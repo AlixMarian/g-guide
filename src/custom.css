@@ -49,3 +49,19 @@
       flex-direction: column;
       color:black;
   }
+
+  .hmpgContainer1{
+    background-color: red;
+  }
+
+  .hmpgContainer2{
+    background-color: BLUE;
+  }
+
+  .bookmarks{
+    background-color: pink;
+  }
+
+  .appointments{
+    background-color: bisque;
+  }

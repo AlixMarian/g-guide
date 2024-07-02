@@ -1,6 +1,15 @@
+import { useNavigate } from 'react-router-dom';
 import '../custom.css';
 
 export const SignUp = () => {
+  const navigate = useNavigate();
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // Perform sign-up logic here
+    navigate('/homepage');
+  };
+
   return (
     <div className="signup-container">
       <div className="container">
@@ -12,7 +21,7 @@ export const SignUp = () => {
           </div>
 
           <div className="col-lg-6">
-            <form className="row g-3">
+            <form className="row g-3" onSubmit={handleSubmit}>
               <div className="col-md-6">
                 <label htmlFor="inputFullName" className="form-label">Full Name</label>
                 <input type="text" className="form-control" id="inputFullName" />
@@ -47,7 +56,7 @@ export const SignUp = () => {
                 </div>
               </div>
 
-              <div className="col-12 d-flex justify-content-center gap-5">
+              <div className="col-12 d-flex justify-content-center gap-2">
                 <button type="reset" className="btn btn-outline-primary">Clear Form</button>
                 <button type="submit" className="btn btn-primary">Sign Up</button>
               </div>

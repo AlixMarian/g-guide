@@ -92,7 +92,7 @@ export const Home = () => {
       </div>
 
     <div className="featureBanner">
-        <h3 className="text-center">Our Features</h3>
+        <h1 className="text-center">Features</h1>
 
         <div className="card-group">
             <div className="card">
