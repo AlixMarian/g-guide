@@ -7,7 +7,11 @@ const app = express();
 const port = 3006;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // Adjust this to match your React frontend's origin
+  methods: 'GET,POST',
+  allowedHeaders: 'Content-Type,Authorization'
+}));
 app.use(bodyParser.json());
 
 // Database connection
@@ -19,7 +23,10 @@ const connection = mysql.createConnection({
 });
 
 connection.connect((err) => {
-  if (err) throw err;
+  if (err) {
+    console.error('Error connecting to the database:', err);
+    throw err;
+  }
   console.log('Connected to the MySQL database.');
 });
 
@@ -40,13 +47,18 @@ app.get('/users', (req, res) => {
 });
 
 app.post('/signup', (req, res) => {
-  const { RoleID, AStatusID, RStatusID, ChurchID, WbvFullName, WbvPhoneNumber, WbvPassword, WbvStatus } = req.body;
-  const query = 'INSERT INTO website_visitor (RoleID, AStatusID, RStatusID, ChurchID, WbvFullName, WbvPhoneNumber, WbvPassword, WbvStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-  connection.query(query, [RoleID, AStatusID, RStatusID, ChurchID, WbvFullName, WbvPhoneNumber, WbvPassword, WbvStatus], (err, results) => {
+  const { fullName, contactNum, emailAddress, password, dataConsent } = req.body;
+  console.log('Received signup request:', req.body); // Log the received data
+
+  const query = 'INSERT INTO website_visitor (RoleID, AStatusID, RStatusID, ChurchID, WbvFullName, WbvPhoneNumber, WbvEmailAddress, WbvPassword, WbvStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  const values = [1, 1, 1, 1, fullName, contactNum, emailAddress, password, dataConsent ? 'Active' : 'Inactive'];
+
+  connection.query(query, values, (err, results) => {
     if (err) {
-      console.error('Error inserting data:', err);
+      console.error('Error inserting data:', err); // Log error
       return res.status(500).json({ error: 'Database error' });
     }
+    console.log('Data inserted successfully:', results); // Log success
     res.status(200).json({ message: 'User registered successfully' });
   });
 });
