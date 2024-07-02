@@ -50,18 +50,6 @@
       color:black;
   }
 
-  .hmpgContainer1{
-    background-color: red;
-  }
-
-  .hmpgContainer2{
-    background-color: BLUE;
-  }
-
-  .bookmarks{
-    background-color: pink;
-  }
-
-  .appointments{
-    background-color: bisque;
+  .hmpgContainer1, .hmpgContainer2{
+    background-color: #b7d1e5;
   }

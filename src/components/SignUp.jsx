@@ -6,8 +6,12 @@ export const SignUp = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Perform sign-up logic here
     navigate('/homepage');
+  };
+
+  const handleSignUpAsCoord = (event) => {
+    event.preventDefault();
+    navigate('/signup-coord');
   };
 
   return (
@@ -62,7 +66,7 @@ export const SignUp = () => {
               </div>
 
               <div className="col-12 d-flex justify-content-center mt-3">
-                <button type="submit" className="btn btn-primary">Sign Up As Church Coordinator</button>
+              <button type="button" className="btn btn-primary" onClick={handleSignUpAsCoord}>Sign Up As Church Coordinator</button>
               </div>
             </form>
           </div>

@@ -1,7 +1,13 @@
 import '../custom.css';
+import { useNavigate } from 'react-router-dom';
 
 export const Homepage = () => {
-  return (
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+      navigate('/');
+    };
+    return (
     <div>
       <nav className="homePageNavbar navbar navbar-expand-lg sticky-top bg-body-tertiary">
         <div className="container-fluid">
@@ -10,14 +16,14 @@ export const Homepage = () => {
             G!Guide
           </a>
           
-          <button type="button" className="btn btn-primary">Logout</button>
+          <button type="button" className="btn btn-primary" onClick={handleLogout}>Logout</button>
         </div>
       </nav>
 
       <div className="container mt-4">
         <div className="row">
           <div className="col-12 mb-4">
-            <div className="card">
+            <div className="card bookappCard">
               <div className="card-body hmpgContainer1 d-flex align-items-center">
                 <div className="card mb-3 flex-grow-1">
                   <div className="row g-0">
@@ -40,12 +46,43 @@ export const Homepage = () => {
             <div className="card">
               <div className="card-body hmpgContainer2 d-flex align-items-center">
                 <div className="row flex-grow-1">
-                  <div className="col-md-6 appointments">.col-md-6</div>
-                  <div className="col-md-6">.col-md-6</div>
+
+                  <div className="col-md-6 bookmarks">
+                  
+                    <h6>Bookmarks</h6>
+                    <br></br>
+                    <div className="card" style={{ width: '1wh' }}>
+                      <div className="card-body">
+                        <h5 className="card-title">Church Name</h5>
+                        <p className="card-text">Church Location</p>
+                        <a href="#" className="card-link">View church information</a>
+                      </div>
+                    </div>
+                    <br></br>
+                  </div>
+
+                  <div className="col-md-6 appointments">
+                    <div className="d-flex align-items-center justify-content-between mb-3">
+                      <h6>My Appointments</h6>
+                      <button type="button" className="btn btn-primary">View Appointment History</button>
+                    </div>
+
+
+                    <div className="card" style={{ width: '1wh' }}>
+                      <div className="card-body">
+                        <h5 className="card-title">Christening</h5>
+                        <p className="card-text">Church Name and Location</p>
+                        <p className="card-text">Date and Time</p>
+                        <p className="card-text">Status</p>
+                      </div>
+                    </div>
+                    <br></br>
+                  </div>
                 </div>
+
               </div>
             </div>
-          </div>
+            </div>
         </div>
       </div>
     </div>

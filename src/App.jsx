@@ -5,6 +5,7 @@ import { Home } from './components/Home';
 import { Login } from './components/Login';
 import { SignUp } from './components/SignUp';
 import { Homepage } from './components/Homepage';
+import { SignUpCoord } from './components/SignUpCoord';
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
         <Route path="/login" element={<><NavBar/><Login /></>} />
         <Route path="/signup" element={<><NavBar/><SignUp /></>} />
         <Route path="/homepage" element={<Homepage />} />
+        <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
       </Routes>
     </Router>
   );
