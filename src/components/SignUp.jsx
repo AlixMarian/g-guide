@@ -24,9 +24,6 @@ export const SignUp = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-<<<<<<< HEAD
-    navigate('/homepage');
-=======
 
     // Basic form validation
     if (formData.password !== formData.confirmPassword) {
@@ -50,8 +47,8 @@ export const SignUp = () => {
       }
     } catch (error) {
       console.error('Error during sign-up:', error);
+      alert(`Sign-up failed. Please try again later. ${error.response ? error.response.data.details : error.message}`);
     }
->>>>>>> b571c8ba86d95796e614bea452bc0beae90d941c
   };
 
   const handleSignUpAsCoord = (event) => {
@@ -111,7 +108,7 @@ export const SignUp = () => {
               </div>
 
               <div className="col-12 d-flex justify-content-center mt-3">
-              <button type="button" className="btn btn-primary" onClick={handleSignUpAsCoord}>Sign Up As Church Coordinator</button>
+                <button type="button" className="btn btn-primary" onClick={handleSignUpAsCoord}>Sign Up As Church Coordinator</button>
               </div>
             </form>
           </div>
@@ -119,4 +116,4 @@ export const SignUp = () => {
       </div>
     </div>
   );
-}
+};

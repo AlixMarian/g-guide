@@ -2,13 +2,14 @@ import express from 'express';
 import mysql from 'mysql2';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import bcrypt from 'bcrypt';
 
 const app = express();
 const port = 3006;
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3000', // Adjust this to match your React frontend's origin
+  origin: 'http://localhost:5173',
   methods: 'GET,POST',
   allowedHeaders: 'Content-Type,Authorization'
 }));
@@ -35,32 +36,30 @@ app.get('/', (req, res) => {
   res.send('Hello from the server!');
 });
 
-app.get('/users', (req, res) => {
-  const query = 'SELECT * FROM website_visitor';
-  connection.query(query, (err, results) => {
-    if (err) {
-      console.error('Error fetching data:', err);
-      return res.status(500).json({ error: 'Database error' });
-    }
-    res.status(200).json(results);
-  });
-});
-
-app.post('/signup', (req, res) => {
+app.post('/signup', async (req, res) => {
   const { fullName, contactNum, emailAddress, password, dataConsent } = req.body;
   console.log('Received signup request:', req.body); // Log the received data
 
-  const query = 'INSERT INTO website_visitor (RoleID, AStatusID, RStatusID, ChurchID, WbvFullName, WbvPhoneNumber, WbvEmailAddress, WbvPassword, WbvStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-  const values = [1, 1, 1, 1, fullName, contactNum, emailAddress, password, dataConsent ? 'Active' : 'Inactive'];
+  try {
+    // Hash the password before storing it in the database
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Hashed password:', hashedPassword);
 
-  connection.query(query, values, (err, results) => {
-    if (err) {
-      console.error('Error inserting data:', err); // Log error
-      return res.status(500).json({ error: 'Database error' });
-    }
-    console.log('Data inserted successfully:', results); // Log success
-    res.status(200).json({ message: 'User registered successfully' });
-  });
+    const query = 'INSERT INTO users (FullName, ContactNumber, EmailAddress, Password, DataConsent) VALUES (?, ?, ?, ?, ?)';
+    const values = [fullName, contactNum, emailAddress, hashedPassword, dataConsent];
+
+    connection.query(query, values, (err, results) => {
+      if (err) {
+        console.error('Error inserting data:', err); // Log error
+        return res.status(500).json({ error: 'Database error', details: err.message });
+      }
+      console.log('Data inserted successfully:', results); // Log success
+      res.status(200).json({ message: 'User registered successfully' });
+    });
+  } catch (err) {
+    console.error('Error during sign-up process:', err);
+    res.status(500).json({ error: 'Sign-up process failed', details: err.message });
+  }
 });
 
 app.listen(port, () => {
