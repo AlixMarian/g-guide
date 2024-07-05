@@ -84,6 +84,9 @@ export const SignUpCoord = () => {
                     </label>
                   </div>
                 </div>
+            
+             <button type="reset" className="btn btn-primary">Upload Proof of Affiliation</button>
+
             <div className="col-12 d-flex justify-content-center gap-2">
               <button type="reset" className="btn btn-outline-primary">Clear Form</button>
               <button type="submit" className="btn btn-primary">Sign Up</button>
