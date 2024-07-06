@@ -24,7 +24,7 @@ export const Login = () => {
     try {
       const response = await axios.post('http://localhost:3006/login', {
         emailAddress: formData.emailAddress,
-        hashedPassword: formData.password,
+        password: formData.password,
       });
 
       console.log('Response from server:', response); // Log server response

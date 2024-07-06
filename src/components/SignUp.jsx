@@ -24,13 +24,13 @@ export const SignUp = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+  
     // Basic form validation
     if (formData.password !== formData.confirmPassword) {
       alert('Passwords do not match');
       return;
     }
-
+  
     try {
       console.log('Submitting form data:', formData); // Log form data for debugging
       const response = await axios.post('http://localhost:3006/signup', {
@@ -40,7 +40,7 @@ export const SignUp = () => {
         password: formData.password,
         dataConsent: formData.dataConsent,
       });
-
+  
       console.log('Response from server:', response); // Log server response
       if (response.status === 200) {
         navigate('/homepage');
@@ -50,6 +50,7 @@ export const SignUp = () => {
       alert(`Sign-up failed. Please try again later. ${error.response ? error.response.data.details : error.message}`);
     }
   };
+  
 
   const handleSignUpAsCoord = (event) => {
     event.preventDefault();
