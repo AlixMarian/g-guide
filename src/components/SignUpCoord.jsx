@@ -1,12 +1,54 @@
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../custom.css';
 
 export const SignUpCoord = () => {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    fullName: '',
+    contactNum: '',
+    emailAddress: '',
+    password: '',
+    confirmPassword: '',
+    dataConsent: false,
+  });
 
-  const handleSubmit = (event) => {
+  const handleChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [id]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    navigate('/homepage');
+
+    // Basic form validation
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    try {
+      console.log('Submitting form data:', formData); // Log form data for debugging
+      const response = await axios.post('http://localhost:3006/signup', {
+        fullName: formData.fullName,
+        contactNum: formData.contactNum,
+        emailAddress: formData.emailAddress,
+        password: formData.password,
+        dataConsent: formData.dataConsent,
+      });
+
+      console.log('Response from server:', response); // Log server response
+      if (response.status === 200) {
+        navigate('/homepage');
+      }
+    } catch (error) {
+      console.error('Error during sign-up:', error);
+      alert(`Sign-up failed. Please try again later. ${error.response ? error.response.data.details : error.message}`);
+    }
   };
 
   return (
@@ -25,27 +67,27 @@ export const SignUpCoord = () => {
               <form className="row g-3" onSubmit={handleSubmit}>
                 <div className="col-md-6">
                   <label htmlFor="inputFullName" className="form-label">Full Name</label>
-                  <input type="text" className="form-control" id="inputFullName" />
-                </div>
+                  <input type="text" className="form-control" id="fullName" value={formData.fullName} onChange={handleChange} />
+                  </div>
 
                 <div className="col-md-6">
                   <label htmlFor="inputContactNum" className="form-label">Contact Number</label>
-                  <input type="text" className="form-control" id="inputContactNum" />
+                  <input type="text" className="form-control" id="contactNum" value={formData.contactNum} onChange={handleChange} />
                 </div>
 
                 <div className="col-12">
                   <label htmlFor="inputEmailAddress" className="form-label">Email Address</label>
-                  <input type="email" className="form-control" id="inputEmailAddress" />
+                  <input type="email" className="form-control" id="emailAddress" value={formData.emailAddress} onChange={handleChange} />
                 </div>
 
                 <div className="col-md-6">
                   <label htmlFor="inputPassword" className="form-label">Password</label>
-                  <input type="password" className="form-control" id="inputPassword" />
+                  <input type="password" className="form-control" id="password" value={formData.password} onChange={handleChange} />
                 </div>
 
                 <div className="col-md-6">
                   <label htmlFor="inputConfirmPass" className="form-label">Confirm Password</label>
-                  <input type="password" className="form-control" id="inputConfirmPass" />
+                  <input type="password" className="form-control" id="confirmPassword" value={formData.confirmPassword} onChange={handleChange} />
                 </div>
 
                 <div className="churchInformation">

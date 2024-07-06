@@ -45,7 +45,7 @@ app.post('/signup', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log('Hashed password:', hashedPassword);
 
-    const query = 'INSERT INTO users (FullName, ContactNumber, EmailAddress, Password, DataConsent) VALUES (?, ?, ?, ?, ?)';
+    const query = 'INSERT INTO new_user (FullName, PhoneNumber, WbvEmailAddress, WbvPassword, DataConsent, ) VALUES (?, ?, ?, ?, ?)';
     const values = [fullName, contactNum, emailAddress, hashedPassword, dataConsent];
 
     connection.query(query, values, (err, results) => {

@@ -1,12 +1,42 @@
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../custom.css';
 
 export const Login = () => {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    emailAddress: '',
+    password: '',
+  });
 
-  const handleSubmit = (event) => {
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    navigate('/homepage');
+
+    try {
+      const response = await axios.post('http://localhost:3006/login', {
+        emailAddress: formData.emailAddress,
+        hashedPassword: formData.password,
+      });
+
+      console.log('Response from server:', response); // Log server response
+      if (response.status === 200) {
+        navigate('/homepage');
+      } else {
+        alert('Login failed. Please check your credentials.');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      alert(`Login failed. Please try again later. ${error.response ? error.response.data.details : error.message}`);
+    }
   };
 
   return (
@@ -21,12 +51,26 @@ export const Login = () => {
               <h2 className="text-center mb-4">Sign In</h2>
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label htmlFor="inputEmail" className="form-label">Email</label>
-                  <input type="email" className="form-control" id="inputEmail" required />
+                  <label htmlFor="emailAddress" className="form-label">Email</label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    id="emailAddress"
+                    value={formData.emailAddress}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="inputPassword" className="form-label">Password</label>
-                  <input type="password" className="form-control" id="inputPassword" required />
+                  <label htmlFor="password" className="form-label">Password</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
                 <div className="d-grid">
                   <button type="submit" className="btn btn-custom-primary">Sign In</button>
@@ -44,4 +88,4 @@ export const Login = () => {
       </div>
     </div>
   );
-}
+};
