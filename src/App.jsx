@@ -8,6 +8,11 @@ import { Homepage } from './components/Homepage';
 import { SignUpCoord } from './components/SignUpCoord';
 import { SEA } from './components2/SEA';
 import { Layout } from './components2/Layout';
+import { Appointments } from './components2/Appointments';
+import { Church } from './components2/Church';
+import { Listpriest } from './components2/Listpriest';
+import { Serviceoff } from './components2/Serviceoff';
+import { ReqVol } from './components2/ReqVol';
 
 const App = () => {
   return (
@@ -19,6 +24,11 @@ const App = () => {
         <Route path="/homepage" element={<Homepage />} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
         <Route path="/SEA" element={<><Layout/><SEA/></>} />
+        <Route path="/Appointmens" element={<><Layout/><Appointments/></>} />
+        <Route path="/ChurchInfo" element={<><Layout/><Church/></>} />
+        <Route path="/ListofPriest" element={<><Layout/><Listpriest/></>} />
+        <Route path="/ServiceOffered" element={<><Layout/><Serviceoff/></>} />
+        <Route path="/RequestforVolunteer" element={<><Layout/><ReqVol/></>} />
       </Routes>
     </Router>
   );

@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
-import '../components2/index2.css'
+
 
 export const Layout = () => {
   return (
     <>
     <nav className="navbar bg-body-tertiary fixed-top">
         <div className="container-fluid">
-        <button className="navbar-toggler left-align " data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+        <button className="navbar-expand-lg sticky-top bg-body-tertiary " data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
       <input type="image" src="../src/assets/logo.png" height="40" width="40"></input>
       </button>
         <a className="navbar-brand" href="#">G! Guide</a>
@@ -23,17 +23,17 @@ export const Layout = () => {
           <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" className="bi bi-calendar-check-fill" viewBox="0 0 16 16">
             <path d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2m-5.146-5.146-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708.708"/>
           </svg>
-            <Link to="/">Schedule, Events, and Announcements</Link>
+            <Link to="/SEA">Schedule, Events, and Announcements</Link>
           </li>
           <hr></hr>
           <li className="nav-item" data-bs-dismiss="offcanvas">
           <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" className="bi bi-calendar-check-fill" viewBox="0 0 48 48"><defs><mask id="ipSAppointment0"><g fill="none" stroke-width="4"><circle cx="24" cy="11" r="7" fill="#fff" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/><path stroke="#fff" stroke-linecap="round" stroke-linejoin="round" d="M4 41c0-8.837 8.059-16 18-16"/><circle cx="34" cy="34" r="9" fill="#fff" stroke="#fff"/><path stroke="#000" stroke-linecap="round" stroke-linejoin="round" d="M33 31v4h4"/></g></mask></defs><path fill="currentColor" d="M0 0h48v48H0z" mask="url(#ipSAppointment0)"/></svg>
-            <Link to="/Appointments">Appointments</Link>
+            <Link to="/Appointmens">Appointments</Link>
           </li>
           <hr></hr>
           <li className="nav-item" data-bs-dismiss="offcanvas">
           <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" className="bi bi-calendar-check-fill" viewBox="0 0 24 24"><path fill="currentColor" d="M2 22v-8l4-1.775V9l5-2.5V5H9V3h2V1h2v2h2v2h-2v1.5L18 9v3.225L22 14v8h-8v-3q0-.825-.587-1.412T12 17t-1.412.588T10 19v3zm10-8.5q.625 0 1.063-.437T13.5 12t-.437-1.062T12 10.5t-1.062.438T10.5 12t.438 1.063T12 13.5"/></svg>
-            <Link to="/ChurchInformation">Church Information</Link>
+            <Link to="/ChurchInfo">Church Information</Link>
           </li>
           <hr></hr>
           <li className="nav-item" data-bs-dismiss="offcanvas">
@@ -58,6 +58,10 @@ export const Layout = () => {
           <hr></hr>
         </ul>
       </div>
+      <li className="nav-item" data-bs-dismiss="offcanvas">
+      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><g fill="none" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10 8V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-2"/><path d="M15 12H3l3-3m0 6l-3-3"/></g></svg>
+      <Link to ="/">Log-out</Link>
+      </li>
     </div>
   </div>
 </nav>
