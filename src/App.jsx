@@ -6,6 +6,8 @@ import { Login } from './components/Login';
 import { SignUp } from './components/SignUp';
 import { Homepage } from './components/Homepage';
 import { SignUpCoord } from './components/SignUpCoord';
+import { SEA } from './components2/SEA';
+import { Layout } from './components2/Layout';
 
 const App = () => {
   return (
@@ -16,6 +18,7 @@ const App = () => {
         <Route path="/signup" element={<><NavBar/><SignUp /></>} />
         <Route path="/homepage" element={<Homepage />} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
+        <Route path="/SEA" element={<><Layout/><SEA/></>} />
       </Routes>
     </Router>
   );
