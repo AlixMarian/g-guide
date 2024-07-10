@@ -4,10 +4,6 @@ export const SEA = () => {
     return (
         <>
 <body>
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
     <h1> Mass Schedule</h1>
 
     <table className="table">
@@ -117,7 +113,7 @@ export const SEA = () => {
         </div>
     </form>
 </div>
-<hr></hr>
+
 <h1>Events</h1>
   <div className="events">
       <form className="row g-3">

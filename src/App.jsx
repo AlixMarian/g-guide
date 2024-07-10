@@ -13,6 +13,7 @@ import { Church } from './components2/Church';
 import { Listpriest } from './components2/Listpriest';
 import { Serviceoff } from './components2/Serviceoff';
 import { ReqVol } from './components2/ReqVol';
+import { AccountSettings } from './components2/AccountSett';
 
 const App = () => {
   return (
@@ -29,6 +30,7 @@ const App = () => {
         <Route path="/ListofPriest" element={<><Layout/><Listpriest/></>} />
         <Route path="/ServiceOffered" element={<><Layout/><Serviceoff/></>} />
         <Route path="/RequestforVolunteer" element={<><Layout/><ReqVol/></>} />
+        <Route path="/AccountSettings" element={<><Layout/><AccountSettings/></>} />
       </Routes>
     </Router>
   );

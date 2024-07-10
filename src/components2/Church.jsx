@@ -1,10 +1,6 @@
 export const Church = () => {
   return (
       <>
-      <br></br>
-      <br></br>
-      <br></br>
-      <br></br>
       <h1>Church Information</h1>
       <div className="announcementsCH">
       <h3>John Doe</h3>
