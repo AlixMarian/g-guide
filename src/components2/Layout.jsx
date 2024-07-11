@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
 import React, { useEffect } from 'react';
+import { Link } from "react-router-dom";
 
 export const Layout = () => {
   
@@ -121,11 +121,6 @@ export const Layout = () => {
               </a>
             </li>
           </ul>
-      </div>
-      <div className="main-content">
-        <div className="container">
-          <h1>Announcements</h1>
-        </div>
       </div>
     </body>
     

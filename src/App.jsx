@@ -24,7 +24,18 @@ const App = () => {
         <Route path="/signup" element={<><NavBar/><SignUp /></>} />
         <Route path="/homepage" element={<Homepage />} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
-        <Route path="/SEA" element={<><Layout/><SEA/></>} />
+        <Route path="/SEA" element={
+          <>
+    
+          <Layout/>
+          <div className='layouts'>
+          <SEA/>
+          </div>
+          </>
+        } />
+        
+        
+        
         <Route path="/Appointments" element={<><Layout/><Appointments/></>} />
         <Route path="/ChurchInfo" element={<><Layout/><Church/></>} />
         <Route path="/ListofPriest" element={<><Layout/><Listpriest/></>} />

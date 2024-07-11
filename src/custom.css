@@ -56,7 +56,9 @@
 
 
   /*ivan parts*/
-
+.main-content{
+  display: contents;
+}
 
 
   .massInfo{
@@ -169,11 +171,12 @@ body {
   position: absolute;
   top:0;
   left: 0;
-  height: 100vh;
+  height: 155vh;
   width: 80px;
   background: #2b578c;
   padding: .4rem .8rem;
   transition: all 0.5s ease;
+  
 }
 
 
@@ -301,4 +304,18 @@ ul{
   display: block;
   flex-direction: column;
   margin: 20px;
+}
+
+.layouts{
+  position: relative;
+  top: 0;
+  left: 80px;
+  transition: all 0.5s ease;
+  width:calc(100% - 80px);
+  padding: 1rem;
+}
+
+.container{
+  display: flex;
+  justify-content: space-between;
 }

@@ -1,9 +1,11 @@
+
+
 export const SEA = () => {
 
 
     return (
         <>
-<body>
+<div className="main-content">
     <h1> Mass Schedule</h1>
 
     <table className="table">
@@ -162,7 +164,7 @@ export const SEA = () => {
     </div>
   </div>
 </form>
-</body>
+</div>
 </>
     );
   };
