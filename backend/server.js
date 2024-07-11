@@ -3,6 +3,8 @@ import mysql from 'mysql2';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
 const app = express();
 const port = 3006;
@@ -19,7 +21,7 @@ app.use(bodyParser.json());
 const connection = mysql.createConnection({
   host: '127.0.0.1',
   user: 'root',
-  password: 'root',
+  password: 'db_password', //password sa inyo MySQL
   database: 'g-guide'
 });
 
@@ -31,9 +33,13 @@ connection.connect((err) => {
   console.log('Connected to the MySQL database.');
 });
 
-// API endpoints
-app.get('/', (req, res) => {
-  res.send('Hello from the server!');
+// Nodemailer configuration
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: '@gmail.com', //replace with actual gmail account nga mu send emails 
+    pass: 'password' //special password sa inyo gmail account
+  }
 });
 
 // Sign-up endpoint
@@ -43,15 +49,37 @@ app.post('/signup', async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const query = 'INSERT INTO users (full_name, contact_number, email_address, password, data_consent) VALUES (?, ?, ?, ?, ?)';
-    const values = [fullName, contactNum, emailAddress, hashedPassword, dataConsent ? 1 : 0];
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const query = 'INSERT INTO users (full_name, contact_number, email_address, password, data_consent, verification_token, verified) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    const values = [fullName, contactNum, emailAddress, hashedPassword, dataConsent ? 1 : 0, verificationToken, 0];
 
-    connection.query(query, values, (err, results) => {
+    connection.query(query, values, (err) => {
       if (err) {
         console.error('Error inserting data:', err);
         return res.status(500).json({ error: 'Database error', details: err.message });
       }
-      res.status(200).json({ message: 'User registered successfully' });
+
+      // Send verification email
+      const verificationUrl = `http://localhost:5173/verify/${verificationToken}`;
+      const mailOptions = {
+        from: '@gmail.com', //gmail account nga mu send confirmation emails
+        to: emailAddress,
+        subject: 'G! Guide Email Verification',
+        html: `
+          <p>You are now one click away to use G! Guide. Please verify your email by clicking the button below:</p>
+          <a href="${verificationUrl}" style="padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none;">Verify Email</a>
+        `
+      };
+
+
+      transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+          console.error('Error sending verification email:', err);
+          return res.status(500).json({ error: 'Email sending failed', details: err.message });
+        }
+        console.log('Verification email sent:', info.response);
+        res.status(200).json({ message: 'User registered successfully. Please check your email to verify your account.' });
+      });
     });
   } catch (err) {
     console.error('Error during sign-up process:', err);
@@ -59,8 +87,31 @@ app.post('/signup', async (req, res) => {
   }
 });
 
+// Verification endpoint
+app.get('/verify/:token', (req, res) => {
+  const { token } = req.params;
 
-// Login endpoint
+  const query = 'UPDATE users SET verified = 1, verification_token = NULL WHERE verification_token = ?';
+  connection.query(query, [token], (err, results) => {
+    if (err) {
+      console.error('Error verifying token:', err);
+      return res.status(500).json({ success: false, error: 'Database error', details: err.message });
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(400).json({ success: false, error: 'Invalid or expired token' });
+    }
+
+    res.json({ success: true });
+  });
+});
+
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}/`);
+});
+
+//others
 app.post('/login', async (req, res) => {
   const { emailAddress, password } = req.body;
   console.log('Received login request:', req.body);
@@ -79,6 +130,11 @@ app.post('/login', async (req, res) => {
       }
 
       const user = results[0];
+      if (!user.verified) {
+        console.log('User email not verified');
+        return res.status(403).json({ error: 'Email not verified' });
+      }
+
       const match = await bcrypt.compare(password, user.password);
       if (!match) {
         console.log('Password does not match');
@@ -94,8 +150,3 @@ app.post('/login', async (req, res) => {
   }
 });
 
-
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}/`);
-});

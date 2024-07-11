@@ -50,10 +50,6 @@
       color:black;
   }
 
-  .hmpgContainer1, .hmpgContainer2{
-    background-color: #b7d1e5;
-  }
-
 
   /*ivan parts*/
 .main-content{
@@ -318,4 +314,15 @@ ul{
 .container{
   display: flex;
   justify-content: space-between;
+}
+
+.homepage-container, .viewApp {
+  background-image: url('../src/assets/backgroundimg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: black;
 }

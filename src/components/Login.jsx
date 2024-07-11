@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../custom.css';
@@ -89,3 +89,5 @@ export const Login = () => {
     </div>
   );
 };
+
+export default Login;

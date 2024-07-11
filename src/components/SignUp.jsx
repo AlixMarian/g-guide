@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import '../custom.css';
 
 export const SignUp = () => {
@@ -13,7 +14,7 @@ export const SignUp = () => {
     confirmPassword: '',
     dataConsent: false,
   });
-
+  const [message, setMessage] = useState('');
   const handleChange = (e) => {
     const { id, value, type, checked } = e.target;
     setFormData((prevFormData) => ({
@@ -43,13 +44,17 @@ export const SignUp = () => {
   
       console.log('Response from server:', response); // Log server response
       if (response.status === 200) {
-        navigate('/homepage');
+        navigate('/login');
+        setMessage(response.data.message);
+        toast.success('Check your gmail account for verification process');
       }
     } catch (error) {
       console.error('Error during sign-up:', error);
       alert(`Sign-up failed. Please try again later. ${error.response ? error.response.data.details : error.message}`);
     }
   };
+
+  
   
 
   const handleSignUpAsCoord = (event) => {
@@ -112,9 +117,12 @@ export const SignUp = () => {
                 <button type="button" className="btn btn-primary" onClick={handleSignUpAsCoord}>Sign Up As Church Coordinator</button>
               </div>
             </form>
+            {message && <p className="mt-3">{message}</p>}
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+export default SignUp;
