@@ -22,6 +22,11 @@ export const SignUpCoord = () => {
     }));
   };
 
+  const handleSEA = (event) => {
+    event.preventDefault();
+    navigate('/SEA');
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -133,7 +138,7 @@ export const SignUpCoord = () => {
               <button type="reset" className="btn btn-outline-primary">Clear Form</button>
               <button type="submit" className="btn btn-primary">Sign Up</button>
             </div>
-
+            <button type="button" className="btn btn-primary" onClick={handleSEA}>Sign Up As Church Coordinator</button>
               </form>
             </div>
 

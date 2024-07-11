@@ -53,3 +53,269 @@
   .hmpgContainer1, .hmpgContainer2{
     background-color: #b7d1e5;
   }
+
+
+  /*ivan parts*/
+.main-content{
+  display: contents;
+}
+
+
+  .massInfo{
+    display: block;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 30px;
+    margin: 10px;
+  }
+
+  .events{
+    display: block;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 30px;
+    margin: 10px;
+  }
+  
+  .announcementsSEA{
+    display: block;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 30px;
+    margin: 10px;
+  }
+
+  /*Church Info*/
+.editchurch{
+  display: block;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
+.announcementsCH{
+  display: block;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
+.info1{
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
+.info2{
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
+.Services{
+  display: flex;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
+.offer1{
+  display: block;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
+.offer2{
+  display: block;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
+.ReqAnnoucement{
+  display: block;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
+
+/**/
+body {
+  margin:0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.user-img{
+  height: 50px;
+  width: 50px;
+  border-radius: 100%;
+  border:1px solid white;
+  display: fixed;
+}
+
+
+
+.sidebar{
+  position: absolute;
+  top:0;
+  left: 0;
+  height: 155vh;
+  width: 80px;
+  background: #2b578c;
+  padding: .4rem .8rem;
+  transition: all 0.5s ease;
+  
+}
+
+
+.sidebar.active{
+  width: 270px;
+}
+
+
+.sidebar #btn{
+  position: absolute;
+  top: .4rem;
+  left: 50%;
+  font-size: 1.2rem;
+  line-height: 50px;
+  transform: translateX(-50%);
+  cursor:pointer;
+}
+
+.sidebar.active #btn{
+  left: 90%;
+}
+
+.sidebar .top .logo{
+  color:white;
+  display: flex;
+  height: 50px;
+  width: 100%;
+  align-items: center;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.sidebar.active .top .logo{
+  opacity: 1;
+}
+
+.top i {
+  font-size: 2px;
+  margin-right: 1px;
+}
+
+.user{
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.user p{
+  color:white;
+  opacity: 1;
+  margin-left: 1rem;
+}
+
+.bold{
+  font-weight: 600;
+}
+
+.sidebar p{
+  opacity:0;
+}
+
+.sidebar.active p{
+  opacity: 1;
+  white-space: nowrap;
+
+}
+
+.sidebar ul li{
+  position: relative;
+  list-style-type: none;
+  height: 50px;
+  width: 90%;
+  margin: 0.8rem auto; 
+  line-height: 50px; 
+}
+
+.sidebar ul li a{
+  color: white;
+  display: flex;
+  align-items: left;
+  text-decoration: none;
+  border-radius: 0.8rem;
+  white-space: nowrap;
+
+}
+
+.sidebar ul li a:hover{
+  background:white;
+  color: black;
+}
+
+.sidebar ul li a i{
+  min-width: 50px;
+  text-align: center;
+  height: 50px;
+  line-height: 50px;
+
+}
+
+
+.sidebar .nav-item{
+  opacity: 0;
+  display: flex;
+}
+
+.sidebar.active .nav-item{
+  opacity: 1;
+}
+
+
+
+.sidebar ul li:hover .tooltip{
+  opacity: 1;
+}
+
+.sidebar.active ul li .tooltip{
+  display: none;
+}
+
+ul{
+  padding-left:   0px;
+}
+
+.container {
+  display: block;
+  flex-direction: column;
+  margin: 20px;
+}
+
+.layouts{
+  position: relative;
+  top: 0;
+  left: 80px;
+  transition: all 0.5s ease;
+  width:calc(100% - 80px);
+  padding: 1rem;
+}
+
+.container{
+  display: flex;
+  justify-content: space-between;
+}
