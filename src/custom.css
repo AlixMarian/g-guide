@@ -51,14 +51,30 @@
   }
 
 
-  /*ivan parts*/
-.main-content{
-  display: contents;
-}
+  .homepage-container, .viewApp {
+    background-image: url('../src/assets/backgroundimg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: black;
+  }
 
+
+  /*ivan parts*/
+  .main-content {
+    position: relative;
+    min-height: 100vh;
+    top: 0;
+    left: 80px;
+    transition: all 0.5s ease;
+    width: calc(100% - 80px);
+    padding: 1rem;
+  }
 
   .massInfo{
-    display: block;
     border: 1px solid black;
     border-radius: 10px;
     padding: 30px;
@@ -66,7 +82,6 @@
   }
 
   .events{
-    display: block;
     border: 1px solid black;
     border-radius: 10px;
     padding: 30px;
@@ -74,12 +89,63 @@
   }
   
   .announcementsSEA{
-    display: block;
     border: 1px solid black;
     border-radius: 10px;
     padding: 30px;
     margin: 10px;
   }
+
+  /*Appointments.jsx*/
+.appointmentDate{
+  text-align: center;
+  display: block;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+  width: 100%;
+}
+
+.appointmentsView{
+  display: inline-flex;
+  width: 100%;
+  
+}
+
+.confirmedAppointments{
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+  width: 50%;
+}
+
+.pendingAppointments{
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+  width: 50%;
+  
+}
+
+.appointmentInfo{
+  display: grid;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
+.appointmentInfo2{
+  display: grid;
+  width: 50%;
+}
+
+.appointmentInfobtn{
+  display: inline-grid;
+  width: 50%;
+}
 
   /*Church Info*/
 .editchurch{
@@ -94,30 +160,17 @@
   display: block;
   border: 1px solid black;
   border-radius: 10px;
-  padding: 30px;
+  padding: 15px;
   margin: 10px;
 }
 
-.info1{
-  border: 1px solid black;
-  border-radius: 10px;
-  padding: 30px;
-  margin: 10px;
-}
-
-.info2{
-  border: 1px solid black;
-  border-radius: 10px;
-  padding: 30px;
-  margin: 10px;
-}
-
+/*services Offered*/
 .Services{
-  display: flex;
-  border: 1px solid black;
-  border-radius: 10px;
-  padding: 30px;
+  display: inline-flex;
+
+  padding:10px;
   margin: 10px;
+  width: 100%;
 }
 
 .offer1{
@@ -126,6 +179,7 @@
   border-radius: 10px;
   padding: 30px;
   margin: 10px;
+  width: 50%;
 }
 
 .offer2{
@@ -134,8 +188,10 @@
   border-radius: 10px;
   padding: 30px;
   margin: 10px;
+  width: 50%;
 }
 
+/* request Volunteers*/
 .ReqAnnoucement{
   display: block;
   border: 1px solid black;
@@ -147,7 +203,7 @@
 
 /**/
 body {
-  margin:0;
+  margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -172,6 +228,8 @@ body {
   background: #2b578c;
   padding: .4rem .8rem;
   transition: all 0.5s ease;
+  z-index: 100;
+  
   
 }
 
@@ -302,27 +360,12 @@ ul{
   margin: 20px;
 }
 
-.layouts{
-  position: relative;
-  top: 0;
-  left: 80px;
-  transition: all 0.5s ease;
-  width:calc(100% - 80px);
-  padding: 1rem;
-}
-
 .container{
   display: flex;
   justify-content: space-between;
 }
 
-.homepage-container, .viewApp {
-  background-image: url('../src/assets/backgroundimg.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  color: black;
+.logout-button {
+  margin-bottom: 1rem; /* Add some margin at the bottom */
 }
+

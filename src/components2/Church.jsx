@@ -66,3 +66,4 @@ export const Church = () => {
   );
 };
 
+export default Church;
