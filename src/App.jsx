@@ -31,13 +31,62 @@ const App = () => {
         <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
         <Route path="/verify/:token" element={<Verify />} />
-        <Route path="/SEA" element={<><Layout/><SEA/></>} />
-        <Route path="/Appointments" element={<><Layout/><Appointments/></>} />
-        <Route path="/ChurchInfo" element={<><Layout/><Church/></>} />
-        <Route path="/ListofPriest" element={<><Layout/><Listpriest/></>} />
-        <Route path="/ServiceOffered" element={<><Layout/><Serviceoff/></>} />
-        <Route path="/RequestforVolunteer" element={<><Layout/><ReqVol/></>} />
-        <Route path="/AccountSettings" element={<><Layout/><AccountSettings/></>} />
+
+
+
+        <Route path="/SEA" element={
+          <>
+            <Layout/>
+            <div className="main-content">
+            <SEA/>
+            </div>
+          </>
+        } />
+
+        <Route path="/Appointments" element={
+          <>
+            <Layout/>
+            <div className="main-content">
+            <Appointments/>
+          </div>
+          </>
+        } />
+        <Route path="/ChurchInfo" element={
+          <>
+              <Layout/>
+              <div className="main-content">
+                <Church/>
+              </div>
+          </>
+        } />
+        <Route path="/ListofPriest" element={
+        <>
+            <Layout/>
+            <div className="main-content">
+              <Listpriest/>
+            </div>
+        </>} />
+        <Route path="/ServiceOffered" element={
+          <>
+            <Layout/>
+            <div className="main-content">
+              <Serviceoff/>
+            </div>
+          </>} />
+        <Route path="/RequestforVolunteer" element={
+          <>
+            <Layout/>
+            <div className="main-content">
+              <ReqVol/>
+            </div>
+          </>} />
+        <Route path="/AccountSettings" element={
+          <>
+            <Layout/>
+              <div className="main-content">
+                <AccountSettings/>
+              </div>
+          </>} />
       </Routes>
       <ToastContainer />
     </Router>

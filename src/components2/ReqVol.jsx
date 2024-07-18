@@ -22,4 +22,4 @@ export const ReqVol = () => {
         
     );  
   };
-  
+  export default ReqVol;

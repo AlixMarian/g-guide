@@ -1,171 +1,148 @@
-
-
 export const SEA = () => {
+  return (
+    <>
+      <h1>Mass Schedule</h1>
 
+      <table className="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Handle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+          </tr>
+          <tr>
+            <th scope="row">2</th>
+            <td>Jacob</td>
+            <td>Thornton</td>
+            <td>@fat</td>
+          </tr>
+          <tr>
+            <th scope="row">3</th>
+            <td>Larry the Bird</td>
+            <td colspan="2">@twitter</td>
+          </tr>
+        </tbody>
+      </table>
 
-    return (
-        <>
-<div className="main-content">
-    <h1> Mass Schedule</h1>
-
-    <table className="table">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">First</th>
-      <th scope="col">Last</th>
-      <th scope="col">Handle</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th scope="row">1</th>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-    </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-    </tr>
-    <tr>
-      <th scope="row">3</th>
-      <td colspan="2">Larry the Bird</td>
-      <td>@twitter</td>
-    </tr>
-  </tbody>
-</table>
-
-<form>
-
-<div className="massInfo">
-  <form className="row g-3">
-  <div className="col-md-6">
-    <label for="inputEmail4" className="form-label">Date</label>
-    <select className="form-select" id="specificSizeSelect">
-      <option selected></option>
-      <option value="1">Monday</option>
-      <option value="2">Tuesday</option>
-      <option value="3">Wednesday</option>
-      <option value="4">Thursday</option>
-      <option value="5">Friday</option>
-      <option value="6">Saturday</option>
-      <option value="7">Sunday</option>
-    </select>
-  </div>
-
-  <div className="col-md-6">
-    <label for="inputPassword4" className="form-label">Type</label>
-    <select className="form-select" id="specificSizeSelect">
-      <option selected></option>
-      <option value="1">Concelebrated</option>
-      <option value="2">Normal Mass</option>
-    </select>
-  </div>
-  </form>
-
-  
-    <form className="row g-3">
-      <div className="col-sm-5">
-        <label for="inputEmail4" className="form-label">Time</label>
-        <input type="email" className="form-control" id="inputEmail4"/>
+      <div className="massInfo">
+        <form className="row g-3">
+          <div className="col-md-6">
+            <label htmlFor="dateSelect" className="form-label">Date</label>
+            <select className="form-select" id="dateSelect">
+              <option selected></option>
+              <option value="1">Monday</option>
+              <option value="2">Tuesday</option>
+              <option value="3">Wednesday</option>
+              <option value="4">Thursday</option>
+              <option value="5">Friday</option>
+              <option value="6">Saturday</option>
+              <option value="7">Sunday</option>
+            </select>
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="typeSelect" className="form-label">Type</label>
+            <select className="form-select" id="typeSelect">
+              <option selected></option>
+              <option value="1">Concelebrated</option>
+              <option value="2">Normal Mass</option>
+            </select>
+          </div>
+        </form>
+        <form className="row g-3">
+          <div className="col-sm-5">
+            <label htmlFor="timeInput" className="form-label">Time</label>
+            <input type="text" className="form-control" id="timeInput"/>
+          </div>
+          <div className="col-sm-1">
+            <label htmlFor="amPmSelect" className="form-label">AM/PM</label>
+            <select className="form-select" id="amPmSelect">
+              <option selected></option>
+              <option value="1">Am</option>
+              <option value="2">Pm</option>
+            </select>
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="languageSelect" className="form-label">Language</label>
+            <select className="form-select" id="languageSelect">
+              <option selected></option>
+              <option value="1">Cebuano</option>
+              <option value="2">English</option>
+            </select>
+          </div>
+        </form>
+        <form className="row g-3">
+          <div className="col-md-6">
+            <label htmlFor="priestSelect" className="form-label">Presiding Priest</label>
+            <select className="form-select" id="priestSelect">
+              <option selected></option>
+              <option value="1">Fr.One</option>
+              <option value="2">Fr.Two</option>
+              <option value="3">Fr.Three</option>
+            </select>
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="confirmButtons" className="form-label">Confirm</label>
+            <div className="btn-group" role="group" id="confirmButtons">
+              <button type="button" className="btn btn-success">Confirm Change</button>
+              <button type="button" className="btn btn-danger">Clear</button>
+            </div>
+          </div>
+        </form>
       </div>
 
-      <div className="col-sm-1">
-      <label for="inputEmail4" className="form-label" >Time</label>
-        <select className="form-select" id="inlineFormSelectPref">
-          <option selected></option>
-          <option value="1">Am</option>
-          <option value="2">Pm</option>
-        </select>
-
-      </div>
-
-      <div className="col-md-6">
-          <label for="inputEmail4" className="form-label">Language</label>
-          <select className="form-select" id="specificSizeSelect">
-          <option selected></option>
-          <option value="1">Cebuano</option>
-          <option value="2">English</option>
-      </select>
-      </div>
-
-     </form>
-
-
-    <form className="row g-3">
-      <div className="col-md-6">
-        <label for="inputEmail4" className="form-label">Presiding Priest</label>
-          <select className="form-select" id="specificSizeSelect">
-            <option selected></option>
-            <option value="1">Fr.One</option>
-            <option value="2">Fr.Two</option>
-            <option value="3">Fr.Three</option>
-          </select>
-      </div>
-
-      <div className="col-md-6">
-      <label for="inputPassword4" className="form-label">Am or Pm</label>
+      <h1>Events</h1>
+      <div className="events">
+        <form className="row g-3">
           <div className="col-6">
+            <label htmlFor="eventDate" className="form-label">Date</label>
+            <input type="text" className="form-control" id="eventDate"/>
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="eventType" className="form-label">Type</label>
+            <input type="text" className="form-control" id="eventType"/>
+          </div>
+        </form>
+        <form className="row g-3">
+          <div className="col-5">
+            <label htmlFor="eventTime" className="form-label">Time</label>
+            <input type="text" className="form-control" id="eventTime"/>
+          </div>
+          <div className="col-md-1">
+            <label htmlFor="eventAmPm" className="form-label">AM/PM</label>
+            <input type="text" className="form-control" id="eventAmPm"/>
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="confirmButtonsEvent" className="form-label">Confirm</label>
+            <div className="btn-group" role="group" id="confirmButtonsEvent">
               <button type="button" className="btn btn-success">Confirm Change</button>
               <button type="button" className="btn btn-danger">Clear</button>
+            </div>
           </div>
+        </form>
+      </div>
+
+      <h1>Announcements</h1>
+      <div className="announcementsSEA">
+        <label htmlFor="announcementTextarea" className="form-label">Announcements</label>
+        <div className="mb-3">
+          <textarea className="form-control" id="announcementTextarea" rows="5"></textarea>
         </div>
-    </form>
-</div>
-
-<h1>Events</h1>
-  <div className="events">
-      <form className="row g-3">
-      <div className="col-6">
-        <label for="inputEmail4" className="form-label">Date</label>
-        <input type="email" className="form-control" id="inputEmail4"/>
-      </div>
-      <div className="col-md-6">
-        <label for="inputEmail4" className="form-label">Type</label>
-        <input type="email" className="form-control" id="inputEmail4"/>
-      </div>
-      </form>
-
-      <form className="row g-3">
-      <div className="col-5">
-        <label for="inputEmail4" className="form-label">Time</label>
-        <input type="email" className="form-control" id="inputEmail4"/>
-      </div>
-      <div className="col-md-1">
-        <label for="inputEmail4" className="form-label">Am or Pm</label>
-        <input type="email" className="form-control" id="inputEmail4"/>
-      </div>
-
-      <div className="col-md-6">
-      <label for="inputEmail4" className="form-label">Am or Pm</label>
-          <div className="col-12">
-              <button type="button" className="btn btn-success">Confirm Change</button>
-              <button type="button" className="btn btn-danger">Clear</button>
-          </div>
-
-       
+        <div className="announcement-bttn">
+          <button type="button" className="btn btn-success">Confirm Change</button>
+          <button type="button" className="btn btn-danger">Clear</button>
         </div>
-      </form>
-  </div>
-   
-<h1>Annoucements</h1>
-  <div className="announcementsSEA">
-    <label for="exampleFormControlTextarea1" className="form-label">Announcements</label>
-      <div className="mb-3">
-        <textarea className="form-control" id="exampleFormControlTextarea1" rows="5"></textarea>
       </div>
-    <br></br>
-    <div className="announcement-bttn">
-      <button type="button" className="btn btn-success">Confirm Change</button>
-      <button type="button" className="btn btn-danger">Clear</button>
-    </div>
-  </div>
-</form>
-</div>
-</>
-    );
-  };
-  
+    </>
+  );
+};
+
+export default SEA;

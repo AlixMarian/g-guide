@@ -55,10 +55,10 @@ export const Serviceoff = () => {
                         </div>
                      </div>
              </div>
-             
         </div>
         <button type="button" className="btn btn-success">Confirm Change</button>
         </>
     );
-  };
-  
+};
+
+export default Serviceoff;

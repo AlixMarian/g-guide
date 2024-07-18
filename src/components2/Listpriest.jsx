@@ -49,3 +49,4 @@ export const Listpriest = () => {
     );
   };
   
+  export default Listpriest;
