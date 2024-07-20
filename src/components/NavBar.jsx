@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import '../custom.css';
+import '../websiteUser.css';
 
 export const NavBar = () => {
   return (

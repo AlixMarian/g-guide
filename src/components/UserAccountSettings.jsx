@@ -1,4 +1,4 @@
-import '../custom.css';
+import '../websiteUser.css';
 
 export const UserAccountSettings = () => {
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { Link } from 'react-router-dom';
-import '../custom.css';
+import '../websiteUser.css';
 
 const containerStyle = {
   width: '100%',

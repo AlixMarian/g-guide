@@ -1,3 +1,5 @@
+import '../churchCoordinator.css';
+
 export const Listpriest = () => {
     return (
         <>
@@ -19,8 +21,8 @@ export const Listpriest = () => {
             <td>Otto</td>
             <td>@mdo</td>
             <td>
-                <button type="button" class="btn btn-info">Edit</button>
-                <button type="button" class="btn btn-danger">Delete</button> 
+                <button type="button" className="btn btn-info">Edit</button>
+                <button type="button" className="btn btn-danger">Delete</button> 
             </td>
             </tr>
             <tr>
@@ -29,8 +31,8 @@ export const Listpriest = () => {
             <td>Thornton</td>
             <td>@fat</td>
             <td>
-                <button type="button" class="btn btn-info">Edit</button>
-                <button type="button" class="btn btn-danger">Delete</button> 
+                <button type="button" className="btn btn-info">Edit</button>
+                <button type="button" className="btn btn-danger">Delete</button> 
             </td>
             </tr>
             <tr>
@@ -39,8 +41,8 @@ export const Listpriest = () => {
             <td>the bird</td>
             <td>@twitter</td>
             <td>
-                <button type="button" class="btn btn-info">Edit</button>
-                <button type="button" class="btn btn-danger">Delete</button> 
+                <button type="button" className="btn btn-info">Edit</button>
+                <button type="button" className="btn btn-danger">Delete</button> 
             </td>
             </tr>
         </tbody>

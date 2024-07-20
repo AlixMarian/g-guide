@@ -1,6 +1,7 @@
 import { useState } from "react";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css'
+import '../churchCoordinator.css';
 
 export const Appointments = () => 
     {
@@ -27,9 +28,9 @@ export const Appointments = () =>
                                 <p>Requested by:</p>
                             </div>
                             <div className="appointmentInfobtn">
-                                <button type="button" class="btn btn-success">Success</button>
-                                <button type="button" class="btn btn-danger">Danger</button>
-                                <button type="button" class="btn btn-info">Info</button>
+                                <button type="button" className="btn btn-success">Success</button>
+                                <button type="button" className="btn btn-danger">Danger</button>
+                                <button type="button" className="btn btn-info">Info</button>
                             </div>
                         </div>
                         <div className="appointmentInfo">
@@ -39,9 +40,9 @@ export const Appointments = () =>
                                 <p>Requested by:</p>
                             </div>
                             <div>
-                                <button type="button" class="btn btn-success">Success</button>
-                                <button type="button" class="btn btn-danger">Danger</button>
-                                <button type="button" class="btn btn-info">Info</button>
+                                <button type="button" className="btn btn-success">Success</button>
+                                <button type="button" className="btn btn-danger">Danger</button>
+                                <button type="button" className="btn btn-info">Info</button>
                             </div>
                         </div>
                         <div className="appointmentInfo">
@@ -51,9 +52,9 @@ export const Appointments = () =>
                                 <p>Requested by:</p>
                             </div>
                             <div>
-                                <button type="button" class="btn btn-success">Success</button>
-                                <button type="button" class="btn btn-danger">Danger</button>
-                                <button type="button" class="btn btn-info">Info</button>
+                                <button type="button" className="btn btn-success">Success</button>
+                                <button type="button" className="btn btn-danger">Danger</button>
+                                <button type="button" className="btn btn-info">Info</button>
                             </div>
                         </div>
                 </div>
@@ -63,17 +64,17 @@ export const Appointments = () =>
                     <div className="appointmentInfo">
                             Time
                             Name
-                            <button type="button" class="btn btn-danger">Danger</button>
+                            <button type="button" className="btn btn-danger">Danger</button>
                         </div>
                         <div className="appointmentInfo">
                             Time
                             Name
-                            <button type="button" class="btn btn-danger">Danger</button>
+                            <button type="button" className="btn btn-danger">Danger</button>
                         </div>
                         <div className="appointmentInfo">
                             Time
                             Name
-                            <button type="button" class="btn btn-danger">Danger</button>
+                            <button type="button" className="btn btn-danger">Danger</button>
                         </div>
                 </div>
         
@@ -83,4 +84,4 @@ export const Appointments = () =>
     );
   };
   
-  export default Appointments
+  export default Appointments;
