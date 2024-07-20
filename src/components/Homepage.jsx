@@ -15,7 +15,7 @@ export const Homepage = () => {
             <div className="card-body">
               <h5 className="card-title">In need of a local church?</h5>
               <p className="card-text">We can help you find your nearest church, get up-to-date information, and connect with them</p>
-              <button type="button" className="btn btn-primary">Open Maps</button>
+              <button type="button" className="btn btn-primary" onClick={() => navigate('/map')}>Open Maps</button>
             </div>
             <img src="src\assets\mapImg.png" className="card-img-bottom" alt="..."/>
           </div>
