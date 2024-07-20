@@ -74,9 +74,15 @@ export const SignUp = () => {
 
           <div className="col-lg-6">
             <form className="row g-3" onSubmit={handleSubmit}>
+
               <div className="col-md-6">
-                <label htmlFor="fullName" className="form-label">Full Name</label>
-                <input type="text" className="form-control" id="fullName" value={formData.fullName} onChange={handleChange} />
+                <label htmlFor="lastName" className="form-label">Last Name</label>
+                <input type="text" className="form-control" id="lastName" value={formData.lastName} onChange={handleChange} />
+              </div>
+
+              <div className="col-md-6">
+                <label htmlFor="firstName" className="form-label">First Name</label>
+                <input type="text" className="form-control" id="firstName" value={formData.firstName} onChange={handleChange} />
               </div>
 
               <div className="col-md-6">
@@ -84,7 +90,7 @@ export const SignUp = () => {
                 <input type="text" className="form-control" id="contactNum" value={formData.contactNum} onChange={handleChange} />
               </div>
 
-              <div className="col-12">
+              <div className="col-md-6">
                 <label htmlFor="emailAddress" className="form-label">Email Address</label>
                 <input type="email" className="form-control" id="emailAddress" value={formData.emailAddress} onChange={handleChange} />
               </div>

@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 const connection = mysql.createConnection({
   host: '127.0.0.1',
   user: 'root',
-  password: 'db_password', //password sa inyo MySQL
+  password: 'alixmarian1!', //password sa inyo MySQL
   database: 'g-guide'
 });
 
@@ -37,8 +37,8 @@ connection.connect((err) => {
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: '@gmail.com', //replace with actual gmail account nga mu send emails 
-    pass: 'password' //special password sa inyo gmail account
+    user: 'alixmariang@gmail.com', //replace with actual gmail account nga mu send emails 
+    pass: 'ovhv fxwf cxgv ovmq' //special password sa inyo gmail account
   }
 });
 
@@ -62,7 +62,7 @@ app.post('/signup', async (req, res) => {
       // Send verification email
       const verificationUrl = `http://localhost:5173/verify/${verificationToken}`;
       const mailOptions = {
-        from: '@gmail.com', //gmail account nga mu send confirmation emails
+        from: 'alixmariang@gmail.com', //gmail account nga mu send confirmation emails
         to: emailAddress,
         subject: 'G! Guide Email Verification',
         html: `
