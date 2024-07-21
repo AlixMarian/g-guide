@@ -3,7 +3,7 @@ export const Church = () => {
       <>
       <h1>Church Information</h1>
       <div className="announcementsCH">
-      <h3>John Doe</h3>
+      <h3>Insert Church Name</h3>
     <label for="exampleFormControlTextarea1" className="form-label">Church History<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="black" d="M7.243 17.997H3v-4.243L14.435 2.319a1 1 0 0 1 1.414 0l2.829 2.828a1 1 0 0 1 0 1.415zm-4.243 2h18v2H3z"/></svg></label>
       <div className="mb-3">
         <textarea className="form-control" id="exampleFormControlTextarea1" rows="5"></textarea>
@@ -37,22 +37,22 @@ export const Church = () => {
     <br></br>
   <form class="row g-3">
     <div class="col-6">
-      <label for="formFileMultiple" class="form-label">Multiple files input example</label>
+      <label for="formFileMultiple" class="form-label">Updload Church Document</label>
       <input class="form-control" type="file" id="formFileMultiple" multiple/>
     </div>
 
     <div class="col-6">
-      <label for="formFileMultiple" class="form-label">Multiple files input example</label>
+      <label for="formFileMultiple" class="form-label">Upload Church G-Cash QR Code</label>
       <input class="form-control" type="file" id="formFileMultiple" multiple/>
     </div>
 
     <div class="col-6">
-      <label for="formFileMultiple" class="form-label">Multiple files input example</label>
+      <label for="formFileMultiple" class="form-label">Upload Church Pictures</label>
       <input class="form-control" type="file" id="formFileMultiple" multiple/>
     </div>
 
     <div class="col-6">
-      <label for="formFileMultiple" class="form-label">Multiple files input example</label>
+      <label for="formFileMultiple" class="form-label">Upload Bank Details</label>
       <input class="form-control" type="file" id="formFileMultiple" multiple/>
     </div>
   
