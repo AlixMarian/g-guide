@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../custom.css';
+import '../websiteUser.css';
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -81,6 +81,15 @@ export const Login = () => {
               </div>
               <div className="text-center mt-2">
                 <span>No account? <a href="/signup" className="text-decoration-none">Sign Up</a></span>
+              </div>
+              <div className="text-center mt-4">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => navigate('/homepage')}
+                >
+                  Homepage TEMP
+                </button>
               </div>
             </div>
           </div>

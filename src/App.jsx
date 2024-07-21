@@ -19,6 +19,9 @@ import Listpriest from './components2/Listpriest';
 import Serviceoff from './components2/Serviceoff';
 import ReqVol from './components2/ReqVol';
 import AccountSettings from './components2/AccountSett';
+import UserAccountSettings from './components/UserAccountSettings';
+import MapComponent from './components/MapComponent';
+
 
 const App = () => {
   return (
@@ -29,8 +32,12 @@ const App = () => {
         <Route path="/signup" element={<><NavBar/><SignUp /></>} />
         <Route path="/homepage" element={<><WebUserNavBar /><Homepage /></>} />
         <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} />
+        <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
+        
         <Route path="/verify/:token" element={<Verify />} />
+        <Route path="/map" element={<MapComponent />} />
+
 
 
 

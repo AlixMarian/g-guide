@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from "react-router-dom";
+import '../churchCoordinator.css';
 
 export const Layout = () => {
   
@@ -23,7 +24,7 @@ export const Layout = () => {
             <span>G! Guide</span>
           </div>
           <i className="bx bx-menu" src="../src/assets/logo.png" id="btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><path fill="none" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h16M4 6h16M4 18h16"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><path fill="none" stroke="black" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 12h16M4 6h16M4 18h16"/></svg>
           </i>
         </div>
       <div className="user">
@@ -47,7 +48,7 @@ export const Layout = () => {
             <li>
               <a href="#">
                 <i className="bx bxs-grid-alt">
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 48 48"><defs><mask id="ipSAppointment0"><g fill="none" stroke-width="4"><circle cx="24" cy="11" r="7" fill="#fff" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/><path stroke="#fff" stroke-linecap="round" stroke-linejoin="round" d="M4 41c0-8.837 8.059-16 18-16"/><circle cx="34" cy="34" r="9" fill="#fff" stroke="#fff"/><path stroke="#000" stroke-linecap="round" stroke-linejoin="round" d="M33 31v4h4"/></g></mask></defs><path fill="black" d="M0 0h48v48H0z" mask="url(#ipSAppointment0)"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 48 48"><defs><mask id="ipSAppointment0"><g fill="none" strokeWidth="4"><circle cx="24" cy="11" r="7" fill="#fff" stroke="#fff" strokeLinecap="round" strokeLinejoin="round"/><path stroke="#fff" strokeLinecap="round" strokeLinejoin="round" d="M4 41c0-8.837 8.059-16 18-16"/><circle cx="34" cy="34" r="9" fill="#fff" stroke="#fff"/><path stroke="#000" strokeLinecap="round" strokeLinejoin="round" d="M33 31v4h4"/></g></mask></defs><path fill="black" d="M0 0h48v48H0z" mask="url(#ipSAppointment0)"/></svg>
                 </i>
                   <span className="nav-item">
                     <Link to="/Appointments">Appointments</Link>
@@ -114,7 +115,7 @@ export const Layout = () => {
              <div className="logout-button">
               <a href="#">
                 <i className="bx bxs-grid-alt">
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><g fill="none" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10 8V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-2"/><path d="M15 12H3l3-3m0 6l-3-3"/></g></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><g fill="none" stroke="black" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"><path d="M10 8V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-2"/><path d="M15 12H3l3-3m0 6l-3-3"/></g></svg>
                 </i>
                   <span className="nav-item">
                     <Link to ="/">Log-out</Link>
@@ -130,5 +131,5 @@ export const Layout = () => {
   );
 };
 
-export default Layout
+export default Layout;
 

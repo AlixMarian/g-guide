@@ -1,3 +1,5 @@
+import '../churchCoordinator.css';
+
 export const SEA = () => {
   return (
     <>
@@ -28,7 +30,7 @@ export const SEA = () => {
           <tr>
             <th scope="row">3</th>
             <td>Larry the Bird</td>
-            <td colspan="2">@twitter</td>
+            <td colSpan="2">@twitter</td>
           </tr>
         </tbody>
       </table>

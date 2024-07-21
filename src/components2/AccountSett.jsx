@@ -1,3 +1,5 @@
+import '../churchCoordinator.css';
+
 export const AccountSettings = () => {
     return (
         <>
@@ -8,28 +10,28 @@ export const AccountSettings = () => {
        <form className="row g-3">
     <div className="form-floating mb-3 col-md-6">
         <input type="email" className="form-control" id="floatingInput" placeholder="name@example.com"/>
-        <label for="floatingInput">Email address</label>
+        <label htmlFor="floatingInput">Email address</label>
     </div>
     <div className="form-floating col-md-6">
         <input type="password" className="form-control" id="floatingPassword" placeholder="Password"/>
-        <label for="floatingPassword">Password</label>
+        <label htmlFor="floatingPassword">Password</label>
     </div>
     <div className="form-floating mb-3 col-md-6">
         <input type="email" className="form-control" id="floatingInput" placeholder="name@example.com"/>
-        <label for="floatingInput">Full Name</label>
+        <label htmlFor="floatingInput">Full Name</label>
     </div>
     <div className="form-floating mb-3 col-md-6">
         <input type="email" className="form-control" id="floatingInput" placeholder="name@example.com"/>
-        <label for="floatingInput">Username</label>
+        <label htmlFor="floatingInput">Username</label>
     </div>
     <div className="form-floating mb-3 col-md-6">
         <input type="email" className="form-control" id="floatingInput" placeholder="name@example.com"/>
-        <label for="floatingInput">Contact Number</label>
+        <label htmlFor="floatingInput">Contact Number</label>
     </div>
 
   <div className="input-group mb-3">
     <input type="file" className="form-control" id="inputGroupFile02"/>
-    <label className="input-group-text" for="inputGroupFile02">Upload</label>
+    <label className="input-group-text" htmlFor="inputGroupFile02">Upload</label>
     </div>
   <div>
     <button type="button" className="btn btn-danger col-md-2">Clear fields</button>
@@ -45,4 +47,4 @@ export const AccountSettings = () => {
         
     );  
   };
-  export default AccountSettings
+  export default AccountSettings;

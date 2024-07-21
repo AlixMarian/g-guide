@@ -1,70 +1,7 @@
-.btn-custom-outline {
-    color: black;
-    border-color: #9bc3e4;
-  }
-  
-  .btn-custom-outline:hover {
-    background-color: #9bc3e4;
-    color: black;
-  }
-  
-  .btn-custom-primary {
-    background-color: #9bc3e4;
-    color: black;
-    border-color: #9bc3e4;
-  }
-  
-  .btn-custom-primary:hover {
-    background-color: darken(#9bc3e4, 60%);
-    color: black;
-  }
-
-  .featureBanner{
-    background-color: #b7d1e5;
-    padding: 20px;
-  }
-
-  .signup-container {
-    background-image: url('../src/assets/backgroundimg.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    color: black;
-  }
-  
-  .loginContainer{
-      background-image: url('../src/assets/backgroundimg.png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      color:black;
-  }
 
 
-  .homepage-container, .viewApp {
-    background-image: url('../src/assets/backgroundimg.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    color: black;
-  }
-
-
-  /*ivan parts*/
-  .main-content {
+/* ---------------------------------------------------------------------------------------------------- */
+.main-content {
     position: relative;
     min-height: 100vh;
     top: 0;
