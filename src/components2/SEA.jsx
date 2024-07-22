@@ -8,10 +8,11 @@ export const SEA = () => {
       <table className="table">
         <thead>
           <tr>
-            <th scope="col">#</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Handle</th>
+            <th scope="col">Day</th>
+            <th scope="col">Time</th>
+            <th scope="col">Type</th>
+            <th scope="col">Language</th>
+            <th scope="col">Presiding Priest</th>
           </tr>
         </thead>
         <tbody>
