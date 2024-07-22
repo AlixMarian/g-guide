@@ -53,7 +53,7 @@ export const Login = () => {
               <br />
               <div className="d-grid">
                 <button id="google-login-btn" className="btn btn-custom-primary" onClick={handleGoogleLogin}>
-                  <i className="fab fa-google"></i> Login with Google
+                  Login with <i className="fab fa-google"></i> 
                 </button>
               </div>
               <div className="text-center mt-4"></div>
