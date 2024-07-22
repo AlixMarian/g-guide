@@ -1,8 +1,22 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate} from 'react-router-dom';
+import { useEffect } from 'react';
+import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import '../websiteUser.css';
 
 export const Homepage = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User signed in:", user);
+      } else {
+        console.log("No user signed in.");
+        navigate('/login'); // Redirect to login if no user is signed in
+      }
+    });
+  }, [navigate]);
 
   const handleViewAppnts = () => {
     navigate('/view-appointments');

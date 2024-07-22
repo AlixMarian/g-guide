@@ -35,8 +35,8 @@ const App = () => {
         <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
         
-        <Route path="/verify/:token" element={<Verify />} />
-        <Route path="/map" element={<MapComponent />} />
+        <Route path="/verify" element={<Verify />} />
+        <Route path="/map" element={<><NavBar/><MapComponent/></>} />
 
 
 

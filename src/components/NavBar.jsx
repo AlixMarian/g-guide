@@ -23,11 +23,11 @@ export const NavBar = () => {
               <a className="nav-link active" aria-current="page" href="/about">About</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link active" aria-current="page" href="/contact">Contact Us</a>
+              <a className="nav-link active" aria-current="page" href="/map">Church Finder</a>
             </li>
           </ul>
           <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <Link to="/login" className="btn btn-custom-outline">Login</Link>
+            <Link to="/login" className="btn btn-custom-outline">Sign In</Link>
             <Link to="/signup" className="btn btn-custom-primary">Sign Up</Link>
           </div>
         </div>

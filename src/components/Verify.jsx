@@ -1,37 +1,33 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { useEffect } from 'react';
+import { getAuth, applyActionCode } from "firebase/auth";
+import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Verify = () => {
-  const { token } = useParams();
-  const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (token) {
-      axios.get(`http://localhost:3006/verify/${token}`)
-        .then(response => {
-          if (response.data.success) {
-            setMessage('Email verified successfully. Redirecting to login...');
-            toast.success('Email verified. Welcome to G! Guide');
-            setTimeout(() => {
-              navigate('/login');
-            }, 3000);
-          } else {
-            setMessage('Verification failed.');
-          }
+    const urlParams = new URLSearchParams(window.location.search);
+    const actionCode = urlParams.get('oobCode');
+    const auth = getAuth();
+
+    if (actionCode) {
+      applyActionCode(auth, actionCode)
+        .then(() => {
+          toast.success("Email verified successfully!");
+          navigate('/login'); // Redirect to login page after verification
         })
-        .catch(error => {
-          setMessage('An error occurred. Please try again.');
-          console.error('Error verifying email:', error);
+        .catch((error) => {
+          toast.error(error.message);
         });
     }
-  }, [token, navigate]);
+  }, [navigate]);
 
   return (
     <div>
-      <h2>{message}</h2>
+      <ToastContainer />
+      <h1>Verifying your email...</h1>
     </div>
   );
 };

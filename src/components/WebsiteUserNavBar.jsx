@@ -1,4 +1,7 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate} from 'react-router-dom';
+import { useEffect } from 'react';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { toast } from 'react-toastify';
 import logo from '../assets/gGuideLogo.svg';
 
 const WebsiteUserNavBar = () => {
@@ -12,8 +15,28 @@ const WebsiteUserNavBar = () => {
     navigate('/homepage');
   };
 
+  useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User signed in:", user);
+      } else {
+        console.log("No user signed in.");
+        navigate('/login');
+      }
+    });
+  }, [navigate]);
+
   const handleLogout = () => {
-    navigate('/login');
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        toast.success("Sign Out Sucessfull");
+        navigate('/login');
+      })
+      .catch((error) => {
+        toast.error(error.message);
+      });
   };
 
   return (
