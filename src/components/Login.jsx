@@ -48,6 +48,12 @@ export const Login = () => {
               <div className="text-center mt-2">
                 <span>No account? <a href="/signup" className="text-decoration-none">Sign Up</a></span>
               </div>
+              <div className="d-grid">
+                <button type="submit" className="btn btn-custom-primary" onClick={handleBackToHomepage}>
+                  <i className="fab fa-google"></i> Login with Google
+                </button>
+              </div>
+
               <div className="text-center mt-4">
               </div>
             </div>
