@@ -1,12 +1,24 @@
 import { useNavigate } from 'react-router-dom';
-
 import '../websiteUser.css';
+import { signInWithGoogle } from '../../backend/googleAuth'; // Updated import path
 
 export const Login = () => {
   const navigate = useNavigate();
   
   const handleBackToHomepage = () => {
     navigate('/homepage');
+  };
+
+  const handleGoogleLogin = () => {
+    signInWithGoogle()
+      .then((result) => {
+        // Successful login, navigate to homepage or wherever needed
+        navigate('/homepage');
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        console.error(error);
+      });
   };
 
   return (
@@ -22,21 +34,11 @@ export const Login = () => {
               <form>
                 <div className="mb-3">
                   <label htmlFor="emailAddress" className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="emailAddress"
-                  
-                  />
+                  <input type="email" className="form-control" id="emailAddress" />
                 </div>
                 <div className="mb-3">
                   <label htmlFor="password" className="form-label">Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="password"
-                    
-                  />
+                  <input type="password" className="form-control" id="password" />
                 </div>
                 <div className="d-grid">
                   <button type="submit" className="btn btn-custom-primary" onClick={handleBackToHomepage}>Sign In</button>
@@ -48,14 +50,13 @@ export const Login = () => {
               <div className="text-center mt-2">
                 <span>No account? <a href="/signup" className="text-decoration-none">Sign Up</a></span>
               </div>
+              <br />
               <div className="d-grid">
-                <button type="submit" className="btn btn-custom-primary" onClick={handleBackToHomepage}>
+                <button id="google-login-btn" className="btn btn-custom-primary" onClick={handleGoogleLogin}>
                   <i className="fab fa-google"></i> Login with Google
                 </button>
               </div>
-
-              <div className="text-center mt-4">
-              </div>
+              <div className="text-center mt-4"></div>
             </div>
           </div>
         </div>
