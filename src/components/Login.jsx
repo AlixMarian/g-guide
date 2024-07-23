@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../websiteUser.css';
-import { signInWithGoogle } from '../../backend/googleAuth'; // Updated import path
+import {signInWithGoogle} from '/backend/googleAuth';
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -31,6 +31,11 @@ export const Login = () => {
       const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
+      if (!user.emailVerified) {
+        toast.error("Please verify your email before logging in.");
+        return;
+      }
+
       // Get user details from Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
@@ -38,21 +43,22 @@ export const Login = () => {
         const role = userData.role;
 
         // Navigate based on user role
-        if (role === "websiteUser") {
+      if (role === "websiteUser") {
           navigate('/homepage');
           toast.success("Welcome to G! Guide");
-        } else if (role === "churchCoor") {
+      } else if (role === "churchCoor") {
           navigate('/SEA');
           toast.success("Welcome to G! Guide");
-        } else if (role === "sysAdmin") {
+      } else if (role === "sysAdmin") {
           navigate('/systemAdminDashboard');
           toast.success("Welcome to G! Guide");
-        } else {
+      } else {
           navigate('/login');
-        }
+      }
       } else {
         toast.error("User data not found");
       }
+      
     } catch (error) {
       toast.error(error.message);
     }
@@ -70,17 +76,55 @@ export const Login = () => {
   }, []);
 
 
-  const handleGoogleLogin = () => {
-    signInWithGoogle()
-      .then((result) => {
-        // Successful login, navigate to homepage or wherever needed
-        navigate('/homepage');
-      })
-      .catch((error) => {
-        // Handle Errors here.
-        console.error(error);
-      });
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithGoogle();
+      const user = result.user;
+  
+      if (user) {
+        // Check if the user exists in Firestore
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+  
+        if (userDoc.exists()) {
+          // User already exists, navigate based on role
+          const userData = userDoc.data();
+          const role = userData.role;
+  
+          switch (role) {
+            case "websiteUser":
+              navigate('/homepage');
+              toast.success("Welcome to G! Guide");
+              break;
+            case "churchCoor":
+              navigate('/SEA');
+              toast.success("Welcome to G! Guide");
+              break;
+            case "sysAdmin":
+              navigate('/systemAdminDashboard');
+              toast.success("Welcome to G! Guide");
+              break;
+            default:
+              navigate('/login');
+              break;
+          }
+        } else {
+          // New user, add to Firestore with default role
+          await setDoc(doc(db, "users", user.uid), {
+            email: user.email,
+            role: "websiteUser" // Default role for new users, modify as needed
+          });
+          navigate('/homepage');
+          toast.success("Welcome to G! Guide");
+        }
+      } else {
+        throw new Error("User not authenticated.");
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      toast.error("Failed to sign in with Google.");
+    }
   };
+  
 
   return (
     <div className="loginContainer">
@@ -105,19 +149,23 @@ export const Login = () => {
                   <button type="submit" className="btn btn-custom-primary">Sign In</button>
                 </div>
               </form>
+              <br />
+              <p style={{ textAlign: 'center' }}>
+                <span style={{ borderBottom: '1px solid black', padding: '0 10px' }}>Or</span>
+              </p>
+
+              <div className="d-grid">
+                <button id="google-login-btn" className="btn btn-custom-primary" onClick={handleGoogleLogin}>
+                  Sign in with <i className="fab fa-google"></i> 
+                </button>
+              </div>
               <div className="text-center mt-3">
                 <a href="/forgot-password" className="text-decoration-none">Forgot Password?</a>
               </div>
               <div className="text-center mt-2">
                 <span>No account? <a href="/signup" className="text-decoration-none">Sign Up</a></span>
               </div>
-              <br />
-              <div className="d-grid">
-                <button id="google-login-btn" className="btn btn-custom-primary" onClick={handleGoogleLogin}>
-                  Login with <i className="fab fa-google"></i> 
-                </button>
-              </div>
-              <div className="text-center mt-4"></div>
+              
             </div>
           </div>
         </div>
