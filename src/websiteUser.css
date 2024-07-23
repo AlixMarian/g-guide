@@ -96,3 +96,16 @@
     width: 150px;
   }
   
+  .coord-signup-container {
+    background-image: url('../src/assets/backgroundimg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: black;
+    padding-bottom: 20px;
+  }
