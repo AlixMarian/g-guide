@@ -34,7 +34,7 @@ const App = () => {
         <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
         
-        <Route path="/map" element={<><NavBar/><MapComponent/></>} />
+        <Route path="/map" element={<MapComponent/>} />
 
         <Route path="/SEA" element={
           <>
