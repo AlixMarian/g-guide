@@ -1,4 +1,4 @@
-export const SysAdminPendingChurch = () => {
+const SysAdminPendingChurch = () => {
   return (
     <div>SysAdminPendingChurch</div>
   )

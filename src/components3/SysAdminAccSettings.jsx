@@ -1,4 +1,4 @@
-export const SysAdminAccSettings = () => {
+const SysAdminAccSettings = () => {
   return (
     <div>SysAdminAccSettings</div>
   )
