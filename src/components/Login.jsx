@@ -7,9 +7,13 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../websiteUser.css';
 import {signInWithGoogle} from '/backend/googleAuth';
+import useChatbot from './Chatbot';
+
 
 export const Login = () => {
   const navigate = useNavigate();
+
+  useChatbot();
   
   const [formData, setFormData] = useState({
     email: "",

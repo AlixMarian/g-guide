@@ -5,8 +5,12 @@ import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import '../websiteUser.css';
 import { toast } from 'react-toastify';
+import useChatbot from './Chatbot';
+
 
 const SignUp = () => {
+  useChatbot();
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',

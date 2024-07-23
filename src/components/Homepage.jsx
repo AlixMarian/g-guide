@@ -2,9 +2,12 @@ import { useNavigate} from 'react-router-dom';
 import { useEffect } from 'react';
 import { getAuth, onAuthStateChanged} from 'firebase/auth';
 import '../websiteUser.css';
+import useChatbot from './Chatbot';
 
 export const Homepage = () => {
   const navigate = useNavigate();
+
+  useChatbot();
 
   useEffect(() => {
     const auth = getAuth();
@@ -83,7 +86,6 @@ export const Homepage = () => {
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
