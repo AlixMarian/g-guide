@@ -7,7 +7,6 @@ import SignUp from './components/SignUp';
 import Homepage from './components/Homepage';
 import WebUserNavBar from './components/WebsiteUserNavBar';
 import SignUpCoord from './components/SignUpCoord';
-import Verify from './components/Verify';
 import ViewAppointments from './components/ViewAppointments';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -35,11 +34,7 @@ const App = () => {
         <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
         
-        <Route path="/verify" element={<Verify />} />
         <Route path="/map" element={<><NavBar/><MapComponent/></>} />
-
-
-
 
         <Route path="/SEA" element={
           <>
