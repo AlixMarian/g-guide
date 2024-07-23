@@ -50,6 +50,7 @@ export const Listpriest = () => {
           console.error(err);
         }
       };
+
     //delete priest
     const deletePriest = async (id) => {
       const priestDoc = doc(db, "priest", id)
@@ -164,14 +165,14 @@ export const Listpriest = () => {
             />
 
           </div>
-
-        </form>
-        <br></br>
           <div className="col-md-6">
-            <div className="btn-group" role="group" id="confirmButtonsEvent">
-              <button type="button" className="btn btn-success" onClick={onSubmitPriest}>Submit</button>
-            </div>
+            <label className="form-label d-block">Confirm</label>
+              <div className="btn-group" role="group">
+                  <button type="button" className="btn btn-success" >Confirm Change</button>
+                  <button type="button" className="btn btn-danger" >Clear</button>
+              </div>
           </div>
+        </form>
       </div>
         </>
     );
