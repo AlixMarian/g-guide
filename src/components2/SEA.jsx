@@ -68,7 +68,7 @@ export const SEA = () => {
           <div className="col-sm-1">
             <label htmlFor="amPmSelect" className="form-label">AM/PM</label>
             <select className="form-select" id="amPmSelect">
-              <option selected></option>
+              {/* <option selected></option> */}
               <option value="1">Am</option>
               <option value="2">Pm</option>
             </select>
@@ -92,8 +92,8 @@ export const SEA = () => {
               <option value="3">Fr.Three</option>
             </select>
           </div>
-          <div className="col-md-6">
-            <label htmlFor="confirmButtons" className="form-label">Confirm</label>
+          <div id='buttons' className="col-md-6">
+            {/* <label htmlFor="confirmButtons" className="form-label">Confirm</label> */}
             <div className="btn-group" role="group" id="confirmButtons">
               <button type="button" className="btn btn-success">Confirm Change</button>
               <button type="button" className="btn btn-danger">Clear</button>
@@ -121,10 +121,15 @@ export const SEA = () => {
           </div>
           <div className="col-md-1">
             <label htmlFor="eventAmPm" className="form-label">AM/PM</label>
-            <input type="text" className="form-control" id="eventAmPm"/>
+            <select  id="amPmSelect" className="form-select">
+              {/* <option selected></option> */}
+              <option value="1">Am</option>
+              <option value="2">Pm</option>
+            </select>
           </div>
-          <div className="col-md-6">
-            <label htmlFor="confirmButtonsEvent" className="form-label">Confirm</label>
+          <br></br>
+          <div id='buttons' className="col-md-6">
+            {/* <label htmlFor="confirmButtonsEvent" className="form-label">Confirm</label> */}
             <div className="btn-group" role="group" id="confirmButtonsEvent">
               <button type="button" className="btn btn-success">Confirm Change</button>
               <button type="button" className="btn btn-danger">Clear</button>
@@ -139,7 +144,7 @@ export const SEA = () => {
         <div className="mb-3">
           <textarea className="form-control" id="announcementTextarea" rows="5"></textarea>
         </div>
-        <div className="announcement-bttn">
+        <div className="btn-group">
           <button type="button" className="btn btn-success">Confirm Change</button>
           <button type="button" className="btn btn-danger">Clear</button>
         </div>
