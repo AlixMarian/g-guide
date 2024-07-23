@@ -34,8 +34,8 @@ const App = () => {
         <Route path="/login" element={<><NavBar/><Login /></>} />
         <Route path="/signup" element={<><NavBar/><SignUp /></>} />
         <Route path="/homepage" element={<><WebUserNavBar /><Homepage /></>} />
-        <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} />
-        <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
+        <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} /> 
+        <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} /> {/* for web user */}
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
         
         <Route path="/map" element={<MapComponent/>} />
