@@ -8,7 +8,7 @@ const WebsiteUserNavBar = () => {
   const navigate = useNavigate();
 
   const handleUserAccSttngs = () => {
-    navigate('/account-settings');
+    navigate('/user-accSettings');
   };
 
   const handleHomepage = () => {

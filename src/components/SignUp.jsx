@@ -56,6 +56,7 @@ const SignUp = () => {
           email: formData.email,
           dataConsent: formData.dataConsent,
           role: 'websiteUser',
+          profileImage: 'https://firebasestorage.googleapis.com/v0/b/g-guide-1368b.appspot.com/o/default%2FuserIcon.png?alt=media&token=11e94d91-bf29-4e3e-ab98-a723fead69bc',
         });
 
         toast.success('Please check your email for verification');
