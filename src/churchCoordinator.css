@@ -67,11 +67,12 @@
 }
 
 .appointmentInfo{
-  display: grid;
+  display: flex;
   border: 1px solid black;
   border-radius: 10px;
   padding: 30px;
   margin: 10px;
+  
 }
 
 .appointmentInfo2{
@@ -305,4 +306,3 @@ ul{
 .logout-button {
   margin-bottom: 1rem; /* Add some margin at the bottom */
 }
-

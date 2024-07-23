@@ -7,7 +7,6 @@ import SignUp from './components/SignUp';
 import Homepage from './components/Homepage';
 import WebUserNavBar from './components/WebsiteUserNavBar';
 import SignUpCoord from './components/SignUpCoord';
-import Verify from './components/Verify';
 import ViewAppointments from './components/ViewAppointments';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -21,26 +20,27 @@ import ReqVol from './components2/ReqVol';
 import AccountSettings from './components2/AccountSett';
 import UserAccountSettings from './components/UserAccountSettings';
 import MapComponent from './components/MapComponent';
+import SysAdminPendingChurch from './components3/SysAdminPendingChurch';
+import SysAdminDashboard from './components3/SysAdminDashboard';
+import SysAdminAccSettings from './components3/SysAdminAccSettings';
 
 
 const App = () => {
   return (
     <Router>
       <Routes>
+        {/* Routes for website user */}
         <Route path="/" element={<><NavBar /><Home /></>} />
         <Route path="/login" element={<><NavBar/><Login /></>} />
         <Route path="/signup" element={<><NavBar/><SignUp /></>} />
         <Route path="/homepage" element={<><WebUserNavBar /><Homepage /></>} />
-        <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} />
-        <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
+        <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} /> 
+        <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} /> {/* for web user */}
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
         
-        <Route path="/verify" element={<Verify />} />
-        <Route path="/map" element={<><NavBar/><MapComponent/></>} />
+        <Route path="/map" element={<MapComponent/>} />
 
-
-
-
+        {/* Routes for church coordinator */}
         <Route path="/SEA" element={
           <>
             <Layout/>
@@ -94,6 +94,11 @@ const App = () => {
                 <AccountSettings/>
               </div>
           </>} />
+
+          {/* Routes for System Admin */}
+          <Route path="/systemAdminDashboard" element={<SysAdminDashboard/>}/>
+          <Route path="/pending-church" element={<SysAdminPendingChurch/>}/>
+          <Route path="/sys-account" element={<SysAdminAccSettings/>}/>
       </Routes>
       <ToastContainer />
     </Router>
