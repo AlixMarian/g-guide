@@ -315,8 +315,8 @@ useEffect(() => {
             <option value="3">Fr. Three</option>
         </select>
     </div>
-    <div className="col-md-6">
-        <label className="form-label d-block">Confirm</label>
+    <div id='buttons' className="col-md-6">
+        {/* <label className="form-label d-block">Confirm</label> */}
         <div className="btn-group" role="group">
             <button type="button" className="btn btn-success" onClick={onSubmitMass}>Confirm Change</button>
             <button type="button" className="btn btn-danger" onClick={() => clearForm()}>Clear</button>
@@ -381,11 +381,11 @@ useEffect(() => {
                       </div>
                       <div className="mb-3">
                         <label for="exampleDropdownFormPassword1" className="form-label">AM/PM</label>
-                          <select className="form-select" id="amPmSelect" >
-                            <option value="" selected disabled>Select a mass period</option>
-                            <option value="Am">Am</option>
-                            <option value="Pm">Pm</option>
-                          </select>
+                        <select className="form-select" id="amPmSelect" onChange={(e) => setNewMassPeriod(e.target.value)}>
+                            <option value="" selected disabled>Select</option>
+                            <option value="Am">AM</option>
+                            <option value="Pm">PM</option>
+                        </select>
                       </div>
                       <div className="mb-3">
                         <label for="exampleDropdownFormPassword1" className="form-label">Type</label>
@@ -443,11 +443,14 @@ useEffect(() => {
           </div>
           <div className="col-md-1">
             <label htmlFor="eventAmPm" className="form-label">AM/PM</label>
-            <input type="text" className="form-control" id="eventAmPm"
-            onChange={(e) => setNewEventPeriod(e.target.value)}/>
+            <select className="form-select" id="amPmSelect" onChange={(e) => setNewEventPeriod(e.target.value)}>
+                <option value="" selected disabled>Select</option>
+                <option value="Am">AM</option>
+                <option value="Pm">PM</option>
+            </select>
           </div>
-          <div className="col-md-6">
-            <label className="form-label d-block">Confirm </label>
+          <div id='buttons' className="col-md-6">
+            {/* <label className="form-label d-block">Confirm </label> */}
               <div className="btn-group" role="group">
                   <button type="button" className="btn btn-success" onClick={onSubmitEvent}>Confirm Change</button>
                   <button type="button" className="btn btn-danger">Clear</button>
