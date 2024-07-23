@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import { Link } from 'react-router-dom';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from 'react-router-dom';
 import '../websiteUser.css';
+import NavBar from './NavBar';
+import WebsiteUserNavBar from './WebsiteUserNavBar';
 
 const containerStyle = {
   width: '100%',
@@ -11,7 +14,20 @@ const containerStyle = {
 const MapComponent = () => {
   const [currentPosition, setCurrentPosition] = useState({});
   const [searchBox, setSearchBox] = useState(null);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const navigate = useNavigate();
   const [map, setMap] = useState(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsUserLoggedIn(true);
+      } else {
+        setIsUserLoggedIn(false);
+      }
+    });
+  }, [navigate]);
 
   const onLoad = (ref) => {
     setSearchBox(ref);
@@ -42,6 +58,7 @@ const MapComponent = () => {
   return (
     <>
       <LoadScript googleMapsApiKey="UNYA_NANI_KAY_WALA_PAKO_CREDIT_CARD" libraries={['places']}>
+        {isUserLoggedIn ? <WebsiteUserNavBar /> : <NavBar />}
         <div className="map-search-container">
           <input
             type="text"
