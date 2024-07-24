@@ -72,7 +72,7 @@ export const Appointments = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
-                        <Form.Group controlId="formSmsContent">
+                        <Form.Group controlId="formSmsContent" className="sms-content">
                             <Form.Label>SMS Content</Form.Label>
                             <Form.Control 
                                 as="textarea" 
