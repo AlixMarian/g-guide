@@ -65,9 +65,11 @@ export const Login = () => {
             }
             break;
           case 'websiteUser':
+            toast.success('Welcome to G! Guide');
             navigate('/homepage');
             break;
           case 'sysAdmin':
+            toast.success('Welcome to G! Guide');
             navigate('/systemAdminDashboard');
             break;
           default:

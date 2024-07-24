@@ -3,7 +3,7 @@ import { useNavigate} from 'react-router-dom';
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { toast } from 'react-toastify';
 
-const SysAdminDashboard = () => {
+export const SysAdminDashboard = () => {
     const navigate = useNavigate();
 
     const handlePendingChurch = () =>{

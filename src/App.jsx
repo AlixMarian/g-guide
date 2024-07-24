@@ -23,6 +23,8 @@ import MapComponent from './components/MapComponent';
 import SysAdminPendingChurch from './components3/SysAdminPendingChurch';
 import SysAdminDashboard from './components3/SysAdminDashboard';
 import SysAdminAccSettings from './components3/SysAdminAccSettings';
+import SysAdminSidebar from './components3/SysAdminSidebar';
+import UserDatabase from './components3/UserDatabase';
 
 
 const App = () => {
@@ -95,10 +97,39 @@ const App = () => {
               </div>
           </>} />
 
-          {/* Routes for System Admin */}
-          <Route path="/systemAdminDashboard" element={<SysAdminDashboard/>}/>
-          <Route path="/pending-church" element={<SysAdminPendingChurch/>}/>
-          <Route path="/sys-account" element={<SysAdminAccSettings/>}/>
+          {/* Routes for System Admin  */}
+          <Route path="/systemAdminDashboard" element={
+            <>
+              <SysAdminSidebar/>
+                <div className='sys-main-content'>
+                  <SysAdminDashboard/>
+                </div>
+            </>}/>
+
+          <Route path="/pending-church" element={
+            <>
+              <SysAdminSidebar/>
+                <div className='sys-main-content'>
+                <SysAdminPendingChurch/>
+                </div>
+            </>}/>
+
+
+          <Route path="/sys-account" element={
+            <>
+              <SysAdminSidebar/>
+                <div className='sys-main-content'>
+                  <SysAdminAccSettings/>  
+                </div>
+            </>}/>
+            
+            <Route path="/userDB" element ={
+            <>
+              <SysAdminSidebar/>
+                <div className='sys-main-content'>
+                  <UserDatabase/>
+                </div>
+            </>} />
       </Routes>
       <ToastContainer />
     </Router>

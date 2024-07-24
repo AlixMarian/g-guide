@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { db} from '/backend/firebase';
+import { useNavigate} from 'react-router-dom';
 import { collection, getDocs, updateDoc, deleteDoc, doc} from 'firebase/firestore';
 import { Table, Modal, Button } from 'react-bootstrap';
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { toast } from 'react-toastify';
+import { getAuth, onAuthStateChanged} from "firebase/auth";
+
 
 
 export const SysAdminPendingChurch = () => {
+  const navigate = useNavigate();
   const [churchData, setChurchData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedChurch, setSelectedChurch] = useState(null);
@@ -136,6 +140,18 @@ export const SysAdminPendingChurch = () => {
       );
     }
   }
+
+  useEffect(() => {
+      const auth = getAuth();
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log("User signed in:", user);
+        } else {
+          console.log("No user signed in.");
+          navigate('/login');
+        }
+      });
+  }, [navigate]);
 
   return (
     <div className="container">
