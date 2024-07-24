@@ -31,38 +31,53 @@ export const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const auth = getAuth();
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      
       const user = userCredential.user;
 
-      if (!user.emailVerified) {
-        toast.error("Please verify your email before logging in.");
-        return;
-      }
-
-      // Get user details from Firestore
-      const userDoc = await getDoc(doc(db, "users", user.uid));
+      // Fetch user details from Firestore
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const churchDoc = await getDoc(doc(db, 'church', user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        const role = userData.role;
 
-        // Navigate based on user role
-      if (role === "websiteUser") {
-          navigate('/homepage');
-          toast.success("Welcome to G! Guide");
-      } else if (role === "churchCoor") {
-          navigate('/SEA');
-          toast.success("Welcome to G! Guide");
-      } else if (role === "sysAdmin") {
-          navigate('/systemAdminDashboard');
-          toast.success("Welcome to G! Guide");
+        switch (userData.role) {
+          case 'churchCoor':
+            // Fetch church details from Firestore
+            
+            if (churchDoc.exists()) {
+              const churchData = churchDoc.data();
+              if (churchData.churchStatus === 'approved') {
+                toast.success('Welcome to G! Guide');
+                navigate('/SEA');
+              } else if (churchData.churchStatus === 'pending') {
+                toast.error('Your church registration is not yet approved. Please wait for admin approval.');
+                return;
+              }else{
+                toast.error('Your church registration has been denied');
+                return;
+              }
+            } else {
+              toast.error('Church details not found.');
+              return;
+            }
+            break;
+          case 'websiteUser':
+            navigate('/homepage');
+            break;
+          case 'sysAdmin':
+            navigate('/systemAdminDashboard');
+            break;
+          default:
+            toast.error('Invalid user role.');
+            break;
+        }
       } else {
-          navigate('/login');
+        toast.error('User details not found.');
+        return;
       }
-      } else {
-        toast.error("User data not found");
-      }
-      
     } catch (error) {
       toast.error(error.message);
     }

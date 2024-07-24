@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
@@ -52,7 +52,7 @@ export const SignUpCoord = () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
-
+      await sendEmailVerification(user);
       // Upload churchProof to Firebase Storage
       let churchProofURL = '';
       if (formData.churchProof) {
@@ -79,6 +79,8 @@ export const SignUpCoord = () => {
         churchEmail: formData.churchEmail,
         churchContactNum: formData.churchContactNum,
         churchProof: churchProofURL,
+        churchRegistrationDate: user.metadata.creationTime,
+        churchStatus: 'pending',
       });
     toast.success('Your registration is being processed by the admin');
     navigate('/login');
@@ -236,7 +238,7 @@ export const SignUpCoord = () => {
                       type="file"
                       className="form-control"
                       id="churchProof"
-                      accept="image/*"
+                      accept="image, .doc, .docx, .pdf"
                       onChange={handleChange}
                       required
                       readOnly
