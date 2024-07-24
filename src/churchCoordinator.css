@@ -72,6 +72,7 @@
   border-radius: 10px;
   padding: 30px;
   margin: 10px;
+  gap: 10px;
   
 }
 
@@ -82,8 +83,15 @@
 
 .appointmentInfobtn{
   display: inline-grid;
-  width: 50%;
+  width: 30%;
+  gap: 5px;
+  margin-left: 80px;
 }
+
+.sms-content textarea {
+  border-color: rgb(53, 53, 53);
+}
+
 
   /*Church Info*/
 .editchurch{
@@ -187,6 +195,7 @@ body {
   cursor:pointer;
 }
 
+
 .sidebar.active #btn{
   left: 90%;
 }
@@ -265,6 +274,8 @@ body {
   text-align: center;
   height: 50px;
   line-height: 50px;
+  
+  
 
 }
 
@@ -306,38 +317,19 @@ ul{
 
 
 .logout-button {
-  margin-bottom: 1rem; /* Add some margin at the bottom */
+
+  margin-bottom: 1rem;
 }
 
-/* churchCoordinator.css */
-
-.btn-group .btn {
-  margin-right: 5px;
+#amPmSelect.form-select {
+  width: 100%;
 }
 
-.btn-success {
-  background-color: #28a745;
-  border-color: #28a745;
-  color: white;
+.btn-group {
+  display: inline-flex;
+  gap: 5px; 
 }
 
-.btn-danger {
-  background-color: #dc3545;
-  border-color: #dc3545;
-  color: white;
+#buttons.col-md-6 {
+  margin-top: 47px;
 }
-
-.btn-success:hover {
-  background-color: #218838;
-  border-color: #1e7e34;
-}
-
-.btn-danger:hover {
-  background-color: #c82333;
-  border-color: #bd2130;
-}
-
-.form-label {
-  margin-bottom: 0.5rem;
-}
-

@@ -176,68 +176,70 @@ export const SEA = () => {
         <hr />
 
         <form className="row g-3">
-          <div className="col-md-6">
-            <label htmlFor="dateSelect" className="form-label">Date</label>
-            <select className="form-select" id="dateSelect" onChange={(e) => setNewMassDate(e.target.value)}>
-              <option value="" selected disabled>Select a day</option>
-              <option value="Monday">Monday</option>
-              <option value="Tuesday">Tuesday</option>
-              <option value="Wednesday">Wednesday</option>
-              <option value="Thursday">Thursday</option>
-              <option value="Friday">Friday</option>
-              <option value="Saturday">Saturday</option>
-              <option value="Sunday">Sunday</option>
-            </select>
-          </div>
-          <div className="col-md-6">
-            <label htmlFor="typeSelect" className="form-label">Type</label>
-            <select className="form-select" id="typeSelect" onChange={(e) => setNewMassType(e.target.value)}>
-              <option value="" selected disabled>Select a mass type</option>
-              <option value="Concelebrated">Concelebrated</option>
-              <option value="Normal Mass">Normal Mass</option>
-            </select>
-          </div>
-        </form>
-        <form className="row g-3">
-          <div className="col-md-5">
-            <label htmlFor="timeInput" className="form-label">Time</label>
-            <input type="text" className="form-control" id="timeInput" onChange={(e) => setNewMassTime(e.target.value)} />
-          </div>
-          <div className="col-md-1">
-            <label htmlFor="amPmSelect" className="form-label">AM/PM</label>
-            <select className="form-select" id="amPmSelect" onChange={(e) => setNewMassPeriod(e.target.value)}>
-              <option value="" selected disabled>Select</option>
-              <option value="Am">AM</option>
-              <option value="Pm">PM</option>
-            </select>
-          </div>
-          <div className="col-md-6">
-            <label htmlFor="languageSelect" className="form-label">Language</label>
-            <select className="form-select" id="languageSelect" onChange={(e) => setNewMassLanguage(e.target.value)}>
-              <option value="" selected disabled>Select a language</option>
-              <option value="Cebuano">Cebuano</option>
-              <option value="English">English</option>
-            </select>
-          </div>
-        </form>
-        <form className="row g-3">
-          <div className="col-md-6">
-            <label htmlFor="priestSelect" className="form-label">Presiding Priest</label>
-            <select className="form-select" id="priestSelect" onChange={(e) => setNewMassPriest(e.target.value)}>
-              <option value="" selected disabled>Select a priest</option>
-              {priestList.map((priest) => (
-                <option key={priest.id} value={priest.name}>{priest.priestType}{priest.firstName}{priest.lastName}</option>
-              ))}
-            </select>
-          </div>
-          <div className="col-md-6">
-            <label className="form-label d-block">Confirm</label>
-            <div className="btn-group" role="group">
-              <button type="button" className="btn btn-success" onClick={onSubmitMass}>Confirm Change</button>
-              <button type="button" className="btn btn-danger">Clear</button>
-            </div>
-          </div>
-        </form>
+
+    <div className="col-md-6">
+        <label htmlFor="dateSelect" className="form-label">Date</label>
+        <select className="form-select" id="dateSelect" onChange={(e) => setNewMassDate(e.target.value)}>
+            <option value="" selected disabled>Select a day</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+            <option value="Sunday">Sunday</option>
+        </select>
+    </div>
+    <div className="col-md-6">
+        <label htmlFor="typeSelect" className="form-label">Type</label>
+        <select className="form-select" id="typeSelect" onChange={(e) => setNewMassType(e.target.value)}>
+            <option value="" selected disabled>Select a mass type</option>
+            <option value="Concelebrated">Concelebrated</option>
+            <option value="Normal Mass">Normal Mass</option>
+        </select>
+    </div>
+</form>
+<form className="row g-3">
+    <div className="col-md-5">
+        <label htmlFor="timeInput" className="form-label">Time</label>
+        <input type="text" className="form-control" id="timeInput" onChange={(e) => setNewMassTime(e.target.value)} />
+    </div>
+    <div className="col-md-1">
+        <label htmlFor="amPmSelect" className="form-label">AM/PM</label>
+        <select className="form-select" id="amPmSelect" onChange={(e) => setNewMassPeriod(e.target.value)}>
+            <option value="" selected disabled>Select</option>
+            <option value="Am">AM</option>
+            <option value="Pm">PM</option>
+        </select>
+    </div>
+    <div className="col-md-6">
+        <label htmlFor="languageSelect" className="form-label">Language</label>
+        <select className="form-select" id="languageSelect" onChange={(e) => setNewMassLanguage(e.target.value)}>
+            <option value="" selected disabled>Select a language</option>
+            <option value="Cebuano">Cebuano</option>
+            <option value="English">English</option>
+        </select>
+    </div>
+</form>
+<form className="row g-3">
+    <div className="col-md-6">
+        <label htmlFor="priestSelect" className="form-label">Presiding Priest</label>
+        <select className="form-select" id="priestSelect" onChange={(e) => setPresidingPriest(e.target.value)}>
+            <option value="" selected disabled>Select a priest</option>
+            <option value="1">Fr. One</option>
+            <option value="2">Fr. Two</option>
+            <option value="3">Fr. Three</option>
+        </select>
+    </div>
+    <div id='buttons' className="col-md-6">
+        {/* <label className="form-label d-block">Confirm</label> */}
+        <div className="btn-group" role="group">
+            <button type="button" className="btn btn-success" onClick={onSubmitMass}>Confirm Change</button>
+            <button type="button" className="btn btn-danger" onClick={() => clearForm()}>Clear</button>
+        </div>
+    </div>
+</form>
+
       </div>
 
       {/* Events Section */}
@@ -252,51 +254,60 @@ export const SEA = () => {
               <th scope="col">AM/PM</th>
               <th></th>
             </tr>
-          </thead>
-          <tbody>
-            {eventList.map((events) => (
-              <tr key={events.id}>
-                <td>{events.eventDate}</td>
-                <td>{events.eventName}</td>
-                <td>{events.eventTime}</td>
-                <td>{events.eventPeriod}</td>
-                <td>
-                  <form>
-                    <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      Edit
-                    </button>
-                    <div className="dropdown-menu">
-                      <form className="px-4 py-3">
-                        <div className="mb-3">
-                          <label htmlFor="exampleDropdownFormEmail1" className="form-label">Day</label>
-                          <select className="form-select" id="dateSelect">
-                            <option value="" selected disabled>Select a day</option>
-                            <option value="Monday">Monday</option>
-                            <option value="Tuesday">Tuesday</option>
-                            <option value="Wednesday">Wednesday</option>
-                            <option value="Thursday">Thursday</option>
-                            <option value="Friday">Friday</option>
-                            <option value="Saturday">Saturday</option>
-                            <option value="Sunday">Sunday</option>
-                          </select>
-                        </div>
-                        <div className="mb-3">
-                          <label htmlFor="exampleDropdownFormEmail1" className="form-label">Time</label>
-                          <input placeholder="" className="form-control" id="exampleDropdownFormEmail1"
-                            // onchange
-                          />
-                        </div>
-                        <div className="mb-3">
-                          <label htmlFor="exampleDropdownFormPassword1" className="form-label">AM/PM</label>
-                          <select className="form-select" id="amPmSelect">
-                            <option value="" selected disabled>Select a mass period</option>
-                            <option value="Am">Am</option>
-                            <option value="Pm">Pm</option>
-                          </select>
-                        </div>
-                        <div className="mb-3">
-                          <label htmlFor="exampleDropdownFormPassword1" className="form-label">Type</label>
-                          <select className="form-select" id="typeSelect">
+
+        </thead>
+        <tbody>
+        {eventList.map((events) => (
+          <tr>
+            <td>
+              {events.eventDate}
+            </td>
+            <td>
+              {events.eventName}
+            </td>
+            <td>
+              {events.eventTime}
+            </td>
+            <td>
+              {events.eventPeriod}
+            </td>
+            <td>
+            <form>
+                <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Edit
+                </button>
+                <div className="dropdown-menu">
+                    <form className="px-4 py-3">
+                    <div className="mb-3">
+                        <label for="exampleDropdownFormEmail1" className="form-label">Day</label>
+                        <select className="form-select" id="dateSelect">
+                          <option value="" selected disabled>Select a day</option>
+                          <option value="Monday">Monday</option>
+                          <option value="Tuesday">Tuesday</option>
+                          <option value="Wednesday">Wednesday</option>
+                          <option value="Thursday">Thursday</option>
+                          <option value="Friday">Friday</option>
+                          <option value="Saturday">Saturday</option>
+                          <option value="Sunday">Sunday</option>
+                        </select>
+                      </div>
+                      <div className="mb-3">
+                        <label for="exampleDropdownFormEmail1" className="form-label">Time</label>
+                        <input placeholder="" className="form-control" id="exampleDropdownFormEmail1"
+                        //onchange
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label for="exampleDropdownFormPassword1" className="form-label">AM/PM</label>
+                        <select className="form-select" id="amPmSelect" onChange={(e) => setNewMassPeriod(e.target.value)}>
+                            <option value="" selected disabled>Select</option>
+                            <option value="Am">AM</option>
+                            <option value="Pm">PM</option>
+                        </select>
+                      </div>
+                      <div className="mb-3">
+                        <label for="exampleDropdownFormPassword1" className="form-label">Type</label>
+                          <select className="form-select" id="typeSelect" >
                             <option value="" selected disabled>Select a mass type</option>
                             <option value="Concelebrated">Concelebrated</option>
                             <option value="Normal Mass">Normal Mass</option>
@@ -347,15 +358,19 @@ export const SEA = () => {
           </div>
           <div className="col-md-1">
             <label htmlFor="eventAmPm" className="form-label">AM/PM</label>
-            <input type="text" className="form-control" id="eventAmPm" onChange={(e) => setNewEventPeriod(e.target.value)} />
+            <select className="form-select" id="amPmSelect" onChange={(e) => setNewEventPeriod(e.target.value)}>
+                <option value="" selected disabled>Select</option>
+                <option value="Am">AM</option>
+                <option value="Pm">PM</option>
+            </select>
           </div>
-          <div className="col-md-6">
-            <label className="form-label d-block">Confirm </label>
-            <div className="btn-group" role="group">
-              <button type="button" className="btn btn-success" onClick={onSubmitEvent}>Confirm Change</button>
-              <button type="button" className="btn btn-danger">Clear</button>
-            </div>
-          </div>
+          <div id='buttons' className="col-md-6">
+            {/* <label className="form-label d-block">Confirm </label> */}
+              <div className="btn-group" role="group">
+                  <button type="button" className="btn btn-success" onClick={onSubmitEvent}>Confirm Change</button>
+                  <button type="button" className="btn btn-danger">Clear</button>
+              </div>
+           </div>n
         </form>
       </div>
 
@@ -371,7 +386,7 @@ export const SEA = () => {
         <div className="mb-3">
           <textarea className="form-control" id="announcementTextarea" rows="5"></textarea>
         </div>
-        <div className="announcement-bttn">
+        <div className="btn-group">
           <button type="button" className="btn btn-success">Confirm Change</button>
           <button type="button" className="btn btn-danger">Clear</button>
         </div>

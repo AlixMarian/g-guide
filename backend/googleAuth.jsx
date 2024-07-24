@@ -1,6 +1,6 @@
 // googleAuth.jsx
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA_NMbQuYZjH5k5yhvUM3MvhQ4h0IUmLUA",
@@ -22,3 +22,4 @@ export const signInWithGoogle = () => {
 };
 
 // window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {});
+// , RecaptchaVerifier

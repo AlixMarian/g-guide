@@ -3,7 +3,7 @@ import { useNavigate} from 'react-router-dom';
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { toast } from 'react-toastify';
 
-const SysAdminDashboard = () => {
+export const SysAdminDashboard = () => {
     const navigate = useNavigate();
 
     const handlePendingChurch = () =>{
@@ -44,7 +44,7 @@ const SysAdminDashboard = () => {
             SysAdminDashboard
 
             <button type="button" className="btn btn-primary" onClick={handlePendingChurch}>Pending Churches</button>
-            <button type="button" className="btn btn-success" onClick={handleSysAdminAccSttngs}>Pending Churches</button>
+            <button type="button" className="btn btn-success" onClick={handleSysAdminAccSttngs}>Admin Account Settings</button>
             <button type="button" className="btn btn-danger" onClick={handleLogout}>Logout</button>
         </div>
 
