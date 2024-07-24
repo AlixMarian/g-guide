@@ -41,7 +41,7 @@ const MapComponent = () => {
 
   return (
     <>
-      <LoadScript googleMapsApiKey="UNYA_NANI_KAY_WALA_PAKO_CREDIT_CARD" libraries={['places']}>
+      <LoadScript googleMapsApiKey="AIzaSyBBf4F2AUko6oCAE5AB4yqxqzzvVrW-h6Q" libraries={['places']}>
         <div className="map-search-container">
           <input
             type="text"
