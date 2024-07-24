@@ -1,266 +1,182 @@
+// src/pages/SEA.jsx
+
 import { useEffect, useState } from 'react';
 import '../churchCoordinator.css';
-import {db} from "/backend/firebase"
-import { getDocs, collection, addDoc,deleteDoc,doc,updateDoc } from 'firebase/firestore';
+import {
+  getMassList,
+  addMassSchedule,
+  deleteMassSchedule,
+  getEventList,
+  addEventSchedule,
+  getAnnouncementList,
+  getPriestList
+} from '../components2/Services/seaServices';
 
 export const SEA = () => {
-  //display mass and event schedule
+  // display mass and event schedule
   const [massList, setMassList] = useState([]);
-  const [eventList, setEventList] = useState([])
-  const [announcementList, setAnnouncementList] = useState([])
+  const [eventList, setEventList] = useState([]);
+  const [announcementList, setAnnouncementList] = useState([]);
+  const [priestList, setPriestList] = useState([]);
 
-
-  //new mass schedule
+  // new mass schedule
   const [newMassDate, setNewMassDate] = useState("");
   const [newMassTime, setNewMassTime] = useState("");
   const [newMassPeriod, setNewMassPeriod] = useState("");
   const [newMassType, setNewMassType] = useState("");
   const [newMassLanguage, setNewMassLanguage] = useState("");
-  
-  //new event schedule
+  const [newMassPriest, setNewMassPriest] = useState("");
 
+  // new event schedule
   const [newEventDate, setNewEventDate] = useState("");
   const [newEventName, setNewEventName] = useState("");
   const [newEventTime, setNewEventTime] = useState("");
   const [newEventPeriod, setNewEventPeriod] = useState("");
 
-  //new announcement
-
-
-
-  const massCollectionRef = collection(db,"massSchedules",);
-  const eventCollectionRef = collection(db,"events",);
-  const announcementCollectionRef = collection(db,"announcements",);
-
-  //display mass Schedule
-    const  getMassList = async () =>{
-      try{
-      const data = await getDocs(massCollectionRef);
-      const filteredData = data.docs.map((doc) => ({
-          ...doc.data(),
-           id: doc.id
-          }));
-      console.log({filteredData});
-          setMassList(filteredData);
-      }catch(err){
-          console.error(err);
-      }
-      
-      };
-
+  // display mass schedule
   useEffect(() => {
-      getMassList();
-  },[])
+    getMassList(setMassList);
+    getPriestList(setPriestList);
+  }, []);
 
-
-  //add new mass Schedule
-  const onSubmitMass = async () => {
-    try{
-    await addDoc(massCollectionRef, {
-        massDate: newMassDate,
-        massTime: newMassTime,
-        massPeriod: newMassPeriod,
-        massType: newMassType,
-        massLanguage: newMassLanguage,
-    });
-      getMassList();
-    }catch(err){
-      console.error(err);
-    }
-  };
-
-  //delete schedule
-  const deleteMassSchedule = async (id) => {
-    const massSchedulesDoc = doc(db, "massSchedules", id)
-    try{
-      await deleteDoc(massSchedulesDoc)
-    }catch(err){
-      console.error(err);
-    }
-  };
-
-
-  //display event schedule
-  const  getEventList = async () =>{
-    try{
-    const data = await getDocs(eventCollectionRef);
-    const filteredData = data.docs.map((doc) => ({
-        ...doc.data(),
-         id: doc.id
-        }));
-    console.log({filteredData});
-        setEventList(filteredData);
-    }catch(err){
-        console.error(err);
-    }
-    
+  // add new mass schedule
+  const onSubmitMass = () => {
+    const massData = {
+      massDate: newMassDate,
+      massTime: newMassTime,
+      massPeriod: newMassPeriod,
+      massType: newMassType,
+      massLanguage: newMassLanguage,
+      presidingPriest: newMassPriest
     };
+    addMassSchedule(massData, () => getMassList(setMassList));
+  };
 
-useEffect(() => {
-    getEventList();
-},[])
+  // delete mass schedule
+  const handleDeleteMassSchedule = async (id) => {
+    await deleteMassSchedule(id, () => getMassList(setMassList));
+  };
 
+  // display event schedule
+  useEffect(() => {
+    getEventList(setEventList);
+  }, []);
 
-//add new event schedule
-
-const onSubmitEvent = async () => {
-  try{
-  await addDoc(eventCollectionRef, {
+  // add new event schedule
+  const onSubmitEvent = () => {
+    const eventData = {
       eventDate: newEventDate,
       eventName: newEventName,
       eventTime: newEventTime,
-      eventPeriod: newEventPeriod,
-  });
-    getEventList();
-  }catch(err){
-    console.error(err);
-  }
-};
-
-//delete event schedule
-
-
-//display announcement
-const  getAnnouncementList = async () =>{
-  try{
-  const data = await getDocs(announcementCollectionRef);
-  const filteredData = data.docs.map((doc) => ({
-      ...doc.data(),
-       id: doc.id
-      }));
-  console.log({filteredData});
-      setAnnouncementList(filteredData);
-  }catch(err){
-      console.error(err);
-  }
-  
+      eventPeriod: newEventPeriod
+    };
+    addEventSchedule(eventData, () => getEventList(setEventList));
   };
 
-useEffect(() => {
-  getAnnouncementList();
-},[])
+  // display announcement list
+  useEffect(() => {
+    getAnnouncementList(setAnnouncementList);
+  }, []);
+  
 
-// add new announcement
-
-//delete announcement
-
-
-
-
-  //html
   return (
     <>
-    <div className="massInfo">
-      <h1>Mass Schedule</h1>
-
-      <table className="table">
-        <thead>
-          <tr>
-            <th scope="col">Day</th>
-            <th scope="col">Time</th>
-            <th scope="col">AM/PM</th>
-            <th scope="col">Type</th>
-            <th scope="col">Language</th>
-            <th scope="col">Presiding Priest</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-        {massList.map((massSchedules) => (
-          <tr>
-            <td>
-              {massSchedules.massDate}
-            </td>
-
-            <td>
-              {massSchedules.massTime}
-            </td>
-              
-            <td>
-             {massSchedules.massPeriod}
-            </td>
-              
-            <td>
-              {massSchedules.massType}
-            </td>
-            <td>
-              {massSchedules.massLanguage}
-            </td>
-            <td>
-            </td>
-            <td>
-                <form>
-                <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Edit
-                </button>
-                <div className="dropdown-menu">
-                    <form className="px-4 py-3">
-                    <div className="mb-3">
-                        <label for="exampleDropdownFormEmail1" className="form-label">Day</label>
-                        <select className="form-select" id="dateSelect">
-                          <option value="" selected disabled>Select a day</option>
-                          <option value="Monday">Monday</option>
-                          <option value="Tuesday">Tuesday</option>
-                          <option value="Wednesday">Wednesday</option>
-                          <option value="Thursday">Thursday</option>
-                          <option value="Friday">Friday</option>
-                          <option value="Saturday">Saturday</option>
-                          <option value="Sunday">Sunday</option>
-                        </select>
-                      </div>
-                      <div className="mb-3">
-                        <label for="exampleDropdownFormEmail1" className="form-label">Time</label>
-                        <input placeholder="" className="form-control" id="exampleDropdownFormEmail1"
-                        //onchange
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label for="exampleDropdownFormPassword1" className="form-label">AM/PM</label>
-                          <select className="form-select" id="amPmSelect" >
+      {/* Mass Schedule Section */}
+      <div className="massInfo">
+        <h1>Mass Schedule</h1>
+        <table className="table">
+          <thead>
+            <tr>
+              <th scope="col">Day</th>
+              <th scope="col">Time</th>
+              <th scope="col">AM/PM</th>
+              <th scope="col">Type</th>
+              <th scope="col">Language</th>
+              <th scope="col">Presiding Priest</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {massList.map((massSchedules) => (
+              <tr key={massSchedules.id}>
+                <td>{massSchedules.massDate}</td>
+                <td>{massSchedules.massTime}</td>
+                <td>{massSchedules.massPeriod}</td>
+                <td>{massSchedules.massType}</td>
+                <td>{massSchedules.massLanguage}</td>
+                <td>{massSchedules.presidingPriest}</td>
+                <td>
+                  <form>
+                    <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Edit
+                    </button>
+                    <div className="dropdown-menu">
+                      <form className="px-4 py-3">
+                        <div className="mb-3">
+                          <label htmlFor="exampleDropdownFormEmail1" className="form-label">Day</label>
+                          <select className="form-select" id="dateSelect">
+                            <option value="" selected disabled>Select a day</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                          </select>
+                        </div>
+                        <div className="mb-3">
+                          <label htmlFor="exampleDropdownFormEmail1" className="form-label">Time</label>
+                          <input placeholder="" className="form-control" id="exampleDropdownFormEmail1"
+                            // onchange
+                          />
+                        </div>
+                        <div className="mb-3">
+                          <label htmlFor="exampleDropdownFormPassword1" className="form-label">AM/PM</label>
+                          <select className="form-select" id="amPmSelect">
                             <option value="" selected disabled>Select a mass period</option>
                             <option value="Am">Am</option>
                             <option value="Pm">Pm</option>
                           </select>
-                      </div>
-                      <div className="mb-3">
-                        <label for="exampleDropdownFormPassword1" className="form-label">Type</label>
-                          <select className="form-select" id="typeSelect" >
+                        </div>
+                        <div className="mb-3">
+                          <label htmlFor="exampleDropdownFormPassword1" className="form-label">Type</label>
+                          <select className="form-select" id="typeSelect">
                             <option value="" selected disabled>Select a mass type</option>
                             <option value="Concelebrated">Concelebrated</option>
                             <option value="Normal Mass">Normal Mass</option>
                           </select>
-                      </div>
-                      <div className="mb-3">
-                        <label for="exampleDropdownFormPassword1" className="form-label">Language</label>
-                          <select className="form-select" id="languageSelect" >
+                        </div>
+                        <div className="mb-3">
+                          <label htmlFor="exampleDropdownFormPassword1" className="form-label">Language</label>
+                          <select className="form-select" id="languageSelect">
                             <option value="" selected disabled>Select a mass language</option>
                             <option value="Cebuano">Cebuano</option>
                             <option value="English">English</option>
                           </select>
-                      </div>
-                      <div className="mb-3">
-                        <label for="exampleDropdownFormPassword1" className="form-label">Presiding Priest</label>
-                        <input type="text" className="form-control" id="exampleDropdownFormPassword1"
-                        //onchange
-                        />
-                      </div>
-                      <button type="submit" className="btn btn-primary"
-                      onClick={() => updatePriest(priest.id)}>Confirm Changes</button>
-                    </form>
-                  </div>
-                <button type="button" class="btn btn-danger" 
-                onClick={() => deleteMassSchedule(massSchedules.id)}>delete</button>
-                </form>
+                        </div>
+                        <div className="mb-3">
+                          <label htmlFor="exampleDropdownFormPassword1" className="form-label">Presiding Priest</label>
+                          <input type="text" className="form-control" id="exampleDropdownFormPassword1"
+                            // onchange
+                          />
+                        </div>
+                        <button type="submit" className="btn btn-primary">Confirm Changes</button>
+                      </form>
+                    </div>
+                    <button type="button" className="btn btn-danger" onClick={() => handleDeleteMassSchedule(massSchedules.id)}>Delete</button>
+                  </form>
                 </td>
-          </tr>
-        ))} 
-        </tbody> 
-      </table>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-        <br/>
-        <hr/>
+        <br />
+        <hr />
 
         <form className="row g-3">
+
     <div className="col-md-6">
         <label htmlFor="dateSelect" className="form-label">Date</label>
         <select className="form-select" id="dateSelect" onChange={(e) => setNewMassDate(e.target.value)}>
@@ -326,10 +242,11 @@ useEffect(() => {
 
       </div>
 
+      {/* Events Section */}
       <div className="events">
-      <h1>Events</h1>
-      <table className='table'>
-        <thead>
+        <h1>Events</h1>
+        <table className='table'>
+          <thead>
             <tr>
               <th scope="col">Date</th>
               <th scope="col">Name</th>
@@ -337,6 +254,7 @@ useEffect(() => {
               <th scope="col">AM/PM</th>
               <th></th>
             </tr>
+
         </thead>
         <tbody>
         {eventList.map((events) => (
@@ -394,52 +312,49 @@ useEffect(() => {
                             <option value="Concelebrated">Concelebrated</option>
                             <option value="Normal Mass">Normal Mass</option>
                           </select>
-                      </div>
-                      <div className="mb-3">
-                        <label for="exampleDropdownFormPassword1" className="form-label">Language</label>
-                          <select className="form-select" id="languageSelect" >
+                        </div>
+                        <div className="mb-3">
+                          <label htmlFor="exampleDropdownFormPassword1" className="form-label">Language</label>
+                          <select className="form-select" id="languageSelect">
                             <option value="" selected disabled>Select a mass language</option>
                             <option value="Cebuano">Cebuano</option>
                             <option value="English">English</option>
                           </select>
-                      </div>
-                      <div className="mb-3">
-                        <label for="exampleDropdownFormPassword1" className="form-label">Presiding Priest</label>
-                        <input type="text" className="form-control" id="exampleDropdownFormPassword1"
-                        //onchange
-                        />
-                      </div>
-                      <button type="submit" className="btn btn-primary"
-                      onClick={() => updatePriest(priest.id)}>Confirm Changes</button>
-                    </form>
-                  </div>
-                <button type="button" class="btn btn-danger" 
-                onClick={() => deleteMassSchedule(massSchedules.id)}>delete</button>
-                </form>
-            </td>
-          </tr>
-          ))}
-        </tbody>
-      </table>
-      <br/>
-      <hr/>
+                        </div>
+                        <div className="mb-3">
+                          <label htmlFor="exampleDropdownFormPassword1" className="form-label">Presiding Priest</label>
+                          <input type="text" className="form-control" id="exampleDropdownFormPassword1"
+                            // onchange
+                          />
+                        </div>
+                        <button type="submit" className="btn btn-primary">Confirm Changes</button>
+                      </form>
+                    </div>
+                    <button type="button" className="btn btn-danger" onClick={() => deleteMassSchedule(events.id)}>Delete</button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <br />
+        <hr />
+
         <form className="row g-3">
           <div className="col-6">
             <label htmlFor="eventDate" className="form-label">Date</label>
-            <input type="text" className="form-control" id="eventDate"
-            onChange={(e) => setNewEventDate(e.target.value)}/>
+            <input type="text" className="form-control" id="eventDate" onChange={(e) => setNewEventDate(e.target.value)} />
           </div>
           <div className="col-md-6">
             <label htmlFor="eventType" className="form-label">Name</label>
-            <input type="text" className="form-control" id="eventType"
-            onChange={(e) => setNewEventName(e.target.value)}/>
+            <input type="text" className="form-control" id="eventType" onChange={(e) => setNewEventName(e.target.value)} />
           </div>
         </form>
         <form className="row g-3">
           <div className="col-5">
             <label htmlFor="eventTime" className="form-label">Time</label>
-            <input type="text" className="form-control" id="eventTime"
-            onChange={(e) => setNewEventTime(e.target.value)}/>
+            <input type="text" className="form-control" id="eventTime" onChange={(e) => setNewEventTime(e.target.value)} />
           </div>
           <div className="col-md-1">
             <label htmlFor="eventAmPm" className="form-label">AM/PM</label>
@@ -455,22 +370,18 @@ useEffect(() => {
                   <button type="button" className="btn btn-success" onClick={onSubmitEvent}>Confirm Change</button>
                   <button type="button" className="btn btn-danger">Clear</button>
               </div>
-           </div>
+           </div>n
         </form>
       </div>
 
-
-    <div className="announcementsSEA">
-      <h1>Announcements</h1>
-
-      {announcementList.map((announcements) => (
-        <td>
-          {announcements. announcement}
-        </td>
-      ))}
-      <br/>
-      <hr/>
-
+      {/* Announcements Section */}
+      <div className="announcementsSEA">
+        <h1>Announcements</h1>
+        {announcementList.map((announcements) => (
+          <p key={announcements.id}>{announcements.announcement}</p>
+        ))}
+        <br />
+        <hr />
         <label htmlFor="announcementTextarea" className="form-label">Announcements</label>
         <div className="mb-3">
           <textarea className="form-control" id="announcementTextarea" rows="5"></textarea>
