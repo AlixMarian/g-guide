@@ -303,6 +303,41 @@ ul{
   justify-content: space-between;
 }
 
+
+
 .logout-button {
   margin-bottom: 1rem; /* Add some margin at the bottom */
 }
+
+/* churchCoordinator.css */
+
+.btn-group .btn {
+  margin-right: 5px;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.form-label {
+  margin-bottom: 0.5rem;
+}
+
