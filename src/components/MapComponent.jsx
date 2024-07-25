@@ -76,7 +76,8 @@ const MapComponent = () => {
   return (
     <>
       <LoadScript 
-        googleMapsApiKey="AIzaSyD-3ZFvxudJQ_2wPV2lKNIB83lSipz_G6k"
+        googleMapsApiKey="careful lang dili permi mag request"
+        // AIzaSyD-3ZFvxudJQ_2wPV2lKNIB83lSipz_G6k
         libraries={['places']}
         onError={() => console.error('Error loading Google Maps script')}
       >
