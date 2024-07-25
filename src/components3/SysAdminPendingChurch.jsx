@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db} from '/backend/firebase';
 import { useNavigate} from 'react-router-dom';
-import { collection, getDocs, updateDoc, deleteDoc, doc} from 'firebase/firestore';
+import { collection, getDocs, updateDoc, addDoc, deleteDoc, doc} from 'firebase/firestore';
 import { Table, Modal, Button } from 'react-bootstrap';
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { toast } from 'react-toastify';
@@ -59,8 +59,8 @@ export const SysAdminPendingChurch = () => {
 
   const handleApprove = async () => {
     if (selectedChurch) {
-      const { id} = selectedChurch;
-
+      const { id, email, name } = selectedChurch; // Assuming selectedChurch has email and name fields
+  
       if (!id) {
         toast.error('Selected church ID is missing.');
         return;
@@ -68,12 +68,23 @@ export const SysAdminPendingChurch = () => {
       try {
         const churchDocRef = doc(db, 'church', id);
         await updateDoc(churchDocRef, { churchStatus: 'approved' });
-
+  
         toast.success('Church approved');
         
         setChurchData(churchData.filter(church => church.id !== id));
         handleCloseModal();
-
+  
+        // Send a confirmation email
+        await addDoc(collection(db, 'mail'), {
+          to: 'email',
+          message: {
+            subject: 'Church Approval Confirmation',
+            html: `Dear User, <br><br>Your church <strong>${name}</strong> has been approved.<br><br>Best Regards,<br>Team`,
+          },
+        });
+  
+        toast.success('Confirmation email sent');
+        
       } catch (error) {
         console.error('Error in handleApprove: ', error);
         toast.error('Unable to approve the church');
@@ -156,8 +167,10 @@ export const SysAdminPendingChurch = () => {
   return (
     <div className="container">
       <h1>Pending Church Registrations</h1>
-      <Table striped bordered hover>
-        <thead>
+      <br></br>
+      <div style={{ display: 'grid', justifyContent: 'center' }}>
+      <Table striped bordered hover style={{ width: '120%' }}>
+      <thead>
           <tr>
             <th>Church Name</th>
             <th>Coordinator Last Name</th>
@@ -226,6 +239,7 @@ export const SysAdminPendingChurch = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+      </div>
     </div>
   );
 };
