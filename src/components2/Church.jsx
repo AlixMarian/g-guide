@@ -35,7 +35,7 @@ export const Church = () => {
         <>
             <h1>Church Information</h1>
             <div className="announcementsCH">
-                <h3>John Doe</h3>
+                <h3>CHURCH NAME</h3>
                 <label htmlFor="exampleFormControlTextarea1" className="form-label">
                     Church History
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">

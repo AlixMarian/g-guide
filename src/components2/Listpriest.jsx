@@ -168,7 +168,7 @@ export const Listpriest = () => {
           <div className="col-md-6">
             <label className="form-label d-block">Confirm</label>
               <div className="btn-group" role="group">
-                  <button type="button" className="btn btn-success" >Confirm Change</button>
+                  <button type="button" className="btn btn-success"onClick={onSubmitPriest} >Confirm Change</button>
                   <button type="button" className="btn btn-danger" >Clear</button>
               </div>
           </div>

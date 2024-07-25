@@ -8,6 +8,7 @@ import {
   deleteMassSchedule,
   getEventList,
   addEventSchedule,
+  deleteEventSchedule,
   getAnnouncementList,
   getPriestList
 } from '../components2/Services/seaServices';
@@ -71,6 +72,11 @@ export const SEA = () => {
       eventPeriod: newEventPeriod
     };
     addEventSchedule(eventData, () => getEventList(setEventList));
+  };
+
+  //delet event schedule
+  const handleDeleteEventSchedule = async (id) => {
+    await deleteEventSchedule(id, () => getEventList(setEventList));
   };
 
   // display announcement list
@@ -176,70 +182,68 @@ export const SEA = () => {
         <hr />
 
         <form className="row g-3">
-
-    <div className="col-md-6">
-        <label htmlFor="dateSelect" className="form-label">Date</label>
-        <select className="form-select" id="dateSelect" onChange={(e) => setNewMassDate(e.target.value)}>
-            <option value="" selected disabled>Select a day</option>
-            <option value="Monday">Monday</option>
-            <option value="Tuesday">Tuesday</option>
-            <option value="Wednesday">Wednesday</option>
-            <option value="Thursday">Thursday</option>
-            <option value="Friday">Friday</option>
-            <option value="Saturday">Saturday</option>
-            <option value="Sunday">Sunday</option>
-        </select>
-    </div>
-    <div className="col-md-6">
-        <label htmlFor="typeSelect" className="form-label">Type</label>
-        <select className="form-select" id="typeSelect" onChange={(e) => setNewMassType(e.target.value)}>
-            <option value="" selected disabled>Select a mass type</option>
-            <option value="Concelebrated">Concelebrated</option>
-            <option value="Normal Mass">Normal Mass</option>
-        </select>
-    </div>
-</form>
-<form className="row g-3">
-    <div className="col-md-5">
-        <label htmlFor="timeInput" className="form-label">Time</label>
-        <input type="text" className="form-control" id="timeInput" onChange={(e) => setNewMassTime(e.target.value)} />
-    </div>
-    <div className="col-md-1">
-        <label htmlFor="amPmSelect" className="form-label">AM/PM</label>
-        <select className="form-select" id="amPmSelect" onChange={(e) => setNewMassPeriod(e.target.value)}>
-            <option value="" selected disabled>Select</option>
-            <option value="Am">AM</option>
-            <option value="Pm">PM</option>
-        </select>
-    </div>
-    <div className="col-md-6">
-        <label htmlFor="languageSelect" className="form-label">Language</label>
-        <select className="form-select" id="languageSelect" onChange={(e) => setNewMassLanguage(e.target.value)}>
-            <option value="" selected disabled>Select a language</option>
-            <option value="Cebuano">Cebuano</option>
-            <option value="English">English</option>
-        </select>
-    </div>
-</form>
-<form className="row g-3">
-    <div className="col-md-6">
-        <label htmlFor="priestSelect" className="form-label">Presiding Priest</label>
-        <select className="form-select" id="priestSelect" onChange={(e) => setPresidingPriest(e.target.value)}>
-            <option value="" selected disabled>Select a priest</option>
-            <option value="1">Fr. One</option>
-            <option value="2">Fr. Two</option>
-            <option value="3">Fr. Three</option>
-        </select>
-    </div>
-    <div id='buttons' className="col-md-6">
-        {/* <label className="form-label d-block">Confirm</label> */}
-        <div className="btn-group" role="group">
-            <button type="button" className="btn btn-success" onClick={onSubmitMass}>Confirm Change</button>
-            <button type="button" className="btn btn-danger" onClick={() => clearForm()}>Clear</button>
-        </div>
-    </div>
-</form>
-
+          <div className="col-md-6">
+            <label htmlFor="dateSelect" className="form-label">Date</label>
+            <select className="form-select" id="dateSelect" onChange={(e) => setNewMassDate(e.target.value)}>
+              <option value="" selected disabled>Select a day</option>
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+              <option value="Saturday">Saturday</option>
+              <option value="Sunday">Sunday</option>
+            </select>
+          </div>
+          <div className="col-md-5">
+            <label htmlFor="timeInput" className="form-label">Time</label>
+            <input type="text" className="form-control" id="timeInput" onChange={(e) => setNewMassTime(e.target.value)} />
+          </div>
+          <div className="col-md-1">
+            <label htmlFor="amPmSelect" className="form-label">AM/PM</label>
+            <select className="form-select" id="amPmSelect" onChange={(e) => setNewMassPeriod(e.target.value)}>
+              <option value="" selected disabled>Select</option>
+              <option value="Am">AM</option>
+              <option value="Pm">PM</option>
+            </select>
+          </div>
+        </form>
+        <form className="row g-3">
+        <div className="col-md-6">
+            <label htmlFor="typeSelect" className="form-label">Type</label>
+            <select className="form-select" id="typeSelect" onChange={(e) => setNewMassType(e.target.value)}>
+              <option value="" selected disabled>Select a mass type</option>
+              <option value="Concelebrated">Concelebrated</option>
+              <option value="Normal Mass">Normal Mass</option>
+            </select>
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="languageSelect" className="form-label">Language</label>
+            <select className="form-select" id="languageSelect" onChange={(e) => setNewMassLanguage(e.target.value)}>
+              <option value="" selected disabled>Select a language</option>
+              <option value="Cebuano">Cebuano</option>
+              <option value="English">English</option>
+            </select>
+          </div>
+        </form>
+        <form className="row g-3">
+          <div className="col-md-6">
+            <label htmlFor="priestSelect" className="form-label">Presiding Priest</label>
+            <select className="form-select" id="priestSelect" onChange={(e) => setNewMassPriest(e.target.value)}>
+              <option value="" selected disabled>Select a priest</option>
+              {priestList.map((priest) => (
+                <option key={priest.id} value={priest.name}>{priest.priestType} {priest.firstName} {priest.lastName}</option>
+              ))}
+            </select>
+          </div>
+          <div className="col-md-6">
+            <label className="form-label d-block">Confirm</label>
+            <div className="btn-group" role="group">
+              <button type="button" className="btn btn-success" onClick={onSubmitMass}>Confirm Change</button>
+              <button type="button" className="btn btn-danger" onClick={() => clearForm()}>Clear</button>
+            </div>
+          </div>
+        </form>
       </div>
 
       {/* Events Section */}
@@ -279,58 +283,21 @@ export const SEA = () => {
                 <div className="dropdown-menu">
                     <form className="px-4 py-3">
                     <div className="mb-3">
-                        <label for="exampleDropdownFormEmail1" className="form-label">Day</label>
-                        <select className="form-select" id="dateSelect">
-                          <option value="" selected disabled>Select a day</option>
-                          <option value="Monday">Monday</option>
-                          <option value="Tuesday">Tuesday</option>
-                          <option value="Wednesday">Wednesday</option>
-                          <option value="Thursday">Thursday</option>
-                          <option value="Friday">Friday</option>
-                          <option value="Saturday">Saturday</option>
-                          <option value="Sunday">Sunday</option>
-                        </select>
-                      </div>
-                      <div className="mb-3">
+                        <label for="exampleDropdownFormEmail1" className="form-label">Date</label>
+                        <input type="text" className="form-control" id="eventDate" />
+                    </div>
+                    <div className="mb-3">
+                        <label for="exampleDropdownFormEmail1" className="form-label">Name</label>
+                        <input type="text" className="form-control" id="eventDate" />
+                    </div>
+                    <div className="mb-3">
                         <label for="exampleDropdownFormEmail1" className="form-label">Time</label>
-                        <input placeholder="" className="form-control" id="exampleDropdownFormEmail1"
-                        //onchange
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label for="exampleDropdownFormPassword1" className="form-label">AM/PM</label>
-                        <select className="form-select" id="amPmSelect" onChange={(e) => setNewMassPeriod(e.target.value)}>
-                            <option value="" selected disabled>Select</option>
-                            <option value="Am">AM</option>
-                            <option value="Pm">PM</option>
-                        </select>
-                      </div>
-                      <div className="mb-3">
-                        <label for="exampleDropdownFormPassword1" className="form-label">Type</label>
-                          <select className="form-select" id="typeSelect" >
-                            <option value="" selected disabled>Select a mass type</option>
-                            <option value="Concelebrated">Concelebrated</option>
-                            <option value="Normal Mass">Normal Mass</option>
-                          </select>
-                        </div>
-                        <div className="mb-3">
-                          <label htmlFor="exampleDropdownFormPassword1" className="form-label">Language</label>
-                          <select className="form-select" id="languageSelect">
-                            <option value="" selected disabled>Select a mass language</option>
-                            <option value="Cebuano">Cebuano</option>
-                            <option value="English">English</option>
-                          </select>
-                        </div>
-                        <div className="mb-3">
-                          <label htmlFor="exampleDropdownFormPassword1" className="form-label">Presiding Priest</label>
-                          <input type="text" className="form-control" id="exampleDropdownFormPassword1"
-                            // onchange
-                          />
-                        </div>
+                        <input type="text" className="form-control" id="eventType"  />
+                    </div>
                         <button type="submit" className="btn btn-primary">Confirm Changes</button>
                       </form>
                     </div>
-                    <button type="button" className="btn btn-danger" onClick={() => deleteMassSchedule(events.id)}>Delete</button>
+                    <button type="button" className="btn btn-danger" onClick={() => handleDeleteEventSchedule(events.id)}>Delete</button>
                   </form>
                 </td>
               </tr>
@@ -342,10 +309,18 @@ export const SEA = () => {
         <hr />
 
         <form className="row g-3">
-          <div className="col-6">
-            <label htmlFor="eventDate" className="form-label">Date</label>
-            <input type="text" className="form-control" id="eventDate" onChange={(e) => setNewEventDate(e.target.value)} />
-          </div>
+        <div className="col-6">
+          <label htmlFor="eventDate" className="form-label">Date</label>
+          <input 
+            type="text" 
+            className="form-control" 
+            id="eventDate" 
+            placeholder="MM/DD/YYYY" 
+            pattern="\d{2}/\d{2}/\d{4}" 
+            onChange={(e) => setNewEventDate(e.target.value)} 
+            required 
+          />
+        </div>
           <div className="col-md-6">
             <label htmlFor="eventType" className="form-label">Name</label>
             <input type="text" className="form-control" id="eventType" onChange={(e) => setNewEventName(e.target.value)} />
@@ -370,7 +345,7 @@ export const SEA = () => {
                   <button type="button" className="btn btn-success" onClick={onSubmitEvent}>Confirm Change</button>
                   <button type="button" className="btn btn-danger">Clear</button>
               </div>
-           </div>n
+           </div>
         </form>
       </div>
 

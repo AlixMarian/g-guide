@@ -18,9 +18,9 @@ export const getMassList = async (setMassList) => {
 };
 
 // Function to add new mass schedule
-export const addMassSchedule = async (id, getMassList) => {
+export const addMassSchedule = async (massData, getMassList) => {
   try {
-    await addDoc(collection(db, "massSchedules"), id);
+    await addDoc(collection(db, "massSchedules"), massData);
     getMassList();
   } catch (err) {
     console.error(err);
@@ -60,6 +60,16 @@ export const addEventSchedule = async (eventData, getEventList) => {
   }
 };
 
+// fuction to delete event schedule
+export const deleteEventSchedule = async (id) => {
+  try {
+    await deleteDoc(doc(db, "events", id));
+    getEventList();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 // Function to get announcement list
 export const getAnnouncementList = async (setAnnouncementList) => {
   try {
@@ -69,6 +79,16 @@ export const getAnnouncementList = async (setAnnouncementList) => {
       id: doc.id
     }));
     setAnnouncementList(filteredData);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+//add announcement 
+export const addAnnouncement = async (announcementData, getAnnouncementList) => {
+  try {
+    await addDoc(collection(db, "announcements"), announcementDataData);
+    getAnnouncementList();
   } catch (err) {
     console.error(err);
   }
