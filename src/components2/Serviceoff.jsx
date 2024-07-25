@@ -29,6 +29,8 @@ export const Serviceoff = () => {
                             <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"/>
                             <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Burials</label>
                         </div>
+                        <br/>
+                        <button type="button" className="btn btn-success">Confirm Change</button>
                     </div>
             </div>
 
@@ -37,28 +39,29 @@ export const Serviceoff = () => {
                     <div className="Schedtogs">
                         <div className="form-check form-switch">
                             <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"/>
-                            <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Baptismal</label>
+                            <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Baptismal Certificate</label>
                         </div>
                         <div className="form-check form-switch">
                             <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"/>
-                            <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Confirmation</label>
+                            <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Confirmation Certificate</label>
                         </div>
                         <div className="form-check form-switch">
                             <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"/>
-                            <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Marriage</label>
+                            <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Marriage Certificate</label>
                         </div>  
                         <div className="form-check form-switch">
                             <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"/>
-                            <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Enumerations (Census)</label>
+                            <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Enumerations (Census) Certificate</label>
                         </div>
                         <div className="form-check form-switch">
                             <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"/>
-                            <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Burials</label>
+                            <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Burials Certificate</label>
                         </div>
                      </div>
+                     <br/>
+                     <button type="button" className="btn btn-success">Confirm Change</button>
              </div>
         </div>
-        <button type="button" className="btn btn-success">Confirm Change</button>
         </>
     );
 };

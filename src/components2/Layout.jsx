@@ -1,10 +1,27 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
+import { getUserDetails } from '../components2/Services/userServices';
+import { getAuth } from 'firebase/auth'; // Import Firebase Auth
 import '../churchCoordinator.css';
 
 export const Layout = () => {
-  
+  const [userDetails, setUserDetails] = useState({});
+
   useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (user) {
+      getUserDetails(user.uid).then(details => {
+        if (details) {
+          setUserDetails(details);
+        }
+      });
+    } else {
+      // Handle case where user is not logged in
+      console.log('No user is logged in');
+    }
+
     let btn = document.querySelector('#btn');
     let sidebar = document.querySelector('.sidebar');
     let buttons = document.querySelectorAll('.sidebar-button'); 
@@ -40,6 +57,8 @@ export const Layout = () => {
   }, []);
 
 
+
+
   return (
     <>
     <body>
@@ -56,7 +75,7 @@ export const Layout = () => {
       <div className="user">
           <img src="../src/assets/viewChurchInfo.png" alt="jogndoe" className="user-img"/>
           <div>
-            <p className="bold">John Doe</p>
+            <p className="bold">{userDetails.firstName} {userDetails.lastName}</p>
             <p>Church Coordinator</p>
           </div>
       </div>
