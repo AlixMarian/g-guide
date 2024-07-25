@@ -7,10 +7,36 @@ export const Layout = () => {
   useEffect(() => {
     let btn = document.querySelector('#btn');
     let sidebar = document.querySelector('.sidebar');
-
+    let buttons = document.querySelectorAll('.sidebar-button'); 
+  
     btn.onclick = function() {
       sidebar.classList.toggle('active');
+      sidebar.classList.toggle('collapsed');
+      toggleButtonState(sidebar.classList.contains('active'));
+      console.log('Sidebar status:', sidebar.classList.contains('active') ? 'active' : 'collapsed');
     };
+  
+    document.addEventListener('click', function(event) {
+      if (!sidebar.contains(event.target) && !btn.contains(event.target)) {
+        sidebar.classList.remove('active');
+        sidebar.classList.add('collapsed');
+        toggleButtonState(false);
+        console.log('Sidebar Listener:', sidebar.classList.contains('active') ? 'active' : 'collapsed');
+      }
+    });
+  
+    function toggleButtonState(isActive) {
+      buttons.forEach(button => {
+        if (isActive) {
+          button.classList.remove('disabled');
+        } else {
+          button.classList.add('disabled');
+        }
+      });
+    }
+  
+    // Initialize button state
+    toggleButtonState(sidebar.classList.contains('active'));
   }, []);
 
 
