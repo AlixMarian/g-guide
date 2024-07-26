@@ -1,7 +1,9 @@
 import { db } from '/backend/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
+
 export const getUserDetails = async (userId) => {
+    
     try {
         const userRef = doc(db, 'users', userId);
         const userDoc = await getDoc(userRef);
@@ -16,3 +18,4 @@ export const getUserDetails = async (userId) => {
         return null;
     }
 };
+
