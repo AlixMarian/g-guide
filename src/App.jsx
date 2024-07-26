@@ -25,6 +25,8 @@ import SysAdminDashboard from './components3/SysAdminDashboard';
 import SysAdminAccSettings from './components3/SysAdminAccSettings';
 import SysAdminSidebar from './components3/SysAdminSidebar';
 import UserDatabase from './components3/UserDatabase';
+import ChurchOptions from './components4/ChurchOptions';
+import ChurchHomepage from './components4/ChurchHomepage';
 
 
 const App = () => {
@@ -130,6 +132,13 @@ const App = () => {
                   <UserDatabase/>
                 </div>
             </>} />
+
+          {/* Routes for selecting churches */}
+          {/* temp only kay dili pa working ang map */}
+          <Route path="/church-options" element={<ChurchOptions/>}/> 
+          <Route path="/church-homepage" element={<ChurchHomepage/>}/>
+
+
       </Routes>
       <ToastContainer />
     </Router>
