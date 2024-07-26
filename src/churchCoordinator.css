@@ -94,7 +94,7 @@
 
 
   /*Church Info*/
-.editchurch{
+.churchUploads{
   display: block;
   border: 1px solid black;
   border-radius: 10px;
@@ -102,7 +102,7 @@
   margin: 10px;
 }
 
-.announcementsCH{
+.churchDetails{
   display: block;
   border: 1px solid black;
   border-radius: 10px;
@@ -374,4 +374,19 @@ ul{
 
 .churchCoorAccStngs button {
   width: 150px;
+}
+
+.time-picker-custom {
+  width: 100% !important;
+  height: 50px !important; /* Adjust height as needed */
+  font-size: 20px !important; /* Adjust font size as needed */
+}
+
+.time-picker-custom input {
+  height: 100% !important; /* Ensure the input takes the full height */
+  font-size: inherit !important; /* Inherit the font size */
+}
+
+.time-picker-custom .react-time-picker__wrapper {
+  height: 100% !important; /* Ensure the wrapper takes the full height */
 }

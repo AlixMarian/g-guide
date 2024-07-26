@@ -1,11 +1,25 @@
 import { useEffect, useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getUserDetails } from '../components2/Services/userServices';
-import { getAuth } from 'firebase/auth'; // Import Firebase Auth
+import { getAuth, signOut } from 'firebase/auth'; 
+import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
 
 export const Layout = () => {
   const [userDetails, setUserDetails] = useState({});
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        toast.success("Sign Out Sucessfull");
+        navigate('/login');
+      })
+      .catch((error) => {
+        toast.error(error.message);
+      });
+  };
 
   useEffect(() => {
     const auth = getAuth();
@@ -164,7 +178,7 @@ export const Layout = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><g fill="none" stroke="black" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"><path d="M10 8V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-2"/><path d="M15 12H3l3-3m0 6l-3-3"/></g></svg>
                 </i>
                   <span className="nav-item">
-                    <Link to ="/">Log-out</Link>
+                    <Link onClick={handleLogout}>Log-out</Link>
                   </span>
               </a>
               </div>
