@@ -6,6 +6,7 @@ import { Table, Modal, Button } from 'react-bootstrap';
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { toast } from 'react-toastify';
 import { getAuth, onAuthStateChanged} from "firebase/auth";
+import axios from 'axios';
 
 
 
@@ -59,12 +60,13 @@ export const SysAdminPendingChurch = () => {
 
   const handleApprove = async () => {
     if (selectedChurch) {
-      const { id, email, name } = selectedChurch; // Assuming selectedChurch has email and name fields
+      const { id, email, name } = selectedChurch;
   
       if (!id) {
         toast.error('Selected church ID is missing.');
         return;
       }
+  
       try {
         const churchDocRef = doc(db, 'church', id);
         await updateDoc(churchDocRef, { churchStatus: 'approved' });
@@ -75,23 +77,31 @@ export const SysAdminPendingChurch = () => {
         handleCloseModal();
   
         // Send a confirmation email
-        await addDoc(collection(db, 'mail'), {
-          to: 'email',
-          message: {
-            subject: 'Church Approval Confirmation',
-            html: `Dear User, <br><br>Your church <strong>${name}</strong> has been approved.<br><br>Best Regards,<br>Team`,
-          },
-        });
-  
-        toast.success('Confirmation email sent');
-        
+        await sendMail(email, name)
+          .then(() => {
+            toast.success('Confirmation email sent');
+          })
+          .catch((error) => {
+            console.error('Error sending email:', error);
+            toast.error('Failed to send confirmation email.');
+          });
       } catch (error) {
-        console.error('Error in handleApprove: ', error);
-        toast.error('Unable to approve the church');
-        toast.error(error.message);
+        console.error('Error approving church:', error);
+        toast.error('Failed to approve church.');
       }
-    } else {
-      toast.error('Unable to perform action. Selected church is undefined.');
+    }
+  };
+  
+  const sendMail = async (email, name) => {
+    try {
+      const response = await axios.post('http://localhost:3000/send-email', { email, name });
+      if (response.status === 200) {
+        return Promise.resolve('Email sent successfully');
+      } else {
+        return Promise.reject('Failed to send email');
+      }
+    } catch (error) {
+      return Promise.reject(error);
     }
   };
   
