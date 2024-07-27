@@ -1,14 +1,11 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
 import { getUserDetails } from '../components2/Services/userServices';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth } from 'firebase/auth'; // Import Firebase Auth
 import '../churchCoordinator.css';
 
 export const Layout = () => {
   const [userDetails, setUserDetails] = useState({});
-  const [loading, setLoading] = useState(true);
-  const btnRef = useRef(null);
-  const sidebarRef = useRef(null);
 
   useEffect(() => {
     const auth = getAuth();
@@ -185,11 +182,13 @@ export const Layout = () => {
                     </g>
                   </svg>
                 </i>
-                <span className="nav-item">Log-out</span>
-              </Link>
-            </div>
-          </li>
-        </ul>
+                  <span className="nav-item">
+                    <Link to ="/">Log-out</Link>
+                  </span>
+              </a>
+              </div>
+            </li>
+          </ul>
       </div>
     </>
   );

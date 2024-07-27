@@ -61,6 +61,13 @@ export const SignUpCoord = () => {
         churchProofURL = await getDownloadURL(proofRef);
       }
 
+      let churchQRDetailURL = '';
+      if (formData.churchQRDetail) {
+        const qrRef = ref(storage, `churchQRs/${user.uid}`);
+        await uploadBytes(qrRef, formData.churchQRDetail);
+        churchQRDetailURL = await getDownloadURL(qrRef);
+      }
+
       // Save user details to Firestore (user collection)
       await setDoc(doc(db, 'users', user.uid), {
         lastName: formData.lastName,
@@ -80,6 +87,10 @@ export const SignUpCoord = () => {
         churchContactNum: formData.churchContactNum,
         churchProof: churchProofURL,
         churchRegistrationDate: user.metadata.creationTime,
+        churchStartTime: 'none',
+        churchEndTime: 'none',
+        churchHistory: 'none',
+        churchQRDetail: churchQRDetailURL,
         churchStatus: 'pending',
       });
     toast.success('Your registration is being processed by the admin');
@@ -239,6 +250,19 @@ export const SignUpCoord = () => {
                       className="form-control"
                       id="churchProof"
                       accept="image, .doc, .docx, .pdf"
+                      onChange={handleChange}
+                      required
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="col-12">
+                    <label htmlFor="inputVerification" className="form-label">G-Gash or Bank QR</label>
+                    <input
+                      type="file"
+                      className="form-control"
+                      id="churchQRDetail"
+                      accept="image/*"
                       onChange={handleChange}
                       required
                       readOnly

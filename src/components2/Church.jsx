@@ -1,41 +1,117 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db} from '/backend/firebase';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
-import { db } from "/backend/firebase";
-import { getDocs, collection } from 'firebase/firestore';
+import ChurchUploads from './ChurchUploads';
 
 export const Church = () => {
-    const [churchList, setChurchList] = useState([]);
-    const [selectedChurch, setSelectedChurch] = useState(null);
+    // eslint-disable-next-line no-unused-vars
+    const [userData, setUserData] = useState(null);
+    const [churchData, setChurchData] = useState({});
+    const [newChurchInfo, setNewChurchInfo] = useState({});
+   
+    const navigate = useNavigate();
 
-    const churchCollectionRef = collection(db, "church");
+    const handleOpeningTimeChange = (e) => {
+        
+        handleChange(e, 'churchStartTime');
+      };
+    
+      const handleClosingTimeChange = (e) => {
+       
+        handleChange(e, 'churchEndTime');
+      };
 
-    const getChurchList = async () => {
-        try {
-            const data = await getDocs(churchCollectionRef);
-            const filteredData = data.docs.map((doc) => ({
-                ...doc.data(),
-                id: doc.id
-            }));
-            setChurchList(filteredData);
-        } catch (err) {
-            console.error(err);
-        }
+    const handleViewProof = () => {
+        window.open(churchData.churchProof, '_blank', 'noopener,noreferrer');
     };
-
+    
+    const handleViewBank = () => {
+        window.open(churchData.churchQRDetail, '_blank', 'noopener,noreferrer');
+    };
+  
     useEffect(() => {
-        getChurchList();
-    }, []);
+      const auth = getAuth();
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          console.log("User signed in:", user);
+          console.log("User id signed in:", user.uid);
+          try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              setUserData(userData);
+  
+              // Fetch church data
+              const churchDoc = await getDoc(doc(db, "church", user.uid));
+              if (churchDoc.exists()) {
+                setChurchData(churchDoc.data());
+              } else {
+                toast.error("Church data not found");
+              }
+            } else {
+              toast.error("User data not found");
+            }
+          } catch (error) {
+            toast.error("Error fetching user data");
+          }
+        } else {
+          console.log("No user signed in.");
+          navigate('/login');
+        }
+      });
+    }, [navigate]);
 
-    const handleChurchChange = (e) => {
-        const church = churchList.find(church => church.id === e.target.value);
-        setSelectedChurch(church);
-    };
+    const handleChange = (e, field) => {
+        const { value } = e.target;
+        setNewChurchInfo((prevState) => ({
+          ...prevState,
+          [field]: value
+        }));
+      };
+    
+      const handleSubmitNewChurchInfo = async (e) => {
+        e.preventDefault();
+        const auth = getAuth();
+        const user = auth.currentUser;
+    
+        if (user) {
+          try {
+            const churchDocRef = doc(db, "church", user.uid);
+            const updatedChurchInfo = { ...newChurchInfo };
+    
+            await updateDoc(churchDocRef, updatedChurchInfo);
+    
+            toast.success("Church data updated successfully");
+          } catch (error) {
+            toast.error("Error updating church data");
+          }
+        } else {
+          toast.error("User data is missing");
+          console.log(user.uid);
+        }
+      };
+
+      const convertTo12HourFormat = (time) => {
+        if (!time) return '';
+        const [hours, minutes] = time.split(':');
+        let hours12 = (hours % 12) || 12;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        return `${hours12}:${minutes} ${ampm}`;
+      };
+
+      
 
     return (
         <>
             <h1>Church Information</h1>
-            <div className="announcementsCH">
-                <h3>CHURCH NAME</h3>
+
+            <div className="churchDetails">
+                <form className="row g-3" onSubmit={handleSubmitNewChurchInfo}>
+                <h3>CHURCH DETAILS</h3>
                 <label htmlFor="exampleFormControlTextarea1" className="form-label">
                     Church History
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
@@ -43,107 +119,121 @@ export const Church = () => {
                     </svg>
                 </label>
                 <div className="mb-3">
-                    <textarea className="form-control" id="exampleFormControlTextarea1" rows="5"></textarea>
+                <textarea
+                    className="form-control"
+                    id="exampleFormControlTextarea1"
+                    rows="5"
+                    placeholder={churchData.churchHistory || ""}
+                    onChange={(e) => handleChange(e, 'churchHistory')}
+                    ></textarea>
                 </div>
                 <br></br>
-            </div>
+                
+                <div className="col-md-3 time-input-container">
+                    <label htmlFor="opening-time"><b>Current Opening Time: </b></label> 
+                    <label htmlFor="existingOpeningTime"> {convertTo12HourFormat(churchData.churchStartTime) || ''}</label><br/>
+                    <input
+                        type="time"
+                        id="opening-time"
+                        name="opening-time"
+                        placeholder={churchData.churchStartTime || ''}
+                        onChange={handleOpeningTimeChange}
+                        className="time-input"
+                    />
+                </div>
 
-            <div className="editchurch">
-                <form className="row g-3">
-                    <div className="col-md-6">
-                        <label htmlFor="churchSelect" className="form-label">Select Church</label>
-                        <select className="form-select" id="churchSelect" onChange={handleChurchChange}>
-                            <option value="" selected disabled>Select a church</option>
-                            {churchList.map((church) => (
-                                <option key={church.id} value={church.id}>{church.churchName}</option>
-                            ))}
-                        </select>
-                    </div>
+                <div className='col-md-3 time-input-container'>
+                    <label htmlFor="closing-time"><b>Closing Time:</b></label>
+                    <label htmlFor="existingOpeningTime"> {convertTo12HourFormat(churchData.churchEndTime) || ''}</label><br/>
+                    <input
+                        type="time"
+                        id="closing-time"
+                        name="closing-time"
+                        placeholder={churchData.churchEndTime || ''}
+                        onChange={handleClosingTimeChange}
+                        className="time-input"
+                    />
+                </div>
 
                     <div className="col-md-6">
-                        <label htmlFor="churchName" className="form-label">Church Name</label>
+                        <label htmlFor="churchName" className="form-label"><b>Church Name</b></label>
                         <input
                             type="text"
-                            className="form-control"
                             id="churchName"
-                            value={selectedChurch ? selectedChurch.churchName : ''}
-                            readOnly
-                        />
+                            className="form-control"
+                            name="churchName"
+                            placeholder={churchData.churchName || ""}
+                            onChange={(e) => handleChange(e, 'churchName')}
+                            />
                     </div>
                     <div className="col-md-6">
-                        <label htmlFor="churchAddress" className="form-label">Church Address</label>
+                        <label htmlFor="churchAddress" className="form-label"><b>Church Address</b></label>
                         <input
                             type="text"
                             className="form-control"
                             id="churchAddress"
-                            value={selectedChurch ? selectedChurch.churchAddress : ''}
-                            readOnly
+                            placeholder={churchData.churchAddress || ""}
+                            onChange={(e) => handleChange(e, 'churchAddress')}
                         />
                     </div>
                     <div className="col-6">
-                        <label htmlFor="churchEmail" className="form-label">Church Email</label>
+                        <label htmlFor="churchEmail" className="form-label"><b>Church Email</b></label>
                         <input
                             type="text"
                             className="form-control"
                             id="churchEmail"
-                            value={selectedChurch ? selectedChurch.churchEmail : ''}
-                            readOnly
+                            placeholder={churchData.churchEmail || ""}
+                            onChange={(e) => handleChange(e, 'churchEmail')}
                         />
                     </div>
                     <div className="col-6">
-                        <label htmlFor="churchContactNum" className="form-label">Contact Details</label>
+                        <label htmlFor="churchContactNum" className="form-label"><b>Contact Details</b></label>
                         <input
                             type="text"
                             className="form-control"
                             id="churchContactNum"
-                            value={selectedChurch ? selectedChurch.churchContactNum : ''}
-                            readOnly
+                            placeholder={churchData.churchContactNum || ""}
+                            onChange={(e) => handleChange(e, 'churchContactNum')}
                         />
                     </div>
                     <div className="col-md-6">
-                        <label htmlFor="churchRegistrationDate" className="form-label">Registration Date</label>
+                        <label htmlFor="churchRegistrationDate" className="form-label"><b>Registration Date</b></label>
                         <input
                             type="text"
                             className="form-control"
                             id="churchRegistrationDate"
-                            value={selectedChurch ? new Date(selectedChurch.churchRegistrationDate).toLocaleString() : ''}
+                            placeholder={churchData.churchRegistrationDate}
                             readOnly
                         />
                     </div>
-                    <div className="col-12">
-                        <label htmlFor="churchProof" className="form-label">Church Proof</label>
-                        {selectedChurch ? (
-                            <a href={selectedChurch.churchProof} target="_blank" rel="noopener noreferrer">
-                                View Proof
-                            </a>
-                        ) : (
-                            <p>No proof available</p>
-                        )}
+                    <div className="col-md-6">
+                        <label htmlFor="churchProof" className="form-label"><b>Church Proof</b></label> <br/>
+                        <button className="btn btn-success" onClick={handleViewProof}>
+                        View Submitted Proof
+                        </button>
                     </div>
-                </form>
-                <br></br>
-                <form className="row g-3">
-                    <div className="col-6">
-                        <label htmlFor="formFileMultiple" className="form-label">Multiple files input example</label>
-                        <input className="form-control" type="file" id="formFileMultiple" multiple />
+
+                    <div className="col-md-6">
+                        <label htmlFor="churchQRDetail" className="form-label"><b>Banking Details</b></label> <br/>
+                        <button className="btn btn-success" onClick={handleViewBank}>
+                        View Current Banking QR
+                        </button>
                     </div>
-                    <div className="col-6">
-                        <label htmlFor="formFileMultiple2" className="form-label">Multiple files input example</label>
-                        <input className="form-control" type="file" id="formFileMultiple2" multiple />
-                    </div>
-                    <div className="col-6">
-                        <label htmlFor="formFileMultiple3" className="form-label">Multiple files input example</label>
-                        <input className="form-control" type="file" id="formFileMultiple3" multiple />
-                    </div>
-                    <div className="col-6">
-                        <label htmlFor="formFileMultiple4" className="form-label">Multiple files input example</label>
-                        <input className="form-control" type="file" id="formFileMultiple4" multiple />
-                    </div>
+                    
                     <div className="announcement-bttn">
-                        <button type="button" className="btn btn-success">Confirm Change</button>
-                        <button type="button" className="btn btn-danger">Clear</button>
+                    <br/>
+                        <button type="submit" className="btn btn-success" onSubmit={handleSubmitNewChurchInfo}>Confirm Change</button>
+                        <button type="reset" className="btn btn-danger">Clear</button>
                     </div>
                 </form>
+            </div>
+
+            <div className="churchUploads">
+                <h3>CHURCH UPLOADS</h3>
+
+                <ChurchUploads />
+
+                
             </div>
         </>
     );
