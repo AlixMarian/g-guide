@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
-import { db} from '/backend/firebase';
-import { useNavigate} from 'react-router-dom';
-import { collection, getDocs, updateDoc, addDoc, deleteDoc, doc} from 'firebase/firestore';
+import { db } from '/backend/firebase';
+import { useNavigate } from 'react-router-dom';
+import { collection, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { Table, Modal, Button } from 'react-bootstrap';
-import { getFunctions, httpsCallable } from "firebase/functions";
 import { toast } from 'react-toastify';
-import { getAuth, onAuthStateChanged} from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import axios from 'axios';
-
-
 
 export const SysAdminPendingChurch = () => {
   const navigate = useNavigate();
@@ -46,8 +43,7 @@ export const SysAdminPendingChurch = () => {
 
     fetchPendingChurches();
   }, []);
-  
-  
+
   const handleShowModal = (church) => {
     setSelectedChurch(church);
     setShowModal(true);
@@ -61,78 +57,87 @@ export const SysAdminPendingChurch = () => {
   const handleApprove = async () => {
     if (selectedChurch) {
       const { id, email, name } = selectedChurch;
-  
+
       if (!id) {
         toast.error('Selected church ID is missing.');
         return;
       }
-  
+
       try {
         const churchDocRef = doc(db, 'church', id);
         await updateDoc(churchDocRef, { churchStatus: 'approved' });
-  
+
         toast.success('Church approved');
-        
         setChurchData(churchData.filter(church => church.id !== id));
         handleCloseModal();
-  
+
         // Send a confirmation email
-        await sendMail(email, name)
-          .then(() => {
-            toast.success('Confirmation email sent');
-          })
-          .catch((error) => {
-            console.error('Error sending email:', error);
-            toast.error('Failed to send confirmation email.');
-          });
+        await sendMail(email, name);
+        toast.success('Confirmation email sent');
       } catch (error) {
         console.error('Error approving church:', error);
         toast.error('Failed to approve church.');
       }
     }
   };
-  
+
   const sendMail = async (email, name) => {
     try {
-      const response = await axios.post('http://localhost:3000/send-email', { email, name });
+      const response = await axios.post('http://localhost:3006/send-email', { email, name });
       if (response.status === 200) {
-        return Promise.resolve('Email sent successfully');
+        return response.data.message;
       } else {
-        return Promise.reject('Failed to send email');
+        throw new Error('Failed to send email');
       }
     } catch (error) {
-      return Promise.reject(error);
+      console.error('Error sending email:', error);
+      throw error;
     }
   };
-  
+
+  const sendRejectionMail = async (email, name) => {
+    try {
+      const response = await axios.post('http://localhost:3006/send-rejection-email', { email, name });
+      if (response.status === 200) {
+        return response.data.message;
+      } else {
+        throw new Error('Failed to send rejection email');
+      }
+    } catch (error) {
+      console.error('Error sending rejection email:', error);
+      throw error;
+    }
+  };
+
   const handleDeny = async () => {
     if (selectedChurch) {
+      const { id, email, name } = selectedChurch;
+
+      if (!id) {
+        toast.error('Selected church ID is missing.');
+        return;
+      }
+
       try {
-        // Send rejection email
-        const functions = getFunctions();
-        const sendRejectionEmail = httpsCallable(functions, 'sendRejectionEmail');
-        await sendRejectionEmail({ email: selectedChurch.email });
-        toast.success('Email sent to the church coordinator email');
+        const churchDocRef = doc(db, 'church', id);
+        await updateDoc(churchDocRef, { churchStatus: 'rejected' });
 
-        // Remove user and church from Firestore
-        const userDocRef = doc(db, 'users', selectedChurch.userId);
-        const churchDocRef = doc(db, 'church', selectedChurch.id);
-        await deleteDoc(userDocRef);
-        await deleteDoc(churchDocRef);
-
-        // Remove from the displayed list
-        setChurchData(churchData.filter(church => church.id !== selectedChurch.id));
+        toast.success('Church rejected');
+        setChurchData(churchData.filter(church => church.id !== id));
         handleCloseModal();
+
+        await sendRejectionMail(email, name);
+        toast.success('Rejection email sent');
       } catch (error) {
-        toast.error('Unable to send email');
+        console.error('Error rejecting church:', error);
+        toast.error('Failed to reject church.');
       }
     }
   };
-
 
   function renderProofOfAffiliation(fileUrl) {
     const fileExtension = fileUrl.split('.').pop().toLowerCase();
-  
+
     if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
       // Render an image
       return <img src={fileUrl} alt="Church Proof" style={{ width: '100%' }} />;
@@ -163,15 +168,15 @@ export const SysAdminPendingChurch = () => {
   }
 
   useEffect(() => {
-      const auth = getAuth();
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          console.log("User signed in:", user);
-        } else {
-          console.log("No user signed in.");
-          navigate('/login');
-        }
-      });
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User signed in:", user);
+      } else {
+        console.log("No user signed in.");
+        navigate('/login');
+      }
+    });
   }, [navigate]);
 
   return (
@@ -179,76 +184,74 @@ export const SysAdminPendingChurch = () => {
       <h1>Pending Church Registrations</h1>
       <br></br>
       <div style={{ display: 'grid', justifyContent: 'center' }}>
-      <Table striped bordered hover style={{ width: '120%' }}>
-      <thead>
-          <tr>
-            <th>Church Name</th>
-            <th>Coordinator Last Name</th>
-            <th>Coordinator First Name</th>
-            <th>Coordinator Email</th>
-            
-            <th>Registration Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {churchData.map(church => (
-            <tr key={church.id}>
-              <td>{church.churchName}</td>
-              <td>{church.lastName}</td>
-              <td>{church.firstName}</td>
-              <td>{church.email}</td>
-              
-              <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
-              <td>
-                <Button variant="info" onClick={() => handleShowModal(church)}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
-                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
-                  </svg>
-                </Button>
-              </td>
+        <Table striped bordered hover style={{ width: '120%' }}>
+          <thead>
+            <tr>
+              <th>Church Name</th>
+              <th>Coordinator Last Name</th>
+              <th>Coordinator First Name</th>
+              <th>Coordinator Email</th>
+              <th>Registration Date</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {churchData.map(church => (
+              <tr key={church.id}>
+                <td>{church.churchName}</td>
+                <td>{church.lastName}</td>
+                <td>{church.firstName}</td>
+                <td>{church.email}</td>
+                <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
+                <td>
+                  <Button variant="info" onClick={() => handleShowModal(church)}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
+                      <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
+                    </svg>
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
 
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Submitted Information</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedChurch && (
-            <>
-              <h4>Church Coordinator Information</h4>
-              <p><strong>Coordinator Last Name:</strong> {selectedChurch.lastName}</p>
-              <p><strong>Coordinator First Name:</strong> {selectedChurch.firstName}</p>
-              <p><strong>Coordinator Email:</strong> {selectedChurch.email}</p>
-              <p><strong>Contact Number:</strong> {selectedChurch.contactNum}</p>
+        <Modal show={showModal} onHide={handleCloseModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Submitted Information</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {selectedChurch && (
+              <>
+                <h4>Church Coordinator Information</h4>
+                <p><strong>Coordinator Last Name:</strong> {selectedChurch.lastName}</p>
+                <p><strong>Coordinator First Name:</strong> {selectedChurch.firstName}</p>
+                <p><strong>Coordinator Email:</strong> {selectedChurch.email}</p>
+                <p><strong>Contact Number:</strong> {selectedChurch.contactNum}</p>
 
-              <h4>Church Information</h4>
-              <p><strong>Church Name:</strong> {selectedChurch.churchName}</p>
-              <p><strong>Church Address:</strong> {selectedChurch.churchAddress}</p>
-              <p><strong>Church Email:</strong> {selectedChurch.churchEmail}</p>
-              <p><strong>Church Contact Number:</strong> {selectedChurch.churchContactNum}</p>
-              <p><strong>Registration Date:</strong> {new Date(selectedChurch.churchRegistrationDate).toLocaleDateString()}</p>
+                <h4>Church Information</h4>
+                <p><strong>Church Name:</strong> {selectedChurch.churchName}</p>
+                <p><strong>Church Address:</strong> {selectedChurch.churchAddress}</p>
+                <p><strong>Church Email:</strong> {selectedChurch.churchEmail}</p>
+                <p><strong>Church Contact Number:</strong> {selectedChurch.churchContactNum}</p>
+                <p><strong>Registration Date:</strong> {new Date(selectedChurch.churchRegistrationDate).toLocaleDateString()}</p>
 
-              <h4>Proof of Affiliation</h4>
-              {renderProofOfAffiliation(selectedChurch.churchProof)}
-            </>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Close
-          </Button>
-          <Button variant="success" onClick={handleApprove}>
-            Approve
-          </Button>
-          <Button variant="danger" onClick={handleDeny}>
-            Deny
-          </Button>
-        </Modal.Footer>
-      </Modal>
+                <h4>Proof of Affiliation</h4>
+                {renderProofOfAffiliation(selectedChurch.churchProof)}
+              </>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseModal}>
+              Close
+            </Button>
+            <Button variant="success" onClick={handleApprove}>
+              Approve
+            </Button>
+            <Button variant="danger" onClick={handleDeny}>
+              Deny
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </div>
   );
