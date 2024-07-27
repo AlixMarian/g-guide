@@ -390,3 +390,61 @@ ul{
 .time-picker-custom .react-time-picker__wrapper {
   height: 100% !important; /* Ensure the wrapper takes the full height */
 }
+
+/*serviceOffered*/
+
+.ServicesList {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.ServicesList h1 {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  color: #333;
+  text-align: center;
+  font-weight: bold;
+}
+
+.serviceListActive {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0; 
+  margin: 0;
+  width: 100%;
+}
+
+.styled-list {
+  list-style: none;
+  padding: 0; 
+  margin: 0; 
+  width: 100%;
+  display: block;
+}
+
+.styled-list-item {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  margin: 5px 0;
+  align-items: center;
+  transition: background-color 0.3s;
+}
+
+.styled-list-item:hover {
+  background-color: #f0f0f0;
+}
+
+.service-icon {
+  margin-right: 10px;
+  color: #223231;
+  font-size: 1.2em;
+}
+
