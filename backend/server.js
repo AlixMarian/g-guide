@@ -17,13 +17,13 @@ const transporter = createTransport({
 });
 
 app.post('/send-email', async (req, res) => {
-  const { email, name } = req.body;
+  const { email } = req.body;
 
   const mailApproved = {
     from: 'marianehistoria88@gmail.com',
     to: email,
     subject: 'Church Registration Approved',
-    text: `Hello ${name},\n\nYour church registration has been approved.\n\nBest regards,\nThe Team`
+    text: `Hello!\n\nYour church registration has been approved.\n\nBest regards,\nG-Guide`
   };
 
   try {
@@ -35,13 +35,13 @@ app.post('/send-email', async (req, res) => {
 });
 
 app.post('/send-rejection-email', async (req, res) => {
-  const { email, name } = req.body;
+  const { email } = req.body;
 
   const mailReject = {
     from: 'marianehistoria88@gmail.com',
     to: email,
     subject: 'Church Registration Rejected',
-    text: `Hello ${name},\n\nWe regret to inform you that your church registration has been rejected.\n\nBest regards,\nThe Team`
+    text: `Hello!\n\nWe regret to inform you that your church registration has been rejected.\n\nBest regards,\nG-Guide`
   };
 
   try {
