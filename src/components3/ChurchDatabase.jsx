@@ -4,7 +4,6 @@ import { db } from '/backend/firebase';
 import { getDocs, collection } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate} from 'react-router-dom';
-import { toast } from 'react-toastify';
 
 export const ChurchDatabase = () => {
   const [churches, setChurches] = useState([]);
@@ -19,7 +18,7 @@ export const ChurchDatabase = () => {
         if (user) {
           console.log("User signed in:", user);
         } else {
-          toast.error("Unauthorized access");
+          console.log("Unauthorized access");
           navigate('/login');
         }
       });

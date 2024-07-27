@@ -145,8 +145,8 @@ const App = () => {
 
           {/* Routes for selecting churches */}
           {/* temp only kay dili pa working ang map */}
-          <Route path="/church-options" element={<ChurchOptions/>}/> 
-          <Route path="/church-homepage" element={<ChurchHomepage/>}/>
+          <Route path="/church-options" element={<><WebUserNavBar /><ChurchOptions/></>}/>
+          <Route path="/church-homepage/:churchId" element={<><WebUserNavBar /><ChurchHomepage/></>}/>
 
 
       </Routes>
