@@ -57,7 +57,7 @@ export const SEA = () => {
 
   const fetchData = (creatorId) => {
     getMassList(setMassList, creatorId);
-    getPriestList(setPriestList);
+    getPriestList(setPriestList, creatorId); // Pass creatorId
     getEventList(setEventList, creatorId);
     getAnnouncementList(setAnnouncementList, creatorId);
   };
