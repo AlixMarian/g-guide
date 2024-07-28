@@ -1,50 +1,67 @@
-import { useEffect, useState } from 'react';
-import '../churchCoordinator.css';
+import React, { useEffect, useState } from 'react';
 import {
   getMassList,
   addMassSchedule,
-  updateMassSchedule, // You need to create this function in your seaServices
+  updateMassSchedule,
   deleteMassSchedule,
   getEventList,
   addEventSchedule,
-  updateEventSchedule, // You need to create this function in your seaServices
+  updateEventSchedule,
   deleteEventSchedule,
   getAnnouncementList,
+  addAnnouncement,
+  deleteAnnouncement,
+  updateAnnouncement,
   getPriestList
 } from '../components2/Services/seaServices';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { toast } from 'react-toastify';
+import '../churchCoordinator.css';
 
 export const SEA = () => {
-  // display mass and event schedule
   const [massList, setMassList] = useState([]);
   const [eventList, setEventList] = useState([]);
   const [announcementList, setAnnouncementList] = useState([]);
   const [priestList, setPriestList] = useState([]);
-
-  // new mass schedule
   const [newMassDate, setNewMassDate] = useState("");
   const [newMassTime, setNewMassTime] = useState("");
   const [newMassPeriod, setNewMassPeriod] = useState("");
   const [newMassType, setNewMassType] = useState("");
   const [newMassLanguage, setNewMassLanguage] = useState("");
   const [newMassPriest, setNewMassPriest] = useState("");
-
-  // new event schedule
   const [newEventDate, setNewEventDate] = useState("");
   const [newEventName, setNewEventName] = useState("");
   const [newEventTime, setNewEventTime] = useState("");
   const [newEventPeriod, setNewEventPeriod] = useState("");
-
-  // editing state
+  const [newAnnouncement, setNewAnnouncement] = useState('');
   const [editingMass, setEditingMass] = useState(null);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+  const [userId, setUserId] = useState('');
 
-  // display mass schedule
   useEffect(() => {
-    getMassList(setMassList);
-    getPriestList(setPriestList);
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+        fetchData(user.uid);
+      } else {
+        setUserId('');
+        toast.error('No user is logged in');
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
-  // add new mass schedule
+  const fetchData = (creatorId) => {
+    getMassList(setMassList, creatorId);
+    getPriestList(setPriestList);
+    getEventList(setEventList, creatorId);
+    getAnnouncementList(setAnnouncementList, creatorId);
+  };
+
   const onSubmitMass = () => {
     const massData = {
       massDate: newMassDate,
@@ -54,10 +71,9 @@ export const SEA = () => {
       massLanguage: newMassLanguage,
       presidingPriest: newMassPriest
     };
-    addMassSchedule(massData, () => getMassList(setMassList));
+    addMassSchedule(massData, userId, () => getMassList(setMassList, userId));
   };
 
-  // update mass schedule
   const onUpdateMass = () => {
     const massData = {
       massDate: newMassDate,
@@ -68,23 +84,16 @@ export const SEA = () => {
       presidingPriest: newMassPriest
     };
     updateMassSchedule(editingMass.id, massData, () => {
-      getMassList(setMassList);
+      getMassList(setMassList, userId);
       setEditingMass(null);
       clearForm();
     });
   };
 
-  // delete mass schedule
   const handleDeleteMassSchedule = async (id) => {
-    await deleteMassSchedule(id, () => getMassList(setMassList));
+    await deleteMassSchedule(id, () => getMassList(setMassList, userId));
   };
 
-  // display event schedule
-  useEffect(() => {
-    getEventList(setEventList);
-  }, []);
-
-  // add new event schedule
   const onSubmitEvent = () => {
     const eventData = {
       eventDate: newEventDate,
@@ -92,10 +101,9 @@ export const SEA = () => {
       eventTime: newEventTime,
       eventPeriod: newEventPeriod
     };
-    addEventSchedule(eventData, () => getEventList(setEventList));
+    addEventSchedule(eventData, userId, () => getEventList(setEventList, userId));
   };
 
-  // update event schedule
   const onUpdateEvent = () => {
     const eventData = {
       eventDate: newEventDate,
@@ -104,23 +112,44 @@ export const SEA = () => {
       eventPeriod: newEventPeriod
     };
     updateEventSchedule(editingEvent.id, eventData, () => {
-      getEventList(setEventList);
+      getEventList(setEventList, userId);
       setEditingEvent(null);
       clearForm();
     });
   };
 
-  // delete event schedule
   const handleDeleteEventSchedule = async (id) => {
-    await deleteEventSchedule(id, () => getEventList(setEventList));
+    await deleteEventSchedule(id, () => getEventList(setEventList, userId));
   };
 
-  // display announcement list
-  useEffect(() => {
-    getAnnouncementList(setAnnouncementList);
-  }, []);
+  const onSubmitAnnouncement = () => {
+    const announcementData = {
+      announcement: newAnnouncement
+    };
+    addAnnouncement(announcementData, userId, () => getAnnouncementList(setAnnouncementList, userId));
+    setNewAnnouncement('');
+  };
 
-  // handle edit mass schedule
+  const handleEditAnnouncement = (announcement) => {
+    setEditingAnnouncement(announcement);
+    setNewAnnouncement(announcement.announcement);
+  };
+
+  const handleDeleteAnnouncement = async (id) => {
+    await deleteAnnouncement(id, () => getAnnouncementList(setAnnouncementList, userId));
+  };
+
+  const onUpdateAnnouncement = () => {
+    const announcementData = {
+      announcement: newAnnouncement
+    };
+    updateAnnouncement(editingAnnouncement.id, announcementData, () => {
+      getAnnouncementList(setAnnouncementList, userId);
+      setEditingAnnouncement(null);
+      clearForm();
+    });
+  };
+
   const handleEditMassSchedule = (mass) => {
     setEditingMass(mass);
     setNewMassDate(mass.massDate);
@@ -131,7 +160,6 @@ export const SEA = () => {
     setNewMassPriest(mass.presidingPriest);
   };
 
-  // handle edit event schedule
   const handleEditEventSchedule = (event) => {
     setEditingEvent(event);
     setNewEventDate(event.eventDate);
@@ -151,6 +179,7 @@ export const SEA = () => {
     setNewEventName("");
     setNewEventTime("");
     setNewEventPeriod("");
+    setNewAnnouncement('');
   };
 
   return (
@@ -275,7 +304,7 @@ export const SEA = () => {
             </thead>
             <tbody>
               {eventList.map((events) => (
-                <tr>
+                <tr key={events.id}>
                   <td>
                     {events.eventDate}
                   </td>
@@ -334,7 +363,6 @@ export const SEA = () => {
             </select>
           </div>
           <div id='buttons' className="col-md-6">
-            {/* <label className="form-label d-block">Confirm </label> */}
               <div className="btn-group" role="group">
                   <button type="button" className="btn btn-success" onClick={editingEvent ? onUpdateEvent : onSubmitEvent}>
                     {editingEvent ? 'Confirm Changes' : 'Confirm Change'}
@@ -348,18 +376,38 @@ export const SEA = () => {
       {/* Announcements Section */}
       <div className="announcementsSEA">
         <h1>Announcements</h1>
-        {announcementList.map((announcements) => (
-          <p key={announcements.id}>{announcements.announcement}</p>
-        ))}
+        <table className="table">
+          <thead>
+            <tr>
+              <th scope="col">Announcement</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {announcementList.map((announcement) => (
+              <tr key={announcement.id}>
+                <td>{announcement.announcement}</td>
+                <td>
+                  <form>
+                    <button type="button" className="btn btn-secondary" onClick={() => handleEditAnnouncement(announcement)}>Edit</button>
+                    <button type="button" className="btn btn-danger" onClick={() => handleDeleteAnnouncement(announcement.id)}>Delete</button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
         <br />
         <hr />
         <label htmlFor="announcementTextarea" className="form-label">Announcements</label>
         <div className="mb-3">
-          <textarea className="form-control" id="announcementTextarea" rows="5"></textarea>
+          <textarea className="form-control" id="announcementTextarea" rows="5" value={newAnnouncement} onChange={(e) => setNewAnnouncement(e.target.value)}></textarea>
         </div>
         <div className="btn-group">
-          <button type="button" className="btn btn-success">Confirm Change</button>
-          <button type="button" className="btn btn-danger">Clear</button>
+          <button type="button" className="btn btn-success" onClick={editingAnnouncement ? onUpdateAnnouncement : onSubmitAnnouncement}>
+            {editingAnnouncement ? 'Confirm Changes' : 'Confirm Change'}
+          </button>
+          <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
         </div>
       </div>
     </>

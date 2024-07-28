@@ -146,7 +146,6 @@
   margin: 10px;
 }
 
-
 /**/
 body {
   margin: 0;
@@ -163,8 +162,6 @@ body {
   display: fixed;
 }
 
-
-
 .sidebar{
   position: absolute;
   top:0;
@@ -175,15 +172,11 @@ body {
   padding: .4rem .8rem;
   transition: all 0.5s ease;
   z-index: 100;
-  
-  
 }
-
 
 .sidebar.active{
   width: 270px;
 }
-
 
 .sidebar #btn{
   position: absolute;
@@ -242,7 +235,6 @@ body {
 .sidebar.active p{
   opacity: 1;
   white-space: nowrap;
-
 }
 
 .sidebar ul li{
@@ -261,7 +253,6 @@ body {
   text-decoration: none;
   border-radius: 0.8rem;
   white-space: nowrap;
-
 }
 
 .sidebar ul li a:hover{
@@ -274,11 +265,7 @@ body {
   text-align: center;
   height: 50px;
   line-height: 50px;
-  
-  
-
 }
-
 
 .sidebar .nav-item{
   opacity: 0;
@@ -313,8 +300,6 @@ ul{
   display: flex;
   justify-content: space-between;
 }
-
-
 
 .logout-button {
 
