@@ -433,3 +433,11 @@ ul{
   font-size: 1.2em;
 }
 
+/* Request Volunteers */
+.createPost, .displayPost{
+  display: block;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}

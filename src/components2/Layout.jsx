@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getUserDetails } from '../components2/Services/userServices';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
 
 export const Layout = () => {
@@ -9,6 +10,7 @@ export const Layout = () => {
   const [loading, setLoading] = useState(true);
   const btnRef = useRef(null);
   const sidebarRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const auth = getAuth();
@@ -65,6 +67,18 @@ export const Layout = () => {
     toggleButtonState(sidebar.classList.contains('active'));
   }, [loading]);
 
+  const handleLogout = () => {
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        toast.success("Sign Out Sucessfull");
+        navigate('/login');
+      })
+      .catch((error) => {
+        toast.error(error.message);
+      });
+  };
+
   return (
     <>
       <div className="sidebar" ref={sidebarRef}>
@@ -80,7 +94,7 @@ export const Layout = () => {
           </i>
         </div>
         <div className="user">
-          <img src={userDetails.photoURL || '../src/assets/viewChurchInfo.png'} alt={userDetails.firstName || 'User'} className="user-img"/>
+          <img src={userDetails.profileImage || ''} alt={userDetails.firstName || 'User'} className="user-img"/>
           <div>
             <p className="bold">{userDetails.firstName} {userDetails.lastName}</p>
             <p>Church Coordinator</p>
@@ -171,7 +185,7 @@ export const Layout = () => {
             </Link>
           </li>
           <li>
-            <div className="logout-button sidebar-button">
+            <div className="logout-button sidebar-button" onClick={handleLogout}>
               <Link to="/">
                 <i className="bx bxs-grid-alt">
                   <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">

@@ -93,29 +93,32 @@ const ChurchHomepage = () => {
       <Carousel>
         {renderCarouselItems()}
       </Carousel>
-      <h1>{church.churchName}</h1>
-      
-        <div className='churchHomepageContents'>
-            <div className='pageNavigation'>
-            <p className="d-inline-flex gap-1">
-                <button className="btn btn-primary" onClick={() => setActiveComponent('info')}>Information</button>
-                <button className="btn btn-primary" onClick={() => setActiveComponent('announcements')}>Announcements</button>
-                <button className="btn btn-primary" onClick={() => setActiveComponent('massSchedule')}>Mass Schedules</button>
-                <button className="btn btn-primary" onClick={() => setActiveComponent('book')}>Book an Appointment</button>
-                <button className="btn btn-primary" onClick={() => setActiveComponent('reqVol')}>Request for Volunteers</button>
-            </p>
-            </div>
-        
+  
+      <div className="churchHomepageContents col-12 col-lg-12 d-flex flex-column align-items-center">
 
-        <div className='pageBody'>
-            <div className="row">
-                <div className="collapse show" id="multiCollapseExample1">
-                    {renderActiveComponent()}
-                </div>
-            
+        <div className='churchTitle col-md-12 text-center'>
+          <h1>{church.churchName}</h1>
+        </div>
+  
+        <div className='pageNavigation col-md-12 d-flex justify-content-center'>
+          <p className="d-inline-flex gap-1">
+            <button className="btn btn-primary" onClick={() => setActiveComponent('info')}>Information</button>
+            <button className="btn btn-primary" onClick={() => setActiveComponent('announcements')}>Announcements</button>
+            <button className="btn btn-primary" onClick={() => setActiveComponent('massSchedule')}>Mass Schedules</button>
+            <button className="btn btn-primary" onClick={() => setActiveComponent('book')}>Book an Appointment</button>
+            <button className="btn btn-primary" onClick={() => setActiveComponent('reqVol')}>Request for Volunteers</button>
+          </p>
+        </div>
+  
+        <div className='pageBody col-md-12 d-flex justify-content-center'>
+          <div className="row">
+            <div className="collapse show" id="multiCollapseExample1">
+              {renderActiveComponent()}
             </div>
+          </div>
         </div>
-        </div>
+
+      </div>
     </div>
   );
 };
