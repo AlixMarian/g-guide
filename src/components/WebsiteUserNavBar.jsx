@@ -11,10 +11,6 @@ const WebsiteUserNavBar = () => {
     navigate('/user-accSettings');
   };
 
-  const handleHomepage = () => {
-    navigate('/homepage');
-  };
-
   useEffect(() => {
     const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
@@ -40,20 +36,31 @@ const WebsiteUserNavBar = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+    <nav className="navbar navbar-expand-lg navbar-light bg-light sticky-top">
       <div className="container-fluid">
-        <a className="navbar-brand" onClick={handleHomepage}>
+        <a className="navbar-brand" href="/homepage">
           <img src={logo} alt="Logo" width="40" height="34" className="d-inline-block align-text-top" />
           G!Guide
         </a>
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        
+
+
+        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
-          <div className="d-grid gap-2 d-md-flex">
+
+        <div className="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+            <li className='nav-item'>
+            <a className="nav-link active" aria-current="page" href="/church-options">Partnered Church List</a>
+            </li>
+          </ul>
+
+          <div className="d-grid gap-2 d-md-flex justify-content-md-end">
             <button type="button" className="btn btn-primary" onClick={handleUserAccSttngs}>Account Settings</button>
             <button type="button" className="btn btn-primary" onClick={handleLogout}>Logout</button>
           </div>
+          
         </div>
       </div>
     </nav>

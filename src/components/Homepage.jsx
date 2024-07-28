@@ -16,7 +16,7 @@ export const Homepage = () => {
         console.log("User signed in:", user);
       } else {
         console.log("No user signed in.");
-        navigate('/login'); // Redirect to login if no user is signed in
+        navigate('/login');
       }
     });
   }, [navigate]);
