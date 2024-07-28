@@ -156,13 +156,15 @@ export const updateAnnouncement = async (id, updatedData, callback) => {
 
 
 // Function to get priest list
-export const getPriestList = async (setPriestList) => {
+export const getPriestList = async (setPriestList, creatorId) => {
   try {
     const data = await getDocs(collection(db, "priest"));
-    const filteredData = data.docs.map((doc) => ({
-      ...doc.data(),
-      id: doc.id
-    }));
+    const filteredData = data.docs
+      .map((doc) => ({
+        ...doc.data(),
+        id: doc.id
+      }))
+      .filter((doc) => doc.creatorId === creatorId); // Filter by creatorId
     setPriestList(filteredData);
   } catch (err) {
     console.error(err);
