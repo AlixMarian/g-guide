@@ -171,8 +171,7 @@ export const Layout = () => {
             </Link>
           </li>
           <li>
-            <div className="logout-button sidebar-button">
-              <Link to="/">
+              <Link to="/" className="logout-button sidebar-button">
                 <i className="bx bxs-grid-alt">
                   <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
                     <g fill="none" stroke="black" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
@@ -183,7 +182,6 @@ export const Layout = () => {
                 </i>
                 <span className="nav-item">Log-out</span>
               </Link>
-            </div>
           </li>
         </ul>
       </div>
