@@ -238,7 +238,7 @@ export const SEA = () => {
           </div>
           <div className="col-md-5">
             <label htmlFor="timeInput" className="form-label">Time</label>
-            <input type="text" className="form-control" id="timeInput" value={newMassTime} onChange={(e) => setNewMassTime(e.target.value)} />
+            <input type="text" className="form-control" id="timeInput" placeholder="00:00" value={newMassTime} onChange={(e) => setNewMassTime(e.target.value)} />
           </div>
           <div className="col-md-1">
             <label htmlFor="amPmSelect" className="form-label">AM/PM</label>
@@ -352,7 +352,7 @@ export const SEA = () => {
         <form className="row g-3">
           <div className="col-5">
             <label htmlFor="eventTime" className="form-label">Time</label>
-            <input type="text" className="form-control" id="eventTime" value={newEventTime} onChange={(e) => setNewEventTime(e.target.value)} />
+            <input type="text" className="form-control" id="eventTime" placeholder="00:00" value={newEventTime} onChange={(e) => setNewEventTime(e.target.value)} />
           </div>
           <div className="col-md-1">
             <label htmlFor="eventAmPm" className="form-label">AM/PM</label>
