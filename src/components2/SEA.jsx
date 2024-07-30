@@ -218,10 +218,10 @@ export const SEA = () => {
             ))}
           </tbody>
         </table>
-
-        <br />
-        <hr />
-
+        <br/>
+        <hr/>
+        <br/>
+        <h4 >{editingMass ? "Edit Mass Schedule" : "Add Mass Schedule"}</h4>
         <form className="row g-3">
           <div className="col-md-6">
             <label htmlFor="dateSelect" className="form-label">Date</label>
@@ -281,7 +281,7 @@ export const SEA = () => {
             <label className="form-label d-block">Confirm</label>
             <div className="btn-group" role="group">
               <button type="button" className="btn btn-success" onClick={editingMass ? onUpdateMass : onSubmitMass}>
-                {editingMass ? 'Confirm Changes' : 'Confirm Change'}
+                {editingMass ? 'Confirm changes' : 'Submit'}
               </button>
               <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
             </div>
@@ -329,7 +329,8 @@ export const SEA = () => {
           </table>
         <br />
         <hr />
-
+        <br/>
+        <h4>{editingEvent ? "Edit Event Schedule" : "Add Event Schedule"}</h4>
         <form className="row g-3">
         <div className="col-6">
           <label htmlFor="eventDate" className="form-label">Date</label>
@@ -365,7 +366,7 @@ export const SEA = () => {
           <div id='buttons' className="col-md-6">
               <div className="btn-group" role="group">
                   <button type="button" className="btn btn-success" onClick={editingEvent ? onUpdateEvent : onSubmitEvent}>
-                    {editingEvent ? 'Confirm Changes' : 'Confirm Change'}
+                    {editingEvent ? 'Confirm Changes' : 'Submit'}
                   </button>
                   <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
               </div>
@@ -399,13 +400,15 @@ export const SEA = () => {
         </table>
         <br />
         <hr />
+        <br/>
+        <h4>{editingAnnouncement ? "Edit Announcement" : "Add Announcement"}</h4>
         <label htmlFor="announcementTextarea" className="form-label">Announcements</label>
         <div className="mb-3">
           <textarea className="form-control" id="announcementTextarea" rows="5" value={newAnnouncement} onChange={(e) => setNewAnnouncement(e.target.value)}></textarea>
         </div>
         <div className="btn-group">
           <button type="button" className="btn btn-success" onClick={editingAnnouncement ? onUpdateAnnouncement : onSubmitAnnouncement}>
-            {editingAnnouncement ? 'Confirm Changes' : 'Confirm Change'}
+            {editingAnnouncement ? 'Confirm Changes' : 'Submit'}
           </button>
           <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
         </div>
