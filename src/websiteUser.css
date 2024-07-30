@@ -110,6 +110,14 @@
     padding-bottom: 20px;
   }
 
+  .nav-item:hover .nav-link {
+    font-weight: 700;
+    /* background-color: rgb(217, 216, 216); */
+  }
+  
+  
+  
+
   /* ============================================================================================================================ */
   /* church homepage contents */
   .churchHomepageContainer {
