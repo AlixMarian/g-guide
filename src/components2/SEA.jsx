@@ -335,7 +335,7 @@ export const SEA = () => {
         <div className="col-6">
           <label htmlFor="eventDate" className="form-label">Date</label>
           <input 
-            type="text" 
+            type="date"
             className="form-control" 
             id="eventDate" 
             placeholder="MM/DD/YYYY" 
@@ -347,13 +347,13 @@ export const SEA = () => {
         </div>
           <div className="col-md-6">
             <label htmlFor="eventType" className="form-label">Name</label>
-            <input type="text" className="form-control" id="eventType" value={newEventName} onChange={(e) => setNewEventName(e.target.value)} />
+            <input type="text" className="form-control" id="eventType" value={newEventName} onChange={(e) => setNewEventName(e.target.value)} required/>
           </div>
         </form>
         <form className="row g-3">
           <div className="col-5">
             <label htmlFor="eventTime" className="form-label">Time</label>
-            <input type="text" className="form-control" id="eventTime" placeholder="00:00" value={newEventTime} onChange={(e) => setNewEventTime(e.target.value)} />
+            <input type="text" className="form-control" id="eventTime" placeholder="00:00" value={newEventTime} onChange={(e) => setNewEventTime(e.target.value)} required/>
           </div>
           <div className="col-md-1">
             <label htmlFor="eventAmPm" className="form-label">AM/PM</label>
