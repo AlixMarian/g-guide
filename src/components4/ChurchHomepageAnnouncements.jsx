@@ -1,32 +1,49 @@
 import '../websiteUser.css';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc} from 'firebase/firestore';
+import { collection, getDocs, query, where} from 'firebase/firestore';
 import { db } from '/backend/firebase';
+
 
 export const ChurchHomepageAnnouncements = () => {
   const { churchId } = useParams();
-  const [churchData, setChurchData] = useState(null);
+  const [announcements, setAnnouncements] = useState([]);
 
   useEffect(() => {
-    const fetchChurchData = async () => {
-      const churchDoc = await getDoc(doc(db, 'church', churchId));
-      if (churchDoc.exists()) {
-        setChurchData(churchDoc.data());
-      } else {
-        console.error('Church not found');
+    const fetchAnnouncements = async () => {
+      try {
+        const q = query(collection(db, 'announcements'), where('creatorId', '==', churchId));
+        const querySnapshot = await getDocs(q);
+        const announcementsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setAnnouncements(announcementsList);
+      } catch (error) {
+        console.error('Error fetching announcements:', error);
       }
     };
-    fetchChurchData();
+
+    fetchAnnouncements();
   }, [churchId]);
 
-  if (!churchData) {
-    return <div>Loading...</div>;
-  }
+
 
   return (
     <div>
-      <h3>Announcement Page of {churchData.churchName}</h3>
+      {announcements.length === 0 ? (
+        <div className="card mb-3">
+          <div className="card-body">
+            <h5 className="card-title">No Announcements</h5>
+          </div>
+        </div>
+      ) : (
+        announcements.map((announcement) => (
+          <div className="card mb-3" key={announcement.id}>
+            <div className="card-body">
+              <h5 className="card-title">{announcement.uploadDate.toDate().toLocaleDateString()}</h5>
+              <p className="card-text">{announcement.announcement}</p>
+            </div>
+          </div>
+        ))
+      )}
     </div>
   )
 }

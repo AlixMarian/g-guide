@@ -15,6 +15,7 @@ import {
   getPriestList
 } from '../components2/Services/seaServices';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { Timestamp} from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
 
@@ -124,7 +125,8 @@ export const SEA = () => {
 
   const onSubmitAnnouncement = () => {
     const announcementData = {
-      announcement: newAnnouncement
+      announcement: newAnnouncement,
+      uploadDate: Timestamp.now(),
     };
     addAnnouncement(announcementData, userId, () => getAnnouncementList(setAnnouncementList, userId));
     setNewAnnouncement('');
@@ -381,6 +383,7 @@ export const SEA = () => {
           <thead>
             <tr>
               <th scope="col">Announcement</th>
+              <th scope='col'>Date Uploaded</th>
               <th></th>
             </tr>
           </thead>
@@ -388,6 +391,7 @@ export const SEA = () => {
             {announcementList.map((announcement) => (
               <tr key={announcement.id}>
                 <td>{announcement.announcement}</td>
+                <td>{announcement.uploadDate.toDate().toLocaleDateString()}</td>
                 <td>
                   <form>
                     <button type="button" className="btn btn-secondary" onClick={() => handleEditAnnouncement(announcement)}>Edit</button>
