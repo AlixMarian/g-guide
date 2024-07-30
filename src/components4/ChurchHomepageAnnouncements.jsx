@@ -29,7 +29,7 @@ export const ChurchHomepageAnnouncements = () => {
   return (
     <div>
       {announcements.length === 0 ? (
-        <div className="card mb-3">
+        <div className="card mb-3 alert alert-info">
           <div className="card-body">
             <h5 className="card-title">No Announcements</h5>
           </div>

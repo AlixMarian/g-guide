@@ -246,8 +246,8 @@ export const SEA = () => {
             <label htmlFor="amPmSelect" className="form-label">AM/PM</label>
             <select className="form-select" id="amPmSelect" value={newMassPeriod} onChange={(e) => setNewMassPeriod(e.target.value)}>
               <option value="" disabled>Select</option>
-              <option value="Am">AM</option>
-              <option value="Pm">PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
             </select>
           </div>
         </form>

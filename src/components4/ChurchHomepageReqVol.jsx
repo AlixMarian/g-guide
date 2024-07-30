@@ -35,7 +35,7 @@ export const ChurchHomepageReqVol = () => {
       <h2>In Progress</h2>
       <div className='col-12 col-lg-12'>
       {ongoingPosts.length === 0 ? (
-          <div className="card mb-3">
+          <div className="card mb-3 alert alert-info">
             <div className="card-body">
               <h5 className="card-title">No Ongoing Requests Available</h5>
             </div>
@@ -67,7 +67,7 @@ export const ChurchHomepageReqVol = () => {
       <p>We would like to extend our gratitude to the participants.</p>
       <div className='col-12 col-lg-12'>
       {archivedPosts.length === 0 ? (
-          <div className="card mb-3">
+          <div className="card mb-3 alert alert-info">
             <div className="card-body">
               <h5 className="card-title">No Completed Requests Available</h5>
             </div>
