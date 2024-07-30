@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { Table, Modal, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -13,34 +13,34 @@ export const SysAdminPendingChurch = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedChurch, setSelectedChurch] = useState(null);
 
+  const fetchPendingChurches = async () => {
+    try {
+      const churchCollection = collection(db, 'church');
+      const churchSnapshot = await getDocs(churchCollection);
+      const churchList = churchSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      const usersCollection = collection(db, 'users');
+      const usersSnapshot = await getDocs(usersCollection);
+      const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      const mappedData = churchList.map((church) => {
+        const user = usersList.find(user => user.id === church.id);
+        return {
+          ...church,
+          lastName: user?.lastName || '',
+          firstName: user?.firstName || '',
+          email: user?.email || '',
+          contactNum: user?.contactNum || '',
+        };
+      });
+
+      setChurchData(mappedData.filter(church => church.churchStatus === 'pending'));
+    } catch (error) {
+      console.error('Error fetching church data: ', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchPendingChurches = async () => {
-      try {
-        const churchCollection = collection(db, 'church');
-        const churchSnapshot = await getDocs(churchCollection);
-        const churchList = churchSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        const usersCollection = collection(db, 'users');
-        const usersSnapshot = await getDocs(usersCollection);
-        const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        const mappedData = churchList.map((church) => {
-          const user = usersList.find(user => user.id === church.id);
-          return {
-            ...church,
-            lastName: user?.lastName || '',
-            firstName: user?.firstName || '',
-            email: user?.email || '',
-            contactNum: user?.contactNum || '',
-          };
-        });
-
-        setChurchData(mappedData.filter(church => church.churchStatus === 'pending'));
-      } catch (error) {
-        console.error('Error fetching church data: ', error);
-      }
-    };
-
     fetchPendingChurches();
   }, []);
 
@@ -56,7 +56,7 @@ export const SysAdminPendingChurch = () => {
 
   const handleApprove = async () => {
     if (selectedChurch) {
-      const { id, email, name } = selectedChurch;
+      const { id, churchName, email } = selectedChurch;
 
       if (!id) {
         toast.error('Selected church ID is missing.');
@@ -64,6 +64,9 @@ export const SysAdminPendingChurch = () => {
       }
 
       try {
+        // Fetch latest data before approval
+        await fetchPendingChurches();
+
         const churchDocRef = doc(db, 'church', id);
         await updateDoc(churchDocRef, { churchStatus: 'approved' });
 
@@ -71,8 +74,8 @@ export const SysAdminPendingChurch = () => {
         setChurchData(churchData.filter(church => church.id !== id));
         handleCloseModal();
 
-        // Send a confirmation email
-        await sendMail(email, name);
+        // Send a confirmation email to the church coordinator
+        await sendMail(email, churchName); // Use coordinatorEmail here
         toast.success('Confirmation email sent');
       } catch (error) {
         console.error('Error approving church:', error);
@@ -111,7 +114,7 @@ export const SysAdminPendingChurch = () => {
 
   const handleDeny = async () => {
     if (selectedChurch) {
-      const { id, email, name } = selectedChurch;
+      const { id, churchName, email } = selectedChurch;
 
       if (!id) {
         toast.error('Selected church ID is missing.');
@@ -119,6 +122,9 @@ export const SysAdminPendingChurch = () => {
       }
 
       try {
+        // Fetch latest data before denial
+        await fetchPendingChurches();
+
         const churchDocRef = doc(db, 'church', id);
         await updateDoc(churchDocRef, { churchStatus: 'rejected' });
 
@@ -126,7 +132,7 @@ export const SysAdminPendingChurch = () => {
         setChurchData(churchData.filter(church => church.id !== id));
         handleCloseModal();
 
-        await sendRejectionMail(email, name);
+        await sendRejectionMail(email, churchName); // Use coordinatorEmail here
         toast.success('Rejection email sent');
       } catch (error) {
         console.error('Error rejecting church:', error);
@@ -184,7 +190,7 @@ export const SysAdminPendingChurch = () => {
       <h1>Pending Church Registrations</h1>
       <br></br>
       <div style={{ display: 'grid', justifyContent: 'center' }}>
-        <Table striped bordered hover style={{ width: '120%' }}>
+        <Table striped bordered hover style={{ width: '100%' }}>
           <thead>
             <tr>
               <th>Church Name</th>
@@ -203,8 +209,8 @@ export const SysAdminPendingChurch = () => {
                 <td>{church.firstName}</td>
                 <td>{church.email}</td>
                 <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
-                <td>
-                  <Button variant="info" onClick={() => handleShowModal(church)}>
+                <td style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Button variant="info"  onClick={() => handleShowModal(church)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
                       <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
                     </svg>

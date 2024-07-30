@@ -71,6 +71,26 @@ export const SysAdminSidebar = () => {
         });
     };
 
+    const handleAdminDashboard = () => {
+      navigate('/systemAdminDashboard');
+    };
+
+    const handlePendingChurch = () => {
+      navigate('/pending-church');
+    };
+
+    const handleUsers = () => {
+      navigate('/userDB');
+    };
+
+    const handleChurchDB = () => {
+      navigate('/churchDB');
+    };
+
+    const handleSysAccount = () => {
+          navigate('/sys-account');
+    };
+
   return (
     <>
     <body className='sidebarContainer'>
@@ -89,7 +109,7 @@ export const SysAdminSidebar = () => {
       
           <ul>
             {/* System admin dashboard */}
-            <li>
+            <li onClick={handleAdminDashboard } style={{ cursor: 'pointer' }}>
               <Link to="/systemAdminDashboard" className="sidebar-button">
                 <i className="bx bxs-grid-alt">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-bar-chart-line-fill" viewBox="0 0 16 16">
@@ -101,7 +121,7 @@ export const SysAdminSidebar = () => {
             </li>
 
             {/* Pending Churches */}
-            <li>
+            <li onClick={handlePendingChurch} style={{ cursor: 'pointer' }}>
               <Link to="/pending-church" className="sidebar-button">
                 <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-file-text-fill" viewBox="0 0 16 16">
@@ -113,7 +133,7 @@ export const SysAdminSidebar = () => {
             </li>
 
             {/* list of users */}
-            <li>
+            <li onClick={handleUsers} style={{ cursor: 'pointer' }}>
               <Link to="/userDB" className="sidebar-button">
                 <i className="bx bxs-grid-alt">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-person-fill-check" viewBox="0 0 16 16">
@@ -127,7 +147,7 @@ export const SysAdminSidebar = () => {
 
 
             {/* list of churches */}
-            <li>
+            <li onClick={handleChurchDB} style={{ cursor: 'pointer' }}>
               <Link to="/churchDB" className="sidebar-button">
                 <i className="bx bxs-grid-alt">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-card-list" viewBox="0 0 16 16">
@@ -140,7 +160,7 @@ export const SysAdminSidebar = () => {
             </li>
 
             {/* system admin account settings */}
-            <li>
+            <li onClick={handleSysAccount} style={{ cursor: 'pointer' }}>
               <Link to="/sys-account" className="sidebar-button">
                 <i className="bx bxs-grid-alt">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-person-vcard-fill" viewBox="0 0 16 16">
@@ -153,11 +173,11 @@ export const SysAdminSidebar = () => {
 
 
             {/* logout */}
-            <li>
+            <li onClick={handleLogout} style={{ cursor: 'pointer' }}>
               <div className="logout-button sidebar-button" onClick={handleLogout}>
                 <Link to="/">
                   <i className="bx bxs-grid-alt">
-                    <svg xmlns="http://www.w3.org/2000/svg" onClick={handleLogout} width="16" height="16" fill="currentColor" className="bi bi-box-arrow-left" viewBox="0 0 16 16">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-box-arrow-left" viewBox="0 0 16 16">
                       <path fillRule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z"/>
                       <path fillRule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z"/>
                     </svg>

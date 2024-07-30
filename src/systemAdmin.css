@@ -54,7 +54,7 @@
 }
 
 .sidebar p{
-  opacity:0;
+  opacity: 0;
 }
 
 .sidebar.active p{
@@ -100,8 +100,6 @@
 .sidebar.active .nav-item{
   opacity: 1;
 }
-
-
 
 .sidebar ul li:hover .tooltip{
   opacity: 1;
