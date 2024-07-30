@@ -43,18 +43,12 @@
   width: 100%;
 }
 
-.appointmentsView{
-  display: inline-flex;
-  width: 100%;
-  
-}
 
 .confirmedAppointments{
   border: 1px solid black;
   border-radius: 10px;
   padding: 30px;
   margin: 10px;
-  width: 50%;
 }
 
 .pendingAppointments{
@@ -62,7 +56,6 @@
   border-radius: 10px;
   padding: 30px;
   margin: 10px;
-  width: 50%;
   
 }
 
