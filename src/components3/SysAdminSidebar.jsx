@@ -109,19 +109,21 @@ export const SysAdminSidebar = () => {
       
           <ul>
             {/* System admin dashboard */}
-            <li onClick={handleAdminDashboard } style={{ cursor: 'pointer' }}>
+            <li className='hover-button' onClick={handleAdminDashboard } style={{ cursor: 'pointer' }} >
               <Link to="/systemAdminDashboard" className="sidebar-button">
                 <i className="bx bxs-grid-alt">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-bar-chart-line-fill" viewBox="0 0 16 16">
                     <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1z"/>
                   </svg>
+                  
                 </i>
                 <span className="nav-item">Dashboard</span>
+                <p className='p-hover'>Dashboard</p>
               </Link>
             </li>
 
             {/* Pending Churches */}
-            <li onClick={handlePendingChurch} style={{ cursor: 'pointer' }}>
+            <li className='hover-button' onClick={handlePendingChurch} style={{ cursor: 'pointer' }}>
               <Link to="/pending-church" className="sidebar-button">
                 <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-file-text-fill" viewBox="0 0 16 16">
@@ -129,11 +131,12 @@ export const SysAdminSidebar = () => {
                 </svg>   
                 </i>
                 <span className="nav-item">Pending Church</span>
+                <p className='p-hover'>Pending Church</p>
               </Link>
             </li>
 
             {/* list of users */}
-            <li onClick={handleUsers} style={{ cursor: 'pointer' }}>
+            <li className='hover-button' onClick={handleUsers} style={{ cursor: 'pointer' }}>
               <Link to="/userDB" className="sidebar-button">
                 <i className="bx bxs-grid-alt">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-person-fill-check" viewBox="0 0 16 16">
@@ -142,12 +145,13 @@ export const SysAdminSidebar = () => {
                   </svg>
                 </i>
                 <span className="nav-item">User Database</span>
+                <p className='p-hover'>User Database</p>
               </Link>
           </li>
 
 
             {/* list of churches */}
-            <li onClick={handleChurchDB} style={{ cursor: 'pointer' }}>
+            <li className='hover-button' onClick={handleChurchDB} style={{ cursor: 'pointer' }}>
               <Link to="/churchDB" className="sidebar-button">
                 <i className="bx bxs-grid-alt">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-card-list" viewBox="0 0 16 16">
@@ -156,11 +160,12 @@ export const SysAdminSidebar = () => {
                   </svg>
                 </i>
                 <span className="nav-item">Church Database</span>
+                <p className='p-hover'>Church Database</p>
               </Link>
             </li>
 
             {/* system admin account settings */}
-            <li onClick={handleSysAccount} style={{ cursor: 'pointer' }}>
+            <li className='hover-button' onClick={handleSysAccount} style={{ cursor: 'pointer' }}>
               <Link to="/sys-account" className="sidebar-button">
                 <i className="bx bxs-grid-alt">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-person-vcard-fill" viewBox="0 0 16 16">
@@ -168,12 +173,13 @@ export const SysAdminSidebar = () => {
                   </svg>
                 </i>
                 <span className="nav-item">Account Settings</span>
+                <p className='p-hover'>Account Settings</p>
               </Link>
             </li>
 
 
             {/* logout */}
-            <li onClick={handleLogout} style={{ cursor: 'pointer' }}>
+            <li className='hover-button' onClick={handleLogout} style={{ cursor: 'pointer' }}>
               <div className="logout-button sidebar-button" onClick={handleLogout}>
                 <Link to="/">
                   <i className="bx bxs-grid-alt">
@@ -183,6 +189,7 @@ export const SysAdminSidebar = () => {
                     </svg>
                   </i>
                   <span className="nav-item">Log-out</span>
+                  <p className='p-hover'>Log-out</p>
                 </Link>
               </div>
             </li>
