@@ -10,7 +10,7 @@ export const Serviceoff = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const querySnapshot = await getDocs(collection(db, "services"));
+            const querySnapshot = await getDocs(collection(db, "churchServices"));
             const schedules = [];
             const requests = [];
             const servicesStatus = {};
@@ -40,14 +40,14 @@ export const Serviceoff = () => {
         const isChecked = event.target.checked;
 
         if (isChecked) {
-            await setDoc(doc(db, "services", serviceName), { name: serviceName });
+            await setDoc(doc(db, "churchServices", serviceName), { name: serviceName });
             if (isSchedule(serviceName)) {
                 setActiveSchedules([...activeSchedules, serviceName]);
             } else {
                 setActiveRequests([...activeRequests, serviceName]);
             }
         } else {
-            await deleteDoc(doc(db, "services", serviceName));
+            await deleteDoc(doc(db, "churchServices", serviceName));
             if (isSchedule(serviceName)) {
                 setActiveSchedules(activeSchedules.filter(service => service !== serviceName));
             } else {

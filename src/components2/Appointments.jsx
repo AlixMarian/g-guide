@@ -18,51 +18,90 @@ export const Appointments = () => {
         handleCloseModal();
     };
 
-    const pendingAppointments = [1, 2, 3]; 
-    const confirmedAppointments = [1, 2, 3, 4, 5];
+    const pendingAppointments = [1]; 
+    const confirmedAppointments = [1];
 
     return (
         <>
             <div className="appoinmentsPage"></div>
             <h1>Appointments</h1>
+                <label htmlFor="dateSelect" className="form-label">
+                    Select a date: 
+                    <DatePicker 
+                        selected={selectedDate} 
+                        onChange={date => setSelectedDate(date)}
+                        showYearDropdown
+                    />
+                </label>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        Filter
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Date</a></li>
+                        <li><a class="dropdown-item" href="#">Purpose</a></li>
+                    </ul>
+                </div>
 
-            <div className="appointmentDate">
-                <label htmlFor="dateSelect" className="form-label"></label>
-                <DatePicker 
-                    selected={selectedDate} 
-                    onChange={date => setSelectedDate(date)}
-                    showYearDropdown
-                />
-            </div>
 
             <div className="appointmentsView">
                 <div className="pendingAppointments">
                     <h1>Pending Appointments</h1>
+                    <table className="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Time</th>
+                            <th scope="col">Period</th>
+                            <th scope="col">Purpose</th>
+                            <th scope="col">Requested by:</th>
+                        </tr>
+                    </thead>
+                    <tbody> 
                     {pendingAppointments.map((appointment, index) => (
-                        <div className="appointmentInfo" key={index}>
-                            <div className="appointmentInfo2">
-                                <p>Time:</p>
-                                <p>Purpose:</p>
-                                <p>Requested by:</p>
-                            </div>
-                            <div className="appointmentInfobtn">
-                                <button type="button" className="btn btn-success">Accept</button>
-                                <button type="button" className="btn btn-danger">Reject</button>
-                                <button type="button" className="btn btn-info" onClick={handleShowModal}>Send SMS</button>
-                            </div>  
-                        </div>
+                        <tr>
+                            <td>
+                                11/22/21
+                                {/*massSchedules.massDate*/}
+                            </td>
+                            <td>
+                                1:00
+                                {/*massSchedules.massDate*/}
+                            </td>
+                            <td>
+                                Pm
+                                {/*massSchedules.massDate*/}
+                            </td>
+                            <td>
+                                Burial
+                                {/*massSchedules.massDate*/}
+                            </td>
+                            <td>
+                                Navia Caspar
+                                {/*massSchedules.massDate*/}
+                            </td>
+                        </tr>
                     ))}
+
+                    </tbody>
+                    </table>
                 </div>
 
                 <div className="confirmedAppointments">
-                    <h1>Confirmed Appointments</h1>
-                    {confirmedAppointments.map((appointment, index) => (
-                        <div className="appointmentInfo" key={index}>
-                            <p>Time</p>
-                            <p>Name</p>
-                            <button type="button" className="btn btn-danger" style={{ width: "100px", marginLeft: "70%" }}>Delete</button>
-                        </div>
-                    ))}
+                    <h1>Completed Appointments</h1>
+                    <table className="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Time</th>
+                            <th scope="col">Purpose</th>
+                            <th scope="col">Requested by:</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                   
+                    </tbody>
+                    </table>
                 </div>
             </div>
 
