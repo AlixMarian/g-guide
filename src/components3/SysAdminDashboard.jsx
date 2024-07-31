@@ -1,52 +1,72 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate} from 'react-router-dom';
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { toast } from 'react-toastify';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '/backend/firebase';
 
 export const SysAdminDashboard = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [churchCount, setChurchCount] = useState(0);
+  const [usersCount, setUsersCount] = useState(0); 
 
-    const handlePendingChurch = () =>{
-        navigate('/pending-church');
-    }
 
-    const handleSysAdminAccSttngs = () => {
-        navigate('/sys-account');
+  useEffect(() => {
+      const auth = getAuth();
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log("User signed in:", user);
+        } else {
+          console.log("No user signed in.");
+          navigate('/login');
+        }
+      });
+  }, [navigate]);
+
+  useEffect(() => {
+      const fetchChurchCount = async () => {
+          try {
+              const churchCollection = collection(db, 'church');
+              const churchSnapshot = await getDocs(churchCollection);
+              setChurchCount(churchSnapshot.size);
+          } catch (error) {
+              console.error("Error fetching church count:", error);
+          }
       };
 
-    useEffect(() => {
-        const auth = getAuth();
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            console.log("User signed in:", user);
-          } else {
-            console.log("No user signed in.");
-            navigate('/login');
-          }
-        });
-    }, [navigate]);
-
-    const handleLogout = () => {
-        const auth = getAuth();
-        signOut(auth)
-          .then(() => {
-            toast.success("Sign Out Sucessfull");
-            navigate('/login');
-          })
-          .catch((error) => {
-            toast.error(error.message);
-          });
+      const fetchUsersCount = async () => {
+        try {
+            const usersCollection = collection(db, 'users');
+            const usersSnapshot = await getDocs(usersCollection);
+            setUsersCount(usersSnapshot.size);
+        } catch (error) {
+            console.error("Error fetching users count:", error);
+        }
     };
+      fetchChurchCount();
+      fetchUsersCount();
+  }, []);
+
+
+    
 
 
     return (
-        <div>
-            SysAdminDashboard
-
-            <button type="button" className="btn btn-primary" onClick={handlePendingChurch}>Pending Churches</button>
-            <button type="button" className="btn btn-success" onClick={handleSysAdminAccSttngs}>Admin Account Settings</button>
-            <button type="button" className="btn btn-danger" onClick={handleLogout}>Logout</button>
+      <div>
+      <h3>Admin Dashboard</h3>
+        <div className='dashboard-container'>
+            <div className='church-total'>
+              <br></br>
+            Total Number of Churches
+              <div className='churchCount'>{churchCount}</div>
+            </div>
+            <div className='users-total'>
+              <br></br>
+            Total Number of Users
+              <div className='usersCount'>{usersCount}</div>
+            </div>
+        
         </div>
+      </div>
 
     )
 }

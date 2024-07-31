@@ -21,6 +21,12 @@ export const Appointments = () => {
     const pendingAppointments = [1]; 
     const confirmedAppointments = [1];
 
+    const formatDate = (date) => {
+        if (!date) return '';
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString(undefined, options);
+    };
+
     return (
         <>
             <div className="appoinmentsPage"></div>
@@ -33,18 +39,21 @@ export const Appointments = () => {
                         showYearDropdown
                     />
                 </label>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <div className="btn-group">
+                    <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         Filter
                     </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Date</a></li>
-                        <li><a class="dropdown-item" href="#">Purpose</a></li>
+                    <ul className="dropdown-menu">
+                        <li><a className="dropdown-item" href="#">Date</a></li>
+                        <li><a className="dropdown-item" href="#">Purpose</a></li>
                     </ul>
                 </div>
 
 
             <div className="appointmentsView">
+                <div className="slots">
+                   <h1>{selectedDate ? ` ${formatDate(selectedDate)}` : 'No date selected'}</h1> 
+                </div>                
                 <div className="pendingAppointments">
                     <h1>Pending Appointments</h1>
                     <table className="table">

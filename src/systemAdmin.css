@@ -109,6 +109,39 @@
   display: none;
 }
 
+.p-hover {
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 2px;
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 10px; 
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.sidebar .hover-button:hover .p-hover {  
+/* .sidebar.collapsed */
+  visibility: visible;
+  opacity: 1;
+}
+
+
+.slots {
+  border-radius: 0.7rem;
+  margin-top: 2%;
+  margin: 10px;
+  height: 15rem;
+  border: 1px solid black; 
+  padding: 30px;
+  font-size: 18px;
+}
 
 
 /* account settings */
@@ -141,5 +174,31 @@
   
   .sysAdminAccsettings button {
     width: 150px;
+  }
+
+  .dashboard-container {
+    display: flex;
+    margin-top: 2rem;
+    justify-content: center;
+    align-items: center;
+    gap: 5rem;
+  }
+  
+  .church-total, .users-total {
+    border-radius: 2rem;
+    width: 20rem;
+    height: 20rem;
+    border: 2px solid black; 
+    padding: 20px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 18px;
+  }
+
+  .churchCount, .usersCount {
+    text-align: center;
+    margin-top: 1rem;
+    font-weight: 900;
+    font-size: 100px;
   }
   
