@@ -85,8 +85,8 @@ export const ChurchHomepageMassSchedule = () => {
             <th>Day</th>
             <th>Time</th>
             <th>Language</th>
-            <th>Date</th>
             <th>Presiding Priest</th>
+            <th>Mass Type</th>
           </tr>
         </thead>
         <tbody>
@@ -95,8 +95,8 @@ export const ChurchHomepageMassSchedule = () => {
               <td>{schedule.massDate}</td>
               <td>{schedule.massTime}</td>
               <td>{schedule.massLanguage}</td>
-              <td>{schedule.massDate}</td>
               <td>{schedule.presidingPriest}</td>
+              <td>{schedule.massType}</td>
             </tr>
           ))}
         </tbody>
@@ -116,8 +116,8 @@ export const ChurchHomepageMassSchedule = () => {
             <th>Day</th>
             <th>Time</th>
             <th>Language</th>
-            <th>Date</th>
             <th>Presiding Priest</th>
+            <th>Mass Type</th>
           </tr>
         </thead>
         <tbody>
@@ -126,8 +126,8 @@ export const ChurchHomepageMassSchedule = () => {
               <td>{schedule.massDate}</td>
               <td>{schedule.massTime}</td>
               <td>{schedule.massLanguage}</td>
-              <td>{schedule.massDate}</td>
               <td>{schedule.presidingPriest}</td>
+              <td>{schedule.massType}</td>
             </tr>
           ))}
         </tbody>

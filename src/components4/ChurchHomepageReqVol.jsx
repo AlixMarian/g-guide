@@ -53,7 +53,7 @@ export const ChurchHomepageReqVol = () => {
                 </small><br />
                 <p>-----------------</p>
                 <p className="card-text">
-                  {`Event: ${post.event}`}
+                  <strong>{`Event: ${post.event}`}</strong>
                 </p>
                 <p className="card-text">{post.content}</p>
               </div>
@@ -64,7 +64,7 @@ export const ChurchHomepageReqVol = () => {
       
       <br/>
       <h2>Completed</h2>
-      <p>We would like to extend our gratitude to the participants.</p>
+      
       <div className='col-12 col-lg-12'>
       {archivedPosts.length === 0 ? (
           <div className="card mb-3 alert alert-info">
@@ -74,7 +74,9 @@ export const ChurchHomepageReqVol = () => {
           </div>
         ) : (
           archivedPosts.map((post) => (
-            <div className="card mb-3" key={post.id}>
+            <div key={post.id}>
+              <p><em>God is not unjust; he will not forget your work and the love you have shown him as you have helped his people and continue to help them.</em> - Hebrews 6:10</p>
+              <div className="card mb-3" >
               <div className="card-body">
                 <h5 className="card-title">{post.title}</h5>
                 <small className="text-muted">
@@ -85,10 +87,11 @@ export const ChurchHomepageReqVol = () => {
                 </small><br />
                 <p>-----------------</p>
                 <p className="card-text">
-                  {`Event: ${post.event}`}
+                  <strong>{`Event: ${post.event}`}</strong>
                 </p>
                 <p className="card-text">{post.content}</p>
               </div>
+            </div>
             </div>
           ))
         )}
