@@ -79,35 +79,7 @@ export const Layout = () => {
       });
   };
 
-  const handleSEA = () => {
-    navigate('/SEA');
-  };
-
-  const handleAppointments = () => {
-    navigate('/Appointments');
-  };
-
-  const handleChurchInfo = () => {
-    navigate('/ChurchInfo');
-  };
-
-  const handleListofPriest = () => {
-    navigate('/ListofPriest');
-  };
-
-  const handleServiceOffered = () => {
-    navigate('/ServiceOffered');
-  };
-
-  const handleRequestforVolunteer = () => {
-    navigate('/RequestforVolunteer');
-  };
-
-  const handleAccountSettings = () => {
-    navigate('/AccountSettings');
-  };
-
-
+  
   return (
     <>
       <div className="sidebar" ref={sidebarRef}>
@@ -130,7 +102,7 @@ export const Layout = () => {
           </div>
         </div>
         <ul>
-            <li onClick={handleSEA} style={{ cursor: 'pointer' }}>
+            <li style={{ cursor: 'pointer' }}>
             <Link to="/SEA" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
@@ -143,7 +115,7 @@ export const Layout = () => {
               <span className="nav-item">Schedule</span>
             </Link>
           </li>
-          <li onClick={handleAppointments} style={{ cursor: 'pointer' }}>
+          <li style={{ cursor: 'pointer' }}>
             <Link to="/Appointments" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 48 48">
@@ -163,7 +135,7 @@ export const Layout = () => {
               <span className="nav-item">Appointments</span>
             </Link>
           </li>
-          <li onClick={handleChurchInfo} style={{ cursor: 'pointer' }}>
+          <li style={{ cursor: 'pointer' }}>
             <Link to="/ChurchInfo" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
@@ -173,7 +145,7 @@ export const Layout = () => {
               <span className="nav-item">Church Information</span>
             </Link>
           </li>
-          <li onClick={handleListofPriest} style={{ cursor: 'pointer' }}>
+          <li style={{ cursor: 'pointer' }}>
             <Link to="/ListofPriest" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 256 256">
@@ -183,7 +155,7 @@ export const Layout = () => {
               <span className="nav-item">List of Priest</span>
             </Link>
           </li>
-          <li onClick={handleServiceOffered} style={{ cursor: 'pointer' }}>
+          <li style={{ cursor: 'pointer' }}>
             <Link to="/ServiceOffered" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" className="bi bi-calendar-check-fill" viewBox="0 0 24 24">
@@ -193,7 +165,7 @@ export const Layout = () => {
               <span className="nav-item">Services Offered</span>
             </Link>
           </li>
-          <li onClick={handleRequestforVolunteer} style={{ cursor: 'pointer' }}>
+          <li style={{ cursor: 'pointer' }}>
             <Link to="/RequestforVolunteer" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" className="bi bi-calendar-check-fill" viewBox="0 0 24 24">
@@ -203,7 +175,7 @@ export const Layout = () => {
               <span className="nav-item">Request Volunteers</span>
             </Link>
           </li>
-          <li onClick={handleAccountSettings} style={{ cursor: 'pointer' }}>
+          <li style={{ cursor: 'pointer' }}>
             <Link to="/AccountSettings" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" className="bi bi-calendar-check-fill" viewBox="0 0 24 24">

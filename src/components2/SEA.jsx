@@ -279,8 +279,7 @@ export const SEA = () => {
               ))}
             </select>
           </div>
-          <div className="col-md-6">
-            <label className="form-label d-block">Confirm</label>
+          <div id='buttons' className="col-md-6">
             <div className="btn-group" role="group">
               <button type="button" className="btn btn-success" onClick={editingMass ? onUpdateMass : onSubmitMass}>
                 {editingMass ? 'Confirm changes' : 'Submit'}
