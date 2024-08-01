@@ -1,6 +1,7 @@
 
 
 /* ---------------------------------------------------------------------------------------------------- */
+
 .main-content {
     position: relative;
     min-height: 100vh;
@@ -146,6 +147,11 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+.btn-success{
+  background-color: #36AE7C;
+}
+
+
 .user-img{
   height: 50px;
   width: 50px;
@@ -154,23 +160,25 @@ body {
   display: fixed;
 }
 
-.sidebar{
-  position: absolute;
-  top:0;
+body .sidebar {
+  position: fixed; 
+  top: 0;
   left: 0;
-  height: 155vh;
+  height: 100vh; 
   width: 80px;
-  background: #2b578c;
-  padding: .4rem .8rem;
+  background: #9bc3e4;
+  padding: 0.4rem 0.8rem;
   transition: all 0.5s ease;
   z-index: 100;
 }
 
+
 .sidebar.active{
   width: 270px;
+  
 }
 
-.sidebar #btn{
+ #btn{
   position: absolute;
   top: .2rem;
   left: 50%;
@@ -185,7 +193,7 @@ body {
   left: 90%;
 }
 
-.sidebar .top .logo{
+ .top .logo{
   color:white;
   display: flex;
   height: 50px;
@@ -199,12 +207,9 @@ body {
   opacity: 1;
 }
 
-.top i {
-  font-size: 2px;
-  margin-right: 1px;
-}
 
-.user{
+
+.user {
   display: flex;
   align-items: center;
   margin: 1px 0 ;
@@ -433,3 +438,6 @@ ul{
   padding: 30px;
   margin: 10px;
 }
+
+
+
