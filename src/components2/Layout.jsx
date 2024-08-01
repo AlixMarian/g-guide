@@ -31,7 +31,7 @@ export const Layout = () => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     const btn = btnRef.current;
@@ -79,6 +79,35 @@ export const Layout = () => {
       });
   };
 
+  const handleSEA = () => {
+    navigate('/SEA');
+  };
+
+  const handleAppointment = () => {
+    navigate('/Appointments');
+  };
+
+  const handleChurchInfo = () => {
+    navigate('/ChurchInfo');
+  };
+
+  const handleListofPriest = () => {
+    navigate('/ListofPriest');
+  };
+
+  const handleServiceOffered = () => {
+    navigate('/ServiceOffered');
+  };
+
+  const handleRequestforVolunteer = () => {
+    navigate('/RequestforVolunteer');
+  };
+
+  const handleAccountSettings = () => {
+    navigate('/AccountSettings');
+  };
+
+
   
   return (
     <>
@@ -102,7 +131,7 @@ export const Layout = () => {
           </div>
         </div>
         <ul>
-            <li style={{ cursor: 'pointer' }}>
+          <li className='hover-button' onClick={handleSEA} style={{ cursor: 'pointer' }}>
             <Link to="/SEA" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
@@ -113,9 +142,10 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">Schedule</span>
+              <p className='p-hover'>Schedule</p>
             </Link>
           </li>
-          <li style={{ cursor: 'pointer' }}>
+          <li className='hover-button' onClick={handleAppointment} style={{ cursor: 'pointer' }}>
             <Link to="/Appointments" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 48 48">
@@ -133,9 +163,10 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">Appointments</span>
+              <p className='p-hover'>Appointments</p>
             </Link>
           </li>
-          <li style={{ cursor: 'pointer' }}>
+          <li className='hover-button' onClick={handleChurchInfo} style={{ cursor: 'pointer' }}>
             <Link to="/ChurchInfo" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
@@ -143,9 +174,10 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">Church Information</span>
+              <p className='p-hover'>Church Information</p>
             </Link>
           </li>
-          <li style={{ cursor: 'pointer' }}>
+          <li className='hover-button' onClick={handleListofPriest} style={{ cursor: 'pointer' }}>
             <Link to="/ListofPriest" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 256 256">
@@ -153,9 +185,10 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">List of Priest</span>
+              <p className='p-hover'>List of Priest</p>
             </Link>
           </li>
-          <li style={{ cursor: 'pointer' }}>
+          <li className='hover-button' onClick={handleServiceOffered} style={{ cursor: 'pointer' }}>
             <Link to="/ServiceOffered" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" className="bi bi-calendar-check-fill" viewBox="0 0 24 24">
@@ -163,9 +196,10 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">Services Offered</span>
+              <p className='p-hover'>Services Offered</p>
             </Link>
           </li>
-          <li style={{ cursor: 'pointer' }}>
+          <li className='hover-button' onClick={handleRequestforVolunteer} style={{ cursor: 'pointer' }}>
             <Link to="/RequestforVolunteer" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" className="bi bi-calendar-check-fill" viewBox="0 0 24 24">
@@ -173,9 +207,10 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">Request Volunteers</span>
+              <p className='p-hover'>Request Volunteers</p>
             </Link>
           </li>
-          <li style={{ cursor: 'pointer' }}>
+          <li className='hover-button' onClick={handleAccountSettings} style={{ cursor: 'pointer' }}>
             <Link to="/AccountSettings" className="sidebar-button">
               <i className="bx bxs-grid-alt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" className="bi bi-calendar-check-fill" viewBox="0 0 24 24">
@@ -183,9 +218,10 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">Account Settings</span>
+              <p className='p-hover'>Account Settings</p>
             </Link>
           </li>
-          <li onClick={handleLogout} style={{ cursor: 'pointer' }}>
+          <li className='hover-button' onClick={handleLogout} style={{ cursor: 'pointer' }}>
               <Link to="/" className="logout-button sidebar-button">
                 <i className="bx bxs-grid-alt">
                   <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
@@ -196,6 +232,7 @@ export const Layout = () => {
                   </svg>
                 </i>
                 <span className="nav-item">Log-out</span>
+                <p className='p-hover'>Log-out</p>
               </Link>
           </li>
         </ul>

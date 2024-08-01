@@ -212,8 +212,10 @@ export const SEA = () => {
                 <td>{massSchedules.presidingPriest}</td>
                 <td>
                   <form>
-                    <button type="button" className="btn btn-secondary" onClick={() => handleEditMassSchedule(massSchedules)}>Edit</button>
-                    <button type="button" className="btn btn-danger" onClick={() => handleDeleteMassSchedule(massSchedules.id)}>Delete</button>
+                    <div className="btn-group" role="group">
+                      <button type="button" className="btn btn-secondary" onClick={() => handleEditMassSchedule(massSchedules)}>Edit</button>
+                      <button type="button" className="btn btn-danger" onClick={() => handleDeleteMassSchedule(massSchedules.id)}>Delete</button>
+                    </div>
                   </form>
                 </td>
               </tr>
@@ -320,8 +322,10 @@ export const SEA = () => {
                   </td>
                   <td>
                     <form>
-                      <button type="button" className="btn btn-secondary" onClick={() => handleEditEventSchedule(events)}>Edit</button>
-                      <button type="button" className="btn btn-danger" onClick={() => handleDeleteEventSchedule(events.id)}>Delete</button>
+                      <div className="btn-group" role="group">
+                        <button type="button" className="btn btn-secondary" onClick={() => handleEditEventSchedule(events)}>Edit</button>
+                        <button type="button" className="btn btn-danger" onClick={() => handleDeleteEventSchedule(events.id)}>Delete</button>
+                      </div>
                     </form>
                   </td>
                 </tr>
@@ -393,8 +397,10 @@ export const SEA = () => {
                 <td>{announcement.uploadDate.toDate().toLocaleDateString()}</td>
                 <td>
                   <form>
-                    <button type="button" className="btn btn-secondary" onClick={() => handleEditAnnouncement(announcement)}>Edit</button>
-                    <button type="button" className="btn btn-danger" onClick={() => handleDeleteAnnouncement(announcement.id)}>Delete</button>
+                    <div className="btn-group" role="group">
+                      <button type="button" className="btn btn-secondary" onClick={() => handleEditAnnouncement(announcement)}>Edit</button>
+                      <button type="button" className="btn btn-danger" onClick={() => handleDeleteAnnouncement(announcement.id)}>Delete</button>
+                    </div>
                   </form>
                 </td>
               </tr>

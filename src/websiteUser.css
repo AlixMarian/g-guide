@@ -115,7 +115,19 @@
     /* background-color: rgb(217, 216, 216); */
   }
   
+  .qr-image {
+    justify-content: center;
+    max-width: 400px;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+  }
   
+  .qr-code {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   
 
   /* ============================================================================================================================ */

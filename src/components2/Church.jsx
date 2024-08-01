@@ -222,8 +222,10 @@ export const Church = () => {
                     
                     <div className="announcement-bttn">
                     <br/>
+                      <div className="btn-group" role="group">
                         <button type="submit" className="btn btn-success" onSubmit={handleSubmitNewChurchInfo}>Confirm Change</button>
                         <button type="reset" className="btn btn-danger">Clear</button>
+                        </div>
                     </div>
                 </form>
             </div>
