@@ -7,18 +7,26 @@ import { db } from '/backend/firebase';
 export const ChurchHomepageInfo = () => {
   const { churchId } = useParams();
   const [churchData, setChurchData] = useState(null);
+  const [services, setServices] = useState([]);
 
   useEffect(() => {
     const fetchChurchData = async () => {
-      const churchDoc = await getDoc(doc(db, 'church', churchId));
-      if (churchDoc.exists()) {
-        setChurchData(churchDoc.data());
-      } else {
-        console.error('Church not found');
+      const docRef = doc(db, 'church', churchId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setChurchData(docSnap.data());
+      }
+    };
+
+    const fetchServices = async () => {
+      const servicesDoc = await getDoc(doc(db, 'services', churchId));
+      if (servicesDoc.exists()) {
+        setServices(servicesDoc.data().activeServices || []);
       }
     };
 
     fetchChurchData();
+    fetchServices();
   }, [churchId]);
 
   const convertTo12HourFormat = (time) => {
@@ -60,6 +68,29 @@ export const ChurchHomepageInfo = () => {
         <div className='card-body'>
         <h3 className='card-title'>Church History</h3>
         <p>{churchData.churchHistory}</p>
+        </div>
+      </div>
+
+      <br/>
+
+      <div className="churchServices card">
+        <div className='card-body'>
+          <h3 className='card-title'>Services we offer</h3>
+          {services.length > 0 ? (
+                services.map((service, index) => (
+                  <div className="card mb-3" key={index}>
+                    <div className="card-body">
+                      <h5 className="card-title">{service}</h5>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="card mb-3">
+                  <div className="card-body">
+                    <h5 className="card-title">No Services Available</h5>
+                  </div>
+                </div>
+              )}
         </div>
       </div>
     </div>
