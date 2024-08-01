@@ -126,11 +126,16 @@
   transition: opacity 0.3s;
 }
 
-.sidebar .hover-button:hover .p-hover {  
-/* .sidebar.collapsed */
+.sidebar.collapsed .hover-button:hover .p-hover {
   visibility: visible;
   opacity: 1;
 }
+
+.sidebar.active .hover-button:hover .p-hover {
+  visibility: hidden;
+  opacity: 0;
+}
+
 
 
 .slots {

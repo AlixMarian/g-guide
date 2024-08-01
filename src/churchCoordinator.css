@@ -337,16 +337,21 @@ ul{
   left: 50%;
   top: 50%;
   transform: translateY(-50%);
-  margin-left: 10px; 
+  margin-left: 10px;
   opacity: 0;
   transition: opacity 0.3s;
 }
 
-.sidebar .hover-button:hover .p-hover {  
-  /* .sidebar.collapsed */
+.sidebar.collapsed .hover-button:hover .p-hover {
   visibility: visible;
   opacity: 1;
 }
+
+.sidebar.active .hover-button:hover .p-hover {
+  visibility: hidden;
+  opacity: 0;
+}
+
   
 
 .logout-button {

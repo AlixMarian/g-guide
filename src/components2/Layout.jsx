@@ -71,7 +71,7 @@ export const Layout = () => {
     const auth = getAuth();
     signOut(auth)
       .then(() => {
-        toast.success("Sign Out Sucessfull");
+        toast.success("Sign Out Successful");
         navigate('/login');
       })
       .catch((error) => {
@@ -107,8 +107,6 @@ export const Layout = () => {
     navigate('/AccountSettings');
   };
 
-
-  
   return (
     <>
       <div className="sidebar" ref={sidebarRef}>
