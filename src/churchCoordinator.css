@@ -55,7 +55,7 @@
 .pendingAppointments{
   border: 1px solid black;
   border-radius: 10px;
-  padding: 30px;
+  padding: 20px;
   margin: 10px;
   
 }
@@ -85,6 +85,33 @@
 .sms-content textarea {
   border-color: rgb(53, 53, 53);
 }
+
+.serviceFiltering{
+  display: block;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
+.appointmentsView{
+  display: inline-flex;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 40px;
+  margin: 10px;
+  width: 99%;
+  justify-content: space-evenly;
+}
+
+.apppointmentCalendar{
+  display: block;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
 
   /*Church Info*/
 .churchUploads{
