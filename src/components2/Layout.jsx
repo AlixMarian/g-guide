@@ -71,7 +71,7 @@ export const Layout = () => {
     const auth = getAuth();
     signOut(auth)
       .then(() => {
-        toast.success("Sign Out Sucessfull");
+        toast.success("Sign Out Successful");
         navigate('/login');
       })
       .catch((error) => {
@@ -107,8 +107,6 @@ export const Layout = () => {
     navigate('/AccountSettings');
   };
 
-
-  
   return (
     <>
       <div className="sidebar" ref={sidebarRef}>
@@ -142,6 +140,7 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">Schedule</span>
+              <p className='p-hover'>Schedule</p>
             </Link>
           </li>
           <li className='hover-button' onClick={handleAppointment} style={{ cursor: 'pointer' }}>
@@ -162,7 +161,7 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">Appointments</span>
-   
+              <p className='p-hover'>Appointments</p>
             </Link>
           </li>
           <li className='hover-button' onClick={handleChurchInfo} style={{ cursor: 'pointer' }}>
@@ -173,7 +172,7 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">Church Information</span>
-
+              <p className='p-hover'>Church Information</p>
             </Link>
           </li>
           <li className='hover-button' onClick={handleListofPriest} style={{ cursor: 'pointer' }}>
@@ -184,7 +183,7 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">List of Priest</span>
-
+              <p className='p-hover'>List of Priest</p>
             </Link>
           </li>
           <li className='hover-button' onClick={handleServiceOffered} style={{ cursor: 'pointer' }}>
@@ -195,7 +194,7 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">Services Offered</span>
-
+              <p className='p-hover'>Services Offered</p>
             </Link>
           </li>
           <li className='hover-button' onClick={handleRequestforVolunteer} style={{ cursor: 'pointer' }}>
@@ -206,7 +205,7 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">Request Volunteers</span>
-
+              <p className='p-hover'>Request Volunteers</p>
             </Link>
           </li>
           <li className='hover-button' onClick={handleAccountSettings} style={{ cursor: 'pointer' }}>
@@ -217,7 +216,7 @@ export const Layout = () => {
                 </svg>
               </i>
               <span className="nav-item">Account Settings</span>
-
+              <p className='p-hover'>Account Settings</p>
             </Link>
           </li>
           <li className='hover-button' onClick={handleLogout} style={{ cursor: 'pointer' }}>
@@ -231,7 +230,7 @@ export const Layout = () => {
                   </svg>
                 </i>
                 <span className="nav-item">Log-out</span>
-
+                <p className='p-hover'>Log-out</p>
               </Link>
           </li>
         </ul>

@@ -352,6 +352,34 @@ ul{
   justify-content: space-between;
 }
 
+.p-hover {
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 2px;
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 10px; 
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.sidebar.collapsed .hover-button:hover .p-hover {
+  visibility: visible;
+  opacity: 1;
+}
+
+.sidebar.active .hover-button:hover .p-hover {
+  visibility: hidden;
+  opacity: 0;
+}
+
+  
 
 .logout-button {
 
