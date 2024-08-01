@@ -352,7 +352,6 @@ ul{
   justify-content: space-between;
 }
 
-<<<<<<< HEAD
 .p-hover {
   visibility: hidden;
   background-color: black;
@@ -365,7 +364,7 @@ ul{
   left: 50%;
   top: 50%;
   transform: translateY(-50%);
-  margin-left: 10px;
+  margin-left: 10px; 
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -381,8 +380,6 @@ ul{
 }
 
   
-=======
->>>>>>> 610d10f3444f553975d69452390c3650e3807f1d
 
 .logout-button {
 
