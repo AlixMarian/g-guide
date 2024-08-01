@@ -3,27 +3,26 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../websiteUser.css';
 import { db } from '/backend/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 
-
-
-export const ChurchHomepageBook = () => {
+export const ChurchHomepageBook = ({ selectedChurchId }) => {
   const [startDate, setStartDate] = useState(new Date());
   const [selectedOption, setSelectedOption] = useState('');
   const [churchQRDetail, setChurchQRDetail] = useState(null);
   const [subOption, setSubOption] = useState('');
 
-
   useEffect(() => {
     const fetchChurchQRDetail = async () => {
-      try {
-        const churchCollection = collection(db, 'church');
-        const churchSnapshot = await getDocs(churchCollection);
-        const churchList = churchSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      if (!selectedChurchId) return;
 
-        // Assuming you want the QR code of the first church in the list
-        if (churchList.length > 0) {
-          setChurchQRDetail(churchList[0].churchQRDetail);
+      try {
+        const churchDocRef = doc(db, 'church', selectedChurchId);
+        const churchSnapshot = await getDoc(churchDocRef);
+
+        if (churchSnapshot.exists()) {
+          setChurchQRDetail(churchSnapshot.data().churchQRDetail);
+        } else {
+          console.error('No such document!');
         }
       } catch (error) {
         console.error('Error fetching church QR detail:', error);
@@ -31,12 +30,11 @@ export const ChurchHomepageBook = () => {
     };
 
     fetchChurchQRDetail();
-  }, []);
+  }, [selectedChurchId]);
 
   const handleSelectChange = (e) => {
     setSelectedOption(e.target.value);
     setSubOption(''); // Reset subOption when main option changes
-
   };
 
   const handleSubOptionChange = (event) => {
@@ -178,3 +176,4 @@ export const ChurchHomepageBook = () => {
 };
 
 export default ChurchHomepageBook;
+

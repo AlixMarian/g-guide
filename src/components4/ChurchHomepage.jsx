@@ -17,6 +17,7 @@ const ChurchHomepage = () => {
   const [photos, setPhotos] = useState([]);
   const [activeComponent, setActiveComponent] = useState('info');
 
+
   useEffect(() => {
     const fetchChurch = async () => {
       if (churchId) {
@@ -76,7 +77,7 @@ const ChurchHomepage = () => {
       case 'massSchedule':
         return <ChurchHomepageMassSchedule />;
       case 'book':
-        return <ChurchHomepageBook />;
+        return <ChurchHomepageBook selectedChurchId={churchId} />;
       case 'reqVol':
         return <ChurchHomepageReqVol />;
       default:
