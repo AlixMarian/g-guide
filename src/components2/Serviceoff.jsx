@@ -1,37 +1,55 @@
 import { useState, useEffect } from 'react';
 import { db } from '/backend/firebase';
-import { collection, getDocs, setDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import '../churchCoordinator.css';
 
 export const Serviceoff = () => {
     const [activeSchedules, setActiveSchedules] = useState([]);
     const [activeRequests, setActiveRequests] = useState([]);
     const [servicesState, setServicesState] = useState({});
+    const [userID, setUserID] = useState(null);
+
+    const auth = getAuth();
 
     useEffect(() => {
-        const fetchData = async () => {
-            const querySnapshot = await getDocs(collection(db, "churchServices"));
-            const schedules = [];
-            const requests = [];
-            const servicesStatus = {};
-            querySnapshot.forEach((doc) => {
-                const serviceData = doc.data().name;
-                servicesStatus[serviceData] = true; // Mark the service as active
-                if (isSchedule(serviceData)) {
-                    schedules.push(serviceData);
-                } else {
-                    requests.push(serviceData);
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUserID(user.uid);
+            } else {
+                setUserID(null);
+            }
+        });
+    }, [auth]);
+
+    useEffect(() => {
+        if (userID) {
+            const fetchData = async () => {
+                const userDoc = await getDoc(doc(db, "services", userID));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    const servicesStatus = {};
+                    const schedules = [];
+                    const requests = [];
+                    (userData.activeServices || []).forEach(serviceName => {
+                        servicesStatus[serviceName] = true;
+                        if (isSchedule(serviceName)) {
+                            schedules.push(serviceName);
+                        } else {
+                            requests.push(serviceName);
+                        }
+                    });
+                    setActiveSchedules(schedules);
+                    setActiveRequests(requests);
+                    setServicesState(servicesStatus);
                 }
-            });
-            setActiveSchedules(schedules);
-            setActiveRequests(requests);
-            setServicesState(servicesStatus);
-        };
-        fetchData();
-    }, []);
+            };
+            fetchData();
+        }
+    }, [userID]);
 
     const isSchedule = (serviceName) => {
-        const schedules = ["Marriages", "Baptism", "Confirmation", "Burials",];
+        const schedules = ["Marriages", "Baptism", "Confirmation", "Burials"];
         return schedules.includes(serviceName);
     };
 
@@ -39,26 +57,26 @@ export const Serviceoff = () => {
         const serviceName = event.target.name;
         const isChecked = event.target.checked;
 
+        let updatedServices = { ...servicesState, [serviceName]: isChecked };
+        let activeServices = Object.keys(updatedServices).filter(service => updatedServices[service]);
+
+        await setDoc(doc(db, "services", userID), { activeServices }, { merge: true });
+
+        setServicesState(updatedServices);
+
         if (isChecked) {
-            await setDoc(doc(db, "churchServices", serviceName), { name: serviceName });
             if (isSchedule(serviceName)) {
                 setActiveSchedules([...activeSchedules, serviceName]);
             } else {
                 setActiveRequests([...activeRequests, serviceName]);
             }
         } else {
-            await deleteDoc(doc(db, "churchServices", serviceName));
             if (isSchedule(serviceName)) {
                 setActiveSchedules(activeSchedules.filter(service => service !== serviceName));
             } else {
                 setActiveRequests(activeRequests.filter(service => service !== serviceName));
             }
         }
-
-        setServicesState(prevState => ({
-            ...prevState,
-            [serviceName]: isChecked,
-        }));
     };
 
     return (
