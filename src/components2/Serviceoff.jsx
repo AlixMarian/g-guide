@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from '/backend/firebase';
-import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import '../churchCoordinator.css';
 
@@ -29,15 +29,13 @@ export const Serviceoff = () => {
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     const servicesStatus = {};
-                    const schedules = [];
-                    const requests = [];
-                    (userData.activeServices || []).forEach(serviceName => {
+                    const schedules = userData.activeSchedules || [];
+                    const requests = userData.activeRequests || [];
+                    schedules.forEach(serviceName => {
                         servicesStatus[serviceName] = true;
-                        if (isSchedule(serviceName)) {
-                            schedules.push(serviceName);
-                        } else {
-                            requests.push(serviceName);
-                        }
+                    });
+                    requests.forEach(serviceName => {
+                        servicesStatus[serviceName] = true;
                     });
                     setActiveSchedules(schedules);
                     setActiveRequests(requests);
@@ -57,26 +55,25 @@ export const Serviceoff = () => {
         const serviceName = event.target.name;
         const isChecked = event.target.checked;
 
-        let updatedServices = { ...servicesState, [serviceName]: isChecked };
-        let activeServices = Object.keys(updatedServices).filter(service => updatedServices[service]);
+        let updatedServicesState = { ...servicesState, [serviceName]: isChecked };
+        let activeSchedules = [];
+        let activeRequests = [];
 
-        await setDoc(doc(db, "services", userID), { activeServices }, { merge: true });
-
-        setServicesState(updatedServices);
-
-        if (isChecked) {
-            if (isSchedule(serviceName)) {
-                setActiveSchedules([...activeSchedules, serviceName]);
-            } else {
-                setActiveRequests([...activeRequests, serviceName]);
+        Object.keys(updatedServicesState).forEach(service => {
+            if (updatedServicesState[service]) {
+                if (isSchedule(service)) {
+                    activeSchedules.push(service);
+                } else {
+                    activeRequests.push(service);
+                }
             }
-        } else {
-            if (isSchedule(serviceName)) {
-                setActiveSchedules(activeSchedules.filter(service => service !== serviceName));
-            } else {
-                setActiveRequests(activeRequests.filter(service => service !== serviceName));
-            }
-        }
+        });
+
+        await setDoc(doc(db, "services", userID), { activeSchedules, activeRequests }, { merge: true });
+
+        setServicesState(updatedServicesState);
+        setActiveSchedules(activeSchedules);
+        setActiveRequests(activeRequests);
     };
 
     return (

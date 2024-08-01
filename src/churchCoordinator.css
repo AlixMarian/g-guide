@@ -112,6 +112,24 @@
   margin: 10px;
 }
 
+.calendar2{
+  display: flex;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+  width: 98%;
+  justify-content: space-evenly;
+}
+
+.slots2{
+  display: block;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
 
   /*Church Info*/
 .churchUploads{
@@ -128,6 +146,10 @@
   border-radius: 10px;
   padding: 15px;
   margin: 10px;
+}
+
+.titleFilter{
+  display: flex;
 }
 
 /*services Offered*/
@@ -218,6 +240,11 @@ body .sidebar {
 
 .sidebar.active #btn{
   left: 90%;
+}
+
+.top i {
+  font-size: 2px;
+  margin-right: 1px;
 }
 
  .top .logo{
@@ -325,29 +352,6 @@ ul{
   justify-content: space-between;
 }
 
-.p-hover {
-  visibility: hidden;
-  background-color: black;
-  color: #fff;
-  text-align: center;
-  border-radius: 5px;
-  padding: 2px;
-  position: absolute;
-  z-index: 1;
-  left: 50%;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-left: 10px; 
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.sidebar .hover-button:hover .p-hover {  
-  /* .sidebar.collapsed */
-  visibility: visible;
-  opacity: 1;
-}
-  
 
 .logout-button {
 
