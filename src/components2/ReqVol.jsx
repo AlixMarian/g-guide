@@ -20,6 +20,8 @@ export const ReqVol = () => {
   const [endDateInput, setEndDateInput] = useState('');
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState('');
+  const [editing, setEditing] = useState(false);
+  const [currentPostId, setCurrentPostId] = useState(null);
 
   const handleTitleChange = (e) => setReqVolunteerTitleInput(e.target.value);
   const handleBodyChange = (e) => setReqVolunteerBodyInput(e.target.value);
@@ -30,6 +32,7 @@ export const ReqVol = () => {
 
   const auth = getAuth();
   const user = auth.currentUser;
+
 
   const fetchEvents = async (user) => {
     const q = query(collection(db, 'events'), where('creatorId', '==', user.uid));
@@ -74,31 +77,58 @@ export const ReqVol = () => {
 
   const handlePostSubmit = async (e) => {
     e.preventDefault();
-    if (user) {
+    
+    
+    const startDate = new Date(startDateInput);
+    const endDate = new Date(endDateInput);
+    
+    
+    const startDateTimestamp = Timestamp.fromDate(startDate);
+    const endDateTimestamp = Timestamp.fromDate(endDate);
+  
+    
+    if (editing) {
       try {
-        await addDoc(collection(db, 'requestVolunteers'), {
+        await updateDoc(doc(db, 'requestVolunteers', currentPostId), {
           title: reqVolunteerTitleInput,
           content: reqVolunteerBodyInput,
-          uploader: user.uid,
-          uploadDate: Timestamp.now(),
-          startDate: Timestamp.fromDate(new Date(startDateInput)),
-          endDate: Timestamp.fromDate(new Date(endDateInput)),
           event: selectedEvent,
-          status: 'ongoing',
+          startDate: startDateTimestamp,
+          endDate: endDateTimestamp,
+          
         });
-        toast.success('Volunteer request posted successfully');
-        setReqVolunteerTitleInput('');
-        setReqVolunteerBodyInput('');
-        setStartDateInput('');
-        setEndDateInput('');
-        setSelectedEvent('');
+        toast.success('Post updated successfully');
       } catch (error) {
-        toast.error('Error posting volunteer request: ' + error.message);
+        toast.error('Error updating post: ' + error.message);
       }
     } else {
-      toast.error('No user signed in.');
+      
+      if (user) {
+        try {
+          await addDoc(collection(db, 'requestVolunteers'), {
+            title: reqVolunteerTitleInput,
+            content: reqVolunteerBodyInput,
+            uploader: user.uid,
+            uploadDate: Timestamp.now(),
+            startDate: Timestamp.fromDate(new Date(startDateInput)),
+            endDate: Timestamp.fromDate(new Date(endDateInput)),
+            event: selectedEvent,
+            status: 'ongoing',
+          });
+          toast.success('Volunteer request posted successfully');
+        } catch (error) {
+          toast.error('Error posting volunteer request: ' + error.message);
+        }
+      } else {
+        toast.error('No user signed in.');
+      }
     }
+  
+    
+    resetForm();
+    fetchPosts();
   };
+  
 
   const fetchPosts = async () => {
     const auth = getAuth();
@@ -129,6 +159,8 @@ export const ReqVol = () => {
       toast.error('Error deleting post: ' + error.message);
     }
   };
+
+  
 
   useEffect(() => {
     const auth = getAuth();
@@ -191,61 +223,69 @@ export const ReqVol = () => {
     }
   };
 
+  const handleEditPost = (post) => {
+    setReqVolunteerTitleInput(post.title);
+    setReqVolunteerBodyInput(post.content);
+    setSelectedEvent(post.event);
+  
+    
+    const startDate = post.startDate.toDate();
+    const endDate = post.endDate.toDate();
+    
+    
+    const startDateString = startDate.toISOString().split('T')[0];
+    const endDateString = endDate.toISOString().split('T')[0];
+    
+    setStartDateInput(startDateString);
+    setEndDateInput(endDateString);
+    
+    setEditing(true);
+    setCurrentPostId(post.id);
+  };
+  
+
+  const handleCancelEdit = () => {
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setReqVolunteerTitleInput('');
+    setReqVolunteerBodyInput('');
+    setSelectedEvent('');
+    setStartDateInput('');
+    setEndDateInput('');
+    setEditing(false);
+    setCurrentPostId(null);
+  };
+
 
   return (
     <div className='ReqAnnouncement'>
       <h1>Request for Volunteers</h1>
 
       <div className="createPost col-12 col-lg-12">
-        <h3>Create Post</h3>
+        <h3>{editing ? 'Edit Post' : 'Create Post'}</h3>
         <form onSubmit={handlePostSubmit}>
           <div className='titleArea col-md-12'>
             <label htmlFor="reqVolunteerTitle" className="form-label">Title</label>
-              <input
-              type="text"
-              className="form-control"
-              id="title"
-              value={reqVolunteerTitleInput}
-              onChange={handleTitleChange}
-              required
-            />
+              <input type="text" className="form-control" id="title" value={reqVolunteerTitleInput} onChange={handleTitleChange} required/>
             <br/>
           </div>
 
 
           <div className="mb-3">
-          <label htmlFor="startDate" className="form-label">Start Date</label>
-          <input
-            type="date"
-            className="form-control"
-            id="startDate"
-            value={startDateInput}
-            onChange={handleStartDateChange}
-            required
-          />
-        </div>
+            <label htmlFor="startDate" className="form-label">Start Date</label>
+            <input type="date" className="form-control" id="startDate" value={startDateInput} onChange={handleStartDateChange} required />
+          </div>
 
         <div className="mb-3">
           <label htmlFor="endDate" className="form-label">End Date</label>
-          <input
-            type="date"
-            className="form-control"
-            id="endDate"
-            value={endDateInput}
-            onChange={handleEndDateChange}
-            required
-          />
+          <input type="date" className="form-control" id="endDate" value={endDateInput} onChange={handleEndDateChange} required />
         </div>
 
         <div className="mb-3">
           <label htmlFor="event" className="form-label">Associate with Event</label>
-          <select
-            className="form-select"
-            id="event"
-            value={selectedEvent}
-            onChange={handleEventChange}
-            required
-          >
+          <select className="form-select" id="event" value={selectedEvent} onChange={handleEventChange} required>
             <option value="" disabled>Select an event</option>
             {events.map((event) => (
               <option key={event.id} value={event.eventName}>
@@ -257,23 +297,17 @@ export const ReqVol = () => {
 
           <div className='contentArea col-md-12'>
             <label htmlFor="reqVolunteerBody" className="form-label">Enter Content</label>
-              <textarea
-              className="form-control"
-              id="content"
-              rows="3"
-              value={reqVolunteerBodyInput}
-              onChange={handleBodyChange}
-              required
-            ></textarea>
+              <textarea className="form-control" id="content" rows="3" value={reqVolunteerBodyInput} onChange={handleBodyChange} required></textarea>
             <br/>
           </div>
 
           
 
-          <div className="buttonAreas col-md-12 d-grid gap-2 d-md-block">
-                <button type="submit" className="btn btn-success me-2">Create Post</button>
-                <button type="reset" className="btn btn-danger me-2">Clear</button>
-          </div>
+          <div className="d-flex justify-content-end gap-2">
+          <button type="submit" className="btn btn-success me-2">{editing ? 'Update Post' : 'Create Post'}</button>
+          {editing && <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancel</button>}
+          <button type="reset" className="btn btn-danger" onClick={resetForm}>Clear</button>
+        </div>
 
         </form>
       </div>
@@ -298,25 +332,13 @@ export const ReqVol = () => {
                 {`Event: ${post.event}`}
               </p>
               <p className="card-text">{post.content}</p>
-              <button
-                className="btn btn-danger"
-                onClick={() => handleDeletePost(post.id)}
-              >Delete Post</button>
+              <button className="btn btn-danger" onClick={() => handleDeletePost(post.id)}>Delete Post</button>
+              <button className="btn btn-info ms-2" onClick={() => handleEditPost(post)}>Edit Post</button>
                {post.status === 'ongoing' && (
-                <button
-                  className="btn btn-warning ms-2"
-                  onClick={() => handleArchivePost(post.id)}
-                >
-                  Archive Post
-                </button>
+                <button className="btn btn-warning ms-2" onClick={() => handleArchivePost(post.id)}>Archive Post</button>
               )}
               {post.status === 'archived' && (
-                <button
-                  className="btn btn-success ms-2"
-                  onClick={() => handleUnarchivePost(post.id)}
-                >
-                  Unarchive Post
-                </button>
+                <button className="btn btn-success ms-2" onClick={() => handleUnarchivePost(post.id)}>Unarchive Post</button>
               )}
             </div>
           </div>
