@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, addDoc, deleteDoc, query, where, getDocsFromServer } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import { Carousel } from 'react-bootstrap';
+import { getAuth } from 'firebase/auth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ChurchHomepageInfo from './ChurchHomepageInfo';
 import ChurchHomepageAnnouncements from './ChurchHomepageAnnouncements';
@@ -16,7 +17,10 @@ const ChurchHomepage = () => {
   const [church, setChurch] = useState(null);
   const [photos, setPhotos] = useState([]);
   const [activeComponent, setActiveComponent] = useState('info');
-
+  const [bookmarkFilled, setBookmarkFilled] = useState(false);
+  const [bookmarkId, setBookmarkId] = useState(null);
+  const auth = getAuth();
+  const user = auth.currentUser;
 
   useEffect(() => {
     const fetchChurch = async () => {
@@ -40,9 +44,26 @@ const ChurchHomepage = () => {
       setPhotos(photosList);
     };
 
+    const checkBookmark = async () => {
+      if (user && churchId) {
+        const q = query(collection(db, 'userBookmark'), where('webUserId', '==', user.uid), where('churchId', '==', churchId));
+        const querySnapshot = await getDocsFromServer(q);
+
+        if (!querySnapshot.empty) {
+          const doc = querySnapshot.docs[0];
+          setBookmarkFilled(true);
+          setBookmarkId(doc.id);
+        } else {
+          setBookmarkFilled(false);
+          setBookmarkId(null);
+        }
+      }
+    };
+
     fetchChurch();
     fetchPhotos();
-  }, [churchId]);
+    checkBookmark();
+  }, [churchId, user]);
 
   const renderCarouselItems = () => {
     if (photos.length === 0) {
@@ -85,6 +106,32 @@ const ChurchHomepage = () => {
     }
   };
 
+  const toggleBookmark = async () => {
+    if (!user) {
+      console.error('User is not logged in.');
+      return;
+    }
+
+    try {
+      if (bookmarkFilled) {
+        // Remove bookmark
+        await deleteDoc(doc(db, 'userBookmark', bookmarkId));
+        setBookmarkFilled(false);
+        setBookmarkId(null);
+      } else {
+        // Add bookmark
+        const docRef = await addDoc(collection(db, 'userBookmark'), {
+          churchId: churchId,
+          webUserId: user.uid
+        });
+        setBookmarkFilled(true);
+        setBookmarkId(docRef.id);
+      }
+    } catch (error) {
+      console.error('Error updating bookmark:', error);
+    }
+  };
+
   if (!church) {
     return <div>Loading...</div>;
   }
@@ -97,10 +144,14 @@ const ChurchHomepage = () => {
   
       <div className="churchHomepageContents col-12 col-lg-12 d-flex flex-column align-items-center">
 
-        <div className='churchTitle col-md-12 text-center'>
-          <h1>{church.churchName}</h1>
+        <div className='churchTitle col-md-12 text-center d-flex align-items-center justify-content-center'>
+          <h1 className="me-2">{church.churchName}</h1>
+          <i 
+            className={`bi ${bookmarkFilled ? 'bi-bookmark-heart-fill' : 'bi-bookmark-heart'}`} 
+            style={{ fontSize: '2rem', cursor: 'pointer' }} 
+            onClick={toggleBookmark}
+          ></i>
         </div>
-  
         <div className='pageNavigation col-md-12 d-flex justify-content-center'>
           <p className="d-inline-flex gap-1">
             <button className="btn btn-primary" onClick={() => setActiveComponent('info')}>Information</button>
