@@ -7,314 +7,288 @@ import '../churchCoordinator.css';
 import DatePicker from 'react-datepicker';
 
 export const Slots = () => {
-  // eslint-disable-next-line no-unused-vars
-  const [userID, setUserID] = useState(null);
+ // eslint-disable-next-line no-unused-vars
+const [userID, setUserID] = useState(null);
 
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [slots, setSlots] = useState([]);
-  const [isRecurring, setIsRecurring] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [filteredSlots, setFilteredSlots] = useState([]);
-  const [editing, setEditing] = useState(false);
-  const [currentSlotId, setCurrentSlotId] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState('');
+const [startDate, setStartDate] = useState('');
+const [endDate, setEndDate] = useState('');
+const [startTime, setStartTime] = useState('');
+const [endTime, setEndTime] = useState('');
+const [slots, setSlots] = useState([]);
+const [isRecurring, setIsRecurring] = useState(false);
+const [selectedDate, setSelectedDate] = useState(null);
+const [filteredSlots, setFilteredSlots] = useState([]);
+const [editing, setEditing] = useState(false);
+const [currentSlotId, setCurrentSlotId] = useState(null);
+const [selectedStatus, setSelectedStatus] = useState('');
 
-  const auth = getAuth();
+const auth = getAuth();
 
-  const handleRecurringChange = (e) => {
-    setIsRecurring(e.target.checked);
-    if (!e.target.checked) {
-      setEndDate('');
-    }
-  };
+const handleRecurringChange = (e) => {
+  setIsRecurring(e.target.checked);
+  if (!e.target.checked) {
+    setEndDate('');
+  }
+};
 
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserID(user.uid);
-      } else {
-        setUserID(null);
-      }
-    });
-  }, [auth]);
-
-  useEffect(() => {
-    fetchSlots();
+useEffect(() => {
+  onAuthStateChanged(auth, (user) => {
+    setUserID(user ? user.uid : null);
   });
+}, [auth]);
 
-  const fetchSlots = async () => {
-    const user = auth.currentUser;
-    if (user) {
-      const slotsCollection = collection(db, 'slot');
-      const q = query(slotsCollection, where('churchId', '==', user.uid));
-      const querySnapshot = await getDocs(q);
-      const slotsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setSlots(slotsList);
-    }
-  };
+useEffect(() => {
+  fetchSlots();
+});
 
-  const convertTo12HourFormat = (time) => {
-    if (!time || time === "none") return "none";
-    const [hours, minutes] = time.split(':');
-    let hours12 = (hours % 12) || 12;
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    return `${hours12}:${minutes} ${ampm}`;
-  };
+const fetchSlots = async () => {
+  const user = auth.currentUser;
+  if (user) {
+    const slotsCollection = collection(db, 'slot');
+    const q = query(slotsCollection, where('churchId', '==', user.uid));
+    const querySnapshot = await getDocs(q);
+    const slotsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setSlots(slotsList);
+  }
+};
 
-  const renderTime = (slot) => {
-    if (!slot.startTime || !slot.endTime || 
-      slot.startTime === "none" || slot.endTime === "none") {
-      return 'Information unavailable: Date disabled';
-    }
-    return `${convertTo12HourFormat(slot.startTime)} - ${convertTo12HourFormat(slot.endTime)}`;
-  };
+const convertTo12HourFormat = (time) => {
+  if (!time || time === "none") return "none";
+  const [hours, minutes] = time.split(':');
+  let hours12 = (hours % 12) || 12;
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  return `${hours12}:${minutes} ${ampm}`;
+};
 
-  const handleCreateSlots = async (e) => {
-    e.preventDefault();
-    const user = auth.currentUser;
+const renderTime = (slot) => {
+  if (!slot.startTime || !slot.endTime || 
+    slot.startTime === "none" || slot.endTime === "none") {
+    return 'Information unavailable: Date disabled';
+  }
+  return `${convertTo12HourFormat(slot.startTime)} - ${convertTo12HourFormat(slot.endTime)}`;
+};
 
-    if (user) {
-      try {
-        if (isRecurring) {
-          const start = new Date(startDate);
-          const end = new Date(endDate);
+const handleCreateSlots = async (e) => {
+  e.preventDefault();
+  const user = auth.currentUser;
 
-          const dates = [];
-          let currentDate = start;
+  if (user) {
+    try {
+      if (isRecurring) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
 
-          while (currentDate <= end) {
-            dates.push(new Date(currentDate));
-            currentDate.setDate(currentDate.getDate() + 1);
-          }
+        const dates = [];
+        let currentDate = start;
 
-          const promises = dates.map(async (date) => {
-            const formattedDate = date.toISOString().split('T')[0]; 
-            await addDoc(collection(db, 'slot'), {
-              startDate: formattedDate,
-              startTime,
-              endTime,
-              slotStatus: 'active',
-              churchId: user.uid,
-            });
-          });
+        while (currentDate <= end) {
+          dates.push(new Date(currentDate));
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
 
-          await Promise.all(promises);
-        } else {
+        const promises = dates.map(async (date) => {
+          const formattedDate = date.toISOString().split('T')[0]; 
           await addDoc(collection(db, 'slot'), {
-            startDate,
+            startDate: formattedDate,
             startTime,
             endTime,
             slotStatus: 'active',
             churchId: user.uid,
           });
-        }
+        });
 
-        setStartDate('');
-        setEndDate('');
-        setStartTime('');
-        setEndTime('');
-        setIsRecurring(false);
-        toast.success('Slots created successfully');
-        fetchSlots();
-      } catch (error) {
-        toast.error('Error creating slots: ', error);
+        await Promise.all(promises);
+      } else {
+        await addDoc(collection(db, 'slot'), {
+          startDate,
+          startTime,
+          endTime,
+          slotStatus: 'active',
+          churchId: user.uid,
+        });
       }
-    } else {
-      alert('No user signed in.');
-    }
-  };
 
-  const handleDeleteSlot = async (slotId) => {
-    try {
-      await deleteDoc(doc(db, 'slot', slotId));
-      toast.success('Slot deleted successfully');
+      resetForm();
+      toast.success('Slots created successfully');
       fetchSlots();
     } catch (error) {
-      toast.error('Error deleting slot: ', error);
+      toast.error('Error creating slots: ', error);
     }
-  };
+  } else {
+    alert('No user signed in.');
+  }
+};
 
-  const filterSlotsByDate = useCallback(() => {
-    let filtered = slots;
-    if (selectedDate) {
-      filtered = filtered.filter(slot => new Date(slot.startDate).toDateString() === selectedDate.toDateString());
+const handleDeleteSlot = async (slotId) => {
+  try {
+    await deleteDoc(doc(db, 'slot', slotId));
+    toast.success('Slot deleted successfully');
+    fetchSlots();
+  } catch (error) {
+    toast.error('Error deleting slot: ', error);
+  }
+};
+
+const filterSlotsByDate = useCallback(() => {
+  let filtered = slots;
+  if (selectedDate) {
+    filtered = filtered.filter(slot => new Date(slot.startDate).toDateString() === selectedDate.toDateString());
+  }
+  if (selectedStatus) {
+    filtered = filtered.filter(slot => slot.slotStatus === selectedStatus);
+  }
+  setFilteredSlots(filtered);
+}, [selectedDate, slots, selectedStatus]);
+
+useEffect(() => {
+  filterSlotsByDate();
+}, [selectedDate, slots, selectedStatus, filterSlotsByDate]);
+
+const handleEditSlot = (slot) => {
+  setStartDate(slot.startDate);
+  setEndDate(slot.endDate !== '' ? slot.endDate : '');
+  setStartTime(slot.startTime);
+  setEndTime(slot.endTime);
+  setEditing(true);
+  setCurrentSlotId(slot.id);
+};
+
+const handleCancelEdit = () => {
+  resetForm();
+};
+
+const handleUpdateSlot = async (e) => {
+  e.preventDefault();
+  const user = auth.currentUser;
+
+  if (user && currentSlotId) {
+    try {
+      await updateDoc(doc(db, 'slot', currentSlotId), {
+        startDate,
+        endDate: isRecurring ? endDate : '', 
+        startTime,
+        endTime,
+        slotStatus: 'active',
+        churchId: user.uid,
+      });
+
+      resetForm();
+      toast.success('Slot updated successfully');
+      fetchSlots();
+    } catch (error) {
+      toast.error('Error updating slot: ', error);
     }
-    if (selectedStatus) {
-      filtered = filtered.filter(slot => slot.slotStatus === selectedStatus);
+  } else {
+    alert('No user signed in or no slot selected.');
+  }
+};
+
+const handleDisableSlots = async (e) => {
+  e.preventDefault();
+  const user = auth.currentUser;
+
+  if (user) {
+    try {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const dates = [];
+      let currentDate = start;
+
+      while (currentDate <= end) {
+        dates.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      const slotsCollection = collection(db, 'slot');
+      const existingDisabledSlotsPromises = dates.map(async (date) => {
+        const formattedDate = date.toISOString().split('T')[0];
+        const q = query(
+          slotsCollection,
+          where('startDate', '==', formattedDate),
+          where('slotStatus', '==', 'disabled'),
+          where('churchId', '==', user.uid)
+        );
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.length > 0;
+      });
+
+      const existingDisabledSlots = await Promise.all(existingDisabledSlotsPromises);
+
+      const datesToDisable = dates.filter((_, index) => !existingDisabledSlots[index]);
+
+      if (datesToDisable.length > 0) {
+        const promises = datesToDisable.map(async (date) => {
+          const formattedDate = date.toISOString().split('T')[0];
+          await addDoc(collection(db, 'slot'), {
+            startDate: formattedDate,
+            startTime: 'none',
+            endTime: 'none',
+            slotStatus: 'disabled',
+            churchId: user.uid,
+          });
+        });
+
+        await Promise.all(promises);
+      } else {
+        await addDoc(collection(db, 'slot'), {
+          startDate,
+          startTime: 'none',
+          endTime: 'none',
+          slotStatus: 'disabled',
+          churchId: user.uid,
+        });
+      }
+
+      resetForm();
+      toast.success('Date(s) have been disabled');
+      fetchSlots();
+    } catch (error) {
+      toast.error('Error disabling slots: ', error);
     }
-    setFilteredSlots(filtered);
-  }, [selectedDate, slots, selectedStatus]);
-  
-  useEffect(() => {
-    filterSlotsByDate();
-  }, [selectedDate, slots, selectedStatus, filterSlotsByDate]);
+  } else {
+    toast.error('No user signed in.');
+  }
+};
 
+const handleDisableSelectedSlot = async () => {
+  const user = auth.currentUser;
 
-    const handleEditSlot = (slot) => {
-        setStartDate(slot.startDate);
-        setEndDate(slot.endDate !== '' ? slot.endDate : '');
-        setStartTime(slot.startTime);
-        setEndTime(slot.endTime);
-        setEditing(true);
-        setCurrentSlotId(slot.id);
-      };
-    
-      const handleCancelEdit = () => {
-        setStartDate('');
-        setEndDate('');
-        setStartTime('');
-        setEndTime('');
-        setIsRecurring(false);
-        setEditing(false);
-        setCurrentSlotId(null);
-      };
+  if (user && currentSlotId) {
+    try {
+      await updateDoc(doc(db, 'slot', currentSlotId), {
+        slotStatus: 'disabled',
+        startTime: 'none',
+        endTime: 'none',
+      });
 
-      const handleUpdateSlot = async (e) => {
-        e.preventDefault();
-        const auth = getAuth();
-        const user = auth.currentUser;
-    
-        if (user && currentSlotId) {
-          try {
-            await updateDoc(doc(db, 'slot', currentSlotId), {
-              startDate,
-              endDate: isRecurring ? endDate : '', 
-              startTime,
-              endTime,
-              slotStatus: 'active',
-              churchId: user.uid,
-            });
-    
-            setStartDate('');
-            setEndDate('');
-            setStartTime('');
-            setEndTime('');
-            setIsRecurring(false);
-            setEditing(false);
-            setCurrentSlotId(null);
-            toast.success('Slot updated successfully');
-            fetchSlots(); 
-          } catch (error) {
-            toast.error('Error updating slot: ', error);
-          }
-        } else {
-          alert('No user signed in or no slot selected.');
-        }
-      };
+      resetForm();
+      toast.success('Slot disabled successfully');
+      fetchSlots();
+    } catch (error) {
+      toast.error('Error disabling slot: ', error);
+    }
+  } else {
+    toast.error('No user signed in or no slot selected.');
+  }
+};
 
-      const handleDisableSlots = async (e) => {
-        e.preventDefault();
-        const user = auth.currentUser;
-      
-        if (user) {
-          try {
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            const dates = [];
-            let currentDate = start;
-      
-            while (currentDate <= end) {
-              dates.push(new Date(currentDate));
-              currentDate.setDate(currentDate.getDate() + 1);
-            }
-      
-            
-            const slotsCollection = collection(db, 'slot');
-            const existingDisabledSlotsPromises = dates.map(async (date) => {
-              const formattedDate = date.toISOString().split('T')[0];
-              const q = query(
-                slotsCollection,
-                where('startDate', '==', formattedDate),
-                where('slotStatus', '==', 'disabled'),
-                where('churchId', '==', user.uid)
-              );
-              const querySnapshot = await getDocs(q);
-              return querySnapshot.docs.length > 0;
-            });
-      
-            const existingDisabledSlots = await Promise.all(existingDisabledSlotsPromises);
-      
-            
-            const datesToDisable = dates.filter((_, index) => !existingDisabledSlots[index]);
-      
-            if (datesToDisable.length > 0) {
-              const promises = datesToDisable.map(async (date) => {
-                const formattedDate = date.toISOString().split('T')[0];
-                await addDoc(collection(db, 'slot'), {
-                  startDate: formattedDate,
-                  startTime: 'none',
-                  endTime: 'none',
-                  slotStatus: 'disabled',
-                  churchId: user.uid,
-                });
-              });
-      
-              await Promise.all(promises);
-              
-            } else {
-              await addDoc(collection(db, 'slot'), {
-                startDate,
-                startTime: 'none',
-                endTime: 'none',
-                slotStatus: 'disabled',
-                churchId: user.uid,
-              });
-            }
-      
-            setStartDate('');
-            setEndDate('');
-            setStartTime('');
-            setEndTime('');
-            setIsRecurring(false);
-            toast.success('Date(s) have been disabled');
-            fetchSlots();
-          } catch (error) {
-            toast.error('Error disabling slots: ', error);
-          }
-        } else {
-          toast.error('No user signed in.');
-        }
-      };
-      
-      const handleDisableSelectedSlot = async () => {
-        const user = auth.currentUser;
-    
-        if (user && currentSlotId) {
-          try {
-            await updateDoc(doc(db, 'slot', currentSlotId), {
-              slotStatus: 'disabled',
-              startTime: 'none',
-              endTime: 'none',
-            });
-    
-            setStartDate('');
-            setEndDate('');
-            setStartTime('');
-            setEndTime('');
-            setIsRecurring(false);
-            setEditing(false);
-            setCurrentSlotId(null);
-            toast.success('Slot disabled successfully');
-            fetchSlots();
-          } catch (error) {
-            toast.error('Error disabling slot: ', error);
-          }
-        } else {
-          toast.error('No user signed in or no slot selected.');
-        }
-      };
+const handleStatusChange = (status) => {
+  setSelectedStatus(status === 'all' ? '' : status);
+};
 
-      const handleStatusChange = (status) => {
-        if (status === 'all') {
-          setSelectedStatus('');
-        } else {
-          setSelectedStatus(status);
-        }
-      };
+const resetForm = () => {
+  setStartDate('');
+  setEndDate('');
+  setStartTime('');
+  setEndTime('');
+  setIsRecurring(false);
+  setSelectedDate(null);
+  setSelectedStatus('');
+  setEditing(false);
+  setCurrentSlotId(null);
+};
 
+      
       return (
         <div>
           <div className='card'>
@@ -332,7 +306,6 @@ export const Slots = () => {
                     />
                   </div>
                 </div>
-
                 <div className="col-md-6 mb-3">
                   <div className="filterStatus dropdown">
                     <label className='me-2'><b>Filter by status:</b></label>
@@ -398,7 +371,6 @@ export const Slots = () => {
                         Recurring Time Slot?
                       </label>
                     </div>
-                    
                       <div className="col-md-6">
                         <div className="mb-3">
                           <label htmlFor="startDate" className="form-label"><b>Start Date</b></label>
@@ -412,7 +384,6 @@ export const Slots = () => {
                           />
                         </div>
                       </div>
-
                       <div className="col-md-6 ">
                         <div className="mb-3">
                           <label htmlFor="endDate" className="form-label"><b>End Date</b> <i>(Only for recurring slots)</i></label>
@@ -427,8 +398,6 @@ export const Slots = () => {
                           />
                         </div>
                       </div>
-                    
-
                     <div className='col-md-6'>
                       <div className="mb-3">
                         <label htmlFor="startTime" className="form-label"><b>Start Time</b></label>
@@ -457,26 +426,17 @@ export const Slots = () => {
                     </div>
                     <div className='col-12 mt-3'>
                       <div className="d-flex justify-content-end gap-2">
-                        <button type="submit" className="btn btn-success">
-                        {editing ? 'Update Time Slot' : 'Create Time Slot'}
-                        </button>
+                        <button type="submit" className="btn btn-success">{editing ? 'Update Time Slot' : 'Create Time Slot'}</button>
                         {editing && (
                           <>
-                          <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>
-                            Cancel
-                          </button>
-                          <button type="button" className="btn btn-warning" onClick={handleDisableSelectedSlot}>
-                            Disable Selected Slot
-                          </button>
+                          <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancel</button>
+                          <button type="button" className="btn btn-warning" onClick={handleDisableSelectedSlot}>Disable Selected Slot</button>
                         </>
-
                         )}
                         {!editing && (
-                          <button type="button" className="btn btn-danger" onClick={handleDisableSlots}>
-                            Disable Date
-                          </button>
+                          <button type="button" className="btn btn-danger" onClick={handleDisableSlots}>Disable Date</button>
                         )}
-                        <button type="reset" className="btn btn-danger">Clear</button>
+                          <button type="button" className="btn btn-danger" onClick={resetForm}>Clear</button>
                       </div>
                     </div>
                   </div>
