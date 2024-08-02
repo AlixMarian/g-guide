@@ -9,7 +9,7 @@ export const Appointments = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [smsContent, setSmsContent] = useState('');
-    const [startDate, setStartDate] = useState(new Date());
+    const [startDate, setStartDate] = useState(new Date()); 
 
     const handleShowModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
@@ -41,7 +41,16 @@ export const Appointments = () => {
                         showYearDropdown
                     />
                 </label>
-                <div className="btn-group">
+            </div>
+
+            <div className="appointmentsView">
+                {/*<div className="slots">
+                   <h1>{selectedDate ? ` ${formatDate(selectedDate)}` : 'No date selected'}</h1> 
+                </div> */}      
+                <div className="pendingAppointments">
+                <div className="titleFilter">
+                    <h2>Pending Appointments</h2>
+                    <div className="btn-group">
                     <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         Filter
                     </button>
@@ -50,14 +59,7 @@ export const Appointments = () => {
                         <li><a className="dropdown-item" href="#">Purpose</a></li>
                     </ul>
                 </div>
-            </div>
-
-            <div className="appointmentsView">
-                {/*<div className="slots">
-                   <h1>{selectedDate ? ` ${formatDate(selectedDate)}` : 'No date selected'}</h1> 
-                </div> */}      
-                <div className="pendingAppointments">
-                    <h2>Pending Appointments</h2>
+                </div>
                     <table className="table">
                     <thead>
                         <tr>
@@ -103,7 +105,18 @@ export const Appointments = () => {
                 </div>
 
                 <div className="confirmedAppointments">
+                <div className="titleFilter">
                     <h2>Completed Appointments</h2>
+                    <div className="btn-group">
+                    <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        Filter
+                    </button>
+                    <ul className="dropdown-menu">
+                        <li><a className="dropdown-item" href="#">Date</a></li>
+                        <li><a className="dropdown-item" href="#">Purpose</a></li>
+                    </ul>
+                </div>
+                </div>
                     <table className="table">
                     <thead>
                         <tr>
@@ -148,22 +161,34 @@ export const Appointments = () => {
 
             <div className="apppointmentCalendar">
                 <h3>Calendar</h3>
+                
+                <div className="calendar2">
+                    <div className='row'>
+                        <div className='calendar col-lg-4 col-md-6 me-5'>
+                            <DatePicker
+                                inline
+                                selected={startDate}
+                                onChange={(date) => setStartDate(date)}
+                                dateFormat="MMMM d, yyyy"
+                            />
+                        </div>
+                    </div>
+                
 
-                <div className='row'>
-              <div className='calendar col-lg-4 col-md-6 me-5'>
-                <DatePicker
-                  inline
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  dateFormat="MMMM d, yyyy"
-                />
-              </div>
-
-              <div className='slots col-lg-4 col-md-6'>
-                <p>Slot available</p>
+              <div className='slots2 col-lg-4 col-md-6'>
+                 <div>mu appear ang selected date</div>
                 <div className="form-check">
                   <input className="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1"/>
                   <label className="form-check-label" htmlFor="flexRadioDefault1">sampleTime</label>
+                  <br/>
+                  <input className="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2"/>
+                  <label className="form-check-label" htmlFor="flexRadioDefault2">sampleTime number 2</label>
+                  <br/>
+                  <input className="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2"/>
+                  <label className="form-check-label" htmlFor="flexRadioDefault2">sampleTime number 2</label>
+                  <br/>
+                  <input className="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2"/>
+                  <label className="form-check-label" htmlFor="flexRadioDefault2">sampleTime number 2</label>
                   <br/>
                   <input className="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2"/>
                   <label className="form-check-label" htmlFor="flexRadioDefault2">sampleTime number 2</label>
@@ -174,7 +199,7 @@ export const Appointments = () => {
                 <button type="submit" className="btn btn-success me-2">Select schedule</button>
                 <button type="reset" className="btn btn-danger me-2">Clear</button>
             </div>
-          </div>
+            </div>
 
             <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
