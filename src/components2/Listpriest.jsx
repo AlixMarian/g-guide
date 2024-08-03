@@ -13,11 +13,11 @@ export const Listpriest = () => {
   const [updatedPriestType, setUpdatedPriestType] = useState("");
   const [updatedPriestFirstName, setUpdatedPriestFirstName] = useState("");
   const [updatedPriestLastName, setUpdatedPriestLastName] = useState("");
-  const [editingPriest, setEditingPriest] = useState(null); // State to track the priest being edited
+  const [editingPriest, setEditingPriest] = useState(null); 
   const [userId, setUserId] = useState("");
   const priestCollectionRef = collection(db, "priest");
 
-  // Get user ID and fetch priest list
+
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -37,7 +37,7 @@ export const Listpriest = () => {
           ...doc.data(),
           id: doc.id
         }))
-        .filter((doc) => doc.creatorId === creatorId); // Filter by creatorId
+        .filter((doc) => doc.creatorId === creatorId); 
       console.log({ filteredData });
       setPriestList(filteredData);
     } catch (err) {
@@ -51,7 +51,7 @@ export const Listpriest = () => {
         priestType: newPriestType,
         firstName: newPriestFirstName,
         lastName: newPriestLastName,
-        creatorId: userId // Add creatorId
+        creatorId: userId 
       });
       toast.success('Priest added successfully!');
       getPriestList(userId);
@@ -82,7 +82,7 @@ export const Listpriest = () => {
         lastName: updatedPriestLastName
       });
       toast.success('Priest updated successfully!');
-      getPriestList(userId); // Refresh list
+      getPriestList(userId); 
     } catch (err) {
       toast.error('Error updating priest!');
       console.error(err);

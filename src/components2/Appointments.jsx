@@ -16,7 +16,7 @@ export const Appointments = () => {
     const handleCloseModal = () => setShowModal(false);
     const handleSendSms = () => {
         console.log(smsContent);
-        // Handle the SMS sending logic here
+
         handleCloseModal();
     };
 
