@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { db } from '/backend/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc} from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import '../churchCoordinator.css';
+import Slots from './Slots';
 
 export const Serviceoff = () => {
     const [activeSchedules, setActiveSchedules] = useState([]);
@@ -10,7 +11,11 @@ export const Serviceoff = () => {
     const [servicesState, setServicesState] = useState({});
     const [userID, setUserID] = useState(null);
 
+
+
     const auth = getAuth();
+
+    
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
@@ -46,6 +51,8 @@ export const Serviceoff = () => {
         }
     }, [userID]);
 
+
+
     const isSchedule = (serviceName) => {
         const schedules = ["Marriages", "Baptism", "Confirmation", "Burials"];
         return schedules.includes(serviceName);
@@ -76,13 +83,15 @@ export const Serviceoff = () => {
         setActiveRequests(activeRequests);
     };
 
+    
+
     return (
         <>
             <h1>Services Offered</h1>
 
             <div className="Services">
                 <div className="offer1">
-                    <h4>Schedules</h4>
+                    <h4>Events</h4>
                     <div className="Schedtogs">
                         <div className="form-check">
                             <input className="form-check-input" type="checkbox" id="marriages" name="Marriages" onChange={handleToggle} checked={!!servicesState['Marriages']} />
@@ -128,7 +137,7 @@ export const Serviceoff = () => {
             <div className="ServicesList">
                 <h1>List of Services Offered</h1>
                 <div className="serviceListActive">
-                    <ul className="styled-list">
+                    <ul className="styled-list me-2">
                         {activeSchedules.map(service => (
                             <li key={service} className="styled-list-item">
                                 <span className="service-icon">♦</span> {service}
@@ -144,6 +153,10 @@ export const Serviceoff = () => {
                         ))}
                     </ul>
                 </div>
+            </div>
+
+            <div className='displaySlots'>
+                <Slots/>
             </div>
         </>
     );

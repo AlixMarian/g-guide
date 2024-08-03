@@ -130,7 +130,7 @@ export const Church = () => {
                 <br></br>
                 
                 <div className="col-md-3 time-input-container">
-                    <label htmlFor="opening-time"><b>Current Opening Time: </b></label> 
+                    <label htmlFor="opening-time" className='me-2'><b>Current Opening Time: </b></label> 
                     <label htmlFor="existingOpeningTime"> {convertTo12HourFormat(churchData.churchStartTime) || ''}</label><br/>
                     <input
                         type="time"
@@ -143,7 +143,7 @@ export const Church = () => {
                 </div>
 
                 <div className='col-md-3 time-input-container'>
-                    <label htmlFor="closing-time"><b>Closing Time:</b></label>
+                    <label htmlFor="closing-time" className='me-2'><b>Closing Time:</b></label>
                     <label htmlFor="existingOpeningTime"> {convertTo12HourFormat(churchData.churchEndTime) || ''}</label><br/>
                     <input
                         type="time"
@@ -218,6 +218,15 @@ export const Church = () => {
                         <button className="btn btn-success" onClick={handleViewBank}>
                         View Current Banking QR
                         </button>
+                        <br/>
+                        <label htmlFor="transactionMessage" className='form-label'><b><i>Instruction for service transactions:</i></b></label>
+                        <input 
+                          type="text" 
+                          className='form-control' 
+                          id="churchInstruction"
+                          placeholder={churchData.churchInstruction || ""}
+                          onChange={(e) => handleChange(e, 'churchInstruction')}
+                          />
                     </div>
                     
                     <div className="announcement-bttn">

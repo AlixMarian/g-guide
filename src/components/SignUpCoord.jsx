@@ -91,6 +91,7 @@ export const SignUpCoord = () => {
         churchEndTime: 'none',
         churchHistory: 'none',
         churchQRDetail: churchQRDetailURL,
+        churchInstruction: 'none',
         churchStatus: 'pending',
       });
     toast.success('Your registration is being processed by the admin');
@@ -266,6 +267,19 @@ export const SignUpCoord = () => {
                       onChange={handleChange}
                       required
                       readOnly
+                    />
+                  </div>
+
+                  <div className="col-12">
+                    <label htmlFor="inputChurchInstruction" className="form-label">Instructions for Service Transactions</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="churchAddress"
+                      value={formData.churchInstruction}
+                      onChange={handleChange}
+                      placeholder='Please enter instructions here, such as the charge per transaction.'
+                      required
                     />
                   </div>
                 
