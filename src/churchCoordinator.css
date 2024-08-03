@@ -45,20 +45,14 @@
 }
 
 
-.confirmedAppointments{
+.Appointments{
   border: 1px solid black;
   border-radius: 10px;
   padding: 30px;
   margin: 10px;
 }
 
-.pendingAppointments{
-  border: 1px solid black;
-  border-radius: 10px;
-  padding: 20px;
-  margin: 10px;
-  
-}
+
 
 .appointmentInfo{
   display: flex;
@@ -88,19 +82,13 @@
 
 .serviceFiltering{
   display: block;
-  border: 1px solid black;
-  border-radius: 10px;
-  padding: 30px;
-  margin: 10px;
+  margin:12px;
 }
+
+
 
 .appointmentsView{
   display: inline-flex;
-  border: 1px solid black;
-  border-radius: 10px;
-  padding: 40px;
-  margin: 10px;
-  width: 99%;
   justify-content: space-evenly;
 }
 
@@ -122,14 +110,31 @@
   justify-content: space-evenly;
 }
 
-.slots2{
-  display: block;
+.appmoreInformation{
+  display: flex;
   border: 1px solid black;
   border-radius: 10px;
   padding: 30px;
   margin: 10px;
+  width: 80%;
+  justify-content: space-evenly;
 }
 
+.slots2{
+  display: block;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding:5px;
+  margin: 5px;
+}
+
+.timedate{
+  text-align: center;
+}
+.time{
+  display: flex;
+  justify-content: space-around;;
+}
 
   /*Church Info*/
 .churchUploads{
