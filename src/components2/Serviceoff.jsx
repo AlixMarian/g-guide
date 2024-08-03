@@ -119,10 +119,6 @@ export const Serviceoff = () => {
                             <label className="form-check-label" htmlFor="marriageCert">Marriage Certificate</label><br />
                         </div>
                         <div className="form-check">
-                            <input className="form-check-input" type="checkbox" id="enumerationsCert" name="Enumerations Certificate" onChange={handleToggle} checked={!!servicesState['Enumerations Certificate']} />
-                            <label className="form-check-label" htmlFor="enumerationsCert">Enumerations Certificate</label><br />
-                        </div>
-                        <div className="form-check">
                             <input className="form-check-input" type="checkbox" id="burialCert" name="Burial Certificate" onChange={handleToggle} checked={!!servicesState['Burial Certificate']} />
                             <label className="form-check-label" htmlFor="burialCert">Burial Certificate</label><br />
                         </div>
