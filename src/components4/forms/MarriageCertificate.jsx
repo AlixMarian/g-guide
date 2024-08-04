@@ -57,6 +57,7 @@ export const MarriageCertificate = () => {
             [name]: value
           });
         };
+
     const fullName = userData ? `${userData.firstName || ''} ${userData.lastName || ''}` : '';
 
     const handleUploadPayment = (e) => {
@@ -102,12 +103,14 @@ export const MarriageCertificate = () => {
       
             await addDoc(collection(db, 'appointments'), appointmentData);
             toast.success("Request submitted to Church Coordinator. Please wait for approval");
+            resetForm();
           } catch (error) {
             console.error("Error submitting request: ", error);
             toast.error(`Error submitting request: ${error.message}`);
           }
         }
-    }
+        resetForm();
+    };
 
     
     const handleClear = () => {
@@ -230,7 +233,7 @@ export const MarriageCertificate = () => {
                     <br/>
                     
                     <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" className="btn btn-success me-md-2" onClick={handleSubmit}>Submit request</button>
+                        <button type="submit" className="btn btn-success me-md-2" onClick={handleSubmit}>Submit Request</button>
                         <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
                     </div>
                 </div>
