@@ -84,13 +84,14 @@ export const MarriageCertificate = () => {
             const appointmentData = {
               appointmentType: 'marriageCertificate',
               appointmentStatus: 'pending',
-              commonFields: {
+              churchId: churchId,
+              userFields: {
                 requesterId: user.uid,
                 requesterName: fullName,
                 requesterContact: userData.contactNum,
                 requesterEmail: userData.email,
                 dateOfRequest: Timestamp.fromDate(new Date()),
-                paymentImage: fileUrl
+                paymentImage: fileUrl,
               },
               marriageCertficate: {
                 brideFirstName: formData.brideFirstName,

@@ -80,7 +80,8 @@ export const ConfirmationCertificate = () => {
             const appointmentData = {
               appointmentType: 'confirmationCertificate',
               appointmentStatus: 'pending',
-              commonFields: {
+              churchId: churchId,
+              userFields: {
                 requesterId: user.uid,
                 requesterName: fullName,
                 requesterContact: userData.contactNum,

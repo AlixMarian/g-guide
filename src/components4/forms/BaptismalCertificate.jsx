@@ -84,7 +84,8 @@ export const BaptismalCertificate = () => {
             const appointmentData = {
               appointmentType: 'baptismalCertificate',
               appointmentStatus: 'pending',
-              commonFields: {
+              churchId: churchId,
+              userFields: {
                 requesterId: user.uid,
                 requesterName: fullName,
                 requesterContact: userData.contactNum,
@@ -237,7 +238,7 @@ export const BaptismalCertificate = () => {
                   <input type="file" className="form-control me-2" id="formFile" required onChange={handleUploadPayment}/>
                 </div>
                 <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                  <button type="submit" className="btn btn-success me-md-2" onClick={handleSubmit}>Submit</button>
+                  <button type="submit" className="btn btn-success me-md-2" onClick={handleSubmit}>Submit Request</button>
                   <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
                 </div>
               </div>

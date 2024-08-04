@@ -86,7 +86,8 @@ export const BurialCertificate = () => {
                 const appointmentData = {
                   appointmentType: 'burialCertificate',
                   appointmentStatus: 'pending',
-                  commonFields: {
+                  churchId: churchId,
+                  userFields: {
                     requesterId: user.uid,
                     requesterName: fullName,
                     requesterContact: userData.contactNum,
