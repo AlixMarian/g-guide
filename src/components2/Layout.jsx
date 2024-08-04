@@ -2,12 +2,15 @@ import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { getUserDetails } from '../components2/Services/userServices';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "/backend/firebase"; // Adjust the import path as necessary
 import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
 
 export const Layout = () => {
   const [userDetails, setUserDetails] = useState({});
   const [loading, setLoading] = useState(true);
+  const [pendingCount, setPendingCount] = useState(0); // State for pending appointments count
   const btnRef = useRef(null);
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
@@ -66,6 +69,16 @@ export const Layout = () => {
 
     toggleButtonState(sidebar.classList.contains('active'));
   }, [loading]);
+
+  useEffect(() => {
+    const fetchPendingAppointmentsCount = async () => {
+      const pendingQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "pending"));
+      const pendingSnapshot = await getDocs(pendingQuery);
+      setPendingCount(pendingSnapshot.size); // Set the count of pending appointments
+    };
+
+    fetchPendingAppointmentsCount();
+  }, []);
 
   const handleLogout = () => {
     const auth = getAuth();
@@ -159,6 +172,7 @@ export const Layout = () => {
                   </defs>
                   <path fill="black" d="M0 0h48v48H0z" mask="url(#ipSAppointment0)"/>
                 </svg>
+                  <span class="badge text-bg-danger">{pendingCount}</span>
               </i>
               <span className="nav-item">Appointments</span>
               <p className='p-hover'>Appointments</p>
