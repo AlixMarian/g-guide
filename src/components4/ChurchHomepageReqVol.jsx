@@ -7,6 +7,7 @@ export const ChurchHomepageReqVol = () => {
   const { churchId } = useParams();
   const [ongoingPosts, setOngoingPosts] = useState([]);
   const [archivedPosts, setArchivedPosts] = useState([]);
+  const [showVerse, setShowVerse] = useState(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -22,6 +23,7 @@ export const ChurchHomepageReqVol = () => {
 
         setOngoingPosts(ongoingList);
         setArchivedPosts(archivedList);
+        setShowVerse(archivedList.length > 0);
       } catch (error) {
         console.error('Error fetching posts:', error);
       }
@@ -66,6 +68,9 @@ export const ChurchHomepageReqVol = () => {
       <h2>Completed</h2>
       
       <div className='col-12 col-lg-12'>
+      {showVerse && (
+          <p><em>God is not unjust; he will not forget your work and the love you have shown him as you have helped his people and continue to help them.</em> - Hebrews 6:10</p>
+        )}
       {archivedPosts.length === 0 ? (
           <div className="card mb-3 alert alert-info">
             <div className="card-body">
@@ -75,7 +80,6 @@ export const ChurchHomepageReqVol = () => {
         ) : (
           archivedPosts.map((post) => (
             <div key={post.id}>
-              <p><em>God is not unjust; he will not forget your work and the love you have shown him as you have helped his people and continue to help them.</em> - Hebrews 6:10</p>
               <div className="card mb-3" >
               <div className="card-body">
                 <h5 className="card-title">{post.title}</h5>
