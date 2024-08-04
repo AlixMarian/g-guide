@@ -13,7 +13,25 @@ export const ChurchHomepageBook = () => {
   const [services, setServices] = useState({ activeSchedules: [], activeRequests: [] });
   const [selectedServiceType, setSelectedServiceType] = useState('');
   const [selectedService, setSelectedService] = useState('');
-  
+  const [requirements, setRequirements] = useState('');
+
+  // State variables for form fields
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    birthday: '',
+    fatherFirstName: '',
+    fatherLastName: '',
+    motherFirstName: '',
+    motherLastName: '',
+    confirmationDate: '',
+    brideFirstName: '',
+    brideLastName: '',
+    groomFirstName: '',
+    groomLastName: '',
+    marriageDate: '',
+    deathCertificate: null,
+  });
 
   useEffect(() => {
     const fetchChurchData = async () => {
@@ -38,6 +56,38 @@ export const ChurchHomepageBook = () => {
     fetchChurchData();
     fetchServices();
   }, [churchId]);
+
+  useEffect(() => {
+    const fetchRequirements = async () => {
+      if (selectedServiceType === "Request Document" && selectedService) {
+        const requirementsDoc = await getDoc(doc(db, 'requirements', selectedService));
+        if (requirementsDoc.exists()) {
+          setRequirements(requirementsDoc.data().requirements);
+        } else {
+          setRequirements('No specific requirements.');
+        }
+      }
+    };
+
+    fetchRequirements();
+  }, [selectedServiceType, selectedService]);
+
+  // Handle form data change
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    setFormData({
+      ...formData,
+      [name]: files[0],
+    });
+  };
 
   return (
     <div className="container mt-5">
@@ -111,13 +161,126 @@ export const ChurchHomepageBook = () => {
           </div>
         </div>
       )}
-  
-      <div className="card mb-4">
-        <div className="card-body">
-          <h5 className="card-title">Submit requirements</h5>
-          <p>himo-an pag files per service offered kay lahi lahi type requirement i pass</p>
+
+      {selectedServiceType === "Request Document" && (
+        <div className="card mb-4">
+          <div className="card-body">
+            <h5 className="card-title">Submit requirements</h5>
+            {selectedService === "Baptismal Certificate" && (
+              <div>
+                <div className="row mb-3">
+                  <div className="col mb-3">
+                    <label htmlFor="firstName" className="form-label">First Name</label>
+                    <input type="text" className="form-control" id="firstName" name="firstName" value={formData.firstName} onChange={handleInputChange} />
+                  </div>
+                  <div className="col mb-3">
+                    <label htmlFor="lastName" className="form-label">Last Name</label>
+                    <input type="text" className="form-control" id="lastName" name="lastName" value={formData.lastName} onChange={handleInputChange} />
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="birthday" className="form-label">Birthday</label>
+                  <input type="date" className="form-control" id="birthday" name="birthday" value={formData.birthday} onChange={handleInputChange} />
+                </div>
+                <div>Father</div>
+                <div className="row mb-3">
+                  <div className="col mb-3">
+                    <label htmlFor="fatherFirstName" className="form-label">First Name</label>
+                    <input type="text" className="form-control" id="fatherFirstName" name="fatherFirstName" value={formData.fatherFirstName} onChange={handleInputChange} />
+                  </div>
+                  <div className="col mb-3">
+                    <label htmlFor="fatherLastName" className="form-label">Last Name</label>
+                    <input type="text" className="form-control" id="fatherLastName" name="fatherLastName" value={formData.fatherLastName} onChange={handleInputChange} />
+                  </div>
+                </div>
+                <div>Mother</div>
+                <div className="row mb-3">
+                  <div className="col mb-3">
+                    <label htmlFor="motherFirstName" className="form-label">First Name</label>
+                    <input type="text" className="form-control" id="motherFirstName" name="motherFirstName" value={formData.motherFirstName} onChange={handleInputChange} />
+                  </div>
+                  <div className="col mb-3">
+                    <label htmlFor="motherLastName" className="form-label">Last Name</label>
+                    <input type="text" className="form-control" id="motherLastName" name="motherLastName" value={formData.motherLastName} onChange={handleInputChange} />
+                  </div>
+                </div>
+                <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="submit" className="btn btn-success me-md-2">Submit</button>
+                  <button type="reset" className="btn btn-danger">Clear</button>
+                </div>
+              </div>
+            )}
+            {selectedService === "Confirmation Certificate" && (
+              <div>
+                <div className="row mb-3">
+                  <div className="col mb-3">
+                    <label htmlFor="firstName" className="form-label">First Name</label>
+                    <input type="text" className="form-control" id="firstName" name="firstName" value={formData.firstName} onChange={handleInputChange} />
+                  </div>
+                  <div className="col mb-3">
+                    <label htmlFor="lastName" className="form-label">Last Name</label>
+                    <input type="text" className="form-control" id="lastName" name="lastName" value={formData.lastName} onChange={handleInputChange} />
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="confirmationDate" className="form-label">Date of Confirmation</label>
+                  <input type="date" className="form-control" id="confirmationDate" name="confirmationDate" value={formData.confirmationDate} onChange={handleInputChange} />
+                </div>
+                <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="submit" className="btn btn-success me-md-2">Submit</button>
+                  <button type="reset" className="btn btn-danger">Clear</button>
+                </div>
+              </div>
+            )}
+            {selectedService === "Marriage Certificate" && (
+              <div>
+                <div>Bride's</div>
+                <div className="row mb-3">
+                  <div className="col mb-3">
+                    <label htmlFor="brideFirstName" className="form-label">First Name</label>
+                    <input type="text" className="form-control" id="brideFirstName" name="brideFirstName" value={formData.brideFirstName} onChange={handleInputChange} />
+                  </div>
+                  <div className="col mb-3">
+                    <label htmlFor="brideLastName" className="form-label">Last Name</label>
+                    <input type="text" className="form-control" id="brideLastName" name="brideLastName" value={formData.brideLastName} onChange={handleInputChange} />
+                  </div>
+                </div>
+                <div>Groom's</div>
+                <div className="row mb-3">
+                  <div className="col mb-3">
+                    <label htmlFor="groomFirstName" className="form-label">First Name</label>
+                    <input type="text" className="form-control" id="groomFirstName" name="groomFirstName" value={formData.groomFirstName} onChange={handleInputChange} />
+                  </div>
+                  <div className="col mb-3">
+                    <label htmlFor="groomLastName" className="form-label">Last Name</label>
+                    <input type="text" className="form-control" id="groomLastName" name="groomLastName" value={formData.groomLastName} onChange={handleInputChange} />
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="marriageDate" className="form-label">Date of Marriage</label>
+                  <input type="date" className="form-control" id="marriageDate" name="marriageDate" value={formData.marriageDate} onChange={handleInputChange} />
+                </div>
+                <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="submit" className="btn btn-success me-md-2">Submit</button>
+                  <button type="reset" className="btn btn-danger">Clear</button>
+                </div>
+              </div>
+            )}
+            {selectedService === "Burial Certificate" && (
+              <div>
+                <div className="mb-3">
+                  <label htmlFor="deathCertificate" className="form-label">Death Certificate</label>
+                  <input className="form-control" type="file" id="deathCertificate" name="deathCertificate" onChange={handleFileChange} />
+                </div>
+                <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="submit" className="btn btn-success me-md-2">Submit</button>
+                  <button type="reset" className="btn btn-danger">Clear</button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
   
       <div className="card mb-4">
         <div className="card-body">
@@ -158,8 +321,6 @@ export const ChurchHomepageBook = () => {
       </div>
     </div>
   );
-  
 };
 
 export default ChurchHomepageBook;
-

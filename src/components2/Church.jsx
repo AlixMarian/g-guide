@@ -8,7 +8,7 @@ import '../churchCoordinator.css';
 import ChurchUploads from './ChurchUploads';
 
 export const Church = () => {
-    // eslint-disable-next-line no-unused-vars
+
     const [userData, setUserData] = useState(null);
     const [churchData, setChurchData] = useState({});
     const [newChurchInfo, setNewChurchInfo] = useState({});
@@ -45,7 +45,7 @@ export const Church = () => {
               const userData = userDoc.data();
               setUserData(userData);
   
-              // Fetch church data
+
               const churchDoc = await getDoc(doc(db, "church", user.uid));
               if (churchDoc.exists()) {
                 setChurchData(churchDoc.data());

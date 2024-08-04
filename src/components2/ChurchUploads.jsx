@@ -7,9 +7,9 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 
 export const ChurchUploads = () => {
-    // eslint-disable-next-line no-unused-vars
+
     const [userData, setUserData] = useState(null);
-    // eslint-disable-next-line no-unused-vars
+
     const [churchData, setChurchData] = useState({});
 
     const [churchPhotos, setChurchPhotos] = useState([]);
@@ -34,7 +34,6 @@ export const ChurchUploads = () => {
                         const userData = userDoc.data();
                         setUserData(userData);
 
-                        // Fetch church data
                         const churchDoc = await getDoc(doc(db, "church", user.uid));
                         if (churchDoc.exists()) {
                             setChurchData(churchDoc.data());
