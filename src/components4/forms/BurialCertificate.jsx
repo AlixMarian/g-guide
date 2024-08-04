@@ -70,13 +70,13 @@ export const BurialCertificate = () => {
         if (user && paymentImageFile && deathCert){
             try {
                 
-                     // Upload payment image
+                    
                     const paymentImageRef = ref(storage, `userPaymentReceipt/${user.uid}/${paymentImageFile.name}`);
                     await uploadBytes(paymentImageRef, paymentImageFile);
                     const paymentImageUrl = await getDownloadURL(paymentImageRef);
                     setPaymentImageUrl(paymentImageUrl);
 
-                    // Upload death certificate
+                    
                     const deathCertRef = ref(storage, `userRequirementSubmissions/${user.uid}/${deathCert.name}`);
                     await uploadBytes(deathCertRef, deathCert);
                     const deathCertUrl = await getDownloadURL(deathCertRef);

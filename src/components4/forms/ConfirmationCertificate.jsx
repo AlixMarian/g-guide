@@ -89,7 +89,7 @@ export const ConfirmationCertificate = () => {
                 dateOfRequest: Timestamp.fromDate(new Date()),
                 paymentImage: fileUrl
               },
-              confirmationCertficate: {
+              confirmationCertificate: {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 confirmationDate: formData.confirmationDate,

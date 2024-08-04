@@ -93,7 +93,7 @@ export const MarriageCertificate = () => {
                 dateOfRequest: Timestamp.fromDate(new Date()),
                 paymentImage: fileUrl,
               },
-              marriageCertficate: {
+              marriageCertificate: {
                 brideFirstName: formData.brideFirstName,
                 brideLastName: formData.brideLastName,
                 dateOfMarriage: formData.marriageDate,

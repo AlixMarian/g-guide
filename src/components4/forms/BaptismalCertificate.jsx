@@ -93,7 +93,7 @@ export const BaptismalCertificate = () => {
                 dateOfRequest: Timestamp.fromDate(new Date()),
                 paymentImage: fileUrl
               },
-              baptismalCertficate: {
+              baptismalCertificate: {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 birthday: formData.birthday,
