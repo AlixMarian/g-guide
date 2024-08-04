@@ -11,6 +11,7 @@ import ChurchHomepageMassSchedule from './ChurchHomepageMassSchedule';
 import ChurchHomepageBook from './ChurchHomepageBook';
 import ChurchHomepageReqVol from './ChurchHomepageReqVol';
 import '../websiteUser.css';
+import { toast } from 'react-toastify';
 
 const ChurchHomepage = () => {
   const { churchId } = useParams();
@@ -114,18 +115,18 @@ const ChurchHomepage = () => {
 
     try {
       if (bookmarkFilled) {
-        // Remove bookmark
         await deleteDoc(doc(db, 'userBookmark', bookmarkId));
         setBookmarkFilled(false);
         setBookmarkId(null);
+        toast.success('Removed from bookmarks');
       } else {
-        // Add bookmark
         const docRef = await addDoc(collection(db, 'userBookmark'), {
           churchId: churchId,
           webUserId: user.uid
         });
         setBookmarkFilled(true);
         setBookmarkId(docRef.id);
+        toast.success('Added to bookmarks');
       }
     } catch (error) {
       console.error('Error updating bookmark:', error);
@@ -144,14 +145,22 @@ const ChurchHomepage = () => {
   
       <div className="churchHomepageContents col-12 col-lg-12 d-flex flex-column align-items-center">
 
-        <div className='churchTitle col-md-12 text-center d-flex align-items-center justify-content-center'>
-          <h1 className="me-2">{church.churchName}</h1>
+      <div className='churchTitle col-md-12 text-center mt-1'>
+        <h1 className='mb-2'>{church.churchName}</h1>
+      </div>
+      
+      <div className='bookmark d-flex align-items-center justify-content-center mb-3'>
           <i 
             className={`bi ${bookmarkFilled ? 'bi-bookmark-heart-fill' : 'bi-bookmark-heart'}`} 
             style={{ fontSize: '2rem', cursor: 'pointer' }} 
             onClick={toggleBookmark}
           ></i>
-        </div>
+          <p 
+            className='mb-0 ms-2'
+            style={{ fontSize: '1rem', cursor: 'pointer' }} 
+          ><b>{bookmarkFilled ? 'Remove from Bookmarks' : 'Add to Bookmarks'}</b></p>
+      </div>
+
         <div className='pageNavigation col-md-12 d-flex justify-content-center'>
           <p className="d-inline-flex gap-1">
             <button className="btn btn-primary" onClick={() => setActiveComponent('info')}>Information</button>
