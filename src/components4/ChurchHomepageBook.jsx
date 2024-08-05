@@ -1,23 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from 'react-datepicker';
-import BaptismalCertificate from './forms/BaptismalCertificate';
-import ConfirmationCertificate from './forms/ConfirmationCertificate';
-import MarriageCertificate from './forms/MarriageCertificate';
-import BurialCertificate from './forms/BurialCertificate';
 
 export const ChurchHomepageBook = () => {
-  const [dateToday, setDateToday] = useState(new Date());
-
+  const [dateToday, setdateToday] = useState(new Date());
+  const [matchedDates, setMatchedDates] = useState([]);
   const { churchId } = useParams();
-  // eslint-disable-next-line no-unused-vars
   const [churchData, setChurchData] = useState(null);
   const [services, setServices] = useState({ activeSchedules: [], activeRequests: [] });
   const [selectedServiceType, setSelectedServiceType] = useState('');
   const [selectedService, setSelectedService] = useState('');
+  const [slots, setSlots] = useState([]);
 
 
   useEffect(() => {
@@ -28,7 +24,7 @@ export const ChurchHomepageBook = () => {
         setChurchData(docSnap.data());
       }
     };
-
+  
     const fetchServices = async () => {
       const servicesDoc = await getDoc(doc(db, 'services', churchId));
       if (servicesDoc.exists()) {
@@ -39,10 +35,66 @@ export const ChurchHomepageBook = () => {
         });
       }
     };
-
+  
+    const fetchSlots = async () => {
+      try {
+        const slotsQuery = query(collection(db, 'slot'), where('churchId', '==', churchId));
+        const querySnapshot = await getDocs(slotsQuery);
+        if (querySnapshot.empty) {
+          console.log("No slots available or no matching documents found.");
+        } else {
+          const slotsData = querySnapshot.docs.map(doc => {
+            return doc.data();
+          });
+          setSlots(slotsData);
+        }
+      } catch (error) {
+        console.error("Error fetching slots:", error.message);
+      }
+    };
+  
     fetchChurchData();
     fetchServices();
+    fetchSlots();
   }, [churchId]);
+
+  const handleDateChange = (date) => {
+    setdateToday(date);
+    checkSlotAvailability(date); 
+  };
+
+  const checkSlotAvailability = (selectedDate) => {
+    const offset = new Date().getTimezoneOffset() / 60;
+    const adjustedDate = new Date(selectedDate.getTime() - offset * 3600000);
+    const formattedDate = adjustedDate.toISOString().split('T')[0];
+    console.log("Formatted Date:", formattedDate);
+  
+    const availableSlots = slots.filter(slot => {
+      return slot.startDate === formattedDate && slot.slotStatus === "active";
+    });
+    
+    setMatchedDates(availableSlots);
+  };
+  
+  
+  
+  
+  
+  const convertTo12HourFormat = (time) => {
+    if (!time || time === "none") return "none";
+    const [hours, minutes] = time.split(':');
+    let hours12 = (hours % 12) || 12;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    return `${hours12}:${minutes} ${ampm}`;
+  };
+
+  const renderTime = (slot) => {
+    if (!slot.startTime || !slot.endTime ||
+      slot.startTime === "none" || slot.endTime === "none") {
+      return 'Information unavailable: Date disabled';
+    }
+    return `${convertTo12HourFormat(slot.startTime)} - ${convertTo12HourFormat(slot.endTime)}`;
+  };
 
   return (
     <div className="container mt-5">
@@ -82,31 +134,41 @@ export const ChurchHomepageBook = () => {
         </div>
       </div>
 
+      <div>
       {selectedServiceType === "Event" && (
         <div className="card mb-4">
           <div className="card-body">
             <h5 className="card-title">Select schedule</h5>
             <p>Mu appear rani if ang gi select sa user kay mu appointment siyag event like bunyag, etc..</p>
             <div className="row">
-              <div className="col-lg-4 col-md-6 mb-3 me-5">
-                <DatePicker
-                  inline
-                  selected={dateToday}
-                  onChange={(date) => setDateToday(date)}
-                  dateFormat="MMMM d, yyyy"
-                />
-              </div>
-    
-              <div className="col-lg-4 col-md-6 mb-3">
-                <p>Slot available</p>
-                <div className="form-check">
-                  <input className="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" />
-                  <label className="form-check-label" htmlFor="flexRadioDefault1">sampleTime</label>
-                </div>
-                <div className="form-check">
-                  <input className="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" />
-                  <label className="form-check-label" htmlFor="flexRadioDefault2">sampleTime number 2</label>
-                </div>
+            <div className="col-lg-4 col-md-6 mb-3 me-5">
+              <DatePicker
+                inline
+                selected={dateToday}
+                onChange={handleDateChange}
+                dateFormat="MMMM d, yyyy"
+              />
+            </div>
+
+            <div className="col-12 col-lg-3 col-md-4 mb-3">
+                <p><b>Slots available for 
+                {dateToday && (<p>{dateToday.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>)}  
+                </b></p>
+                {matchedDates.length > 0 ? (
+                  <div>
+                    {matchedDates.map((slot, index) => (
+                      <div key={index}>
+                        <label>
+                          <input type="radio" name="slotTime" value={slot.startTime} className='me-3'/>
+                          {renderTime(slot)}
+                        </label>
+                        <br />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No slots available for the selected date.</p>
+                )}
               </div>
             </div>
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -115,25 +177,16 @@ export const ChurchHomepageBook = () => {
           </div>
         </div>
       )}
-
-      {selectedServiceType === "Request Document" && (
-        <div>
-            {selectedService === "Baptismal Certificate" && (
-              <BaptismalCertificate/>
-            )}
-            {selectedService === "Confirmation Certificate" && (
-              <ConfirmationCertificate/>
-            )}
-            {selectedService === "Marriage Certificate" && (
-              <MarriageCertificate/>
-            )}
-            {selectedService === "Burial Certificate" && (
-              <BurialCertificate/>
-            )}
-        </div>
-      )}
+    </div>
   
-      {/* <div className="card mb-4">
+      <div className="card mb-4">
+        <div className="card-body">
+          <h5 className="card-title">Submit requirements</h5>
+          <p>himo-an pag files per service offered kay lahi lahi type requirement i pass</p>
+        </div>
+      </div>
+  
+      <div className="card mb-4">
         <div className="card-body">
           <h5 className="card-title">Submit Payment</h5>
             {churchData && churchData.churchQRDetail && churchData.churchInstruction &&(
@@ -150,28 +203,11 @@ export const ChurchHomepageBook = () => {
             </div>
 
         </div>
-      </div> */}
-
-  
-      {/* <div className="finalizeDetails card mb-4">
-        <div className="card-body">
-          <h5 className="card-title">Finalize details</h5>
-          <p>mga input fields rani diri nga read only. diri mu reflect mga choices gi make sa user</p>
-          
-          <div className='userOverview d-flex align-items-center mb-3'>
-          <label className="me-2">Selected Service</label>
-          <input type="text" className="form-control w-50" id="selectedService" value={selectedService} readOnly placeholder="Selected Service" />
-          </div>
-          
-          <br/>
-          <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <button type="submit" className="btn btn-success me-md-2">Finalize</button>
-            <button type="reset" className="btn btn-danger">Clear</button>
-          </div>
-        </div>
-      </div> */}
+      </div>
     </div>
   );
+  
 };
 
 export default ChurchHomepageBook;
+
