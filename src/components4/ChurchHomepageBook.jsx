@@ -114,7 +114,7 @@ export const ChurchHomepageBook = () => {
                   {selectedServiceType || "Select Service Type"}
               </button>
               <ul className="dropdown-menu" aria-labelledby="servicesTypeDropdown">
-                <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); setSelectedServiceType("Event"); setSelectedService(''); }}>Event</a></li>
+                <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); setSelectedServiceType("Schedule Appointment"); setSelectedService(''); }}>Schedule Appointment</a></li>
                 <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); setSelectedServiceType("Request Document"); setSelectedService(''); }}>Request Document</a></li>
               </ul>
             </div>
