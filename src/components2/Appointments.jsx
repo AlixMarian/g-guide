@@ -10,6 +10,7 @@ import '../churchCoordinator.css';
 
 export const Appointments = () => {
     const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedType, setSelectedType] = useState("All Documents");
     const [showModal, setShowModal] = useState(false);
     const [smsContent, setSmsContent] = useState('');
     const [startDate, setStartDate] = useState(new Date()); 
@@ -76,7 +77,6 @@ export const Appointments = () => {
 
     const appointmentTypeMapping = {
         marriageCertificate: "Marriage Certificate",
-        birthCertificate: "Birth Certificate",
         baptismalCertificate: "Baptismal Certificate",
         burialCertificate: "Burial Certificate",
         confirmationCertificate: "Confirmation Certificate",
@@ -94,6 +94,10 @@ export const Appointments = () => {
     const handleDateChange = (date) => {
         setStartDate(date);
         setFormattedDate(formatDate({ seconds: date.getTime() / 1000 }));
+    };
+
+    const handleTypeChange = (type) => {
+        setSelectedType(type);
     };
 
     useEffect(() => {
@@ -133,96 +137,97 @@ export const Appointments = () => {
         fetchAppointments();
     }, []);
 
+    const filteredAppointments = (appointments) => {
+        return appointments.filter(appointment => {
+            const dateMatches = selectedDate ? formatDate(appointment.userFields?.dateOfRequest) === formatDate({ seconds: selectedDate.getTime() / 1000 }) : true;
+            const typeMatches = selectedType === "All Documents" || appointmentTypeMapping[appointment.appointmentType] === selectedType;
+            return dateMatches && typeMatches;
+        });
+    };
+
     return (
         <>
             <div className="appoinmentsPage"></div>
+
             <h1>Appointments</h1>
+            <div className="dropdown">
+                <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                    Filter by
+                </button>
+                <form className="dropdown-menu p-4">
+                    <div className="mb-3">
+                        <label className="form-label">Date</label>
+                        <DatePicker
+                            className='form-control'
+                            selected={selectedDate}
+                            onChange={date => setSelectedDate(date)}
+                            showYearDropdown
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            Appointment Type
+                        </button>
+                        <ul className="dropdown-menu">
+                            <li><a className="dropdown-item" href="#" onClick={() => handleTypeChange("All Documents")}>All Documents</a></li>
+                            {Object.values(appointmentTypeMapping).map(type => (
+                                <li key={type}><a className="dropdown-item" href="#" onClick={() => handleTypeChange(type)}>{type}</a></li>
+                            ))}
+                        </ul>
+                    </div>
+                </form>
+            </div>
 
             <div className="Appointments">
-                    <div className="titleFilter">
-                        <h3>Pending Appointments:</h3>
-                            <div className='appointmentFilterDates'>
-                                <label className='me-2'><b></b></label>
-                                <DatePicker
-                                className='form-control'
-                                selected={selectedDate}
-                                onChange={date => setSelectedDate(date)}
-                                showYearDropdown
-                                />
-                            </div>
-                            <div className="btn-group">
-                                <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Filter
-                                </button>
-                                <ul className="dropdown-menu">
-                                    <li><a className="dropdown-item" href="#">Date</a></li>
-                                    <li><a className="dropdown-item" href="#">Purpose</a></li>
-                                </ul>
-                            </div>
-                    </div>
-                    <br/>
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Date of Request</th>
-                                <th scope="col">Appointment Type</th>
-                                <th scope="col">Requested by:</th>
-                                <th scope="col">More Info</th> 
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {pendingAppointments.map((appointment, index) => (
-                                <tr key={index}>
-                                    <td>{formatDate(appointment.userFields?.dateOfRequest)}</td>
-                                    <td>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td> 
-                                    <td>{appointment.userFields?.requesterName}</td>
-                                    <td>
-                                        <Button variant="info" onClick={() => handleShowModal(appointment)}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="20" fill="currentColor" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
-                                            </svg>
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="titleFilter">
+                    <h3>Pending Appointments:</h3>
                 </div>
-            <div className="appointmentsView">    
-                <div className="Appointments">
+                <br />
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date of Request</th>
+                            <th scope="col">Appointment Type</th>
+                            <th scope="col">Requested by:</th>
+                            <th scope="col">More Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredAppointments(pendingAppointments).map((appointment, index) => (
+                            <tr key={index}>
+                                <td>{formatDate(appointment.userFields?.dateOfRequest)}</td>
+                                <td>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
+                                <td>{appointment.userFields?.requesterName}</td>
+                                <td>
+                                    <Button variant="info" onClick={() => handleShowModal(appointment)}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="20" fill="currentColor" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
+                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2" />
+                                        </svg>
+                                    </Button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            <div className="appointmentsView">
+                <div className="Appointments2">
                     <div className="titleFilter">
                         <h3>Approved Appointments:</h3>
-                            <div className='appointmentFilterDates'>
-                                <label className='me-2'><b></b></label>
-                                <DatePicker
-                                className='form-control'
-                                selected={selectedDate}
-                                onChange={date => setSelectedDate(date)}
-                                showYearDropdown
-                                />
-                            </div>
-                            <div className="btn-group">
-                                <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Filter
-                                </button>
-                                <ul className="dropdown-menu">
-                                    <li><a className="dropdown-item" href="#">Date</a></li>
-                                    <li><a className="dropdown-item" href="#">Purpose</a></li>
-                                </ul>
-                            </div>
                     </div>
-                    <br/>
+                    <br />
                     <table className="table">
                         <thead>
                             <tr>
                                 <th scope="col">Date of Request</th>
                                 <th scope="col">Appointment Type</th>
                                 <th scope="col">Requested by:</th>
-                                <th scope="col">More Info</th> 
+                                <th scope="col">More Info</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {approvedAppointments.map((appointment, index) => (
+                            {filteredAppointments(approvedAppointments).map((appointment, index) => (
                                 <tr key={index}>
                                     <td>{formatDate(appointment.userFields?.dateOfRequest)}</td>
                                     <td>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
@@ -230,7 +235,7 @@ export const Appointments = () => {
                                     <td>
                                         <Button variant="info" onClick={() => handleShowModal(appointment)}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="20" fill="currentColor" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2" />
                                             </svg>
                                         </Button>
                                     </td>
@@ -239,48 +244,31 @@ export const Appointments = () => {
                         </tbody>
                     </table>
                 </div>
-                <div className="Appointments">
+
+                <div className="Appointments2">
                     <div className="titleFilter">
                         <h3>Denied Appointments:</h3>
-                            <div className='appointmentFilterDates'>
-                                <label className='me-2'><b></b></label>
-                                <DatePicker
-                                className='form-control'
-                                selected={selectedDate}
-                                onChange={date => setSelectedDate(date)}
-                                showYearDropdown
-                                />
-                            </div>
-                            <div className="btn-group">
-                                <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Filter
-                                </button>
-                                <ul className="dropdown-menu">
-                                    <li><a className="dropdown-item" href="#">Date</a></li>
-                                    <li><a className="dropdown-item" href="#">Purpose</a></li>
-                                </ul>
-                            </div>
                     </div>
-                    <br/>
+                    <br />
                     <table className="table">
                         <thead>
                             <tr>
                                 <th scope="col">Date of Request</th>
                                 <th scope="col">Appointment Type</th>
                                 <th scope="col">Requested by:</th>
-                                <th scope="col">More Info</th> 
+                                <th scope="col">More Info</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {deniedAppointments.map((appointment, index) => (
+                            {filteredAppointments(deniedAppointments).map((appointment, index) => (
                                 <tr key={index}>
                                     <td>{formatDate(appointment.userFields?.dateOfRequest)}</td>
-                                    <td>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td> 
+                                    <td>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
                                     <td>{appointment.userFields?.requesterName}</td>
                                     <td>
                                         <Button variant="info" onClick={() => handleShowModal(appointment)}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="25" height="20" fill="currentColor" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2" />
                                             </svg>
                                         </Button>
                                     </td>
@@ -290,6 +278,7 @@ export const Appointments = () => {
                     </table>
                 </div>
             </div>
+
             <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>Appointment Details</Modal.Title>
