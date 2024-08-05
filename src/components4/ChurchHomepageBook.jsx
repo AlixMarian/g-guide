@@ -4,6 +4,10 @@ import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firesto
 import { db } from '/backend/firebase';
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from 'react-datepicker';
+import BaptismalCertificate from './forms/BaptismalCertificate';
+import ConfirmationCertificate from './forms/ConfirmationCertificate';
+import MarriageCertificate from './forms/MarriageCertificate';
+import BurialCertificate from './forms/BurialCertificate';
 
 export const ChurchHomepageBook = () => {
   const [dateToday, setdateToday] = useState(new Date());
@@ -14,6 +18,7 @@ export const ChurchHomepageBook = () => {
   const [selectedServiceType, setSelectedServiceType] = useState('');
   const [selectedService, setSelectedService] = useState('');
   const [slots, setSlots] = useState([]);
+  
 
 
   useEffect(() => {
@@ -179,12 +184,22 @@ export const ChurchHomepageBook = () => {
       )}
     </div>
   
-      <div className="card mb-4">
-        <div className="card-body">
-          <h5 className="card-title">Submit requirements</h5>
-          <p>himo-an pag files per service offered kay lahi lahi type requirement i pass</p>
+    {selectedServiceType === "Request Document" && (
+        <div>
+            {selectedService === "Baptismal Certificate" && (
+              <BaptismalCertificate/>
+            )}
+            {selectedService === "Confirmation Certificate" && (
+              <ConfirmationCertificate/>
+            )}
+            {selectedService === "Marriage Certificate" && (
+              <MarriageCertificate/>
+            )}
+            {selectedService === "Burial Certificate" && (
+              <BurialCertificate/>
+            )}
         </div>
-      </div>
+      )}
   
       <div className="card mb-4">
         <div className="card-body">
