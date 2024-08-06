@@ -9,14 +9,17 @@ import { toast } from 'react-toastify';
 
 export const MarriageCertificate = () => {
     const { churchId } = useParams();
+    // eslint-disable-next-line no-unused-vars
     const [churchData, setChurchData] = useState(null);
     const [userData, setUserData] = useState(null); 
     const auth = getAuth();
     const user = auth.currentUser;
     const [loading, setLoading] = useState(true);
-    const [paymentImageFile, setPaymentImageFile] = useState(null);
+    const [authorizationImageFile, setAuthorizationImageFile] = useState(null);
     // eslint-disable-next-line no-unused-vars
-    const [paymentImageUrl, setPaymentImageUrl] = useState('');
+    const [authorizationImageUrl, setAuthorizationImageUrl] = useState('');
+    const [showAuthorization, setShowAuthorization] = useState(false);
+    const [appointmentPurpose, setAppointmentPurpose] = useState('personal');
     const [formData, setFormData] = useState({
         brideFirstName: '',
         brideLastName: '',
@@ -60,30 +63,34 @@ export const MarriageCertificate = () => {
 
     const fullName = userData ? `${userData.firstName || ''} ${userData.lastName || ''}` : '';
 
-    const handleUploadPayment = (e) => {
+    const handleAuthorizationUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setPaymentImageFile(file);
+          setAuthorizationImageFile(file);
         }else{
             toast.error("no image detected");
         }
-    };
+      };
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    if (user && paymentImageFile){
+    if (user){
         try {
             
-                const storageRef = ref(storage, `userPaymentReceipt/${user.uid}/${paymentImageFile.name}`);
-                await uploadBytes(storageRef, paymentImageFile);
+            if (authorizationImageFile) {
+                const storageRef = ref(storage, `userAuthorizationLetter/${user.uid}/${authorizationImageFile.name}`);
+                await uploadBytes(storageRef, authorizationImageFile);
                 const fileUrl = await getDownloadURL(storageRef);
-                setPaymentImageUrl(fileUrl);
+                setAuthorizationImageUrl(fileUrl);
+              }
 
                 
             const appointmentData = {
               appointmentType: 'marriageCertificate',
               appointmentStatus: 'pending',
+              appointmentPurpose: appointmentPurpose,
+              authorizationLetter: authorizationImageUrl || 'none',
               churchId: churchId,
               userFields: {
                 requesterId: user.uid,
@@ -91,7 +98,6 @@ export const MarriageCertificate = () => {
                 requesterContact: userData.contactNum,
                 requesterEmail: userData.email,
                 dateOfRequest: Timestamp.fromDate(new Date()),
-                paymentImage: fileUrl,
               },
               marriageCertificate: {
                 brideFirstName: formData.brideFirstName,
@@ -110,7 +116,6 @@ export const MarriageCertificate = () => {
             toast.error(`Error submitting request: ${error.message}`);
           }
         }
-        resetForm();
     };
 
     
@@ -127,10 +132,19 @@ export const MarriageCertificate = () => {
             groomLastName: '',
             marriageDate: ''
         });
-        setPaymentImageFile(null);
-        setPaymentImageUrl('');
+        setAuthorizationImageFile(null);
+        setAuthorizationImageUrl('');
     };
-      
+    
+    const handlePersonalClick = () => {
+        setAppointmentPurpose('personal');
+        setShowAuthorization(false);
+      };
+    
+      const handleOthersClick = () => {
+        setAppointmentPurpose('others');
+        setShowAuthorization(true);
+      };
 
       if (loading) {
         return <div>Loading...</div>;
@@ -139,6 +153,28 @@ export const MarriageCertificate = () => {
     return (
         <div>
         <form id="marriageCert">
+            <div className='purpose card mb-4'>
+              <div className='card-body'>
+                <h5 className='card-title'>Who is the Appointment For?</h5>
+                <div className="d-grid gap-2 d-md-flex justify-content-md-center">
+                  <button type='button' className='personal btn btn-primary' onClick={handlePersonalClick}>Personal</button>
+                  <button type='button' className='others btn btn-primary' onClick={handleOthersClick}>Others</button>
+                </div>
+              </div>
+            </div>
+
+            {showAuthorization && (
+            <div className='authorization card mb-4'>
+              <div className='card-body'>
+                <h5 className='card-title'>Submit Authorization Letter</h5>
+                <p>Submit an authorization letter with a clear image of the signature and a valid ID from the person on whose behalf you are making the appointment. Ensure all details are visible and legible.</p>
+                <div className="d-flex align-items-center mb-3">
+                  <input type="file" className="form-control me-2" id="formFile" required onChange={handleAuthorizationUpload}/>
+                </div>
+              </div>
+            </div>
+            )}
+
     
             <div className="userDetails card mb-4">
                 <div className="card-body">
@@ -209,30 +245,7 @@ export const MarriageCertificate = () => {
                         <label htmlFor="marriageDate" className="form-label">Date of Marriage</label>
                         <input type="date" className="form-control" id="marriageDate" name="marriageDate" onChange={handleChange} required/>
                     </div>
-                </div>
-            </div>
-    
-            
-            <div className="submitPayment card mb-4">
-                <div className="card-body">
-                    <h5 className="card-title">Submit Payment</h5>
-                    
-                    {churchData && churchData.churchQRDetail && churchData.churchInstruction && (
-                        <div>
-                            <p>{churchData.churchInstruction}</p>
-                            <img src={churchData.churchQRDetail} alt="Church QR Code" className="qr-image mx-auto d-block" />
-                        </div>
-                    )}
-                    
-                    <br/>
-                    
-                    <label><strong>Submit your receipt here</strong></label>
-                    <div className="d-flex align-items-center mb-3">
-                        <input className="form-control me-2" type="file" id="formFile userPayment" required onChange={handleUploadPayment} />
-                    </div>
-                    
-                    <br/>
-                    
+
                     <div className="d-grid gap-2 d-md-flex justify-content-md-end">
                         <button type="submit" className="btn btn-success me-md-2" onClick={handleSubmit}>Submit Request</button>
                         <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>

@@ -8,15 +8,18 @@ import { toast } from 'react-toastify';
 
 export const BurialCertificate = () => {
     const { churchId } = useParams();
+    // eslint-disable-next-line no-unused-vars
     const [churchData, setChurchData] = useState(null);
     const [userData, setUserData] = useState(null); 
     const auth = getAuth();
     const user = auth.currentUser;
     const [loading, setLoading] = useState(true);
-    const [paymentImageFile, setPaymentImageFile] = useState(null);
-    const [deathCert,setDeathCert] = useState(null);
+    const [authorizationImageFile, setAuthorizationImageFile] = useState(null);
     // eslint-disable-next-line no-unused-vars
-    const [paymentImageUrl, setPaymentImageUrl] = useState('');
+    const [authorizationImageUrl, setAuthorizationImageUrl] = useState('');
+    const [showAuthorization, setShowAuthorization] = useState(false);
+    const [appointmentPurpose, setAppointmentPurpose] = useState('personal');
+    const [deathCert,setDeathCert] = useState(null);
     // eslint-disable-next-line no-unused-vars
     const [deathCertUrl, setDeathCertUrl] = useState('');
     
@@ -47,10 +50,10 @@ export const BurialCertificate = () => {
 
     const fullName = userData ? `${userData.firstName || ''} ${userData.lastName || ''}` : '';
 
-    const handleUploadPayment = (e) => {
+    const handleAuthorizationUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setPaymentImageFile(file);
+          setAuthorizationImageFile(file);
         }else{
             toast.error("no image detected");
         }
@@ -67,14 +70,16 @@ export const BurialCertificate = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (user && paymentImageFile && deathCert){
+        if (user && deathCert){
             try {
                 
                     
-                    const paymentImageRef = ref(storage, `userPaymentReceipt/${user.uid}/${paymentImageFile.name}`);
-                    await uploadBytes(paymentImageRef, paymentImageFile);
-                    const paymentImageUrl = await getDownloadURL(paymentImageRef);
-                    setPaymentImageUrl(paymentImageUrl);
+                if (authorizationImageFile) {
+                    const storageRef = ref(storage, `userAuthorizationLetter/${user.uid}/${authorizationImageFile.name}`);
+                    await uploadBytes(storageRef, authorizationImageFile);
+                    const fileUrl = await getDownloadURL(storageRef);
+                    setAuthorizationImageUrl(fileUrl);
+                  }
 
                     
                     const deathCertRef = ref(storage, `userRequirementSubmissions/${user.uid}/${deathCert.name}`);
@@ -86,6 +91,8 @@ export const BurialCertificate = () => {
                 const appointmentData = {
                   appointmentType: 'burialCertificate',
                   appointmentStatus: 'pending',
+                  appointmentPurpose: appointmentPurpose,
+                  authorizationLetter: authorizationImageUrl || 'none',
                   churchId: churchId,
                   userFields: {
                     requesterId: user.uid,
@@ -93,7 +100,7 @@ export const BurialCertificate = () => {
                     requesterContact: userData.contactNum,
                     requesterEmail: userData.email,
                     dateOfRequest: Timestamp.fromDate(new Date()),
-                    paymentImage: paymentImageUrl , 
+                    
                   },
                   burialCertificate: {
                    deathCertificate: deathCertUrl,
@@ -102,12 +109,13 @@ export const BurialCertificate = () => {
           
                 await addDoc(collection(db, 'appointments'), appointmentData);
                 toast.success("Request submitted to Church Coordinator. Please wait for approval");
+                resetForm();
               } catch (error) {
                 console.error("Error submitting request: ", error);
                 toast.error(`Error submitting request: ${error.message}`);
               }
             }
-            resetForm();
+            
         };
 
     const handleClear = () => {
@@ -116,11 +124,20 @@ export const BurialCertificate = () => {
     };
 
     const resetForm = () => {
-        setPaymentImageFile(null);
+        setAuthorizationImageUrl(null);
         setDeathCert(null);
-        setPaymentImageUrl('');
         setDeathCertUrl('');
     };
+
+    const handlePersonalClick = () => {
+        setAppointmentPurpose('personal');
+        setShowAuthorization(false);
+      };
+    
+      const handleOthersClick = () => {
+        setAppointmentPurpose('others');
+        setShowAuthorization(true);
+      };
 
     if (loading) {
         return <div>Loading...</div>;
@@ -129,6 +146,28 @@ export const BurialCertificate = () => {
     return (
     <div>
         <form id="burialCertificate">
+
+            <div className='purpose card mb-4'>
+              <div className='card-body'>
+                <h5 className='card-title'>Who is the Appointment For?</h5>
+                <div className="d-grid gap-2 d-md-flex justify-content-md-center">
+                  <button type='button' className='personal btn btn-primary' onClick={handlePersonalClick}>Personal</button>
+                  <button type='button' className='others btn btn-primary' onClick={handleOthersClick}>Others</button>
+                </div>
+              </div>
+            </div>
+
+            {showAuthorization && (
+            <div className='authorization card mb-4'>
+              <div className='card-body'>
+                <h5 className='card-title'>Submit Authorization Letter</h5>
+                <p>Submit an authorization letter with a clear image of the signature and a valid ID from the person on whose behalf you are making the appointment. Ensure all details are visible and legible.</p>
+                <div className="d-flex align-items-center mb-3">
+                  <input type="file" className="form-control me-2" id="formFile" required onChange={handleAuthorizationUpload}/>
+                </div>
+              </div>
+            </div>
+            )}
        
             <div className="userDetails card mb-4">
                 <div className="card-body">
@@ -174,30 +213,15 @@ export const BurialCertificate = () => {
                         <label htmlFor="deathCertificate" className="form-label">Death Certificate</label>
                         <input className="form-control" type="file" id="deathCertificate" name="deathCertificate" onChange={handleUploadDeathCert} required/>
                     </div>
-                </div>
-            </div>
 
-        
-            <div className="submitPayment card mb-4">
-                <div className="card-body">
-                    <h5 className="card-title">Submit Payment</h5>
-                    {churchData && churchData.churchQRDetail && churchData.churchInstruction && (
-                        <div>
-                            <p>{churchData.churchInstruction}</p>
-                            <img src={churchData.churchQRDetail} alt="Church QR Code" className="qr-image mx-auto d-block" />
-                        </div>
-                    )}
-                    <br />
-                    <label><strong>Submit your receipt here</strong></label>
-                    <div className="d-flex align-items-center mb-3">
-                        <input className="form-control me-2" type="file" id="formFile" onChange={handleUploadPayment}/>
-                    </div>
                     <div className="d-grid gap-2 d-md-flex justify-content-md-end">
                         <button type="submit" className="btn btn-success me-md-2" onClick={handleSubmit}>Submit Request</button>
                         <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
                     </div>
+
                 </div>
             </div>
+
         </form>
     </div>
 
