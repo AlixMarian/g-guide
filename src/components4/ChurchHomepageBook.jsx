@@ -13,6 +13,7 @@ export const ChurchHomepageBook = () => {
   const [dateToday, setdateToday] = useState(new Date());
   const [matchedDates, setMatchedDates] = useState([]);
   const { churchId } = useParams();
+  // eslint-disable-next-line no-unused-vars
   const [churchData, setChurchData] = useState(null);
   const [services, setServices] = useState({ activeSchedules: [], activeRequests: [] });
   const [selectedServiceType, setSelectedServiceType] = useState('');
@@ -81,10 +82,6 @@ export const ChurchHomepageBook = () => {
     setMatchedDates(availableSlots);
   };
   
-  
-  
-  
-  
   const convertTo12HourFormat = (time) => {
     if (!time || time === "none") return "none";
     const [hours, minutes] = time.split(':');
@@ -103,7 +100,7 @@ export const ChurchHomepageBook = () => {
 
   return (
     <div className="container mt-5">
-      <h2 className="mb-4">Book an Appointment</h2>
+      <h2 className="mb-4">Book Church Services</h2>
   
       <div className="card mb-4">
         <div className="card-body">
@@ -114,7 +111,7 @@ export const ChurchHomepageBook = () => {
                   {selectedServiceType || "Select Service Type"}
               </button>
               <ul className="dropdown-menu" aria-labelledby="servicesTypeDropdown">
-                <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); setSelectedServiceType("Schedule Appointment"); setSelectedService(''); }}>Schedule Appointment</a></li>
+                <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); setSelectedServiceType("Book an Appointment"); setSelectedService(''); }}>Book an Appointment</a></li>
                 <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); setSelectedServiceType("Request Document"); setSelectedService(''); }}>Request Document</a></li>
               </ul>
             </div>
@@ -140,7 +137,7 @@ export const ChurchHomepageBook = () => {
       </div>
 
       <div>
-      {selectedServiceType === "Event" && (
+      {selectedServiceType === "Book an Appointment" && (
         <div className="card mb-4">
           <div className="card-body">
             <h5 className="card-title">Select schedule</h5>
@@ -200,25 +197,6 @@ export const ChurchHomepageBook = () => {
             )}
         </div>
       )}
-  
-      <div className="card mb-4">
-        <div className="card-body">
-          <h5 className="card-title">Submit Payment</h5>
-            {churchData && churchData.churchQRDetail && churchData.churchInstruction &&(
-               <div>
-                <p>{churchData.churchInstruction}</p>
-                <img src={churchData.churchQRDetail} alt="Church QR Code" className="qr-image mx-auto d-block" />
-             </div>
-            )}
-            <br/>
-            <label><strong>Submit your receipt here</strong></label>
-            <div className="d-flex align-items-center mb-3">
-              <input className="form-control me-2" type="file" id="formFile"/>
-              <button type="reset" className="btn btn-danger">Clear</button>
-            </div>
-
-        </div>
-      </div>
     </div>
   );
   

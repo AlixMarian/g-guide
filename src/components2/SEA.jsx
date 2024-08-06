@@ -15,7 +15,7 @@ import {
   getPriestList
 } from '../components2/Services/seaServices';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { Timestamp} from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
 
@@ -40,6 +40,9 @@ export const SEA = () => {
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
   const [userId, setUserId] = useState('');
 
+
+
+  
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -52,15 +55,26 @@ export const SEA = () => {
       }
     });
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
   const fetchData = (creatorId) => {
     getMassList(setMassList, creatorId);
-    getPriestList(setPriestList, creatorId); // Pass creatorId
+    getPriestList(setPriestList, creatorId);
     getEventList(setEventList, creatorId);
     getAnnouncementList(setAnnouncementList, creatorId);
+  };
+
+  const handleSubmit = (e, callback) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const form = e.currentTarget;
+    if (form.checkValidity() === false) {
+      form.classList.add('was-validated');
+    } else {
+      callback();
+    }
   };
 
   const onSubmitMass = () => {
@@ -183,6 +197,7 @@ export const SEA = () => {
     setNewEventPeriod("");
     setNewAnnouncement('');
   };
+  
 
   return (
     <>
@@ -225,11 +240,11 @@ export const SEA = () => {
         <br/>
         <hr/>
         <br/>
-        <h4 >{editingMass ? "Edit Mass Schedule" : "Add Mass Schedule"}</h4>
-        <form className="row g-3">
+        <h4>{editingMass ? "Edit Mass Schedule" : "Add Mass Schedule"}</h4>
+        <form className="row g-3 needs-validation" noValidate onSubmit={(e) => handleSubmit(e, editingMass ? onUpdateMass : onSubmitMass)}>
           <div className="col-md-6">
-            <label htmlFor="dateSelect" className="form-label">Date</label>
-            <select className="form-select" id="dateSelect" value={newMassDate} onChange={(e) => setNewMassDate(e.target.value)}>
+            <label htmlFor="validationTooltip04" className="form-label">Date</label>
+            <select className="form-select" required id="validationTooltip04" value={newMassDate} onChange={(e) => setNewMassDate(e.target.value)}>
               <option value="" disabled>Select a day</option>
               <option value="Monday">Monday</option>
               <option value="Tuesday">Tuesday</option>
@@ -239,51 +254,53 @@ export const SEA = () => {
               <option value="Saturday">Saturday</option>
               <option value="Sunday">Sunday</option>
             </select>
+            <div className="invalid-feedback">Please select a day</div>
           </div>
-          <div className="col-md-5">
+          <div className="col-md-4">
             <label htmlFor="timeInput" className="form-label">Time</label>
-            <input type="text" className="form-control" id="timeInput" placeholder="00:00" value={newMassTime} onChange={(e) => setNewMassTime(e.target.value)} />
+            <input type="time" required className="form-control" id="timeInput" placeholder="00:00" value={newMassTime} onChange={(e) => setNewMassTime(e.target.value)} />
+            <div className="invalid-feedback">Please input a time</div>
           </div>
-          <div className="col-md-1">
+          <div className="col-md-2">
             <label htmlFor="amPmSelect" className="form-label">AM/PM</label>
-            <select className="form-select" id="amPmSelect" value={newMassPeriod} onChange={(e) => setNewMassPeriod(e.target.value)}>
-              <option value="" disabled>Select</option>
+            <select className="form-select" required id="amPmSelect" value={newMassPeriod} onChange={(e) => setNewMassPeriod(e.target.value)}>
+              <option value="" disabled>Select Period</option>
               <option value="AM">AM</option>
               <option value="PM">PM</option>
             </select>
+            <div className="invalid-feedback">Please select a time period</div>
           </div>
-        </form>
-        <form className="row g-3">
-        <div className="col-md-6">
+          <div className="col-md-6">
             <label htmlFor="typeSelect" className="form-label">Type</label>
-            <select className="form-select" id="typeSelect" value={newMassType} onChange={(e) => setNewMassType(e.target.value)}>
+            <select className="form-select" required id="typeSelect" value={newMassType} onChange={(e) => setNewMassType(e.target.value)}>
               <option value="" disabled>Select a mass type</option>
               <option value="Concelebrated">Concelebrated</option>
-              <option value="Normal Mass">Normal Mass</option>
+              <option value="Ordinary Mass">Ordinary Mass</option>
             </select>
+            <div className="invalid-feedback">Please select a mass type</div>
           </div>
           <div className="col-md-6">
             <label htmlFor="languageSelect" className="form-label">Language</label>
-            <select className="form-select" id="languageSelect" value={newMassLanguage} onChange={(e) => setNewMassLanguage(e.target.value)}>
+            <select className="form-select" required id="languageSelect" value={newMassLanguage} onChange={(e) => setNewMassLanguage(e.target.value)}>
               <option value="" disabled>Select a language</option>
               <option value="Cebuano">Cebuano</option>
               <option value="English">English</option>
             </select>
+            <div className="invalid-feedback">Please select a language</div>
           </div>
-        </form>
-        <form className="row g-3">
           <div className="col-md-6">
             <label htmlFor="priestSelect" className="form-label">Presiding Priest</label>
-            <select className="form-select" id="priestSelect" value={newMassPriest} onChange={(e) => setNewMassPriest(e.target.value)}>
+            <select className="form-select" required id="priestSelect" value={newMassPriest} onChange={(e) => setNewMassPriest(e.target.value)}>
               <option value="" disabled>Select a priest</option>
               {priestList.map((priest) => (
                 <option key={priest.id} value={priest.name}>{priest.priestType} {priest.firstName} {priest.lastName}</option>
               ))}
             </select>
+            <div className="invalid-feedback">Please select a priest</div>
           </div>
           <div id='buttons' className="col-md-6">
             <div className="btn-group" role="group">
-              <button type="button" className="btn btn-success" onClick={editingMass ? onUpdateMass : onSubmitMass}>
+              <button type="submit" className="btn btn-success">
                 {editingMass ? 'Confirm changes' : 'Submit'}
               </button>
               <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
@@ -295,87 +312,81 @@ export const SEA = () => {
       {/* Events Section */}
       <div className="events">
         <h1>Events</h1>
-          <table className='table'>
-            <thead>
-              <tr>
-                <th scope="col">Date</th>
-                <th scope="col">Name</th>
-                <th scope="col">Time</th>
-                <th scope="col">AM/PM</th>
-                <th></th>
+        <table className='table'>
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Name</th>
+              <th scope="col">Time</th>
+              <th scope="col">AM/PM</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {eventList.map((events) => (
+              <tr key={events.id}>
+                <td>{events.eventDate}</td>
+                <td>{events.eventName}</td>
+                <td>{events.eventTime}</td>
+                <td>{events.eventPeriod}</td>
+                <td>
+                  <form>
+                    <div className="btn-group" role="group">
+                      <button type="button" className="btn btn-secondary" onClick={() => handleEditEventSchedule(events)}>Edit</button>
+                      <button type="button" className="btn btn-danger" onClick={() => handleDeleteEventSchedule(events.id)}>Delete</button>
+                    </div>
+                  </form>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {eventList.map((events) => (
-                <tr key={events.id}>
-                  <td>
-                    {events.eventDate}
-                  </td>
-                  <td>
-                    {events.eventName}
-                  </td>
-                  <td>
-                    {events.eventTime}
-                  </td>
-                  <td>
-                    {events.eventPeriod}
-                  </td>
-                  <td>
-                    <form>
-                      <div className="btn-group" role="group">
-                        <button type="button" className="btn btn-secondary" onClick={() => handleEditEventSchedule(events)}>Edit</button>
-                        <button type="button" className="btn btn-danger" onClick={() => handleDeleteEventSchedule(events.id)}>Delete</button>
-                      </div>
-                    </form>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            ))}
+          </tbody>
+        </table>
         <br />
         <hr />
         <br/>
         <h4>{editingEvent ? "Edit Event Schedule" : "Add Event Schedule"}</h4>
-        <form className="row g-3">
-        <div className="col-6">
-          <label htmlFor="eventDate" className="form-label">Date</label>
-          <input 
-            type="date"
-            className="form-control" 
-            id="eventDate" 
-            placeholder="MM/DD/YYYY" 
-            pattern="\d{2}/\d{2}/\d{4}" 
-            value={newEventDate} 
-            onChange={(e) => setNewEventDate(e.target.value)} 
-            required 
-          />
-        </div>
+        <form className="row g-3 needs-validation" noValidate onSubmit={(e) => handleSubmit(e, editingEvent ? onUpdateEvent : onSubmitEvent)}>
+          <div className="col-6">
+            <label htmlFor="eventDate" className="form-label">Date</label>
+            <input 
+              type="date"
+              className="form-control" 
+              id="eventDate" 
+              placeholder="MM/DD/YYYY" 
+              pattern="\d{2}/\d{2}/\d{4}" 
+              value={newEventDate} 
+              onChange={(e) => setNewEventDate(e.target.value)} 
+              required 
+            />
+            <div className="invalid-feedback">Please provide a valid date</div>
+          </div>
           <div className="col-md-6">
             <label htmlFor="eventType" className="form-label">Name</label>
             <input type="text" className="form-control" id="eventType" value={newEventName} onChange={(e) => setNewEventName(e.target.value)} required/>
+            <div className="invalid-feedback">Please provide a name</div>
           </div>
-        </form>
-        <form className="row g-3">
-          <div className="col-5">
+          <div className="col-4 ">
             <label htmlFor="eventTime" className="form-label">Time</label>
-            <input type="text" className="form-control" id="eventTime" placeholder="00:00" value={newEventTime} onChange={(e) => setNewEventTime(e.target.value)} required/>
+            <input type="time" className="form-control" id="eventTime" placeholder="00:00" value={newEventTime} onChange={(e) => setNewEventTime(e.target.value)} required/>
+            <div className="invalid-feedback">Please provide a valid time</div>
           </div>
-          <div className="col-md-1">
+          <div className="col-md-2">
             <label htmlFor="eventAmPm" className="form-label">AM/PM</label>
-            <select className="form-select" id="eventAmPm" value={newEventPeriod} onChange={(e) => setNewEventPeriod(e.target.value)}>
-                <option value="" disabled>Select</option>
-                <option value="Am">AM</option>
-                <option value="Pm">PM</option>
+            <select className="form-select" id="eventAmPm" value={newEventPeriod} onChange={(e) => setNewEventPeriod(e.target.value)} required>
+              <option value="" disabled>Select Period</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
             </select>
+            <div className="invalid-feedback">Please select time period</div>
           </div>
           <div id='buttons' className="col-md-6">
-              <div className="btn-group" role="group">
-                  <button type="button" className="btn btn-success" onClick={editingEvent ? onUpdateEvent : onSubmitEvent}>
-                    {editingEvent ? 'Confirm Changes' : 'Submit'}
-                  </button>
-                  <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
-              </div>
-           </div>
+            <div className="btn-group" role="group">
+              <button type="submit" className="btn btn-success">
+                {editingEvent ? 'Confirm Changes' : 'Submit'}
+              </button>
+              <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
+            </div>
+          </div>
         </form>
       </div>
 
@@ -411,16 +422,19 @@ export const SEA = () => {
         <hr />
         <br/>
         <h4>{editingAnnouncement ? "Edit Announcement" : "Add Announcement"}</h4>
-        <label htmlFor="announcementTextarea" className="form-label">Announcements</label>
-        <div className="mb-3">
-          <textarea className="form-control" id="announcementTextarea" rows="5" value={newAnnouncement} onChange={(e) => setNewAnnouncement(e.target.value)}></textarea>
-        </div>
-        <div className="btn-group">
-          <button type="button" className="btn btn-success" onClick={editingAnnouncement ? onUpdateAnnouncement : onSubmitAnnouncement}>
-            {editingAnnouncement ? 'Confirm Changes' : 'Submit'}
-          </button>
-          <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
-        </div>
+        <form className="row g-3 needs-validation" noValidate onSubmit={(e) => handleSubmit(e, editingAnnouncement ? onUpdateAnnouncement : onSubmitAnnouncement)}>
+          <div className="mb-3">
+            <label htmlFor="announcementTextarea" className="form-label">Announcements</label>
+            <textarea className="form-control" id="announcementTextarea" rows="5" value={newAnnouncement} onChange={(e) => setNewAnnouncement(e.target.value)} required></textarea>
+            <div className="invalid-feedback">Please provide an announcement</div>
+          </div>
+          <div className="btn-group">
+            <button type="submit" className="btn btn-success">
+              {editingAnnouncement ? 'Confirm Changes' : 'Submit'}
+            </button>
+            <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
+          </div>
+        </form>
       </div>
     </>
   );
