@@ -30,16 +30,16 @@ export const ViewAppointments = () => {
           const userAppointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setAppointments(userAppointments);
 
-          // Extract unique church IDs from the appointments
+          
           const churchIds = [...new Set(userAppointments.map(app => app.churchId))];
 
-          // Fetch churches for the extracted church IDs
+          
           if (churchIds.length > 0) {
             const churchesData = await Promise.all(
               churchIds.map(id => getDoc(doc(db, 'church', id)))
             );
 
-            // Create a mapping of churchId to church data
+            
             const churchMap = churchesData.reduce((acc, doc) => {
               if (doc.exists()) {
                 acc[doc.id] = doc.data();
@@ -143,41 +143,6 @@ export const ViewAppointments = () => {
         <div className="col-12 mb-4">
             <button type="button" className="btn btn-primary" onClick={handleBackToHomepage}>Back to Homepage</button>
           </div>
-          <div className="col-12 mb-4">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Pending Appointments</h5>
-                <div className="row">
-                  {appointments.length > 0 ? (
-                    appointments
-                      .filter(appointment => appointment.appointmentStatus === "pending")
-                      .map(appointment => {
-                        const church = churches[appointment.churchId];
-                        return (
-                          <div key={appointment.id} className="col-12 mb-3">
-                            <div className="card">
-                              <div className="card-body d-flex align-items-center justify-content-between">
-                                <div>
-                                  <h5 className="card-title mb-0">{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</h5>
-                                  <p className="card-text mb-0"><b>Status: {appointment.appointmentStatus}</b></p>
-                                  {church && (
-                                    <p className='card-text mb-0'>Church Name: {church.churchName}</p>
-                                  )}
-                                </div>
-                                  <button className='btn btn-info' onClick={() => handleShowModal(appointment)}>View Information</button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })
-                  ) : (
-                    <p>No appointments found.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div className="col-12 mb-4">
             <div className="card">
               <div className="card-body">
