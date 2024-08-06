@@ -74,12 +74,12 @@ export const BurialCertificate = () => {
             try {
                 
                     
-                if (authorizationImageFile) {
-                    const storageRef = ref(storage, `userAuthorizationLetter/${user.uid}/${authorizationImageFile.name}`);
-                    await uploadBytes(storageRef, authorizationImageFile);
-                    const fileUrl = await getDownloadURL(storageRef);
-                    setAuthorizationImageUrl(fileUrl);
-                  }
+              let authorizationImageUrl = 'none';
+              if (authorizationImageFile) {
+                  const storageRef = ref(storage, `userAuthorizationLetter/${user.uid}/${authorizationImageFile.name}`);
+                  await uploadBytes(storageRef, authorizationImageFile);
+                  authorizationImageUrl = await getDownloadURL(storageRef);
+              }
 
                     
                     const deathCertRef = ref(storage, `userRequirementSubmissions/${user.uid}/${deathCert.name}`);
@@ -92,7 +92,8 @@ export const BurialCertificate = () => {
                   appointmentType: 'burialCertificate',
                   appointmentStatus: 'pending',
                   appointmentPurpose: appointmentPurpose,
-                  authorizationLetter: authorizationImageUrl || 'none',
+                  authorizationLetter: authorizationImageUrl,
+                  paymentImage: 'none',
                   churchId: churchId,
                   userFields: {
                     requesterId: user.uid,
@@ -145,7 +146,7 @@ export const BurialCertificate = () => {
 
     return (
     <div>
-        <form id="burialCertificate">
+        <form id="burialCertificate" onSubmit={handleSubmit}>
 
             <div className='purpose card mb-4'>
               <div className='card-body'>
@@ -215,7 +216,7 @@ export const BurialCertificate = () => {
                     </div>
 
                     <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" className="btn btn-success me-md-2" onClick={handleSubmit}>Submit Request</button>
+                        <button type="submit" className="btn btn-success me-md-2">Submit Request</button>
                         <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
                     </div>
 

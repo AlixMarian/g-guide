@@ -78,19 +78,20 @@ export const MarriageCertificate = () => {
     if (user){
         try {
             
-            if (authorizationImageFile) {
-                const storageRef = ref(storage, `userAuthorizationLetter/${user.uid}/${authorizationImageFile.name}`);
-                await uploadBytes(storageRef, authorizationImageFile);
-                const fileUrl = await getDownloadURL(storageRef);
-                setAuthorizationImageUrl(fileUrl);
-              }
+          let authorizationImageUrl = 'none';
+          if (authorizationImageFile) {
+              const storageRef = ref(storage, `userAuthorizationLetter/${user.uid}/${authorizationImageFile.name}`);
+              await uploadBytes(storageRef, authorizationImageFile);
+              authorizationImageUrl = await getDownloadURL(storageRef);
+          }
 
                 
             const appointmentData = {
               appointmentType: 'marriageCertificate',
               appointmentStatus: 'pending',
               appointmentPurpose: appointmentPurpose,
-              authorizationLetter: authorizationImageUrl || 'none',
+              authorizationLetter: authorizationImageUrl,
+              paymentImage: 'none',
               churchId: churchId,
               userFields: {
                 requesterId: user.uid,
@@ -152,7 +153,7 @@ export const MarriageCertificate = () => {
 
     return (
         <div>
-        <form id="marriageCert">
+        <form id="marriageCert" onSubmit={handleSubmit}>
             <div className='purpose card mb-4'>
               <div className='card-body'>
                 <h5 className='card-title'>Who is the Appointment For?</h5>
@@ -247,7 +248,7 @@ export const MarriageCertificate = () => {
                     </div>
 
                     <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" className="btn btn-success me-md-2" onClick={handleSubmit}>Submit Request</button>
+                        <button type="submit" className="btn btn-success me-md-2">Submit Request</button>
                         <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
                     </div>
                 </div>

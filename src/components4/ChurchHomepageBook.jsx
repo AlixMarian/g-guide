@@ -118,7 +118,7 @@ export const ChurchHomepageBook = () => {
             {selectedServiceType && (
               <div className="dropdown">
                 <button className="btn btn-secondary dropdown-toggle" type="button" id="servicesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                  {selectedService || "Select Service"}
+                  {selectedService || "Select Type"}
                 </button>
                 <ul className="dropdown-menu" aria-labelledby="servicesDropdown">
                   {selectedServiceType === "Event" && services.activeSchedules.map((service, index) => (
