@@ -536,5 +536,11 @@ ul{
   margin: 10px;
 }
 
+.custom-modal .modal-content {
+  background-color: rgb(255, 176, 170);
+  color: black; 
+  width: 70%;
+  margin: auto;
 
+}
 
