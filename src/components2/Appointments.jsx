@@ -19,6 +19,9 @@ export const Appointments = () => {
     const [approvedAppointments, setapprovedAppointments] = useState([]);
     const [deniedAppointments, setdeniedAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [showDenyModal, setShowDenyModal] = useState(false);
+    const [denialReason, setDenialReason] = useState('');
+
 
     const handleShowModal = (appointment) => {
         setSelectedAppointment(appointment);
@@ -47,7 +50,7 @@ export const Appointments = () => {
         try {
             const appointmentRef = doc(db, "appointments", selectedAppointment.id);
             await updateDoc(appointmentRef, {
-                appointmentStatus: "approved"
+                appointmentStatus: "Approved"
             });
 
             sendEmail(selectedAppointment.userFields?.requesterEmail, "Appointment Approved", "Your appointment has been approved.");
@@ -60,20 +63,29 @@ export const Appointments = () => {
 
     const handleDeny = async () => {
         if (!selectedAppointment) return;
-
+        setShowDenyModal(true);
+    };
+    
+    const handleSubmitDenial = async () => {
+        if (!selectedAppointment) return;
+    
         try {
             const appointmentRef = doc(db, "appointments", selectedAppointment.id);
             await updateDoc(appointmentRef, {
-                appointmentStatus: "denied"
+                appointmentStatus: "Denied",
+                denialReason: denialReason
             });
-
-            sendEmail(selectedAppointment.userFields?.requesterEmail, "Appointment Denied", "Your appointment has been denied.");
+    
+            sendEmail(selectedAppointment.userFields?.requesterEmail, "Appointment Denied", `Your appointment has been denied. Reason: ${denialReason}`);
             toast.success('Appointment denied successfully!');
+            setShowDenyModal(false);
+            setDenialReason('');
             handleCloseModal();
         } catch (error) {
             console.error("Error updating document: ", error);
         }
     };
+    
 
     const appointmentTypeMapping = {
         marriageCertificate: "Marriage Certificate",
@@ -149,33 +161,35 @@ export const Appointments = () => {
         <>
             <div className="appoinmentsPage"></div>
 
-            <h1>Appointments</h1>
-            <div className="dropdown">
-                <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                    Filter by
-                </button>
-                <form className="dropdown-menu p-4">
-                    <div className="mb-3">
-                        <label className="form-label">Date</label>
-                        <DatePicker
-                            className='form-control'
-                            selected={selectedDate}
-                            onChange={date => setSelectedDate(date)}
-                            showYearDropdown
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            Appointment Type
-                        </button>
-                        <ul className="dropdown-menu">
-                            <li><a className="dropdown-item" href="#" onClick={() => handleTypeChange("All Documents")}>All Documents</a></li>
-                            {Object.values(appointmentTypeMapping).map(type => (
-                                <li key={type}><a className="dropdown-item" href="#" onClick={() => handleTypeChange(type)}>{type}</a></li>
-                            ))}
-                        </ul>
-                    </div>
-                </form>
+            <div className="d-flex align-items-center mb-3">
+                <h1 className="me-3">Appointments</h1>
+                <div className="dropdown">
+                    <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                        Filter by
+                    </button>
+                    <form className="dropdown-menu p-4">
+                        <div className="mb-3">
+                            <label className="form-label">Date</label>
+                            <DatePicker
+                                className='form-control'
+                                selected={selectedDate}
+                                onChange={date => setSelectedDate(date)}
+                                showYearDropdown
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <button type="button" className="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                Appointment Type
+                            </button>
+                            <ul className="dropdown-menu">
+                                <li><a className="dropdown-item" href="#" onClick={() => handleTypeChange("All Documents")}>All Documents</a></li>
+                                {Object.values(appointmentTypeMapping).map(type => (
+                                    <li key={type}><a className="dropdown-item" href="#" onClick={() => handleTypeChange(type)}>{type}</a></li>
+                                ))}
+                            </ul>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <div className="Appointments">
@@ -190,6 +204,7 @@ export const Appointments = () => {
                             <th scope="col">Appointment Type</th>
                             <th scope="col">Requested by:</th>
                             <th scope="col">More Info</th>
+                            <th scope="col">Send SMS</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -203,6 +218,12 @@ export const Appointments = () => {
                                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="20" fill="currentColor" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
                                             <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2" />
                                         </svg>
+                                    </Button>
+                                </td>
+                                <td>
+                                    <Button>
+                                    {/* <Button variant="info" onClick={() => handleShowModal(appointment)}> */}
+                                        <i className="bi bi-chat-text"></i> 
                                     </Button>
                                 </td>
                             </tr>
@@ -287,6 +308,7 @@ export const Appointments = () => {
                     {selectedAppointment && (
                         <div>
                             <p><strong>Appointment Status:</strong> {selectedAppointment.appointmentStatus}</p>
+                            <p><strong>Appointment Option:</strong></p>
                             <p><strong>Appointment Type:</strong> {appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType}</p>
                             {selectedAppointment.appointmentType === "confirmationCertificate" && (
                                 <>
@@ -321,7 +343,11 @@ export const Appointments = () => {
                                 </>
                             )}
                             <p><strong>Date of Request:</strong> {formatDate(selectedAppointment.userFields?.dateOfRequest)}</p>
-                            <p><strong>Payment Image:</strong> <a href={selectedAppointment.userFields?.paymentImage} target="_blank" rel="noopener noreferrer">View Image</a></p>
+                            <p><strong>Payment Receipt Image: </strong> {selectedAppointment.userFields?.paymentImage ? (
+                                <a href={selectedAppointment.userFields?.paymentImage} target="_blank" rel="noopener noreferrer">View Image</a>
+                            ) : (
+                                <span style={{ color: 'red' }}>Pending Payment</span>
+                            )}</p>
                             <p><strong>Requester Contact:</strong> {selectedAppointment.userFields?.requesterContact}</p>
                             <p><strong>Requester Email:</strong> {selectedAppointment.userFields?.requesterEmail}</p>
                             <p><strong>Requester Name:</strong> {selectedAppointment.userFields?.requesterName}</p>
@@ -329,20 +355,44 @@ export const Appointments = () => {
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="primary" onClick={handleSendSms}>
-                        Send SMS
-                    </Button>
                     <Button variant="success" onClick={handleApprove}>
                         Approve
                     </Button>
                     <Button variant="danger" onClick={handleDeny}>
                         Deny
                     </Button>
-                    <Button variant="secondary" onClick={handleCloseModal}>
-                        Close
-                    </Button>
                 </Modal.Footer>
             </Modal>
+
+
+            <Modal show={showDenyModal} onHide={() => setShowDenyModal(false)} className="custom-modal" dialogClassName="modal-dialog-centered">
+                <Modal.Header closeButton>
+                    <Modal.Title>Deny Appointment</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form.Group controlId="denialReason">
+                        <Form.Label>Reason for Denial:</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={3}
+                            value={denialReason}
+                            onChange={(e) => setDenialReason(e.target.value)}
+                            placeholder="Enter reason for denial"
+                            style={{ resize: 'vertical' }}
+                        />
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" onClick={() => setShowDenyModal(false)}>Cancel</Button>
+                    <Button variant="success" onClick={handleSubmitDenial}>Submit</Button>
+                    <p style={{ fontSize: '12px', textAlign: 'center', margin: '0 auto', marginTop: '1rem' }}>Note: This message will send to both Email and SMS</p>
+                    
+                    </Modal.Footer>
+            </Modal>
+
+
+
+
         </>
     );
 };
