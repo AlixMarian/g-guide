@@ -7,12 +7,10 @@ import { toast } from 'react-toastify';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "/backend/firebase";
 import '../websiteUser.css';
+import { Modal} from 'react-bootstrap';
 
 export const SignUpCoord = () => {
-  const handleSEA = (event) => {
-    event.preventDefault();
-    navigate('/SEA');
-  };
+  const [showDataConsentModal, setShowDataConsentModal] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -100,6 +98,9 @@ export const SignUpCoord = () => {
       toast.error(error.message);
     }
   };
+
+  const handleShowDataConsentModal = () => setShowDataConsentModal(true);
+  const handleCloseDataConsentModal = () => setShowDataConsentModal(false);
   
   return (
     <div className="coord-signup-container">
@@ -275,7 +276,7 @@ export const SignUpCoord = () => {
                     <input
                       type="text"
                       className="form-control"
-                      id="churchAddress"
+                      id="churchInstruction"
                       value={formData.churchInstruction}
                       onChange={handleChange}
                       placeholder='Please enter instructions here, such as the charge per transaction.'
@@ -296,25 +297,65 @@ export const SignUpCoord = () => {
                       checked={formData.dataConsent}
                       onChange={handleChange}
                     />
-                <label className="form-check-label" htmlFor="dataConsent">
-                  <b>Data Consent</b>
+                <label className="form-check-label" htmlFor="dataConsent" >
+                    <b>I agree to the 
+                      <label className='form-check-label ms-1'onClick={handleShowDataConsentModal} style={{ color: 'blue' }}> G! Guide Data Privacy Policy</label> 
+                    </b>
                 </label>
               </div>
             </div>
 
-            <div className="col-12 d-flex flex-column align-items-center">
-              <div className="d-flex justify-content-center gap-2 mb-2">
+            <div className="col-12 d-flex flex-column align-items-center mt-3">
+            <div className="d-flex justify-content-center gap-2 mb-2">
                 <button type="reset" className="btn btn-outline-primary">Clear Form</button>
                 <button type="submit" className="btn btn-primary">Sign Up</button>
-              </div>
-              <div className="w-100 text-center">
-                <button type="button" className="btn btn-primary" onClick={handleSEA}>Shortcut to churchCoordinator</button>
               </div>
             </div>
             </form>
           </div>
         </div>
       </div>
+      <Modal show={showDataConsentModal} onHide={handleCloseDataConsentModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>G! Guide Data Privacy Policy</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Welcome to G! Guide. As a church coordinator, your role is vital in managing church services and overseeing bookings from our website users. This policy outlines the types of information we collect from you and how we use and store it.</p>
+          <h5>1. Information We Collect</h5>
+          <p>Upon registration, we collect:</p>
+          <p><b>Account Handler Information</b></p>
+          <ul className='ms-5'>
+            <li>First Name</li>
+            <li>Last Name</li>
+            <li>Contact Number</li>
+            <li>Email Address</li>
+          </ul>
+          <p><b>Church Information</b></p>
+          <ul className='ms-5'>
+            <li>Church Name</li>
+            <li>Church Address</li>
+            <li>Church Email Address</li>
+            <li>Church Contact Number</li>
+            <li>Proof of Affiliation</li>
+            <li>G-Cash or Bank QR Image</li>
+            <li>Instructions for Service Transactions</li>
+          </ul>
+          <h5>2. How We Use Your Information</h5>
+          <p>The information we collect is used to:</p>
+          <ul className='ms-5'>
+            <li>Create and manage your coordinator account</li>
+            <li>Facilitate the management of church services and bookings</li>
+            <li>Verify your affiliation with the church</li>
+            <li>Communicate with you regarding your responsibilities and our services</li>
+            <li>Process transactions related to church services</li>
+          </ul>
+          <h5>Changes to This Policy</h5>
+          <p>We may update this privacy policy from time to time. Any changes will be posted on this page, and we will notify you via email or through our app.</p>
+          <h5>Contact Us</h5>
+          <p>If you have any questions or concerns about this privacy policy or our data practices, please contact us at <b>g!guide@gmail.com</b>.</p>
+        </Modal.Body>
+      </Modal>
+
     </div>
   );
 };

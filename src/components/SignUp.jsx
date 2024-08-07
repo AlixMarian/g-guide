@@ -6,10 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import '../websiteUser.css';
 import { toast } from 'react-toastify';
 import useChatbot from './Chatbot';
+import { Modal} from 'react-bootstrap';
 
 
-const SignUp = () => {
+export const SignUp = () => {
   useChatbot();
+  const [showDataConsentModal, setShowDataConsentModal] = useState(false);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -48,7 +50,6 @@ const SignUp = () => {
 
       try {
         await sendEmailVerification(user);
-        // Save user details to Firestore
         await setDoc(doc(db, 'users', user.uid), {
           lastName: formData.lastName,
           firstName: formData.firstName,
@@ -84,6 +85,9 @@ const SignUp = () => {
     event.preventDefault();
     navigate('/signup-coord');
   };
+
+  const handleShowDataConsentModal = () => setShowDataConsentModal(true);
+  const handleCloseDataConsentModal = () => setShowDataConsentModal(false);
 
   return (
     <div className="signup-container">
@@ -190,8 +194,10 @@ const SignUp = () => {
                     checked={formData.dataConsent}
                     onChange={handleChange}
                   />
-                  <label className="form-check-label" htmlFor="dataConsent">
-                    <b>Data Consent</b>
+                  <label className="form-check-label" htmlFor="dataConsent" >
+                    <b>I agree to the 
+                      <label className='form-check-label ms-1'onClick={handleShowDataConsentModal} style={{ color: 'blue' }}> G! Guide Data Privacy Policy</label> 
+                    </b>
                   </label>
                 </div>
               </div>
@@ -214,6 +220,38 @@ const SignUp = () => {
           </div>
         </div>
       </div>
+
+      <Modal show={showDataConsentModal} onHide={handleCloseDataConsentModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>G! Guide Data Privacy Policy</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Welcome to G! Guide. Your privacy is of utmost importance to us. This policy outlines the types of personal information we collect and how we use and store it.</p>
+          <h5>1. Information We Collect</h5>
+          <p><strong>1.1 Personal Information:</strong> When you sign up for G! Guide, we collect the following:</p>
+          <ul className='ms-5'>
+            <li>First and Last Name</li>
+            <li>Contact Number</li>
+            <li>Email Address</li>
+          </ul>
+          <p><strong>1.2 Booking Information:</strong> If you book a church service or request church documents on behalf of another person, we collect:</p>
+          <ul className='ms-5'>
+            <li>Authorization letter containing a clear image of the signature and any valid ID of the person authorizing you</li>
+          </ul>
+          <h5>2. How We Use Your Information</h5>
+          <p>The information we collect is used to:</p>
+          <ul className='ms-5'>
+            <li>Create and manage your account</li>
+            <li>Facilitate church service bookings and document requests</li>
+            <li>Communicate with you regarding your bookings and services</li>
+            <li>Guarantee that you have the necessary authority to book a service using another person’s details</li>
+          </ul>
+          <h5>Changes to This Policy</h5>
+          <p>We may update this privacy policy from time to time. Any changes will be posted on this page, and we will notify you via email or through our app.</p>
+          <h5>Contact Us</h5>
+          <p>If you have any questions or concerns about this privacy policy or our data practices, please contact us at <b>g!guide@gmail.com</b>.</p>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
