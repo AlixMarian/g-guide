@@ -17,7 +17,6 @@ export const Listpriest = () => {
   const [userId, setUserId] = useState("");
   const priestCollectionRef = collection(db, "priest");
 
-
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -45,18 +44,58 @@ export const Listpriest = () => {
     }
   };
 
-  const onSubmitPriest = async () => {
+  const handleSubmit = (e, callback) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const form = e.currentTarget;
+    if (form.checkValidity() === false) {
+      form.classList.add('was-validated');
+    } else {
+      callback();
+    }
+  };
+
+  const onSubmitPriest = () => {
+    const priestData = {
+      priestType: newPriestType,
+      firstName: newPriestFirstName,
+      lastName: newPriestLastName,
+      creatorId: userId 
+    };
+    addPriest(priestData);
+  };
+
+  const onUpdatePriest = () => {
+    const priestData = {
+      priestType: updatedPriestType,
+      firstName: updatedPriestFirstName,
+      lastName: updatedPriestLastName
+    };
+    updatePriestData(editingPriest.id, priestData);
+  };
+
+  const addPriest = async (priestData) => {
     try {
-      await addDoc(priestCollectionRef, {
-        priestType: newPriestType,
-        firstName: newPriestFirstName,
-        lastName: newPriestLastName,
-        creatorId: userId 
-      });
+      await addDoc(priestCollectionRef, priestData);
       toast.success('Priest added successfully!');
       getPriestList(userId);
+      clearForm();
     } catch (err) {
       toast.error('Error adding priest!');
+      console.error(err);
+    }
+  };
+
+  const updatePriestData = async (id, priestData) => {
+    const priestDoc = doc(db, "priest", id);
+    try {
+      await updateDoc(priestDoc, priestData);
+      toast.success('Priest updated successfully!');
+      getPriestList(userId); 
+      clearForm();
+    } catch (err) {
+      toast.error('Error updating priest!');
       console.error(err);
     }
   };
@@ -69,22 +108,6 @@ export const Listpriest = () => {
       getPriestList(userId); 
     } catch (err) {
       toast.error('Error deleting priest!');
-      console.error(err);
-    }
-  };
-
-  const updatePriest = async (id) => {
-    const priestDoc = doc(db, "priest", id);
-    try {
-      await updateDoc(priestDoc, {
-        priestType: updatedPriestType,
-        firstName: updatedPriestFirstName,
-        lastName: updatedPriestLastName
-      });
-      toast.success('Priest updated successfully!');
-      getPriestList(userId); 
-    } catch (err) {
-      toast.error('Error updating priest!');
       console.error(err);
     }
   };
@@ -136,36 +159,38 @@ export const Listpriest = () => {
       </table>
 
       <div className="events">
-        <form className="row g-3">
+        <form className="row g-3 needs-validation" noValidate onSubmit={(e) => handleSubmit(e, editingPriest ? onUpdatePriest : onSubmitPriest)}>
           <h3>{editingPriest ? "Edit Priest" : "Add a Priest"}</h3>
-          <div className="col-6">
-            <label className="form-label">First Name</label>
-            <input type="text" className="form-control"
-              value={editingPriest ? updatedPriestFirstName : newPriestFirstName}
-              onChange={(e) => editingPriest ? setUpdatedPriestFirstName(e.target.value) : setNewPriestFirstName(e.target.value)}
-            />
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Last Name</label>
-            <input type="text" className="form-control"
-              value={editingPriest ? updatedPriestLastName : newPriestLastName}
-              onChange={(e) => editingPriest ? setUpdatedPriestLastName(e.target.value) : setNewPriestLastName(e.target.value)}
-            />
-          </div>
-          <div className="col-6">
-            <label className="form-label">Position</label>
-            <input type="text" className="form-control"
+          <div className="col-md-4">
+            <label className="form-label" htmlFor="priestType">Position</label>
+            <input type="text" className="form-control" id="priestType"
               value={editingPriest ? updatedPriestType : newPriestType}
               onChange={(e) => editingPriest ? setUpdatedPriestType(e.target.value) : setNewPriestType(e.target.value)}
-            />
+              required/>
+            <div className="invalid-feedback">Please provide a position.</div>
           </div>
-          <div className="col-md-6">
-            <label className="form-label d-block">Confirm</label>
-            <div className="btn-group" role="group">
-              <button type="button" className="btn btn-success" onClick={editingPriest ? () => updatePriest(editingPriest.id) : onSubmitPriest}>
-                {editingPriest ? "Confirm Changes" : "Confirm Change"}
+          <div className="col-md-4">
+            <label className="form-label" htmlFor="priestFirstName">First Name</label>
+            <input type="text" className="form-control" id="priestFirstName"
+              value={editingPriest ? updatedPriestFirstName : newPriestFirstName}
+              onChange={(e) => editingPriest ? setUpdatedPriestFirstName(e.target.value) : setNewPriestFirstName(e.target.value)}
+              required/>
+            <div className="invalid-feedback">Please provide a first name.</div>
+          </div>
+          <div className="col-md-4">
+            <label className="form-label" htmlFor="priestLastName">Last Name</label>
+            <input type="text" className="form-control" id="priestLastName"
+              value={editingPriest ? updatedPriestLastName : newPriestLastName}
+              onChange={(e) => editingPriest ? setUpdatedPriestLastName(e.target.value) : setNewPriestLastName(e.target.value)}
+              required/>
+            <div className="invalid-feedback">Please provide a last name.</div>
+          </div>
+          <div className="col-12" >
+            <div className="btn-group" role="group" >
+              <button type="submit" className="btn btn-success">
+                {editingPriest ? "Confirm Changes" : "Submit"}
               </button>
-              <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
+              <button type="button" className="btn btn-secondary" onClick={clearForm}>Clear</button>
             </div>
           </div>
         </form>
