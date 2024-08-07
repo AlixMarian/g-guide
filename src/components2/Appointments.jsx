@@ -13,19 +13,24 @@ export const Appointments = () => {
     const [selectedType, setSelectedType] = useState("All Documents");
     const [showModal, setShowModal] = useState(false);
     const [smsContent, setSmsContent] = useState('');
-    const [startDate, setStartDate] = useState(new Date()); 
+    const [startDate, setStartDate] = useState(new Date());
     const [formattedDate, setFormattedDate] = useState('');
     const [pendingAppointments, setPendingAppointments] = useState([]);
+    const [forPaymentAppointments, setForPaymentAppointments] = useState([]);
     const [approvedAppointments, setapprovedAppointments] = useState([]);
     const [deniedAppointments, setdeniedAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [showDenyModal, setShowDenyModal] = useState(false);
     const [denialReason, setDenialReason] = useState('');
 
-
     const handleShowModal = (appointment) => {
         setSelectedAppointment(appointment);
-        setShowModal(true);
+        // Check payment status here and update if necessary
+        if (appointment.userFields?.paymentImage && appointment.appointmentStatus === 'pending') {
+            handleForPayment(appointment);
+        } else {
+            setShowModal(true);
+        }
     };
 
     const handleCloseModal = () => {
@@ -61,21 +66,39 @@ export const Appointments = () => {
         }
     };
 
-    const handleDeny = async () => {
+    const handleForPayment = async (appointment) => {
+        if (!appointment) return;
+
+        try {
+            const appointmentRef = doc(db, "appointments", appointment.id);
+            await updateDoc(appointmentRef, {
+                appointmentStatus: "For Payment"
+            });
+
+            sendEmail(appointment.userFields?.requesterEmail, "Appointment Pending for Payment", "Your appointment is now pending for payment.");
+            toast.success('Appointment pending for payment.');
+            setSelectedAppointment({ ...appointment, appointmentStatus: 'For Payment' });
+            setShowModal(true);
+        } catch (error) {
+            console.error("Error updating document: ", error);
+        }
+    };
+
+    const handleDeny = () => {
         if (!selectedAppointment) return;
         setShowDenyModal(true);
     };
-    
+
     const handleSubmitDenial = async () => {
         if (!selectedAppointment) return;
-    
+
         try {
             const appointmentRef = doc(db, "appointments", selectedAppointment.id);
             await updateDoc(appointmentRef, {
                 appointmentStatus: "Denied",
                 denialReason: denialReason
             });
-    
+
             sendEmail(selectedAppointment.userFields?.requesterEmail, "Appointment Denied", `Your appointment has been denied. Reason: ${denialReason}`);
             toast.success('Appointment denied successfully!');
             setShowDenyModal(false);
@@ -85,7 +108,6 @@ export const Appointments = () => {
             console.error("Error updating document: ", error);
         }
     };
-    
 
     const appointmentTypeMapping = {
         marriageCertificate: "Marriage Certificate",
@@ -115,14 +137,21 @@ export const Appointments = () => {
     useEffect(() => {
         const fetchAppointments = async () => {
             const pendingQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "pending"));
+            const paymentQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "For Payment"));
             const approvedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "approved"));
             const deniedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "denied"));
-            
+
             const pendingSnapshot = await getDocs(pendingQuery);
+            const paymentSnapshot = await getDocs(paymentQuery);
             const approvedSnapshot = await getDocs(approvedQuery);
             const deniedSnapshot = await getDocs(deniedQuery);
-            
+
             const pendingAppointmentsData = pendingSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            const forPaymentAppointmentsData = paymentSnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
@@ -138,10 +167,12 @@ export const Appointments = () => {
             }));
 
             console.log("Pending Appointments:", pendingAppointmentsData);
-            console.log("approved Appointments:", approvedAppointmentsData);
-            console.log("denied Appointments:", deniedAppointmentsData);
+            console.log("For Payment Appointments:", forPaymentAppointmentsData);
+            console.log("Approved Appointments:", approvedAppointmentsData);
+            console.log("Denied Appointments:", deniedAppointmentsData);
 
             setPendingAppointments(pendingAppointmentsData);
+            setForPaymentAppointments(forPaymentAppointmentsData);
             setapprovedAppointments(approvedAppointmentsData);
             setdeniedAppointments(deniedAppointmentsData);
         };
@@ -194,7 +225,7 @@ export const Appointments = () => {
 
             <div className="Appointments">
                 <div className="titleFilter">
-                    <h3>Pending Appointments:</h3>
+                    <h3>Pending Appointments</h3>
                 </div>
                 <br />
                 <table className="table">
@@ -215,15 +246,49 @@ export const Appointments = () => {
                                 <td>{appointment.userFields?.requesterName}</td>
                                 <td>
                                     <Button variant="info" onClick={() => handleShowModal(appointment)}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="20" fill="currentColor" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2" />
-                                        </svg>
+                                        <i className="bi bi-info-circle-fill"></i>
                                     </Button>
                                 </td>
                                 <td>
                                     <Button>
-                                    {/* <Button variant="info" onClick={() => handleShowModal(appointment)}> */}
-                                        <i className="bi bi-chat-text"></i> 
+                                        <i className="bi bi-chat-text"></i>
+                                    </Button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            <div className="Appointments">
+                <div className="titleFilter">
+                    <h3>For Payment Appointments</h3>
+                </div>
+                <br />
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date of Request</th>
+                            <th scope="col">Appointment Type</th>
+                            <th scope="col">Requested by:</th>
+                            <th scope="col">More Info</th>
+                            <th scope="col">Send SMS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredAppointments(forPaymentAppointments).map((appointment, index) => (
+                            <tr key={index}>
+                                <td>{formatDate(appointment.userFields?.dateOfRequest)}</td>
+                                <td>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
+                                <td>{appointment.userFields?.requesterName}</td>
+                                <td>
+                                    <Button variant="info" onClick={() => handleShowModal(appointment)}>
+                                        <i className="bi bi-info-circle-fill"></i>
+                                    </Button>
+                                </td>
+                                <td>
+                                    <Button>
+                                        <i className="bi bi-chat-text"></i>
                                     </Button>
                                 </td>
                             </tr>
@@ -235,7 +300,7 @@ export const Appointments = () => {
             <div className="appointmentsView">
                 <div className="Appointments2">
                     <div className="titleFilter">
-                        <h3>Approved Appointments:</h3>
+                        <h3>Approved Appointments</h3>
                     </div>
                     <br />
                     <table className="table">
@@ -255,9 +320,7 @@ export const Appointments = () => {
                                     <td>{appointment.userFields?.requesterName}</td>
                                     <td>
                                         <Button variant="info" onClick={() => handleShowModal(appointment)}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="20" fill="currentColor" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2" />
-                                            </svg>
+                                            <i className="bi bi-info-circle-fill"></i>
                                         </Button>
                                     </td>
                                 </tr>
@@ -268,7 +331,7 @@ export const Appointments = () => {
 
                 <div className="Appointments2">
                     <div className="titleFilter">
-                        <h3>Denied Appointments:</h3>
+                        <h3>Denied Appointments</h3>
                     </div>
                     <br />
                     <table className="table">
@@ -288,9 +351,7 @@ export const Appointments = () => {
                                     <td>{appointment.userFields?.requesterName}</td>
                                     <td>
                                         <Button variant="info" onClick={() => handleShowModal(appointment)}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="20" fill="currentColor" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2" />
-                                            </svg>
+                                            <i className="bi bi-info-circle-fill"></i>
                                         </Button>
                                     </td>
                                 </tr>
@@ -308,7 +369,7 @@ export const Appointments = () => {
                     {selectedAppointment && (
                         <div>
                             <p><strong>Appointment Status:</strong> {selectedAppointment.appointmentStatus}</p>
-                            <p><strong>Appointment Option:</strong></p>
+                            <p><strong>Appointment Option:</strong> {selectedAppointment.appointmentPurpose} </p>
                             <p><strong>Appointment Type:</strong> {appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType}</p>
                             {selectedAppointment.appointmentType === "confirmationCertificate" && (
                                 <>
@@ -355,15 +416,21 @@ export const Appointments = () => {
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="success" onClick={handleApprove}>
-                        Approve
-                    </Button>
+                    {selectedAppointment?.appointmentStatus !== 'For Payment' && (
+                        <Button variant="primary" style={{ backgroundColor: 'blue', borderColor: 'blue' }} onClick={handleForPayment}>
+                            For Payment
+                        </Button>
+                    )}
+                    {selectedAppointment?.appointmentStatus !== 'pending' && (
+                        <Button variant="success" onClick={handleApprove}>
+                            Approve
+                        </Button>
+                    )}
                     <Button variant="danger" onClick={handleDeny}>
                         Deny
                     </Button>
                 </Modal.Footer>
             </Modal>
-
 
             <Modal show={showDenyModal} onHide={() => setShowDenyModal(false)} className="custom-modal" dialogClassName="modal-dialog-centered">
                 <Modal.Header closeButton>
@@ -386,13 +453,8 @@ export const Appointments = () => {
                     <Button variant="danger" onClick={() => setShowDenyModal(false)}>Cancel</Button>
                     <Button variant="success" onClick={handleSubmitDenial}>Submit</Button>
                     <p style={{ fontSize: '12px', textAlign: 'center', margin: '0 auto', marginTop: '1rem' }}>Note: This message will send to both Email and SMS</p>
-                    
-                    </Modal.Footer>
+                </Modal.Footer>
             </Modal>
-
-
-
-
         </>
     );
 };
