@@ -5,8 +5,9 @@ import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firesto
 import { db } from '/backend/firebase';
 import '../websiteUser.css';
 import useChatbot from './Chatbot';
-import { Modal, Button} from 'react-bootstrap'; 
+import { Modal} from 'react-bootstrap'; 
 import { toast } from 'react-toastify';
+import Pagination from 'react-bootstrap/Pagination';
 
 export const Homepage = () => {
   const navigate = useNavigate();
@@ -16,6 +17,10 @@ export const Homepage = () => {
   const [churches, setChurches] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [currentAppointmentPage, setCurrentAppointmentPage] = useState(1);
+  const [currentBookmarkPage, setCurrentBookmarkPage] = useState(1);
+  const appointmentsPerPage = 2;
+  const bookmarksPerPage = 2;
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -112,31 +117,31 @@ export const Homepage = () => {
     setSelectedAppointment(null);
   };
 
-  const renderPaymentImage = (fileUrl) => {
-    const fileExtension = fileUrl.split('.').pop().toLowerCase();
+  // const renderPaymentImage = (fileUrl) => {
+  //   const fileExtension = fileUrl.split('.').pop().toLowerCase();
 
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+  //   if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
       
-      return <img src={fileUrl} alt="Payment Proof" style={{ width: '100%' }} />;
-    } else if (fileExtension === 'pdf') {
+  //     return <img src={fileUrl} alt="Payment Proof" style={{ width: '100%' }} />;
+  //   } else if (fileExtension === 'pdf') {
       
-      return (
-        <iframe src={fileUrl} title="Payment Proof" style={{ width: '100%', height: '500px' }}/>
-      );
-    } else if (['doc', 'docx'].includes(fileExtension)) {
+  //     return (
+  //       <iframe src={fileUrl} title="Payment Proof" style={{ width: '100%', height: '500px' }}/>
+  //     );
+  //   } else if (['doc', 'docx'].includes(fileExtension)) {
       
-      return (
-        <a href={fileUrl} target="_blank" rel="noopener noreferrer">Download Payment Proof</a>
-      );
-    } else {
+  //     return (
+  //       <a href={fileUrl} target="_blank" rel="noopener noreferrer">Download Payment Proof</a>
+  //     );
+  //   } else {
       
-      return (
-        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-          Download Payment Proof
-        </a>
-      );
-    }
-  };
+  //     return (
+  //       <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+  //         Download Payment Proof
+  //       </a>
+  //     );
+  //   }
+  // };
 
   const renderDeathCertificate = (fileUrl) => {
     const fileExtension = fileUrl.split('.').pop().toLowerCase();
@@ -174,6 +179,28 @@ export const Homepage = () => {
     navigate('/view-appointments');
   };
 
+  const indexOfLastAppointment = currentAppointmentPage * appointmentsPerPage;
+  const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
+  const currentAppointments = appointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
+
+  const paginateAppointments = (pageNumbersAppointment) => setCurrentAppointmentPage(pageNumbersAppointment);
+
+  const pageNumbersAppointment = [];
+  for (let i = 1; i <= Math.ceil(appointments.length / appointmentsPerPage); i++) {
+    pageNumbersAppointment.push(i);
+  }
+
+  const indexOfLastBookmark = currentBookmarkPage * bookmarksPerPage;
+  const indexOfFirstBookmark = indexOfLastBookmark - bookmarksPerPage;
+  const currentBookmark = bookmarkedChurches.slice(indexOfFirstBookmark, indexOfLastBookmark);
+
+  const paginateBookmark = (pageNumberBookmark) => setCurrentBookmarkPage(pageNumberBookmark);
+
+  const pageNumbersBookmarks = [];
+  for (let i = 1; i <= Math.ceil(bookmarkedChurches.length / bookmarksPerPage); i++) {
+    pageNumbersBookmarks.push(i);
+  }
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -197,6 +224,7 @@ export const Homepage = () => {
               <div className="card-body">
                 <h5 className="card-title"><b>Bookmarked Churches</b></h5>
                 {bookmarkedChurches.length > 0 ? (
+                  currentBookmark &&
                   bookmarkedChurches.map((church) => (
                     <div className="card w-100 mb-3" key={church.id}>
                       <div className="card-body d-flex align-items-center justify-content-between">
@@ -216,6 +244,15 @@ export const Homepage = () => {
                   <p>No Bookmarks</p>
                 )}
               </div>
+              <div className="d-flex justify-content-center">
+                <Pagination className="ms-3">
+                  {pageNumbersBookmarks.map(number => (
+                    <Pagination.Item key={number} active={number === currentBookmarkPage} onClick={() => paginateBookmark(number)}>
+                      {number}
+                    </Pagination.Item>
+                  ))}
+                </Pagination>
+              </div>
             </div>
           </div>
           <div className="col-12 mb-4">
@@ -227,8 +264,8 @@ export const Homepage = () => {
               <div className="card-body">
                 <div className="row">
                   {appointments.length > 0 ? (
-                    appointments
-                      .filter(appointment => appointment.appointmentStatus === "pending")
+                    currentAppointments
+                      .filter(appointment => appointment.appointmentStatus === "pending" || "For Payment")
                       .map(appointment => {
                         const church = churches[appointment.churchId];
                         return (
@@ -276,11 +313,11 @@ export const Homepage = () => {
                             <div>
                               <br />
                               <h4>Submitted Requirements</h4>
-                              <p><b>Bride's First Name:</b> {selectedAppointment.marriageCertificate.brideFirstName}</p>
-                              <p><b>Bride's Last Name:</b> {selectedAppointment.marriageCertificate.brideLastName}</p>
+                              <p><b>Bride&apos;s First Name:</b> {selectedAppointment.marriageCertificate.brideFirstName}</p>
+                              <p><b>Bride&apos;s Last Name:</b> {selectedAppointment.marriageCertificate.brideLastName}</p>
                               <br />
-                              <p><b>Groom's First Name:</b> {selectedAppointment.marriageCertificate.groomFirstName}</p>
-                              <p><b>Groom's Last Name:</b> {selectedAppointment.marriageCertificate.groomLastName}</p>
+                              <p><b>Groom&apos;s First Name:</b> {selectedAppointment.marriageCertificate.groomFirstName}</p>
+                              <p><b>Groom&apos;s Last Name:</b> {selectedAppointment.marriageCertificate.groomLastName}</p>
                               <br />
                               <p><b>Date of Marriage:</b> {selectedAppointment.marriageCertificate.dateOfMarriage}</p>
                             </div>
@@ -302,10 +339,10 @@ export const Homepage = () => {
                               <p><b>Last Name:</b> {selectedAppointment.baptismalCertificate.lastName}</p>
                               <p><b>Birthday:</b> {selectedAppointment.baptismalCertificate.birthday}</p>
                               <br />
-                              <p><b>Father's First Name:</b> {selectedAppointment.baptismalCertificate.fatherFirstName}</p>
-                              <p><b>Father's Last Name:</b> {selectedAppointment.baptismalCertificate.fatherLastName}</p>
-                              <p><b>Mother's First Name:</b> {selectedAppointment.baptismalCertificate.motherFirstName}</p>
-                              <p><b>Mother's Last Name:</b> {selectedAppointment.baptismalCertificate.motherLastName}</p>
+                              <p><b>Father&apos;s First Name:</b> {selectedAppointment.baptismalCertificate.fatherFirstName}</p>
+                              <p><b>Father&apos;s Last Name:</b> {selectedAppointment.baptismalCertificate.fatherLastName}</p>
+                              <p><b>Mother&apos;s First Name:</b> {selectedAppointment.baptismalCertificate.motherFirstName}</p>
+                              <p><b>Mother&apos;s Last Name:</b> {selectedAppointment.baptismalCertificate.motherLastName}</p>
                             </div>
                           )}
                           {selectedAppointment.appointmentType === 'burialCertificate' && (
@@ -317,14 +354,20 @@ export const Homepage = () => {
                           )}
                           <br />
                           <h4>Payment Details</h4>
-                          {renderPaymentImage(selectedAppointment.userFields.paymentImage)}
+                          {/* {renderPaymentImage(selectedAppointment.userFields.paymentImage)} */}
                         </div>
                       )}
                     </Modal.Body>
-                    <Modal.Footer>
-                      <Button variant="secondary" onClick={handleCloseModal}>Close</Button>
-                    </Modal.Footer>
                   </Modal>
+                  <div className="d-flex justify-content-center">
+                    <Pagination className="ms-3">
+                    {pageNumbersAppointment.map(number => (
+                      <Pagination.Item key={number} active={number === currentAppointmentPage} onClick={() => paginateAppointments(number)}>
+                        {number}
+                      </Pagination.Item>
+                    ))}
+                  </Pagination>
+                  </div>
                 </div>
               </div>
             </div>
