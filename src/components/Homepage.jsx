@@ -5,7 +5,7 @@ import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firesto
 import { db } from '/backend/firebase';
 import '../websiteUser.css';
 import useChatbot from './Chatbot';
-import { Modal} from 'react-bootstrap'; 
+import { Modal, Button, Form} from 'react-bootstrap'; 
 import { toast } from 'react-toastify';
 import Pagination from 'react-bootstrap/Pagination';
 
@@ -116,6 +116,62 @@ export const Homepage = () => {
     setShowModal(false);
     setSelectedAppointment(null);
   };
+
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
+  const [paymentImageUrl, setPaymentImageUrl] = useState(null);
+
+   
+
+  const handlePayment = async (appointmentId) => {
+    try {
+        setSelectedAppointmentId(appointmentId); // Track the selected appointment ID
+
+        const appointmentDoc = await getDoc(doc(db, 'appointments', appointmentId));
+        if (appointmentDoc.exists()) {
+            const appointmentData = appointmentDoc.data();
+            setPaymentImageUrl(appointmentData.userFields.paymentImage || null);
+        } else {
+            console.error('No such document!');
+        }
+    } catch (error) {
+        console.error('Error fetching payment image:', error);
+    }
+    setShowPaymentModal(true);
+    console.log(`Initiating payment for appointment ID: ${appointmentId}`);
+  };
+
+  const handleClosePaymentModal = () => {
+      setShowPaymentModal(false);
+  };
+
+  const handleFileChange = (event) => {
+      setSelectedFile(event.target.files[0]);
+  };
+
+  const handleFileSubmit = () => {
+    if (selectedFile) {
+        const fileType = selectedFile.type;
+        const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+        if (validImageTypes.includes(fileType)) {
+            console.log('File selected:', selectedFile, 'for appointment:', selectedAppointmentId);
+            // Add your file upload logic here
+
+            setShowPaymentModal(false); // Close the modal after submission
+        } else {
+            alert("Please select a valid image file (JPG, PNG, GIF).");
+        }
+    } else {
+        alert("Please select a file first.");
+    }
+};
+
+
+
+
+  
 
   // const renderPaymentImage = (fileUrl) => {
   //   const fileExtension = fileUrl.split('.').pop().toLowerCase();
@@ -277,7 +333,41 @@ export const Homepage = () => {
                                   <p className="card-text mb-0"><b>Status: {appointment.appointmentStatus}</b></p>
                                   {church && <p className='card-text mb-0'>Church Name: {church.churchName}</p>}
                                 </div>
-                                <button className='btn btn-info' onClick={() => handleShowModal(appointment)}>View Information</button>
+                                <div className="d-flex align-items-center">
+                                {appointment.appointmentStatus === "For Payment" && (
+                                    <button className='btn btn-warning ms-2' onClick={() => handlePayment(appointment.id)}>Pay here via QR Code</button>
+                                )}
+                                  <button className='btn btn-info ms-2' onClick={() => handleShowModal(appointment)}>View Information</button>
+                                </div>
+                                <Modal show={showPaymentModal} onHide={handleClosePaymentModal}>
+                                      <Modal.Header closeButton>
+                                          <Modal.Title>Submit Payment Receipt</Modal.Title>
+                                      </Modal.Header>
+                                      <Modal.Body>
+                                          {paymentImageUrl ? (
+                                              <>
+                                                  <img src={paymentImageUrl} alt="Payment Receipt" style={{ width: '100%' }} />
+                                                  <Form.Group controlId="formFile" className="mb-3 mt-3">
+                                                      <Form.Label>Upload a new receipt image</Form.Label>
+                                                      <Form.Control type="file" onChange={handleFileChange} />
+                                                  </Form.Group>
+                                              </>
+                                          ) : (
+                                              <Form.Group controlId="formFile" className="mb-3">
+                                                  <Form.Label>Select receipt image</Form.Label>
+                                                  <Form.Control type="file" onChange={handleFileChange} />
+                                              </Form.Group>
+                                          )}
+                                      </Modal.Body>
+                                      <Modal.Footer>
+                                          <Button variant="secondary" onClick={handleClosePaymentModal}>
+                                              Close
+                                          </Button>
+                                          <Button variant="primary" onClick={() => console.log('Submit')}>
+                                              Submit
+                                          </Button>
+                                      </Modal.Footer>
+                                  </Modal>
                               </div>
                             </div>
                           </div>
@@ -358,6 +448,7 @@ export const Homepage = () => {
                         </div>
                       )}
                     </Modal.Body>
+
                   </Modal>
                   <div className="d-flex justify-content-center">
                     <Pagination className="ms-3">
