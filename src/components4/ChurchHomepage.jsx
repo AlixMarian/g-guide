@@ -166,7 +166,7 @@ const ChurchHomepage = () => {
             <button className="btn btn-primary" onClick={() => setActiveComponent('info')}>Information</button>
             <button className="btn btn-primary" onClick={() => setActiveComponent('announcements')}>Announcements</button>
             <button className="btn btn-primary" onClick={() => setActiveComponent('massSchedule')}>Mass Schedules</button>
-            <button className="btn btn-primary" onClick={() => setActiveComponent('book')}>Book an Appointment</button>
+            <button className="btn btn-primary" onClick={() => setActiveComponent('book')}>Book a Church Service</button>
             <button className="btn btn-primary" onClick={() => setActiveComponent('reqVol')}>Request for Volunteers</button>
           </p>
         </div>
