@@ -5,13 +5,16 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
 import DatePicker from 'react-datepicker';
+import Pagination from 'react-bootstrap/Pagination';
+
 
 export const Slots = () => {
+  // eslint-disable-next-line no-unused-vars
   const [userID, setUserID] = useState(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
   const [slots, setSlots] = useState([]);
   const [isRecurring, setIsRecurring] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -20,9 +23,26 @@ export const Slots = () => {
   const [currentSlotId, setCurrentSlotId] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Adjust this number based on your preference
+  const itemsPerPage = 10;
 
   const auth = getAuth();
+
+
+  const formatDate = (date) => {
+    if (!date) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+   const handleStartDateChange = (date) => {
+    setStartDate(formatDate(date));
+  };
+
+  const handleEndDateChange = (date) => {
+    setEndDate(formatDate(date));
+  };
 
   const handleRecurringChange = (e) => {
     setIsRecurring(e.target.checked);
@@ -39,7 +59,7 @@ export const Slots = () => {
 
   useEffect(() => {
     fetchSlots();
-  }, [auth]);
+  });
 
   const fetchSlots = async () => {
     const user = auth.currentUser;
@@ -48,6 +68,7 @@ export const Slots = () => {
       const q = query(slotsCollection, where('churchId', '==', user.uid));
       const querySnapshot = await getDocs(q);
       const slotsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      slotsList.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
       setSlots(slotsList);
     }
   };
@@ -59,7 +80,7 @@ export const Slots = () => {
     const ampm = hours >= 12 ? 'PM' : 'AM';
     return `${hours12}:${minutes} ${ampm}`;
   };
-
+  
   const renderTime = (slot) => {
     if (!slot.startTime || !slot.endTime || slot.startTime === "none" || slot.endTime === "none") {
       return 'Information unavailable: Date disabled';
@@ -67,6 +88,23 @@ export const Slots = () => {
     return `${convertTo12HourFormat(slot.startTime)} - ${convertTo12HourFormat(slot.endTime)}`;
   };
 
+  const formatFirebaseTimestamp = (timestamp) => {
+    if (!timestamp) return '';
+
+    if (timestamp instanceof Date) {
+      return timestamp.toLocaleDateString();
+    }
+    
+    if (timestamp.seconds && timestamp.nanoseconds) {
+      const date = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000);
+      return date.toLocaleDateString();
+    }
+  
+    return new Date(timestamp).toLocaleDateString();
+  };
+  
+  
+  
   const handleCreateSlots = async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -276,8 +314,8 @@ export const Slots = () => {
   };
 
   const resetForm = () => {
-    setStartDate('');
-    setEndDate('');
+    setStartDate(null);
+  setEndDate(null);
     setStartTime('');
     setEndTime('');
     setIsRecurring(false);
@@ -289,9 +327,10 @@ export const Slots = () => {
 
   const totalPages = Math.ceil(filteredSlots.length / itemsPerPage);
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
+  const handlePageChange = (number) => {
+    setCurrentPage(number);
   };
+  
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -304,20 +343,11 @@ export const Slots = () => {
       setCurrentPage(currentPage - 1);
     }
   };
+  const pageNumbers = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pageNumbers.push(i);
+  }
 
-  const renderPagination = () => {
-    const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(
-        <li className={`page-item ${currentPage === i ? 'active' : ''}`} key={i}>
-          <a className="page-link" href="#" onClick={() => handlePageChange(i)}>
-            {i}
-          </a>
-        </li>
-      );
-    }
-    return pages;
-  };
 
   const currentItems = filteredSlots.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -331,9 +361,9 @@ export const Slots = () => {
                 <div className='filterDates'>
                   <label className='me-2'><b>Filter by date:</b></label>
                   <DatePicker
-                    className='form-control'
-                    selected={selectedDate}
-                    onChange={date => setSelectedDate(date)}
+                  className='form-control'
+                    selected={startDate ? new Date(startDate) : null}
+                    onChange={handleStartDateChange}
                     showYearDropdown
                   />
                 </div>
@@ -368,7 +398,7 @@ export const Slots = () => {
             <tbody>
               {currentItems.map(slot => (
                 <tr key={slot.id}>
-                  <td>{slot.startDate}</td>
+                  <td>{formatFirebaseTimestamp(slot.startDate)}</td>
                   <td>{renderTime(slot)}</td>
                   <td>{slot.slotStatus}</td>
                   <td>
@@ -385,21 +415,15 @@ export const Slots = () => {
               ))}
             </tbody>
           </table>
-          <nav aria-label="Page navigation example">
-            <ul className="pagination">
-              <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                <a className="page-link" href="#" aria-label="Previous" onClick={handlePreviousPage}>
-                  <span aria-hidden="true">&laquo;</span>
-                </a>
-              </li>
-              {renderPagination()}
-              <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                <a className="page-link" href="#" aria-label="Next" onClick={handleNextPage}>
-                  <span aria-hidden="true">&raquo;</span>
-                </a>
-              </li>
-            </ul>
-          </nav>
+          <Pagination className="d-flex justify-content-center">
+            <Pagination.Prev disabled={currentPage === 1} onClick={handlePreviousPage} />
+            {pageNumbers.map(number => (
+              <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)} style={{ zIndex: 0 }} >
+                {number}
+              </Pagination.Item>
+            ))}
+            <Pagination.Next disabled={currentPage === totalPages} onClick={handleNextPage} />
+          </Pagination>
           <br />
           <h5>{editing ? 'Modify Selected Time Slot' : 'Create or Disable Time Slots'}</h5>
           <form onSubmit={editing ? handleUpdateSlot : handleCreateSlots}>
@@ -420,26 +444,28 @@ export const Slots = () => {
                 </div>
                 <div className="col-md-6">
                   <div className="mb-3">
-                    <label htmlFor="startDate" className="form-label"><b>Start Date</b></label>
-                    <input
-                      type="date"
-                      className="form-control"
+                    <label htmlFor="startDate" className="form-label"><b>Start Date</b></label> <br/>
+                    <DatePicker
+                      showIcon
+                      className="form-control w-100"
                       id="startDate"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
+                      selected={startDate ? new Date(startDate) : null}
+                      onChange={handleStartDateChange}
+                      minDate={new Date()}
                       required
                     />
                   </div>
                 </div>
                 <div className="col-md-6 ">
                   <div className="mb-3">
-                    <label htmlFor="endDate" className="form-label"><b>End Date</b> <i>(Only for recurring slots)</i></label>
-                    <input
-                      type="date"
-                      className="form-control"
+                    <label htmlFor="endDate" className="form-label"><b>End Date</b> <i>(Only for recurring slots)</i></label><br/>
+                    <DatePicker
+                      showIcon
+                     className="form-control w-100"
                       id="endDate"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
+                      selected={endDate ? new Date(endDate) : null}
+                      onChange={handleEndDateChange}
+                      minDate={new Date()}
                       readOnly={!isRecurring}
                       required
                     />
