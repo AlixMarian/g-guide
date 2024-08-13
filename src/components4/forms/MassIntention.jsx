@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc, Timestamp, collection, addDoc } from 'firebase/firestore';
+import { doc, getDoc, Timestamp, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '/backend/firebase';
 import { toast } from 'react-toastify';
@@ -17,6 +17,9 @@ export const MassIntention = () => {
     petition: '',
     forTheSoulOf: ''
   });
+
+  const [massSchedules, setMassSchedules] = useState([]);
+  const [selectedScheduleId, setSelectedScheduleId] = useState(null);
 
   useEffect(() => {
     const fetchChurchData = async () => {
@@ -43,6 +46,21 @@ export const MassIntention = () => {
     fetchUserData();
   }, [user]);
 
+  // Fetch mass schedules
+  useEffect(() => {
+    const fetchMassSchedules = async () => {
+      const q = query(collection(db, 'massSchedules'), where('creatorId', '==', churchId));
+      const querySnapshot = await getDocs(q);
+      const schedules = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setMassSchedules(schedules);
+    };
+
+    fetchMassSchedules();
+  }, [churchId]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -54,6 +72,13 @@ export const MassIntention = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (user) {
+      if (!selectedScheduleId) {
+        toast.error("Please select a mass schedule.");
+        return;
+      }
+
+      const selectedSchedule = massSchedules.find(schedule => schedule.id === selectedScheduleId);
+
       try {
         const massIntentionData = {
           churchId: churchId,
@@ -65,7 +90,7 @@ export const MassIntention = () => {
           thanksgivingMass: formData.thanksgivingMass,
           petition: formData.petition,
           forTheSoulOf: formData.forTheSoulOf,
-          status: 'pending'
+          massSchedule: selectedSchedule, 
         };
 
         await addDoc(collection(db, 'massIntentions'), massIntentionData);
@@ -91,6 +116,11 @@ export const MassIntention = () => {
       petition: '',
       forTheSoulOf: ''
     });
+    setSelectedScheduleId(null); 
+  };
+
+  const handleScheduleSelect = (scheduleId) => {
+    setSelectedScheduleId(scheduleId);
   };
 
   if (loading) {
@@ -134,10 +164,40 @@ export const MassIntention = () => {
 
         <div className="massDetails card mb-4">
           <div className="card-body">
-            <h5 className="card-title">Mass Intentions</h5>
+            <h5 className="card-title">Mass Intentions</h5><br/>
+            <h6 className="card-title">Please select a mass schedule</h6>
+            <table className='table'>
+              <thead>
+                <tr>
+                  <th scope="col">Select</th>
+                  <th scope="col">Day</th>
+                  <th scope="col">Time</th>
+                  <th scope="col">AM/PM</th>
+                </tr>
+              </thead>
+              <tbody>
+                {massSchedules.map(schedule => (
+                  <tr key={schedule.id}>
+                    <td>
+                      <input
+                        type="radio"
+                        name="schedule"
+                        value={schedule.id}
+                        checked={selectedScheduleId === schedule.id}
+                        onChange={() => handleScheduleSelect(schedule.id)}
+                      />
+                    </td>
+                    <td>{schedule.massDate}</td>
+                    <td>{schedule.massTime}</td>
+                    <td>{schedule.massPeriod}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
             <div className="mb-3">
-              <label htmlFor="thanksgivingMass" className="form-label">Thanksgiving Mass</label>
-              <textarea className="form-control" id="thanksgivingMass" name="thanksgivingMass" onChange={handleChange} value={formData.thanksgivingMass || ''}></textarea>
+              <label htmlFor="thanksgiving" className="form-label">Thanksgiving</label>
+              <textarea className="form-control" id="thanksgiving" name="thanksgivingMass" onChange={handleChange} value={formData.thanksgivingMass || ''}></textarea>
             </div>
             <div className="mb-3">
               <label htmlFor="petition" className="form-label">Petition</label>

@@ -45,99 +45,84 @@ export const ChurchHomepageBook = () => {
 
   const handleServiceTypeChange = (serviceType) => {
     setSelectedServiceType(serviceType);
-    if (serviceType !== 'Mass Intentions') {
-      setSelectedService('');
-    } else {
-      setSelectedService('Mass Intentions');
-    }
+    setSelectedService(''); // Clear selected service when changing service type
   };
 
   return (
     <div className="container mt-5">
       <h2 className="mb-4">Book Church Services</h2>
 
-      {selectedServiceType !== "Mass Intentions" && (
-        <div className="card mb-4">
-          <div className="card-body">
-            <h5 className="card-title">Select from the services we offer</h5>
-            <div className="row">
-              <div className="col-12 col-md-auto mb-2 mb-md-0">
+      <div className="card mb-4">
+        <div className="card-body">
+          <h5 className="card-title">Select from the services we offer</h5>
+          <div className="row">
+            <div className="col-12 col-md-auto mb-2 mb-md-0">
+              <div className="dropdown">
+                <button
+                  className="btn btn-secondary dropdown-toggle"
+                  type="button"
+                  id="servicesTypeDropdown"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  {selectedServiceType || "Select Service Type"}
+                </button>
+                <ul className="dropdown-menu" aria-labelledby="servicesTypeDropdown">
+                  <li>
+                    <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault();handleServiceTypeChange("Book an Appointment");}}>Book an Appointment</a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault(); handleServiceTypeChange("Request Document");}}>Request Document</a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#"onClick={(e) => {e.preventDefault();handleServiceTypeChange("Mass Intentions");}}>Mass Intentions</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            {selectedServiceType && selectedServiceType !== "Mass Intentions" && (
+              <div className="col-12 col-md-auto">
                 <div className="dropdown">
                   <button
                     className="btn btn-secondary dropdown-toggle"
                     type="button"
-                    id="servicesTypeDropdown"
+                    id="servicesDropdown"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                    {selectedServiceType || "Select Service Type"}
+                    {selectedService || "Select Type"}
                   </button>
-                  <ul className="dropdown-menu" aria-labelledby="servicesTypeDropdown">
-                    <li>
-                      <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault(); handleServiceTypeChange("Book an Appointment");}}>Book an Appointment</a>
-                    </li>
-                    <li><a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault(); handleServiceTypeChange("Request Document");}}>Request Document</a>
-                    </li>
-                    <li><a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault(); handleServiceTypeChange("Mass Intentions");}}>Mass Intentions</a>
-                    </li>
+                  <ul className="dropdown-menu" aria-labelledby="servicesDropdown">
+                    {selectedServiceType === "Book an Appointment" &&
+                      services.activeSchedules.map((service, index) => (
+                        <li key={index}>
+                          <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault();setSelectedService(service);}}>{service}</a>
+                        </li>
+                      ))}
+                    {selectedServiceType === "Request Document" &&
+                      services.activeRequests.map((service, index) => (
+                        <li key={index}>
+                          <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault();setSelectedService(service);}}>{service}</a>
+                        </li>
+                      ))}
                   </ul>
                 </div>
               </div>
-              {selectedServiceType && selectedServiceType !== "Mass Intentions" && (
-                <div className="col-12 col-md-auto">
-                  <div className="dropdown">
-                    <button
-                      className="btn btn-secondary dropdown-toggle"
-                      type="button"
-                      id="servicesDropdown"
-                      data-bs-toggle="dropdown"
-                      aria-expanded="false"
-                    >
-                      {selectedService || "Select Type"}
-                    </button>
-                    <ul className="dropdown-menu" aria-labelledby="servicesDropdown">
-                      {selectedServiceType === "Book an Appointment" &&
-                        services.activeSchedules.map((service, index) => (
-                          <li key={index}>
-                            <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault();setSelectedService(service);}}>{service}</a>
-                          </li>
-                        ))}
-
-                      {selectedServiceType === "Request Document" &&
-                        services.activeRequests.map((service, index) => (
-                          <li key={index}>
-                            <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault();setSelectedService(service);}}>{service}</a>
-                          </li>
-                        ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
-      {selectedServiceType === "Mass Intentions" ? (
-        <MassIntention />
-      ) : (
+
+      {selectedServiceType === "Mass Intentions" && <MassIntention />}
+      {selectedServiceType === "Book an Appointment" && selectedService === "Marriages" && <Marriage />}
+      {selectedServiceType === "Request Document" && (
         <div>
-          {selectedServiceType === "Book an Appointment" && (
-            <div>
-              {selectedService === "Marriages" && <Marriage/>}
-              {selectedService === "Baptism" && <Baptism/>}
-              {selectedService === "Burials" && <Burial/>}
-            </div>
-          )}
-          
-          {selectedServiceType === "Request Document" && (
-            <div>
-              {selectedService === "Baptismal Certificate" && <BaptismalCertificate />}
-              {selectedService === "Confirmation Certificate" && <ConfirmationCertificate />}
-              {selectedService === "Marriage Certificate" && <MarriageCertificate />}
-              {selectedService === "Burial Certificate" && <BurialCertificate />}
-            </div>
-          )}
+          {selectedService === "Baptismal Certificate" && <BaptismalCertificate />}
+          {selectedService === "Confirmation Certificate" && <ConfirmationCertificate />}
+          {selectedService === "Marriage Certificate" && <MarriageCertificate />}
+          {selectedService === "Burial Certificate" && <BurialCertificate />}
+
         </div>
       )}
     </div>
