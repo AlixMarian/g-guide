@@ -53,7 +53,6 @@ export const ReqVol = () => {
             const userData = userDoc.data();
             setUserData(userData);
 
-            // Fetch church data
             const churchDoc = await getDoc(doc(db, "church", user.uid));
             if (churchDoc.exists()) {
               setChurchData(churchDoc.data());
@@ -273,6 +272,7 @@ export const ReqVol = () => {
           </div>
           <div className="mb-3">
             <label htmlFor="startDate" className="form-label">Start Date</label>
+
             <input 
               type="date"
               className="form-control" 
@@ -287,6 +287,7 @@ export const ReqVol = () => {
 
         <div className="mb-3">
           <label htmlFor="endDate" className="form-label">End Date</label>
+
           <input 
                 type="date"
                 className="form-control" 
