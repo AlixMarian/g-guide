@@ -365,6 +365,7 @@ export const Slots = () => {
                     selected={startDate ? new Date(startDate) : null}
                     onChange={handleStartDateChange}
                     showYearDropdown
+                    
                   />
                 </div>
               </div>
@@ -452,6 +453,7 @@ export const Slots = () => {
                       selected={startDate ? new Date(startDate) : null}
                       onChange={handleStartDateChange}
                       minDate={new Date()}
+                      maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 2))}
                       required
                     />
                   </div>
