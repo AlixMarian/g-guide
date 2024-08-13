@@ -9,9 +9,12 @@ import MarriageCertificate from './forms/MarriageCertificate';
 import BurialCertificate from './forms/BurialCertificate';
 import Marriage from './forms/Marriage';
 import MassIntention from './forms/MassIntention';
+import Baptism from './forms/Baptism';
+import Burial  from './forms/Burial';
 
 export const ChurchHomepageBook = () => {
   const { churchId } = useParams();
+  // eslint-disable-next-line no-unused-vars
   const [churchData, setChurchData] = useState(null);
   const [services, setServices] = useState({ activeSchedules: [], activeRequests: [] });
   const [selectedServiceType, setSelectedServiceType] = useState('');
@@ -119,6 +122,7 @@ export const ChurchHomepageBook = () => {
           {selectedService === "Confirmation Certificate" && <ConfirmationCertificate />}
           {selectedService === "Marriage Certificate" && <MarriageCertificate />}
           {selectedService === "Burial Certificate" && <BurialCertificate />}
+
         </div>
       )}
     </div>

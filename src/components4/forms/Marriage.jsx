@@ -17,6 +17,8 @@ export const Marriage = () => {
     const [slots, setSlots] = useState([]);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [disabledDates, setDisabledDates] = useState([]);
+    const [activeDates, setActiveDates] = useState([]);
     const auth = getAuth();
     const user = auth.currentUser;
 
@@ -36,10 +38,19 @@ export const Marriage = () => {
                 if (querySnapshot.empty) {
                     console.log("No slots available or no matching documents found.");
                 } else {
-                    const slotsData = querySnapshot.docs.map(doc => {
-                        return doc.data();
-                    });
+                    const slotsData = querySnapshot.docs.map(doc => doc.data());
                     setSlots(slotsData);
+
+                    
+                    const active = slotsData
+                        .filter(slot => slot.slotStatus === "active")
+                        .map(slot => new Date(slot.startDate));
+                    const disabled = slotsData
+                        .filter(slot => slot.slotStatus === "disabled")
+                        .map(slot => new Date(slot.startDate));
+
+                    setActiveDates(active);
+                    setDisabledDates(disabled);
                 }
             } catch (error) {
                 console.error("Error fetching slots:", error.message);
@@ -48,6 +59,7 @@ export const Marriage = () => {
 
         fetchChurchData();
         fetchSlots();
+        
     }, [churchId]);
 
     useEffect(() => {
@@ -81,7 +93,7 @@ export const Marriage = () => {
 
         setMatchedDates(availableSlots);
     };
-
+    
     const convertTo12HourFormat = (time) => {
         if (!time || time === "none") return "none";
         const [hours, minutes] = time.split(':');
@@ -104,49 +116,87 @@ export const Marriage = () => {
 
     return (
         <div>
-            <form className='marriages'>
+            <form id='marriages'>
+
+            <div className="userDetails card mb-4">
+              <div className="card-body">
+                <h5 className="card-title">User Details</h5>
+                <div className="userOverview d-flex align-items-center mb-3">
+                  <div className="container">
+                    <div className="row mb-3">
+                      <div className="col-md-6">
+                        <div className="mb-3">
+                          <label className="form-label">Selected Service</label>
+                          <input type="text" className="form-control" id="selectedService" readOnly placeholder="Marriage" />
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="mb-3">
+                          <label className="form-label">User Name</label>
+                          <input type="text" className="form-control" id="userName" readOnly defaultValue={`${userData?.firstName || ""} ${userData?.lastName || ""}`} />
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="mb-3">
+                          <label className="form-label">User Contact</label>
+                          <input type="text" className="form-control" id="userContact" readOnly defaultValue={userData?.contactNum || ""} />
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="mb-3">
+                          <label className="form-label">User Email</label>
+                          <input type="text" className="form-control" id="userEmail" readOnly defaultValue={userData?.email || ""} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
                 <div className="card mb-4">
                     <div className="card-body">
                         <h5 className="card-title">Select schedule</h5>
-                        <p>Mu appear rani if ang gi select sa user kay mu appointment siyag event like bunyag, etc..</p>
-                        <div className="row">
-                            <div className="col-lg-4 col-md-6 mb-3 me-5">
-                                <DatePicker
-                                    inline
-                                    selected={dateToday}
-                                    onChange={handleDateChange}
-                                    dateFormat="MMMM d, yyyy"
-                                    minDate={new Date()}
-                                />
-                            </div>
-                            <div className="col-12 col-lg-3 col-md-4 mb-3">
-                                <p>
-                                    <b>
-                                        Slots available for
-                                        {dateToday && (
-                                            <p>
-                                                {dateToday.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                                            </p>
-                                        )}
-                                    </b>
+                        <div className="row g-3 align-items-start justify-content-center">
+                        <div className="col-lg-4 col-md-6 me-3">
+                            <DatePicker
+                            inline
+                            selected={dateToday}
+                            onChange={handleDateChange}
+                            dateFormat="MMMM d, yyyy"
+                            minDate={new Date()}
+                            className="w-100"
+                            maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 2))}
+                            excludeDates={disabledDates}
+                            highlightDates={activeDates} 
+                            />
+                        </div>
+                        <div className="col-lg-6 col-md-6">
+                            <div className="d-flex flex-column h-100">
+                            <div className="mb-3">
+                                <p className="fw-bold mb-1">Slots available for:</p>
+                                <p className="text-muted">
+                                {dateToday && dateToday.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                 </p>
+                            </div>
+                            <div className="flex-grow-1">
                                 {matchedDates.length > 0 ? (
-                                    <div>
-                                        {matchedDates.map((slot, index) => (
-                                            <div key={index}>
-                                                <label>
-                                                    <input type="radio" name="slotTime" value={slot.startTime} className='me-3' />
-                                                    {renderTime(slot)}
-                                                </label>
-                                                <br />
-                                            </div>
-                                        ))}
+                                matchedDates.map((slot, index) => (
+                                    <div key={index} className="mb-2">
+                                    <label className="form-check-label">
+                                        <input type="radio" name="slotTime" value={slot.startTime} className="form-check-input me-2" required/>
+                                        {renderTime(slot)}
+                                    </label>
                                     </div>
+                                ))
                                 ) : (
-                                    <p>No slots available for the selected date.</p>
+                                <p className="text-muted">No slots available for the selected date.</p>
                                 )}
                             </div>
+                            </div>
                         </div>
+                        </div>
+
                         <div className="d-grid gap-2 d-md-flex justify-content-md-end">
                             <button type="reset" className="btn btn-danger">Clear</button>
                         </div>
