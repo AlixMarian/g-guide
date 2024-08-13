@@ -270,16 +270,34 @@ export const ReqVol = () => {
               <input type="text" className="form-control" id="title" value={reqVolunteerTitleInput} onChange={handleTitleChange} required/>
             <br/>
           </div>
-
-
           <div className="mb-3">
             <label htmlFor="startDate" className="form-label">Start Date</label>
-            <input type="date" className="form-control" id="startDate" value={startDateInput} onChange={handleStartDateChange} required min={new Date().toISOString().split('T')[0]} />
+
+            <input 
+              type="date"
+              className="form-control" 
+              id="startDate" 
+              value={startDateInput} 
+              onChange={handleStartDateChange} 
+              min={new Date().toISOString().split('T')[0]} 
+              max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
+              required 
+            />
           </div>
 
         <div className="mb-3">
           <label htmlFor="endDate" className="form-label">End Date</label>
-          <input type="date" className="form-control" id="endDate" value={endDateInput} onChange={handleEndDateChange} required min={new Date().toISOString().split('T')[0]} />
+
+          <input 
+                type="date"
+                className="form-control" 
+                id="endDate" 
+                value={endDateInput} 
+                onChange={handleEndDateChange} 
+                min={new Date().toISOString().split('T')[0]}
+                max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
+                required
+              />
         </div>
 
         <div className="mb-3">
