@@ -8,6 +8,8 @@ import ConfirmationCertificate from './forms/ConfirmationCertificate';
 import MarriageCertificate from './forms/MarriageCertificate';
 import BurialCertificate from './forms/BurialCertificate';
 import Marriage from './forms/Marriage';
+import Baptism from './forms/Baptism';
+import Burial  from './forms/Burial';
 
 export const ChurchHomepageBook = () => {
   const { churchId } = useParams();
@@ -87,6 +89,12 @@ export const ChurchHomepageBook = () => {
         <div>
           {selectedService === "Marriages" && (
           <Marriage/>
+          )}
+          {selectedService === "Baptism" && (
+          <Baptism/>
+          )}
+          {selectedService === "Burials" && (
+          <Burial/>
           )}
         </div>
       )}
