@@ -361,6 +361,7 @@ export const SEA = () => {
                 value={newEventDate} 
                 onChange={(e) => setNewEventDate(e.target.value)} 
                 min={new Date().toISOString().split('T')[0]} 
+                max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
                 required 
               />
               <div className="invalid-feedback">Please provide a valid date</div>
