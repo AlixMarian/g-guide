@@ -18,6 +18,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
+import DatePicker from 'react-datepicker';
 
 export const SEA = () => {
   const [massList, setMassList] = useState([]);
@@ -39,6 +40,7 @@ export const SEA = () => {
   const [editingEvent, setEditingEvent] = useState(null);
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
   const [userId, setUserId] = useState('');
+  const [startDate, setStartDate] = useState('');
 
 
 
@@ -57,6 +59,10 @@ export const SEA = () => {
 
     return () => unsubscribe();
   }, []);
+
+  const handleStartDateChange = (date) => {
+    setStartDate(formatDate(date));
+  };
 
   const fetchData = (creatorId) => {
     getMassList(setMassList, creatorId);
@@ -348,18 +354,17 @@ export const SEA = () => {
         <form className="row g-3 needs-validation" noValidate onSubmit={(e) => handleSubmit(e, editingEvent ? onUpdateEvent : onSubmitEvent)}>
           <div className="col-6">
             <label htmlFor="eventDate" className="form-label">Date</label>
-            <input 
-              type="date"
-              className="form-control" 
-              id="eventDate" 
-              placeholder="MM/DD/YYYY" 
-              pattern="\d{2}/\d{2}/\d{4}" 
-              value={newEventDate} 
-              onChange={(e) => setNewEventDate(e.target.value)} 
-              required 
-            />
-            <div className="invalid-feedback">Please provide a valid date</div>
-          </div>
+              <input 
+                type="date"
+                className="form-control w-100" 
+                id="eventDate" 
+                value={newEventDate} 
+                onChange={(e) => setNewEventDate(e.target.value)} 
+                min={new Date().toISOString().split('T')[0]} 
+                required 
+              />
+              <div className="invalid-feedback">Please provide a valid date</div>
+            </div>
           <div className="col-md-6">
             <label htmlFor="eventType" className="form-label">Name</label>
             <input type="text" className="form-control" id="eventType" value={newEventName} onChange={(e) => setNewEventName(e.target.value)} required/>
