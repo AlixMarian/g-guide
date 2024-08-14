@@ -1,17 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-  getMassList,
-  addMassSchedule,
-  updateMassSchedule,
-  deleteMassSchedule,
-  getEventList,
-  addEventSchedule,
-  updateEventSchedule,
-  deleteEventSchedule,
-  getAnnouncementList,
-  addAnnouncement,
-  deleteAnnouncement,
-  updateAnnouncement,
+import {getMassList,addMassSchedule,updateMassSchedule,
+  deleteMassSchedule,getEventList,addEventSchedule,
+  updateEventSchedule,deleteEventSchedule,getAnnouncementList,
+  addAnnouncement,deleteAnnouncement,updateAnnouncement,
   getPriestList
 } from '../components2/Services/seaServices';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
