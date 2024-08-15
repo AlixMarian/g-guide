@@ -207,6 +207,10 @@ export const MassIntention = () => {
               <label htmlFor="forTheSoulOf" className="form-label">For the Soul of</label>
               <textarea className="form-control" id="forTheSoulOf" name="forTheSoulOf" onChange={handleChange} value={formData.forTheSoulOf || ''} ></textarea>
             </div>
+            <div className="mb-3">
+              <label htmlFor="forTheSoulOf" className="form-label">Please scan the QR code for your offering:</label>
+              
+            </div>
           </div>
         </div>
 
