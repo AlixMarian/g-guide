@@ -77,31 +77,31 @@ export const ViewAppointments = () => {
     setSelectedAppointment(null);
   };
 
-  const renderPaymentImage = (fileUrl) => {
-    const fileExtension = fileUrl.split('.').pop().toLowerCase();
+  // const renderPaymentImage = (fileUrl) => {
+  //   const fileExtension = fileUrl.split('.').pop().toLowerCase();
 
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+  //   if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
       
-      return <img src={fileUrl} alt="Payment Proof" style={{ width: '100%' }} />;
-    } else if (fileExtension === 'pdf') {
+  //     return <img src={fileUrl} alt="Payment Proof" style={{ width: '100%' }} />;
+  //   } else if (fileExtension === 'pdf') {
       
-      return (
-        <iframe src={fileUrl} title="Payment Proof" style={{ width: '100%', height: '500px' }}/>
-      );
-    } else if (['doc', 'docx'].includes(fileExtension)) {
+  //     return (
+  //       <iframe src={fileUrl} title="Payment Proof" style={{ width: '100%', height: '500px' }}/>
+  //     );
+  //   } else if (['doc', 'docx'].includes(fileExtension)) {
       
-      return (
-        <a href={fileUrl} target="_blank" rel="noopener noreferrer">Download Payment Proof</a>
-      );
-    } else {
+  //     return (
+  //       <a href={fileUrl} target="_blank" rel="noopener noreferrer">Download Payment Proof</a>
+  //     );
+  //   } else {
       
-      return (
-        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-          Download Payment Proof
-        </a>
-      );
-    }
-  };
+  //     return (
+  //       <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+  //         Download Payment Proof
+  //       </a>
+  //     );
+  //   }
+  // };
 
   const renderDeathCertificate = (fileUrl) => {
     const fileExtension = fileUrl.split('.').pop().toLowerCase();
@@ -261,7 +261,7 @@ export const ViewAppointments = () => {
               
               <br/>
               <h4>Payment Details</h4>
-              {renderPaymentImage(selectedAppointment.userFields.paymentImage)}
+              {/* {renderPaymentImage(selectedAppointment.userFields.paymentImage)} */}
             </div>
           )}
         </Modal.Body>
