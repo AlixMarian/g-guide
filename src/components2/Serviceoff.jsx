@@ -54,7 +54,7 @@ export const Serviceoff = () => {
 
 
     const isSchedule = (serviceName) => {
-        const schedules = ["Marriages", "Baptism", "Confirmation", "Burials"];
+        const schedules = ["Marriages", "Baptism", "Confirmation", "Burials","Mass Intentions"];
         return schedules.includes(serviceName);
     };
 
@@ -91,7 +91,7 @@ export const Serviceoff = () => {
 
             <div className="Services">
                 <div className="offer1">
-                    <h4>Events</h4>
+                    <h4>Appointments</h4>
                     <div className="Schedtogs">
                         <div className="form-check">
                             <input className="form-check-input" type="checkbox" id="marriages" name="Marriages" onChange={handleToggle} checked={!!servicesState['Marriages']} />
@@ -108,6 +108,10 @@ export const Serviceoff = () => {
                         <div className="form-check">
                             <input className="form-check-input" type="checkbox" id="burials" name="Burials" onChange={handleToggle} checked={!!servicesState['Burials']} />
                             <label className="form-check-label" htmlFor="burials">Burials</label>
+                        </div>
+                        <div className="form-check">
+                            <input className="form-check-input" type="checkbox" id="massintentions" name="Mass Intentions" onChange={handleToggle} checked={!!servicesState['Mass Intentions']} />
+                            <label className="form-check-label" htmlFor="massintentions">Mass Intentions</label>
                         </div>
                     </div>
                 </div>

@@ -74,13 +74,10 @@ export const ChurchHomepageBook = () => {
                   <li>
                     <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault(); handleServiceTypeChange("Request Document");}}>Request Document</a>
                   </li>
-                  <li>
-                    <a className="dropdown-item" href="#"onClick={(e) => {e.preventDefault();handleServiceTypeChange("Mass Intentions");}}>Mass Intentions</a>
-                  </li>
                 </ul>
               </div>
             </div>
-            {selectedServiceType && selectedServiceType !== "Mass Intentions" && (
+            {selectedServiceType && (
               <div className="col-12 col-md-auto">
                 <div className="dropdown">
                   <button
@@ -114,8 +111,13 @@ export const ChurchHomepageBook = () => {
       </div>
 
 
-      {selectedServiceType === "Mass Intentions" && <MassIntention />}
-      {selectedServiceType === "Book an Appointment" && selectedService === "Marriages" && <Marriage />}
+      
+      {selectedServiceType === "Book an Appointment" && (
+        <div>
+          {selectedService === "Marriages" && <Marriage />}
+          {selectedService === "Mass Intentions" && <MassIntention />}
+        </div>
+      )}
       {selectedServiceType === "Request Document" && (
         <div>
           {selectedService === "Baptismal Certificate" && <BaptismalCertificate />}
