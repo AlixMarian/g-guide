@@ -116,6 +116,8 @@ export const ChurchHomepageBook = () => {
         <div>
           {selectedService === "Marriages" && <Marriage />}
           {selectedService === "Mass Intentions" && <MassIntention />}
+          {selectedService === "Baptism" && <Baptism/>}
+          {selectedService === "Burials" && <Burial/>}
         </div>
       )}
       {selectedServiceType === "Request Document" && (

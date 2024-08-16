@@ -42,25 +42,24 @@ export const Burial = () => {
             try {
                 const slotsQuery = query(collection(db, 'slot'), where('churchId', '==', churchId));
                 const querySnapshot = await getDocs(slotsQuery);
-                if (querySnapshot.empty) {
-                    console.log("No slots available or no matching documents found.");
-                } else {
-                    const slotsData = querySnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
+                if (!querySnapshot.empty) {
+                    const slotsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setSlots(slotsData);
-
-                    
+    
+                    const now = new Date();
+                    now.setHours(0, 0, 0, 0);
+    
                     const active = slotsData
-                        .filter(slot => slot.slotStatus === "active")
+                        .filter(slot => slot.slotStatus === "active" && new Date(slot.startDate) >= now)
                         .map(slot => new Date(slot.startDate));
                     const disabled = slotsData
                         .filter(slot => slot.slotStatus === "disabled")
                         .map(slot => new Date(slot.startDate));
-
+    
                     setActiveDates(active);
                     setDisabledDates(disabled);
+                } else {
+                    console.log("No slots available or no matching documents found.");
                 }
             } catch (error) {
                 console.error("Error fetching slots:", error.message);
@@ -112,6 +111,14 @@ export const Burial = () => {
         return `${hours12}:${minutes} ${ampm}`;
     };
 
+    const sortSlotsByTime = (slots) => {
+        return slots.sort((a, b) => {
+            const timeA = parseInt(a.startTime.replace(':', ''), 10);
+            const timeB = parseInt(b.startTime.replace(':', ''), 10);
+            return timeA - timeB;
+        });
+    };
+
     const renderTime = (slot) => {
         if (!slot.startTime || !slot.endTime ||
             slot.startTime === "none" || slot.endTime === "none") {
@@ -131,9 +138,14 @@ export const Burial = () => {
 
     const handleSlotChange = (event) => {
         const selectedSlotId = event.target.value;
-        setSelectedSlotId(selectedSlotId);
-        console.log("Selected Slot ID:", selectedSlotId);
+        if (selectedSlotId) {
+            setSelectedSlotId(selectedSlotId);
+            console.log("Selected Slot ID:", selectedSlotId);
+        } else {
+            console.error("No Slot ID found. Please select a valid slot.");
+        }
     };
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -267,18 +279,18 @@ export const Burial = () => {
                     </p>
                 </div>
                 <div className="flex-grow-1">
-                    {matchedDates.length > 0 ? (
-                    matchedDates.map((slot, index) => (
-                        <div key={index} className="mb-2">
-                        <label className="form-check-label">
-                            <input type="radio" name="slotTime"  value={slot.id} className="form-check-input me-2" onChange={handleSlotChange} required/>
-                            {renderTime(slot)}
-                        </label>
-                        </div>
-                    ))
-                    ) : (
-                    <p className="text-muted">No slots available for the selected date.</p>
-                    )}
+                        {matchedDates.length > 0 ? (
+                        sortSlotsByTime(matchedDates).map((slot, index) => (
+                            <div key={index} className="mb-2">
+                            <label className="form-check-label">
+                                <input type="radio" name="slotTime" value={slot.id} className="form-check-input me-2" onChange={handleSlotChange} required/>
+                                {renderTime(slot)}
+                            </label>
+                            </div>
+                        ))
+                        ) : (
+                        <p className="text-muted">No slots available for the selected date.</p>
+                        )}
                 </div>
                 </div>
             </div>

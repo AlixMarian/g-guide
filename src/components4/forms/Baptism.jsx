@@ -1,11 +1,10 @@
 import DatePicker from 'react-datepicker';
 import { useEffect, useState } from 'react';
-import { collection, query, where, getDocs, getDoc, doc, Timestamp, addDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, getDoc, doc, Timestamp, addDoc, updateDoc } from 'firebase/firestore';
 import { useParams } from 'react-router-dom';
-import { db, storage } from '/backend/firebase';
+import { db } from '/backend/firebase';
 import 'react-datepicker/dist/react-datepicker.css';
 import { getAuth } from 'firebase/auth';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from 'react-toastify';
 
 export const Baptism = () => {
@@ -17,11 +16,31 @@ export const Baptism = () => {
     const [slots, setSlots] = useState([]);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [priests, setPriests] = useState([]);
     const [disabledDates, setDisabledDates] = useState([]);
     const [activeDates, setActiveDates] = useState([]);
+    const [selectedSlotId, setSelectedSlotId] = useState(null);
+    const [formData,setFormData] = useState({
+        fatherFirstName: '',
+        fatherLastName: '',
+        motherFirstName: '',
+        motherLastName: '',
+        childFirstName: '',
+        childLastName: '',
+        dateOfBirth: '',
+        placeOfBirth: '',
+        marriageDate:'',
+        homeAddress: '',
+        priestOptions: '',
+        godParents: '',
+    });
+
     const auth = getAuth();
     const user = auth.currentUser;
-
+    const fullName = userData ? `${userData.firstName || ''} ${userData.lastName || ''}` : '';
+    const getPriestFullName = (priest) => {
+        return priest ? `${priest.priestType || ''} ${priest.firstName || ''} ${priest.lastName || ''}`.trim() : '';
+    };
     useEffect(() => {
         const fetchChurchData = async () => {
             const docRef = doc(db, 'church', churchId);
@@ -35,31 +54,44 @@ export const Baptism = () => {
             try {
                 const slotsQuery = query(collection(db, 'slot'), where('churchId', '==', churchId));
                 const querySnapshot = await getDocs(slotsQuery);
-                if (querySnapshot.empty) {
-                    console.log("No slots available or no matching documents found.");
-                } else {
-                    const slotsData = querySnapshot.docs.map(doc => doc.data());
+                if (!querySnapshot.empty) {
+                    const slotsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setSlots(slotsData);
-
-                    
+    
+                    const now = new Date();
+                    now.setHours(0, 0, 0, 0);
+    
                     const active = slotsData
-                        .filter(slot => slot.slotStatus === "active")
+                        .filter(slot => slot.slotStatus === "active" && new Date(slot.startDate) >= now)
                         .map(slot => new Date(slot.startDate));
                     const disabled = slotsData
                         .filter(slot => slot.slotStatus === "disabled")
                         .map(slot => new Date(slot.startDate));
-
+    
                     setActiveDates(active);
                     setDisabledDates(disabled);
+                } else {
+                    console.log("No slots available or no matching documents found.");
                 }
             } catch (error) {
                 console.error("Error fetching slots:", error.message);
             }
         };
 
+        const fetchPriests = async () => {
+            try {
+                const priestsQuery = query(collection(db, 'priest'), where('creatorId', '==', churchId));
+                const querySnapshot = await getDocs(priestsQuery);
+                const priestsData = querySnapshot.docs.map(doc => doc.data());
+                setPriests(priestsData);
+            } catch (error) {
+                console.error("Error fetching priests:", error.message);
+            }
+        };
+
         fetchChurchData();
         fetchSlots();
-        
+        fetchPriests();
     }, [churchId]);
 
     useEffect(() => {
@@ -102,6 +134,14 @@ export const Baptism = () => {
         return `${hours12}:${minutes} ${ampm}`;
     };
 
+    const sortSlotsByTime = (slots) => {
+        return slots.sort((a, b) => {
+            const timeA = parseInt(a.startTime.replace(':', ''), 10);
+            const timeB = parseInt(b.startTime.replace(':', ''), 10);
+            return timeA - timeB;
+        });
+    };
+
     const renderTime = (slot) => {
         if (!slot.startTime || !slot.endTime ||
             slot.startTime === "none" || slot.endTime === "none") {
@@ -110,13 +150,111 @@ export const Baptism = () => {
         return `${convertTo12HourFormat(slot.startTime)} - ${convertTo12HourFormat(slot.endTime)}`;
     };
 
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+          ...formData,
+          [name]: value
+        });
+      };
+    
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+    if (user){
+        try {   
+            const appointmentData = {
+              appointmentType: 'baptism',
+              appointmentStatus: 'pending',
+              appointmentPurpose: 'none',
+              authorizationLetter: 'none',
+              paymentImage: 'none',
+              churchId: churchId,
+              slotId: selectedSlotId,
+              userFields: {
+                requesterId: user.uid,
+                requesterName: fullName,
+                requesterContact: userData.contactNum,
+                requesterEmail: userData.email,
+                dateOfRequest: Timestamp.fromDate(new Date()),
+              },
+              baptism: {
+                fatherFirstName: formData.fatherFirstName,
+                fatherLastName: formData.fatherLastName,
+                motherFirstName: formData.motherFirstName,
+                motherLastName: formData.motherLastName,
+                childFirstName: formData.childFirstName,
+                childLastName: formData.childLastName,
+                dateOfBirth: formData.dateOfBirth,
+                placeOfBirth: formData.placeOfBirth,
+                marriageDate: formData.marriageDate,
+                homeAddress: formData.homeAddress,
+                priestOptions: formData.priestOptions,
+                godParents: formData.godParents,
+              }
+            };
+      
+            await addDoc(collection(db, 'appointments'), appointmentData);
+
+             // Update slot status to "taken"
+             const slotRef = doc(db, 'slot', selectedSlotId);
+             await updateDoc(slotRef, { slotStatus: 'taken' });
+
+             // Remove the taken slot from the UI
+             setSlots(prevSlots => prevSlots.filter(slot => slot.id !== selectedSlotId));
+             setMatchedDates(prevMatchedDates => prevMatchedDates.filter(slot => slot.id !== selectedSlotId));
+
+            toast.success("Request submitted to Church Coordinator. Please wait for approval");
+            resetForm();
+          } catch (error) {
+            console.error("Error submitting request: ", error);
+            toast.error(`Error submitting request: ${error.message}`);
+          }
+        }else{
+          toast.error("Error submitting request:");
+        }
+        
+    };
+
+    const handleClear = () => {
+        resetForm();
+        toast.success('Form cleared');
+    };
+
+    const resetForm = () => {
+      setFormData({
+        fatherFirstName: '',
+        fatherLastName: '',
+        motherFirstName: '',
+        motherLastName: '',
+        childFirstName: '',
+        childLastName: '',
+        dateOfBirth: '',
+        placeOfBirth: '',
+        marriageDate:'',
+        homeAddress: '',
+        priestOptions: "",
+        godParents: '',
+      });
+  };
+
+  const handleSlotChange = (event) => {
+    const selectedSlotId = event.target.value;
+    if (selectedSlotId) {
+        setSelectedSlotId(selectedSlotId);
+        console.log("Selected Slot ID:", selectedSlotId);
+    } else {
+        console.error("No Slot ID found. Please select a valid slot.");
+    }
+};
+    
+
     if (loading) {
         return <div>Loading...</div>;
     }
 
   return (
     <div>
-    <form id='baptism'>
+    <form className='baptism' onSubmit={handleSubmit}>
 
     <div className="userDetails card mb-4">
       <div className="card-body">
@@ -181,10 +319,10 @@ export const Baptism = () => {
                     </div>
                     <div className="flex-grow-1">
                         {matchedDates.length > 0 ? (
-                        matchedDates.map((slot, index) => (
+                        sortSlotsByTime(matchedDates).map((slot, index) => (
                             <div key={index} className="mb-2">
                             <label className="form-check-label">
-                                <input type="radio" name="slotTime" value={slot.startTime} className="form-check-input me-2" required/>
+                                <input type="radio" name="slotTime" value={slot.id} className="form-check-input me-2" onChange={handleSlotChange} required/>
                                 {renderTime(slot)}
                             </label>
                             </div>
@@ -211,11 +349,11 @@ export const Baptism = () => {
                     <div className="row mb-3">
                         <div className="col mb-3">
                             <label htmlFor="fatherFirstName" className="form-label">First Name</label>
-                            <input type="text" className="form-control" id="fatherFirstName" name="fatherFirstName" required/>
+                            <input type="text" className="form-control" id="fatherFirstName" name="fatherFirstName" required onChange={handleChange} value={formData.fatherFirstName || ''}/>
                         </div>
                         <div className="col mb-3">
                             <label htmlFor="fatherLastName" className="form-label">Last Name</label>
-                            <input type="text" className="form-control" id="fatherLastName" name="fatherLastName" required/>
+                            <input type="text" className="form-control" id="fatherLastName" name="fatherLastName" required onChange={handleChange} value={formData.fatherLastName || ''}/>
                         </div>
                     </div>
 
@@ -223,11 +361,11 @@ export const Baptism = () => {
                     <div className="row mb-3">
                         <div className="col mb-3">
                             <label htmlFor="motherFirstName" className="form-label">First Name</label>
-                            <input type="text" className="form-control" id="motherFirstName" name="motherFirstName" required/>
+                            <input type="text" className="form-control" id="motherFirstName" name="motherFirstName" required onChange={handleChange} value={formData.motherFirstName || ''}/>
                         </div>
                         <div className="col mb-3">
                             <label htmlFor="motherLastName" className="form-label">Last Name</label>
-                            <input type="text" className="form-control" id="motherLastName" name="motherLastName" required/>
+                            <input type="text" className="form-control" id="motherLastName" name="motherLastName" required onChange={handleChange} value={formData.motherLastName || ''}/>
                         </div>
                     </div>
                     
@@ -235,47 +373,54 @@ export const Baptism = () => {
                     <div className="row mb-3">
                         <div className="col mb-3">
                             <label htmlFor="childFirstName" className="form-label">First Name</label>
-                            <input type="text" className="form-control" id="childFirstName" name="childFirstName" required/>
+                            <input type="text" className="form-control" id="childFirstName" name="childFirstName" required onChange={handleChange} value={formData.childFirstName || ''}/>
                         </div>
                         <div className="col mb-3">
                             <label htmlFor="childLastName" className="form-label">Last Name</label>
-                            <input type="text" className="form-control" id="childLastName" name="childLastName" required/>
+                            <input type="text" className="form-control" id="childLastName" name="childLastName" required onChange={handleChange} value={formData.childLastName || ''}/>
                         </div>
                     </div>
 
                     <div className="mb-3">
                         <label htmlFor="dateOfBirth" className="form-label">Date of Birth</label>
-                        <input type="date" className="form-control" id="dateOfBirth" name="dateOfBirth"  required/>
+                        <input type="date" className="form-control" id="dateOfBirth" name="dateOfBirth"  required onChange={handleChange}/>
                     </div>
 
                     <div className="row mb-3">
                         <div className="col mb-12">
                             <label htmlFor="placeOfBirth" className="form-label">Place of Birth</label>
-                            <input type="text" className="form-control" id="placeOfBirth" name="placeOfBirth" required/>
+                            <input type="text" className="form-control" id="placeOfBirth" name="placeOfBirth" required onChange={handleChange} value={formData.placeOfBirth || ''}/>
                         </div>
                     </div>
 
                     <div><b>Other Details</b></div>
                     <div className="mb-3">
                         <label htmlFor="marriageDate" className="form-label">Marriage Date of Parents</label>
-                        <input type="date" className="form-control" id="marriageDate" name="marriageDate"  required/>
+                        <input type="date" className="form-control" id="marriageDate" name="marriageDate"  required onChange={handleChange}/>
                     </div>
                     <div className="mb-3">
                         <label htmlFor="homeAddress" className="form-label">Home Address</label>
-                        <input type="text" className="form-control" id="homeAddress" name="homeAddress"  required/>
+                        <input type="text" className="form-control" id="homeAddress" name="homeAddress"  required  onChange={handleChange} value={formData.homeAddress || ''}/>
                     </div>
                     <div className="mb-3">
                         <label htmlFor="priestOptions" className="form-label">Name of Priest who will Baptise</label>
-                        <input type="dropdown" className="form-control" id="priestOptions" name="priestOptions"  required/>
+                        <select className="form-control" id="priestOptions" name="priestOptions" required onChange={handleChange} value={formData.priestOptions || ''}>
+                                <option value="" disabled>Select a Priest</option>
+                                {priests.map((priest, index) => (
+                                    <option key={index} value={getPriestFullName(priest)}>
+                                    {getPriestFullName(priest)}
+                                    </option>
+                                ))}
+                            </select>                    
                     </div>
                     <div className="mb-3">
                         <label htmlFor="godParents" className="form-label">Name of Godparents</label>
-                        <input type="text" className="form-control" id="godParents" name="godParents"  required/>
+                        <input type="text" className="form-control" id="godParents" name="godParents" required onChange={handleChange} value={formData.godParents || ''} placeholder='example: "John Doe, Jane Doe, etc.."'/>
                     </div>
 
                     <div className="d-grid gap-2 d-md-flex justify-content-md-end">
                         <button type="submit" className="btn btn-success me-md-2">Submit Requirements</button>
-                        <button type="reset" className="btn btn-danger" >Clear</button>
+                        <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
                     </div>
                 </div>
             </div>
