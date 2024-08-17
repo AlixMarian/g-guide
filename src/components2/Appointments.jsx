@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
+import axios from 'axios';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button, Form } from 'react-bootstrap';
@@ -43,71 +44,89 @@ export const Appointments = () => {
         handleCloseModal();
     };
 
-    const sendEmail = (email, subject, message) => {
-        // Placeholder function to send an email
-        // Replace with your email sending logic
-        console.log(`Sending email to ${email}: ${subject} - ${message}`);
-    };
-
-    const handleApprove = async () => {
-        if (!selectedAppointment) return;
-
+    const sendEmail = async (email, subject, message) => {
         try {
-            const appointmentRef = doc(db, "appointments", selectedAppointment.id);
-            await updateDoc(appointmentRef, {
-                appointmentStatus: "Approved"
-            });
-
-            sendEmail(selectedAppointment.userFields?.requesterEmail, "Appointment Approved", "Your appointment has been approved.");
-            toast.success('Appointment approved successfully!');
-            handleCloseModal();
+          const response = await axios.post('http://localhost:3006/send-email', {
+            email: email,
+            subject: subject,
+            text: message
+          });
+          console.log('Email sent successfully:', response.data);
         } catch (error) {
-            console.error("Error updating document: ", error);
+          console.error('Error sending email:', error);
         }
-    };
+      };
 
-    const handleForPayment = async (appointment) => {
-        if (!appointment) return;
-
-        try {
-            const appointmentRef = doc(db, "appointments", appointment.id);
-            await updateDoc(appointmentRef, {
-                appointmentStatus: "For Payment"
-            });
-
-            sendEmail(appointment.userFields?.requesterEmail, "Appointment Pending for Payment", "Your appointment is now pending for payment.");
-            toast.success('Appointment pending for payment.');
-            setSelectedAppointment({ ...appointment, appointmentStatus: 'For Payment' });
-            setShowModal(true);
-        } catch (error) {
-            console.error("Error updating document: ", error);
-        }
-    };
-
-    const handleDeny = () => {
+      const handleApprove = async () => {
         if (!selectedAppointment) return;
-        setShowDenyModal(true);
-    };
+      
+        try {
+          const appointmentRef = doc(db, "appointments", selectedAppointment.id);
+          await updateDoc(appointmentRef, {
+            appointmentStatus: "approved"
+          });
+      
+          // Send Approval Email
+          await sendEmail(
+            selectedAppointment.userFields?.requesterEmail,
+            "Appointment Approved",
+            "<span style='color: green;'>Your appointment has been approved.</span><br>"
+          );
+      
+          toast.success('Appointment approved successfully!');
+          handleCloseModal();
+        } catch (error) {
+          console.error("Error updating document: ", error);
+        }
+      };
 
+      const handleForPayment = async () => {
+        if (!selectedAppointment) return;
+      
+        try {
+          const appointmentRef = doc(db, "appointments", selectedAppointment.id);
+          await updateDoc(appointmentRef, {
+            appointmentStatus: "For Payment"
+          });
+      
+          // Send Approval Email
+        await sendEmail(
+            selectedAppointment.userFields?.requesterEmail,
+            "Appointment Pending for Payment",
+            "Your appointment is now pending for payment. \n\nPlease follow the instructions to complete the payment process.<br>"
+        );
+      
+        toast.success('Appointment pending for payment.');
+        handleCloseModal();
+        } catch (error) {
+        console.error("Error updating document: ", error);
+        }
+      };
+    
     const handleSubmitDenial = async () => {
         if (!selectedAppointment) return;
-
+      
         try {
-            const appointmentRef = doc(db, "appointments", selectedAppointment.id);
-            await updateDoc(appointmentRef, {
-                appointmentStatus: "Denied",
-                denialReason: denialReason
-            });
-
-            sendEmail(selectedAppointment.userFields?.requesterEmail, "Appointment Denied", `Your appointment has been denied. Reason: ${denialReason}`);
-            toast.success('Appointment denied successfully!');
-            setShowDenyModal(false);
-            setDenialReason('');
-            handleCloseModal();
+          const appointmentRef = doc(db, "appointments", selectedAppointment.id);
+          await updateDoc(appointmentRef, {
+            appointmentStatus: "denied",
+            denialReason: denialReason
+          });
+      
+          await sendEmail(
+            selectedAppointment.userFields?.requesterEmail,
+            "Appointment Denied",
+            `We regret to inform you that your appointment has been denied. <br><span style="color: red;">Reason: ${denialReason}</span><br>`
+          );
+      
+          toast.success('Appointment denied successfully!');
+          setShowDenyModal(false);
+          setDenialReason('');
+          handleCloseModal();
         } catch (error) {
-            console.error("Error updating document: ", error);
+          console.error("Error updating document: ", error);
         }
-    };
+      };
 
     const appointmentTypeMapping = {
         marriageCertificate: "Marriage Certificate",
@@ -426,7 +445,7 @@ export const Appointments = () => {
                             Approve
                         </Button>
                     )}
-                    <Button variant="danger" onClick={handleDeny}>
+                    <Button variant="danger" onClick={() => setShowDenyModal(true)}>
                         Deny
                     </Button>
                 </Modal.Footer>
