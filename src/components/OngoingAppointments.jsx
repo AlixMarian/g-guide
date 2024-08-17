@@ -147,35 +147,17 @@ export const OngoingAppointments = () => {
     
       const renderDeathCertificate = (fileUrl) => {
         const fileExtension = fileUrl.split('.').pop().toLowerCase();
-    
         if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-          
           return <img src={fileUrl} alt="Death Certificate" style={{ width: '100%' }} />;
         } else if (fileExtension === 'pdf') {
-          
-          return (
-            <iframe
-              src={fileUrl}
-              title="Death Certificate"
-              style={{ width: '100%', height: '500px' }}
-            />
-          );
+          return <iframe src={fileUrl} title="Death Certificate" style={{ width: '100%', height: '500px' }} />;
         } else if (['doc', 'docx'].includes(fileExtension)) {
-          
-          return (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-              Download Death Certificate
-            </a>
-          );
+          return <a href={fileUrl} target="_blank" rel="noopener noreferrer">Download Death Certificate</a>;
         } else {
-          
-          return (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-              View Death Certificate
-            </a>
-          );
+          return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Death Certificate</a>;
         }
       };
+      
 
       const handleChoosePayment = (e) => {
         const { files } = e.target;
@@ -218,31 +200,19 @@ export const OngoingAppointments = () => {
         }
     };
     
-      const renderPaymentImage = (fileUrl) => {
-        const fileExtension = fileUrl.split('.').pop().toLowerCase();
-
-        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-        
+    const renderPaymentImage = (fileUrl) => {
+      const fileExtension = fileUrl.split('.').pop().toLowerCase();
+      if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
         return <img src={fileUrl} alt="Payment Proof" style={{ width: '100%' }} />;
-        } else if (fileExtension === 'pdf') {
-        
-        return (
-            <iframe src={fileUrl} title="Payment Proof" style={{ width: '100%', height: '500px' }}/>
-        );
-        } else if (['doc', 'docx'].includes(fileExtension)) {
-        
-        return (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">Download Payment Proof</a>
-        );
-        } else {
-        
-        return (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-            View Payment Proof
-            </a>
-        );
-        }
+      } else if (fileExtension === 'pdf') {
+        return <iframe src={fileUrl} title="Payment Proof" style={{ width: '100%', height: '500px' }} />;
+      } else if (['doc', 'docx'].includes(fileExtension)) {
+        return <a href={fileUrl} target="_blank" rel="noopener noreferrer">Download Payment Proof</a>;
+      } else {
+        return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Payment Proof</a>;
+      }
     };
+    
 
       const filteredAppointments = appointments
       .sort((a, b) => {
@@ -257,7 +227,7 @@ export const OngoingAppointments = () => {
         const dateB = b.userFields.dateOfRequest ? b.userFields.dateOfRequest.seconds : 0;
         return dateB - dateA;
       })
-      .filter(appointment => appointment.appointmentStatus === "pending" || appointment.appointmentStatus === "For Payment");
+      .filter(appointment => appointment.appointmentStatus === "Pending" || appointment.appointmentStatus === "For Payment");
     
     const indexOfLastAppointment = currentAppointmentPage * appointmentsPerPage;
     const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
@@ -308,50 +278,35 @@ export const OngoingAppointments = () => {
                     <p>No appointments found.</p>
                   )}
                   <Modal show={showPaymentModal} onHide={handleClosePaymentModal}>
-                                  <Modal.Header closeButton>
-                                      <Modal.Title>Submit Payment Receipt</Modal.Title>
-                                  </Modal.Header>
-                                  <Modal.Body>
-                                      {churchInstruction && (
-                                          <>
-                                              <h5>Instructions:</h5>
-                                              <p>{churchInstruction}</p>
-                                          </>
-                                      )}
-                                      {churchQRDetail && (
-                                          <>
-                                              <h5>Church QR Code:</h5>
-                                              <div className="d-flex justify-content-center">
-                                                <img src={churchQRDetail} alt="Church QR Code" className="qr-image" />
-                                                </div>
-                                          </>
-                                      )}
-                                      <form className='submitPayment'onSubmit={handleSubmitPayment}>
-                                      <h5>Submit Receipt</h5>
-                                      <input
-                                        type="file"
-                                        className="form-control"
-                                        id="paymentReceiptImage"
-                                        accept="image/*"
-                                        onChange={handleChoosePayment}
-                                        ref={fileInputRef}
-                                        readOnly
-                                        />
-                                    
-                                    <button type="submit" className="btn btn-primary mt-2">Upload Receipt</button>
-                                      </form>
-
-                                  </Modal.Body>
-                                  <Modal.Footer>
-                                      <Button variant="secondary" onClick={handleClosePaymentModal}>
-                                          Close
-                                      </Button>
-                                      <Button variant="primary" onClick={() => console.log('Submit')}>
-                                          Submit
-                                      </Button>
-                                  </Modal.Footer>
-                              </Modal>
-
+                  <Modal.Header closeButton>
+                    <Modal.Title>Submit Payment Receipt</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    {churchInstruction && (
+                      <>
+                        <h5>Instructions:</h5>
+                        <p>{churchInstruction}</p>
+                      </>
+                    )}
+                    {churchQRDetail && (
+                      <>
+                        <h5>Church QR Code:</h5>
+                        <div className="d-flex justify-content-center">
+                          <img src={churchQRDetail} alt="Church QR Code" className="qr-image" />
+                        </div>
+                      </>
+                    )}
+                    <form className='submitPayment' onSubmit={handleSubmitPayment}>
+                      <h5>Submit Receipt</h5>
+                      <input type="file" className="form-control" id="paymentReceiptImage" accept="image/*" onChange={handleChoosePayment} ref={fileInputRef} readOnly />
+                      <button type="submit" className="btn btn-primary mt-2">Upload Receipt</button>
+                    </form>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClosePaymentModal}>Close</Button>
+                    <Button variant="primary" onClick={() => console.log('Submit')}>Submit</Button>
+                  </Modal.Footer>
+                </Modal>
 
                   <Modal show={showModal} onHide={handleCloseModal} centered>
                     <Modal.Header closeButton>
