@@ -72,7 +72,7 @@ export const Layout = () => {
 
   useEffect(() => {
     const fetchPendingAppointmentsCount = async () => {
-      const pendingQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "pending"));
+      const pendingQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Pending"));
       const pendingSnapshot = await getDocs(pendingQuery);
       setPendingCount(pendingSnapshot.size); // Set the count of pending appointments
     };

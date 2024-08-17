@@ -150,7 +150,7 @@ export const ViewAppointments = () => {
                 <div className="row">
                   {appointments.length > 0 ? (
                     appointments
-                      .filter(appointment => appointment.appointmentStatus === "approved" || appointment.appointmentStatus === "denied")
+                      .filter(appointment => appointment.appointmentStatus === "Approved" || appointment.appointmentStatus === "Denied")
                       .map(appointment => {
                         const church = churches[appointment.churchId];
                         return (

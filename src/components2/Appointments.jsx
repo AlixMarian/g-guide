@@ -26,12 +26,7 @@ export const Appointments = () => {
 
     const handleShowModal = (appointment) => {
         setSelectedAppointment(appointment);
-        // Check payment status here and update if necessary
-        if (appointment.userFields?.paymentImage && appointment.appointmentStatus === 'pending') {
-            handleForPayment(appointment);
-        } else {
-            setShowModal(true);
-        }
+        setShowModal(true);
     };
 
     const handleCloseModal = () => {
@@ -39,94 +34,87 @@ export const Appointments = () => {
         setSelectedAppointment(null);
     };
 
-    const handleSendSms = () => {
-        console.log(smsContent);
-        handleCloseModal();
-    };
-
     const sendEmail = async (email, subject, message) => {
         try {
-          const response = await axios.post('http://localhost:3006/send-email', {
-            email: email,
-            subject: subject,
-            text: message
-          });
-          console.log('Email sent successfully:', response.data);
+            const response = await axios.post('http://localhost:3006/send-email', {
+                email: email,
+                subject: subject,
+                text: message
+            });
+            console.log('Email sent successfully:', response.data);
         } catch (error) {
-          console.error('Error sending email:', error);
+            console.error('Error sending email:', error);
         }
-      };
+    };
 
-      const handleApprove = async () => {
+    const handleApprove = async () => {
         if (!selectedAppointment) return;
-      
-        try {
-          const appointmentRef = doc(db, "appointments", selectedAppointment.id);
-          await updateDoc(appointmentRef, {
-            appointmentStatus: "approved"
-          });
-      
-          // Send Approval Email
-          await sendEmail(
-            selectedAppointment.userFields?.requesterEmail,
-            "Appointment Approved",
-            "<span style='color: green;'>Your appointment has been approved.</span><br>"
-          );
-      
-          toast.success('Appointment approved successfully!');
-          handleCloseModal();
-        } catch (error) {
-          console.error("Error updating document: ", error);
-        }
-      };
 
-      const handleForPayment = async () => {
-        if (!selectedAppointment) return;
-      
         try {
-          const appointmentRef = doc(db, "appointments", selectedAppointment.id);
-          await updateDoc(appointmentRef, {
-            appointmentStatus: "For Payment"
-          });
-      
-          // Send Approval Email
-        await sendEmail(
-            selectedAppointment.userFields?.requesterEmail,
-            "Appointment Pending for Payment",
-            "Your appointment is now pending for payment. \n\nPlease follow the instructions to complete the payment process.<br>"
-        );
-      
-        toast.success('Appointment pending for payment.');
-        handleCloseModal();
+            const appointmentRef = doc(db, "appointments", selectedAppointment.id);
+            await updateDoc(appointmentRef, {
+                appointmentStatus: "Approved"
+            });
+
+            await sendEmail(
+                selectedAppointment.userFields?.requesterEmail,
+                "Appointment Approved",
+                "<span style='color: green;'>Your appointment has been approved.</span><br>"
+            );
+
+            toast.success('Appointment approved successfully!');
+            handleCloseModal();
         } catch (error) {
-        console.error("Error updating document: ", error);
+            console.error("Error updating document: ", error);
         }
-      };
-    
+    };
+
+    const handleForPayment = async () => {
+        if (!selectedAppointment) return;
+
+        try {
+            const appointmentRef = doc(db, "appointments", selectedAppointment.id);
+            await updateDoc(appointmentRef, {
+                appointmentStatus: "For Payment"
+            });
+
+            await sendEmail(
+                selectedAppointment.userFields?.requesterEmail,
+                "Appointment Pending for Payment",
+                "Your appointment is now pending for payment. <br>Please follow the instructions to complete the payment process.<br>"
+            );
+
+            toast.success('Appointment pending for payment.');
+            handleCloseModal();
+        } catch (error) {
+            console.error("Error updating document: ", error);
+        }
+    };
+
     const handleSubmitDenial = async () => {
         if (!selectedAppointment) return;
-      
+
         try {
-          const appointmentRef = doc(db, "appointments", selectedAppointment.id);
-          await updateDoc(appointmentRef, {
-            appointmentStatus: "denied",
-            denialReason: denialReason
-          });
-      
-          await sendEmail(
-            selectedAppointment.userFields?.requesterEmail,
-            "Appointment Denied",
-            `We regret to inform you that your appointment has been denied. <br><span style="color: red;">Reason: ${denialReason}</span><br>`
-          );
-      
-          toast.success('Appointment denied successfully!');
-          setShowDenyModal(false);
-          setDenialReason('');
-          handleCloseModal();
+            const appointmentRef = doc(db, "appointments", selectedAppointment.id);
+            await updateDoc(appointmentRef, {
+                appointmentStatus: "Denied",
+                denialReason: denialReason
+            });
+
+            await sendEmail(
+                selectedAppointment.userFields?.requesterEmail,
+                "Appointment Denied",
+                `We regret to inform you that your appointment has been denied. <br><span style="color: red;">Reason: ${denialReason}</span><br>`
+            );
+
+            toast.success('Appointment denied successfully!');
+            setShowDenyModal(false);
+            setDenialReason('');
+            handleCloseModal();
         } catch (error) {
-          console.error("Error updating document: ", error);
+            console.error("Error updating document: ", error);
         }
-      };
+    };
 
     const appointmentTypeMapping = {
         marriageCertificate: "Marriage Certificate",
@@ -155,10 +143,10 @@ export const Appointments = () => {
 
     useEffect(() => {
         const fetchAppointments = async () => {
-            const pendingQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "pending"));
+            const pendingQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Pending"));
             const paymentQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "For Payment"));
-            const approvedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "approved"));
-            const deniedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "denied"));
+            const approvedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Approved"));
+            const deniedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Denied"));
 
             const pendingSnapshot = await getDocs(pendingQuery);
             const paymentSnapshot = await getDocs(paymentQuery);
@@ -184,11 +172,6 @@ export const Appointments = () => {
                 id: doc.id,
                 ...doc.data()
             }));
-
-            console.log("Pending Appointments:", pendingAppointmentsData);
-            console.log("For Payment Appointments:", forPaymentAppointmentsData);
-            console.log("Approved Appointments:", approvedAppointmentsData);
-            console.log("Denied Appointments:", deniedAppointmentsData);
 
             setPendingAppointments(pendingAppointmentsData);
             setForPaymentAppointments(forPaymentAppointmentsData);
@@ -379,7 +362,6 @@ export const Appointments = () => {
                     </table>
                 </div>
             </div>
-
             <div className="Appointments">
                 <div className="titleFilter">
                     <h3>Mass Intentions</h3>
@@ -423,6 +405,7 @@ export const Appointments = () => {
                             <p><strong>Appointment Status:</strong> {selectedAppointment.appointmentStatus}</p>
                             <p><strong>Appointment Option:</strong> {selectedAppointment.appointmentPurpose} </p>
                             <p><strong>Appointment Type:</strong> {appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType}</p>
+                            
                             {selectedAppointment.appointmentType === "confirmationCertificate" && (
                                 <>
                                     <p><strong>Confirmation Date:</strong> {selectedAppointment.confirmationCertificate?.confirmationDate}</p>
@@ -455,32 +438,45 @@ export const Appointments = () => {
                                     <p><strong>Death Certificate:</strong> <a href={selectedAppointment.burialCertificate?.deathCertificate} target="_blank" rel="noopener noreferrer">View Document</a></p>
                                 </>
                             )}
+
                             <p><strong>Date of Request:</strong> {formatDate(selectedAppointment.userFields?.dateOfRequest)}</p>
-                            <p><strong>Payment Receipt Image: </strong> {selectedAppointment.userFields?.paymentImage ? (
-                                <a href={selectedAppointment.userFields?.paymentImage} target="_blank" rel="noopener noreferrer">View Image</a>
+
+                            <p><strong>Payment Receipt Image: </strong> {selectedAppointment.appointments?.paymentImage ? (
+                                <a href={selectedAppointment.appointments.paymentImage} target="_blank" rel="noopener noreferrer">
+                                    View Document
+                                </a>
                             ) : (
                                 <span style={{ color: 'red' }}>Pending Payment</span>
                             )}</p>
                             <p><strong>Requester Contact:</strong> {selectedAppointment.userFields?.requesterContact}</p>
                             <p><strong>Requester Email:</strong> {selectedAppointment.userFields?.requesterEmail}</p>
                             <p><strong>Requester Name:</strong> {selectedAppointment.userFields?.requesterName}</p>
+                            {selectedAppointment.appointmentPurpose === "others" && selectedAppointment.authorizationLetter && (
+                                <>
+                                    <p><strong>Authorization Letter:</strong> <a href={selectedAppointment.authorizationLetter} target="_blank" rel="noopener noreferrer">View Document</a></p>
+                                </>
+                            )}
                         </div>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    {selectedAppointment?.appointmentStatus !== 'For Payment' && (
-                        <Button variant="primary" style={{ backgroundColor: 'blue', borderColor: 'blue' }} onClick={handleForPayment}>
-                            For Payment
-                        </Button>
-                    )}
-                    {selectedAppointment?.appointmentStatus !== 'pending' && (
-                        <Button variant="success" onClick={handleApprove}>
-                            Approve
-                        </Button>
-                    )}
-                    <Button variant="danger" onClick={() => setShowDenyModal(true)}>
-                        Deny
-                    </Button>
+                        <>
+                           {!['For Payment', 'Approved', 'Denied'].includes(selectedAppointment?.appointmentStatus) && (
+                                <Button variant="primary" style={{ backgroundColor: 'blue', borderColor: 'blue' }} onClick={handleForPayment}>
+                                    For Payment
+                                </Button>
+                            )}
+                            {!['Pending', 'Approved', 'Denied'].includes(selectedAppointment?.appointmentStatus) && (
+                            <Button variant="success" onClick={handleApprove}>
+                                Approve
+                            </Button>
+                            )}
+                            {![ 'Approved', 'Denied'].includes(selectedAppointment?.appointmentStatus) && (
+                            <Button variant="danger" onClick={() => setShowDenyModal(true)}>
+                                Deny
+                            </Button>
+                            )}
+                        </>
                 </Modal.Footer>
             </Modal>
 
