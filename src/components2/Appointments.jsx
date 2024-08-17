@@ -380,6 +380,39 @@ export const Appointments = () => {
                 </div>
             </div>
 
+            <div className="Appointments">
+                <div className="titleFilter">
+                    <h3>Mass Intentions</h3>
+                </div>
+                <br />
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date of Request</th>
+                            <th scope="col">Mass Date:</th>
+                            <th scope="col">Mass Time:</th>
+                            <th scope="col">Requested by:</th>
+                            <th scope="col">More Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    
+                                </td>
+                                <td>
+                                <Button>
+                                        <i className="bi bi-info-circle-fill"></i>
+                                    </Button>
+                                </td>
+                            </tr>
+                    </tbody>
+                </table>
+            </div>
+
             <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>Appointment Details</Modal.Title>
