@@ -83,7 +83,7 @@ export const ConfirmationCertificate = () => {
                 
             const appointmentData = {
               appointmentType: 'confirmationCertificate',
-              appointmentStatus: 'pending',
+              appointmentStatus: 'Pending',
               appointmentPurpose: appointmentPurpose,
               authorizationLetter: authorizationImageUrl,
               paymentImage: 'none',

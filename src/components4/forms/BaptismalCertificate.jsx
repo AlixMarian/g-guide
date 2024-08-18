@@ -102,7 +102,7 @@ export const BaptismalCertificate = () => {
                 
             const appointmentData = {
               appointmentType: 'baptismalCertificate',
-              appointmentStatus: 'pending',
+              appointmentStatus: 'Pending',
               appointmentPurpose: appointmentPurpose,
               authorizationLetter: authorizationImageUrl,
               paymentImage: 'none',

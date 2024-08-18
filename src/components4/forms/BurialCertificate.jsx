@@ -90,7 +90,7 @@ export const BurialCertificate = () => {
                     
                 const appointmentData = {
                   appointmentType: 'burialCertificate',
-                  appointmentStatus: 'pending',
+                  appointmentStatus: 'Pending',
                   appointmentPurpose: appointmentPurpose,
                   authorizationLetter: authorizationImageUrl,
                   paymentImage: 'none',

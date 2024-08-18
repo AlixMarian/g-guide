@@ -160,7 +160,7 @@ export const Burial = () => {
                     
                 const appointmentData = {
                   appointmentType: 'burial',
-                  appointmentStatus: 'pending',
+                  appointmentStatus: 'Pending',
                   appointmentPurpose: 'none',
                   authorizationLetter: 'none',
                   paymentImage: 'none',

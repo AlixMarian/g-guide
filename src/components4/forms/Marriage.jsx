@@ -155,7 +155,7 @@ export const Marriage = () => {
                             
             const appointmentData = {
               appointmentType: 'marriage',
-              appointmentStatus: 'pending',
+              appointmentStatus: 'Pending',
               appointmentPurpose: 'none',
               authorizationLetter: 'none',
               paymentImage: 'none',

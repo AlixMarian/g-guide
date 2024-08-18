@@ -164,7 +164,7 @@ export const Baptism = () => {
         try {   
             const appointmentData = {
               appointmentType: 'baptism',
-              appointmentStatus: 'pending',
+              appointmentStatus: 'Pending',
               appointmentPurpose: 'none',
               authorizationLetter: 'none',
               paymentImage: 'none',
