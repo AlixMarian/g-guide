@@ -69,7 +69,7 @@ export const ConfirmationCertificate = () => {
         });
       };
 
-    const handleSubmit = async (e) => {
+    const handleCreateAppointment = async (e) => {
         e.preventDefault();
     if (user){
         try {
@@ -155,7 +155,7 @@ export const ConfirmationCertificate = () => {
 
       return (
         <div>
-          <form id="confirmationCert" onSubmit={handleSubmit}>
+          <form id="confirmationCert" onSubmit={handleCreateAppointment}>
           <div className='purpose card mb-4'>
               <div className='card-body'>
                 <h5 className='card-title'>Who is the Appointment For?</h5>
@@ -240,9 +240,6 @@ export const ConfirmationCertificate = () => {
                 </div>
               </div>
             </div>
-      
-            
-            
       
           </form>
         </div>

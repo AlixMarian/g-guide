@@ -86,7 +86,7 @@ export const BaptismalCertificate = () => {
         });
       };
 
-    const handleSubmit = async (e) => {
+    const handleCreateAppointment = async (e) => {
         e.preventDefault();
     if (user){
         try {
@@ -174,7 +174,7 @@ export const BaptismalCertificate = () => {
 
       return (
         <div>
-          <form className="baptismalCert" onSubmit={handleSubmit}>
+          <form className="baptismalCert" onSubmit={handleCreateAppointment}>
 
             <div className='purpose card mb-4'>
               <div className='card-body'>

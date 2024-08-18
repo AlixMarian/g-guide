@@ -68,7 +68,7 @@ export const BurialCertificate = () => {
         }
     }
 
-    const handleSubmit = async (e) => {
+    const handleCreateAppointment = async (e) => {
         e.preventDefault();
         if (user && deathCert){
             try {
@@ -146,7 +146,7 @@ export const BurialCertificate = () => {
 
     return (
     <div>
-        <form id="burialCertificate" onSubmit={handleSubmit}>
+        <form id="burialCertificate" onSubmit={handleCreateAppointment}>
 
             <div className='purpose card mb-4'>
               <div className='card-body'>

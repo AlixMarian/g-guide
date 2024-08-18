@@ -63,7 +63,7 @@ export const SysAdminSidebar = () => {
     const auth = getAuth();
     signOut(auth)
       .then(() => {
-        toast.success("Sign Out Sucessfull");
+        toast.success("Sign Out Sucessful");
         navigate('/login');
       })
       .catch((error) => {

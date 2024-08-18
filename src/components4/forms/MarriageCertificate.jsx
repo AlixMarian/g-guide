@@ -73,7 +73,7 @@ export const MarriageCertificate = () => {
       };
 
 
-    const handleSubmit = async (e) => {
+    const handleCreateAppointment = async (e) => {
         e.preventDefault();
     if (user){
         try {
@@ -153,7 +153,7 @@ export const MarriageCertificate = () => {
 
     return (
         <div>
-        <form id="marriageCert" onSubmit={handleSubmit}>
+        <form id="marriageCert" onSubmit={handleCreateAppointment}>
             <div className='purpose card mb-4'>
               <div className='card-body'>
                 <h5 className='card-title'>Who is the Appointment For?</h5>

@@ -210,11 +210,11 @@ export const ViewAppointments = () => {
                 <div>
                   <br/>
                   <h4>Submitted Requirements</h4>
-                  <p><b>Bride's First Name:</b> {selectedAppointment.marriageCertificate.brideFirstName}</p>
-                  <p><b>Bride's Last Name:</b> {selectedAppointment.marriageCertificate.brideLastName}</p>
+                  <p><b>Bride&apos;s First Name:</b> {selectedAppointment.marriageCertificate.brideFirstName}</p>
+                  <p><b>Bride&apos;s Last Name:</b> {selectedAppointment.marriageCertificate.brideLastName}</p>
                   <br/>
-                  <p><b>Groom's First Name:</b> {selectedAppointment.marriageCertificate.groomFirstName}</p>
-                  <p><b>Groom's Last Name:</b> {selectedAppointment.marriageCertificate.groomLastName}</p>
+                  <p><b>Groom&apos;s First Name:</b> {selectedAppointment.marriageCertificate.groomFirstName}</p>
+                  <p><b>Groom&apos;s Last Name:</b> {selectedAppointment.marriageCertificate.groomLastName}</p>
                   <br/>
                   <p><b>Date of Marriage:</b> {selectedAppointment.marriageCertificate.dateOfMarriage}</p>
                 </div>
@@ -240,10 +240,10 @@ export const ViewAppointments = () => {
                 <p><b>Birthday:</b> {selectedAppointment.baptismalCertificate.birthday}</p>
 
                 <br/>
-                <p><b>Father's First Name:</b> {selectedAppointment.baptismalCertificate.fatherFirstName}</p>
-                <p><b>Father's Last Name:</b> {selectedAppointment.baptismalCertificate.fatherLastName}</p>
-                <p><b>Mother's First Name</b> {selectedAppointment.baptismalCertificate.motherFirstName}</p>
-                <p><b>Mother's Last Name:</b> {selectedAppointment.baptismalCertificate.motherLastName}</p>
+                <p><b>Father&apos;s First Name:</b> {selectedAppointment.baptismalCertificate.fatherFirstName}</p>
+                <p><b>Father&apos;s Last Name:</b> {selectedAppointment.baptismalCertificate.fatherLastName}</p>
+                <p><b>Mother&apos;s First Name</b> {selectedAppointment.baptismalCertificate.motherFirstName}</p>
+                <p><b>Mother&apos;s Last Name:</b> {selectedAppointment.baptismalCertificate.motherLastName}</p>
 
                 </div>
               )}
@@ -280,12 +280,12 @@ export const ViewAppointments = () => {
                   }
                   </p>
 
-                  <p><b>Child's First Name:</b> {selectedAppointment.baptism.childFirstName}</p>
-                  <p><b>Child's Last Name:</b> {selectedAppointment.baptism.childLastName}</p>
-                  <p><b>Father's First Name:</b> {selectedAppointment.baptism.fatherFirstName}</p>
-                  <p><b>Father's Last Name:</b> {selectedAppointment.baptism.fatherLastName}</p>
-                  <p><b>Mother's First Name:</b> {selectedAppointment.baptism.motherFirstName}</p>
-                  <p><b>Mother's Last Name:</b> {selectedAppointment.baptism.motherLastName}</p>
+                  <p><b>Child&apos;s First Name:</b> {selectedAppointment.baptism.childFirstName}</p>
+                  <p><b>Child&apos;s Last Name:</b> {selectedAppointment.baptism.childLastName}</p>
+                  <p><b>Father&apos;s First Name:</b> {selectedAppointment.baptism.fatherFirstName}</p>
+                  <p><b>Father&apos;s Last Name:</b> {selectedAppointment.baptism.fatherLastName}</p>
+                  <p><b>Mother&apos;s First Name:</b> {selectedAppointment.baptism.motherFirstName}</p>
+                  <p><b>Mother&apos;s Last Name:</b> {selectedAppointment.baptism.motherLastName}</p>
                   <p><b>Date of Birth:</b> {selectedAppointment.baptism.dateOfBirth}</p>
                   <p><b>Place of Birth:</b> {selectedAppointment.baptism.placeOfBirth}</p>
                   <p><b>Marriage Date of Parents:</b> {selectedAppointment.baptism.marriageDate}</p>

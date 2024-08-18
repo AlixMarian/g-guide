@@ -147,7 +147,7 @@ export const Burial = () => {
     };
     
 
-    const handleSubmit = async (e) => {
+    const handleCreateAppointment = async (e) => {
         e.preventDefault();
         if (user && deathCert){
             try {
@@ -180,11 +180,11 @@ export const Burial = () => {
           
                 await addDoc(collection(db, 'appointments'), appointmentData);
 
-                // Update slot status to "taken"
+                
                 const slotRef = doc(db, 'slot', selectedSlotId);
                 await updateDoc(slotRef, { slotStatus: 'taken' });
 
-                // Remove the taken slot from the UI
+                
                 setSlots(prevSlots => prevSlots.filter(slot => slot.id !== selectedSlotId));
                 setMatchedDates(prevMatchedDates => prevMatchedDates.filter(slot => slot.id !== selectedSlotId));
 
@@ -214,112 +214,126 @@ export const Burial = () => {
     }
 
     return (
-    <div>
-        <form id='burial' onSubmit={handleSubmit}>
-
-<div className="userDetails card mb-4">
-  <div className="card-body">
-    <h5 className="card-title">User Details</h5>
-    <div className="userOverview d-flex align-items-center mb-3">
-      <div className="container">
-        <div className="row mb-3">
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label className="form-label">Selected Service</label>
-              <input type="text" className="form-control" id="selectedService" readOnly placeholder="Burial" />
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label className="form-label">User Name</label>
-              <input type="text" className="form-control" id="userName" readOnly defaultValue={`${userData?.firstName || ""} ${userData?.lastName || ""}`} />
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label className="form-label">User Contact</label>
-              <input type="text" className="form-control" id="userContact" readOnly defaultValue={userData?.contactNum || ""} />
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="mb-3">
-              <label className="form-label">User Email</label>
-              <input type="text" className="form-control" id="userEmail" readOnly defaultValue={userData?.email || ""} />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-    <div className="card mb-4">
-        <div className="card-body">
-            <h5 className="card-title">Select schedule</h5>
-            <div className="row g-3 align-items-start justify-content-center">
-            <div className="col-lg-4 col-md-6 me-3">
-                <DatePicker
-                inline
-                selected={dateToday}
-                onChange={handleDateChange}
-                dateFormat="MMMM d, yyyy"
-                minDate={new Date()}
-                className="w-100"
-                maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 2))}
-                excludeDates={disabledDates}
-                highlightDates={activeDates} 
-                />
-            </div>
-            <div className="col-lg-6 col-md-6">
-                <div className="d-flex flex-column h-100">
-                <div className="mb-3">
-                    <p className="fw-bold mb-1">Slots available for:</p>
-                    <p className="text-muted">
-                    {dateToday && dateToday.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                    </p>
+        <div>
+          <form id='burial' onSubmit={handleCreateAppointment}>
+            <div className="userDetails card mb-4">
+            <div className="card-body">
+                <h5 className="card-title">User Details</h5>
+                <div className="userOverview d-flex align-items-center mb-3">
+                <div className="container">
+                    <div className="row mb-3">
+                    <div className="col-md-6">
+                        <div className="mb-3">
+                        <label className="form-label">Selected Service</label>
+                        <input type="text" className="form-control" id="selectedService" readOnly placeholder="Burial" />
+                        </div>
+                    </div>
+                    <div className="col-md-6">
+                        <div className="mb-3">
+                        <label className="form-label">User Name</label>
+                        <input type="text" className="form-control" id="userName" readOnly defaultValue={`${userData?.firstName || ""} ${userData?.lastName || ""}`} />
+                        </div>
+                    </div>
+                    <div className="col-md-6">
+                        <div className="mb-3">
+                        <label className="form-label">User Contact</label>
+                        <input type="text" className="form-control" id="userContact" readOnly defaultValue={userData?.contactNum || ""} />
+                        </div>
+                    </div>
+                    <div className="col-md-6">
+                        <div className="mb-3">
+                        <label className="form-label">User Email</label>
+                        <input type="text" className="form-control" id="userEmail" readOnly defaultValue={userData?.email || ""} />
+                        </div>
+                    </div>
+                    </div>
                 </div>
-                <div className="flex-grow-1">
+                </div>
+            </div>
+            </div>
+
+      
+            <div className="card mb-4">
+              <div className="card-body">
+                <h5 className="card-title">Select the Burial Date</h5>
+                <div className="row g-3 align-items-start justify-content-center">
+                  <div className="col-lg-4 col-md-6 me-3">
+                    <DatePicker
+                      inline
+                      selected={dateToday}
+                      onChange={handleDateChange}
+                      dateFormat="MMMM d, yyyy"
+                      minDate={new Date()}
+                      className="w-100"
+                      maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 2))}
+                      excludeDates={disabledDates}
+                      highlightDates={activeDates}
+                    />
+                  </div>
+                  <div className="col-lg-6 col-md-6">
+                    <div className="d-flex flex-column h-100">
+                      <div className="mb-3">
+                        <p className="fw-bold mb-1">Slots available for:</p>
+                        <p className="text-muted">
+                          {dateToday && dateToday.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        </p>
+                      </div>
+                      <div className="flex-grow-1">
                         {matchedDates.length > 0 ? (
-                        sortSlotsByTime(matchedDates).map((slot, index) => (
+                          sortSlotsByTime(matchedDates).map((slot, index) => (
                             <div key={index} className="mb-2">
-                            <label className="form-check-label">
-                                <input type="radio" name="slotTime" value={slot.id} className="form-check-input me-2" onChange={handleSlotChange} required/>
+                              <label className="form-check-label">
+                                <input
+                                  type="radio"
+                                  name="slotTime"
+                                  value={slot.id}
+                                  className="form-check-input me-2"
+                                  onChange={handleSlotChange}
+                                  required
+                                />
                                 {renderTime(slot)}
-                            </label>
+                              </label>
                             </div>
-                        ))
+                          ))
                         ) : (
-                        <p className="text-muted">No slots available for the selected date.</p>
+                          <p className="text-muted">No slots available for the selected date.</p>
                         )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
+      
+                <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="reset" className="btn btn-danger">Clear</button>
                 </div>
+              </div>
             </div>
+      
+            <div className="submitReq card mb-4">
+              <div className="card-body">
+                <h5 className="card-title">Submit Requirement</h5>
+                <div className="mb-3">
+                  <label htmlFor="deathCertificate" className="form-label">Death Certificate</label>
+                  <input
+                    className="form-control"
+                    type="file"
+                    id="deathCertificate"
+                    name="deathCertificate"
+                    onChange={handleUploadDeathCert}
+                    required
+                  />
+                </div>
+      
+                <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="submit" className="btn btn-success me-md-2">Submit Requirement</button>
+                  <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
+                </div>
+              </div>
             </div>
-
-            <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                <button type="reset" className="btn btn-danger">Clear</button>
-            </div>
+          </form>
         </div>
-    </div>
-
-    <div className="submitReq card mb-4">
-                <div className="card-body">
-                    <h5 className="card-title">Submit Requirement</h5>
-                    <div className="mb-3">
-                        <label htmlFor="deathCertificate" className="form-label">Death Certificate</label>
-                        <input className="form-control" type="file" id="deathCertificate" name="deathCertificate" onChange={handleUploadDeathCert} required/>
-                    </div>
-
-                    <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" className="btn btn-success me-md-2">Submit Requirements</button>
-                        <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
-                    </div>
-
-                </div>
-            </div>
-</form>
-    </div>
-  )
+      )
+      
 }
 
 export default Burial;

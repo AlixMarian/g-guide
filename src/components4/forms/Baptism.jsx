@@ -158,7 +158,7 @@ export const Baptism = () => {
         });
       };
     
-    const handleSubmit = async (e) => {
+    const handleCreateAppointment = async (e) => {
         e.preventDefault();
     if (user){
         try {   
@@ -195,11 +195,11 @@ export const Baptism = () => {
       
             await addDoc(collection(db, 'appointments'), appointmentData);
 
-             // Update slot status to "taken"
+             
              const slotRef = doc(db, 'slot', selectedSlotId);
              await updateDoc(slotRef, { slotStatus: 'taken' });
 
-             // Remove the taken slot from the UI
+             
              setSlots(prevSlots => prevSlots.filter(slot => slot.id !== selectedSlotId));
              setMatchedDates(prevMatchedDates => prevMatchedDates.filter(slot => slot.id !== selectedSlotId));
 
@@ -245,7 +245,7 @@ export const Baptism = () => {
     } else {
         console.error("No Slot ID found. Please select a valid slot.");
     }
-};
+    };
     
 
     if (loading) {
@@ -254,7 +254,7 @@ export const Baptism = () => {
 
   return (
     <div>
-    <form className='baptism' onSubmit={handleSubmit}>
+    <form className='baptism' onSubmit={handleCreateAppointment}>
 
     <div className="userDetails card mb-4">
       <div className="card-body">
