@@ -8,24 +8,35 @@ import WebsiteUserNavBar from './WebsiteUserNavBar';
 
 const containerStyle = {
   width: '100%',
-  height: '800px'
+  height: '800px',
 };
+
+const customIconUrl = 'src/assets/location.png';
+
+const customIcon = {
+  url: customIconUrl,
+  scaledSize: new window.google.maps.Size(40, 40), // Adjust the size to match the default marker
+  anchor: new window.google.maps.Point(20, 40), // Adjust anchor to match the new size
+};
+
+const libraries = ['places'];
 
 const MapComponent = () => {
   const [currentPosition, setCurrentPosition] = useState(null);
-  const [searchBox, setSearchBox] = useState(null);
+  const usjrParish = { lat: 10.293781179053578, lng: 123.89720337545744 };
+  const stoNino = { lat: 10.294269656778269, lng: 123.90209939572426 };
+  const holyCross = { lat: 10.288896349759417, lng: 123.86470036121767 };
+  const perpetualHelp = { lat: 10.312898584993762, lng: 123.8978071919825 };
+  const sanCarlos = { lat: 10.32239875453249, lng: 123.9094321317518 };
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const navigate = useNavigate();
   const [map, setMap] = useState(null);
+  const [searchBox, setSearchBox] = useState(null);
 
   useEffect(() => {
     const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsUserLoggedIn(true);
-      } else {
-        setIsUserLoggedIn(false);
-      }
+      setIsUserLoggedIn(!!user);
     });
   }, [navigate]);
 
@@ -43,26 +54,24 @@ const MapComponent = () => {
       if (places.length > 0) {
         const place = places[0];
         const location = place.geometry.location;
-        const lat = location.lat();
-        const lng = location.lng();
-        setCurrentPosition({ lat, lng });
+        setCurrentPosition({ lat: location.lat(), lng: location.lng() });
         if (map) {
-          map.panTo({ lat, lng });
+          map.panTo({ lat: location.lat(), lng: location.lng() });
         }
       }
     }
   };
 
-  const success = position => {
-    const currentPosition = {
+  const success = (position) => {
+    setCurrentPosition({
       lat: position.coords.latitude,
-      lng: position.coords.longitude
-    };
-    setCurrentPosition(currentPosition);
+      lng: position.coords.longitude,
+    });
   };
 
   const error = () => {
     console.error('Unable to retrieve your location');
+    alert('Location access was denied. Please enable location permissions in your browser settings and reload the page.');
   };
 
   useEffect(() => {
@@ -76,9 +85,8 @@ const MapComponent = () => {
   return (
     <>
       <LoadScript 
-        googleMapsApiKey="careful lang dili permi mag request"
-        // AIzaSyD-3ZFvxudJQ_2wPV2lKNIB83lSipz_G6k
-        libraries={['places']}
+        googleMapsApiKey="AIzaSyD-3ZFvxudJQ_2wPV2lKNIB83lSipz_G6k"
+        libraries={libraries}
         onError={() => console.error('Error loading Google Maps script')}
       >
         {isUserLoggedIn ? <WebsiteUserNavBar /> : <NavBar />}
@@ -96,18 +104,19 @@ const MapComponent = () => {
             }}
           />
           <button type="button" onClick={onPlacesChanged}>Submit</button>
-
         </div>
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={currentPosition || { lat: 0, lng: 0 }} // Default to (0,0) if no position is set
           zoom={10}
           onLoad={(map) => setMap(map)}
-          onError={() => console.error('Error loading the map')}
         >
-          {currentPosition && (
-            <Marker position={currentPosition} />
-          )}
+          {currentPosition && <Marker position={currentPosition} />}
+          <Marker position={usjrParish} icon={customIcon} />
+          <Marker position={stoNino} icon={customIcon} />
+          <Marker position={holyCross} icon={customIcon} />
+          <Marker position={perpetualHelp} icon={customIcon} />
+          <Marker position={sanCarlos} icon={customIcon} />
         </GoogleMap>
       </LoadScript>
     </>
@@ -115,4 +124,3 @@ const MapComponent = () => {
 };
 
 export default MapComponent;
-  
