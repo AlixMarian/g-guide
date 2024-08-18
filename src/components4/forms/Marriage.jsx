@@ -1,6 +1,6 @@
 import DatePicker from 'react-datepicker';
 import { useEffect, useState } from 'react';
-import { collection, query, where, getDocs, getDoc, doc, Timestamp, addDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, getDoc, doc, Timestamp, addDoc, updateDoc } from 'firebase/firestore';
 import { useParams } from 'react-router-dom';
 import { db } from '/backend/firebase';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -178,6 +178,13 @@ export const Marriage = () => {
             };
       
             await addDoc(collection(db, 'appointments'), appointmentData);
+
+            const slotRef = doc(db, 'slot', selectedSlotId);
+            await updateDoc(slotRef, { slotStatus: 'taken' });
+
+            setSlots(prevSlots => prevSlots.filter(slot => slot.id !== selectedSlotId));
+            setMatchedDates(prevMatchedDates => prevMatchedDates.filter(slot => slot.id !== selectedSlotId));
+
             toast.success("Request submitted to Church Coordinator. Please wait for approval");
             resetForm();
           } catch (error) {

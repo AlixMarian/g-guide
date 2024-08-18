@@ -80,6 +80,7 @@ export const ViewAppointments = () => {
     confirmationCertificate: "Confirmation Certificate",
     baptism: "Baptism",
     burial:"Burial",
+    marriage: "Marriage",
   };
 
   const getSlotData = (slotId) => {
@@ -294,7 +295,30 @@ export const ViewAppointments = () => {
                   <p><b>Name of Godparents:</b> {selectedAppointment.baptism.godParents}</p>
                 </div>
               )}
-              
+              {selectedAppointment.appointmentType === 'marriage' && (
+                <div>
+                  <br/>
+                  <h4>Submitted Requirements</h4>
+                  <p><b>Selected Date for Marriage Seminar: </b>{selectedAppointment.slotId ? (() => {
+                    const slotData = getSlotData(selectedAppointment.slotId);
+                    return slotData.startDate || 'N/A';
+                  })() : 'N/A'}</p>
+                  <p><b>Selected Time for Marriage Seminar: </b>{selectedAppointment.slotId ? (() => {
+                    const slotData = getSlotData(selectedAppointment.slotId);
+                    const startTime = convertTo12HourFormat(slotData.startTime);
+                    const endTime = convertTo12HourFormat(slotData.endTime);
+                    return startTime && endTime ? `${startTime} - ${endTime}` : 'N/A';
+                  })() : 'N/A'}</p>
+                  <br/>
+                  <p><b>Bride&apos;s First Name:</b> {selectedAppointment.marriage.brideFirstName}</p>
+                  <p><b>Bride&apos;s Last Name:</b> {selectedAppointment.marriage.brideLastName}</p>
+                  <br/>
+                  <p><b>Groom&apos;s First Name:</b> {selectedAppointment.marriage.groomFirstName}</p>
+                  <p><b>Groom&apos;s Last Name:</b> {selectedAppointment.marriage.groomLastName}</p>
+                  <br/>
+                  <p><b>Planned Wedding Date:</b> {selectedAppointment.marriage.dateOfMarriage}</p>
+                  </div>
+              )}
               <br/>
               <h4>Payment Details</h4>
               {/* {renderPaymentImage(selectedAppointment.userFields.paymentImage)} */}
