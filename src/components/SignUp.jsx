@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, sendEmailVerification } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, collection } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import '../websiteUser.css';
@@ -33,7 +33,7 @@ export const SignUp = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
@@ -65,6 +65,19 @@ export const SignUp = () => {
       } catch {
         toast.error('Unable to send email');
       }
+
+      try {
+        const webVisitorDocRef = doc(collection(db, 'websiteVisitor')); 
+        console.log('Generated webVisitorDocRef ID:', webVisitorDocRef.id);
+
+        await setDoc(webVisitorDocRef, {
+          userId: user.uid,
+        });
+      } catch (visitorError) {
+        console.error('Error storing website visitor data:', visitorError);
+        toast.error('Unable to store visitor data: ' + visitorError.message);
+      }
+
     } catch (error) {
       toast.error(error.message);
     }
@@ -100,7 +113,7 @@ export const SignUp = () => {
           </div>
 
           <div className="col-lg-6">
-            <form className="row g-3" onSubmit={handleSubmit}>
+            <form className="row g-3" onSubmit={handleRegister}>
               <div className="col-md-6">
                 <label htmlFor="lastName" className="form-label">
                   Last Name

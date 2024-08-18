@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, collection } from "firebase/firestore";
 import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -36,7 +36,7 @@ export const SignUpCoord = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegister  = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
@@ -51,7 +51,7 @@ export const SignUpCoord = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
       await sendEmailVerification(user);
-      // Upload churchProof to Firebase Storage
+      
       let churchProofURL = '';
       if (formData.churchProof) {
         const proofRef = ref(storage, `churchVerification/${user.uid}`);
@@ -66,7 +66,7 @@ export const SignUpCoord = () => {
         churchQRDetailURL = await getDownloadURL(qrRef);
       }
 
-      // Save user details to Firestore (user collection)
+      
       await setDoc(doc(db, 'users', user.uid), {
         lastName: formData.lastName,
         firstName: formData.firstName,
@@ -77,7 +77,7 @@ export const SignUpCoord = () => {
         profileImage: 'https://firebasestorage.googleapis.com/v0/b/g-guide-1368b.appspot.com/o/default%2FuserIcon.png?alt=media&token=11e94d91-bf29-4e3e-ab98-a723fead69bc',
       });
 
-      // Save church details to Firestore (church collection)
+      
       await setDoc(doc(db, 'church', user.uid), {
         churchName: formData.churchName,
         churchAddress: formData.churchAddress,
@@ -94,6 +94,19 @@ export const SignUpCoord = () => {
       });
     toast.success('Your registration is being processed by the admin');
     navigate('/login');
+
+    try {
+      const churchCoorDocRef = doc(collection(db, 'coordinator')); 
+      console.log('Generated webVisitorDocRef ID:', churchCoorDocRef.id);
+
+      await setDoc(churchCoorDocRef, {
+        userId: user.uid,
+      });
+    } catch (visitorError) {
+      console.error('Error storing website visitor data:', visitorError);
+      toast.error('Unable to store visitor data: ' + visitorError.message);
+    }
+
     } catch (error) {
       toast.error(error.message);
     }
@@ -113,7 +126,7 @@ export const SignUpCoord = () => {
           </div>
 
           <div className="col-lg-6">
-          <form className=" churchInformation" onSubmit={handleSubmit}>
+          <form className=" churchInformation" onSubmit={handleRegister}>
             <div className="row g-3 accountHandler">
               <h3>Account Handler</h3>
               

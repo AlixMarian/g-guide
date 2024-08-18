@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, setDoc } from "firebase/firestore";
 import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -28,62 +28,75 @@ export const Login = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     const auth = getAuth();
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      
-      const user = userCredential.user;
+        const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+        const user = userCredential.user;
+        const userId = user.uid;
 
-      // Fetch user details from Firestore
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      const churchDoc = await getDoc(doc(db, 'church', user.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
+        
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        if (!userDoc.exists()) {
+            toast.error('User details not found.');
+            return;
+        }
 
-        switch (userData.role) {
-          case 'churchCoor':
-            // Fetch church details from Firestore
-            
-            if (churchDoc.exists()) {
-              const churchData = churchDoc.data();
-              if (churchData.churchStatus === 'approved') {
-                toast.success('Welcome to G! Guide');
-                navigate('/SEA');
-              } else if (churchData.churchStatus === 'pending') {
-                toast.error('Your church registration is not yet approved. Please wait for admin approval.');
-                return;
-              }else{
-                toast.error('Your church registration has been denied');
-                return;
-              }
-            } else {
-              toast.error('Church details not found.');
-              return;
-            }
-            break;
-          case 'websiteUser':
+        
+        const coordinatorQuery = query(collection(db, 'coordinator'), where('userId', '==', userId));
+        const adminQuery = query(collection(db, 'admin'), where('userId', '==', userId));
+        const websiteVisitorQuery = query(collection(db, 'websiteVisitor'), where('userId', '==', userId));
+
+        const [coordinatorSnapshot, adminSnapshot, websiteVisitorSnapshot] = await Promise.all([
+            getDocs(coordinatorQuery),
+            getDocs(adminQuery),
+            getDocs(websiteVisitorQuery),
+        ]);
+
+        
+        const churchDoc = await getDoc(doc(db, 'church', userId));
+
+        if (!websiteVisitorSnapshot.empty) {
             toast.success('Welcome to G! Guide');
             navigate('/homepage');
-            break;
-          case 'sysAdmin':
+            return;
+        }
+
+        if (!coordinatorSnapshot.empty) {
+            if (churchDoc.exists()) {
+                const churchData = churchDoc.data();
+                if (churchData.churchStatus === 'approved') {
+                    toast.success('Welcome to G! Guide');
+                    navigate('/SEA');
+                    return;
+                } else if (churchData.churchStatus === 'pending') {
+                    toast.error('Your church registration is not yet approved. Please wait for admin approval.');
+                    return;
+                } else {
+                    toast.error('Your church registration has been denied');
+                    return;
+                }
+            } else {
+                toast.error('Church details not found.');
+                return;
+            }
+        }
+
+        if (!adminSnapshot.empty) {
             toast.success('Welcome to G! Guide');
             navigate('/systemAdminDashboard');
-            break;
-          default:
-            toast.error('Invalid user role.');
-            break;
+            return;
         }
-      } else {
-        toast.error('User details not found.');
-        return;
-      }
+
+        toast.error('Invalid user role.');
     } catch (error) {
-      toast.error(error.message);
+        toast.error(error.message);
     }
-  };
+};
+
+
 
   useEffect(() => {
     const auth = getAuth();
@@ -103,11 +116,11 @@ export const Login = () => {
       const user = result.user;
   
       if (user) {
-        // Check if the user exists in Firestore
+        
         const userDoc = await getDoc(doc(db, "users", user.uid));
   
         if (userDoc.exists()) {
-          // User already exists, navigate based on role
+          
           const userData = userDoc.data();
           const role = userData.role;
   
@@ -129,10 +142,10 @@ export const Login = () => {
               break;
           }
         } else {
-          // New user, add to Firestore with default role
+          
           await setDoc(doc(db, "users", user.uid), {
             email: user.email,
-            role: "websiteUser" // Default role for new users, modify as needed
+            role: "websiteUser"
           });
           navigate('/homepage');
           toast.success("Welcome to G! Guide");
@@ -157,7 +170,7 @@ export const Login = () => {
             </div>
             <div className="card shadow-sm p-4">
               <h2 className="text-center mb-4">Sign In</h2>
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleLogin}>
                 <div className="mb-3">
                   <label htmlFor="emailAddress" className="form-label">Email</label>
                   <input type="email" className="form-control" id="email" value={formData.email} onChange={handleChange} required />
