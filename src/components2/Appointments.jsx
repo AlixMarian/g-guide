@@ -386,7 +386,7 @@ export const Appointments = () => {
                                     
                                 </td>
                                 <td>
-                                <Button>
+                                    <Button variant="info">
                                         <i className="bi bi-info-circle-fill"></i>
                                     </Button>
                                 </td>
