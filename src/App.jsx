@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import NavBar from "./components/NavBar";
 import Home from './components/Home';
 import Login from './components/Login';
@@ -29,13 +29,18 @@ import ChurchDatabase from './components3/ChurchDatabase';
 import ChurchOptions from './components4/ChurchOptions';
 import ChurchHomepage from './components4/ChurchHomepage';
 
-
 const App = () => {
   return (
     <Router>
       <Routes>
+        {/* Redirect from root path to map */}
+        <Route path="/" element={<Navigate to="/map" />} />
+
+        {/* Map route */}
+        <Route path="/map" element={<MapComponent />} />
+
         {/* Routes for website user */}
-        <Route path="/" element={<><NavBar /><Home /></>} />
+        <Route path="/home" element={<><NavBar /><Home /></>} />
         <Route path="/login" element={<><NavBar/><Login /></>} />
         <Route path="/signup" element={<><NavBar/><SignUp /></>} />
         <Route path="/homepage" element={<><WebUserNavBar /><Homepage /></>} />
@@ -43,14 +48,12 @@ const App = () => {
         <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} /> {/* for web user */}
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
         
-        <Route path="/map" element={<MapComponent/>} />
-
         {/* Routes for church coordinator */}
         <Route path="/SEA" element={
           <>
             <Layout/>
             <div className="main-content">
-            <SEA/>
+              <SEA/>
             </div>
           </>
         } />
@@ -59,96 +62,100 @@ const App = () => {
           <>
             <Layout/>
             <div className="main-content">
-            <Appointments/>
-          </div>
+              <Appointments/>
+            </div>
           </>
         } />
         <Route path="/ChurchInfo" element={
           <>
-              <Layout/>
-              <div className="main-content">
-                <Church/>
-              </div>
+            <Layout/>
+            <div className="main-content">
+              <Church/>
+            </div>
           </>
         } />
         <Route path="/ListofPriest" element={
-        <>
+          <>
             <Layout/>
             <div className="main-content">
               <Listpriest/>
             </div>
-        </>} />
+          </>
+        } />
         <Route path="/ServiceOffered" element={
           <>
             <Layout/>
             <div className="main-content">
               <Serviceoff/>
             </div>
-          </>} />
+          </>
+        } />
         <Route path="/RequestforVolunteer" element={
           <>
             <Layout/>
             <div className="main-content">
               <ReqVol/>
             </div>
-          </>} />
+          </>
+        } />
         <Route path="/AccountSettings" element={
           <>
             <Layout/>
-              <div className="main-content">
-                <AccountSettings/>
-              </div>
-          </>} />
+            <div className="main-content">
+              <AccountSettings/>
+            </div>
+          </>
+        } />
 
-          {/* Routes for System Admin  */}
-          <Route path="/systemAdminDashboard" element={
-            <>
-              <SysAdminSidebar/>
-                <div className='sys-main-content'>
-                  <SysAdminDashboard/>
-                </div>
-            </>}/>
+        {/* Routes for System Admin  */}
+        <Route path="/systemAdminDashboard" element={
+          <>
+            <SysAdminSidebar/>
+            <div className='sys-main-content'>
+              <SysAdminDashboard/>
+            </div>
+          </>
+        }/>
 
-          <Route path="/pending-church" element={
-            <>
-              <SysAdminSidebar/>
-                <div className='sys-main-content'>
-                <SysAdminPendingChurch/>
-                </div>
-            </>}/>
+        <Route path="/pending-church" element={
+          <>
+            <SysAdminSidebar/>
+            <div className='sys-main-content'>
+              <SysAdminPendingChurch/>
+            </div>
+          </>
+        }/>
 
+        <Route path="/sys-account" element={
+          <>
+            <SysAdminSidebar/>
+            <div className='sys-main-content'>
+              <SysAdminAccSettings/>  
+            </div>
+          </>
+        }/>
 
-          <Route path="/sys-account" element={
-            <>
-              <SysAdminSidebar/>
-                <div className='sys-main-content'>
-                  <SysAdminAccSettings/>  
-                </div>
-            </>}/>
-            
-            <Route path="/userDB" element ={
-            <>
-              <SysAdminSidebar/>
-                <div className='sys-main-content'>
-                  <UserDatabase/>
-                </div>
-            </>} />
+        <Route path="/userDB" element={
+          <>
+            <SysAdminSidebar/>
+            <div className='sys-main-content'>
+              <UserDatabase/>
+            </div>
+          </>
+        } />
 
-            <Route path="/churchDB" element = {
-              <>
-                <SysAdminSidebar/>
-                <div className='sys-main-content'>
-                  <ChurchDatabase/>
-                </div>
-              </>
-            }/>
+        <Route path="/churchDB" element={
+          <>
+            <SysAdminSidebar/>
+            <div className='sys-main-content'>
+              <ChurchDatabase/>
+            </div>
+          </>
+        }/>
 
-          {/* Routes for selecting churches */}
-          {/* temp only kay dili pa working ang map */}
-          <Route path="/church-options" element={<><WebUserNavBar /><ChurchOptions/></>}/>
-          <Route path="/church-homepage/:churchId" element={<><WebUserNavBar /><ChurchHomepage/></>}/>
-
-
+        {/* Routes for selecting churches */}
+        <Route path="/church-options" element={<><WebUserNavBar /><ChurchOptions/></>}/>
+        <Route path="/church-homepage/:churchId" element={<><WebUserNavBar /><ChurchHomepage/></>}/>
       </Routes>
       <ToastContainer />
     </Router>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from '@react-google-maps/api';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
 import '../websiteUser.css';
@@ -23,6 +23,7 @@ const MapComponent = () => {
   const navigate = useNavigate();
   const [map, setMap] = useState(null);
   const [customIcon, setCustomIcon] = useState(null);
+  const [searchBox, setSearchBox] = useState(null);
 
   useEffect(() => {
     const auth = getAuth();
@@ -66,6 +67,20 @@ const MapComponent = () => {
     }
   }, [map]);
 
+  const onLoadSearchBox = (ref) => {
+    setSearchBox(ref);
+  };
+
+  const onPlacesChanged = () => {
+    const places = searchBox.getPlaces();
+    if (places && places.length > 0) {
+      const place = places[0];
+      const location = place.geometry.location;
+      setCurrentPosition({ lat: location.lat(), lng: location.lng() });
+      map.panTo({ lat: location.lat(), lng: location.lng() });
+    }
+  };
+
   return (
     <>
       <LoadScript 
@@ -75,6 +90,20 @@ const MapComponent = () => {
         onError={() => console.error('Error loading Google Maps script')}
       >
         {isUserLoggedIn ? <WebsiteUserNavBar /> : <NavBar />}
+
+        <div className="map-search-container">
+          <StandaloneSearchBox
+            onLoad={onLoadSearchBox}
+            onPlacesChanged={onPlacesChanged}
+          >
+            <input
+              type="text"
+              placeholder="Search for a place..."
+              className="map-search-input"
+              style={{ width: '20%', padding: '10px', margin: '20px' }}
+            />
+          </StandaloneSearchBox>
+        </div>
 
         <GoogleMap
           mapContainerStyle={containerStyle}
