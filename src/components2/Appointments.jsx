@@ -5,7 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
-import { db } from "/backend/firebase"; // Adjust the import path as necessary
+import { db } from "/backend/firebase"; 
 import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
 
@@ -23,6 +23,8 @@ export const Appointments = () => {
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [showDenyModal, setShowDenyModal] = useState(false);
     const [denialReason, setDenialReason] = useState('');
+    const [massIntentions, setMassIntentions] = useState([]);
+
 
     const handleShowModal = (appointment) => {
         setSelectedAppointment(appointment);
@@ -189,6 +191,26 @@ export const Appointments = () => {
             return dateMatches && typeMatches;
         });
     };
+
+    const fetchMassIntentions = async () => {
+        const massIntentionsQuery = query(collection(db, "massIntentions"));
+        const massIntentionsSnapshot = await getDocs(massIntentionsQuery);
+        const massIntentionsData = massIntentionsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        setMassIntentions(massIntentionsData);
+    };
+    
+    useEffect(() => {
+        const fetchAppointments = async () => {
+            // Existing code for fetching appointments
+        };
+    
+        fetchAppointments();
+        fetchMassIntentions(); // Fetch mass intentions on component mount
+    }, []);
+    
 
     return (
         <>
@@ -371,26 +393,26 @@ export const Appointments = () => {
                     <thead>
                         <tr>
                             <th scope="col">Date of Request</th>
-                            <th scope="col">Mass Date:</th>
-                            <th scope="col">Mass Time:</th>
-                            <th scope="col">Requested by:</th>
+                            <th scope="col">Mass Date</th>
+                            <th scope="col">Mass Time</th>
+                            <th scope="col">Requested by</th>
                             <th scope="col">More Info</th>
                         </tr>
                     </thead>
                     <tbody>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                        {massIntentions.map((intention, index) => (
+                            <tr key={index}>
+                                <td>{formatDate(intention.dateOfRequest)}</td>
+                                <td>{intention.massSchedule.massDate}</td>
+                                <td>{intention.massSchedule.massTime}</td>
+                                <td>{intention.userName}</td>
                                 <td>
-                                    
-                                </td>
-                                <td>
-                                    <Button variant="info">
+                                    <Button variant="info" onClick={() => handleShowModal(intention)}>
                                         <i className="bi bi-info-circle-fill"></i>
                                     </Button>
                                 </td>
                             </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
