@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import '../websiteUser.css';
 import NavBar from './NavBar';
 import WebsiteUserNavBar from './WebsiteUserNavBar';
+import { Offcanvas } from 'react-bootstrap'; // Removed Button since it's not used
 
 const containerStyle = {
   width: '100%',
@@ -13,6 +14,7 @@ const containerStyle = {
 
 const MapComponent = () => {
   const [currentPosition, setCurrentPosition] = useState(null);
+
   const usjrParish = { lat: 10.293781179053578, lng: 123.89720337545744 };
   const stoNino = { lat: 10.294269656778269, lng: 123.90209939572426 };
   const holyCross = { lat: 10.288896349759417, lng: 123.86470036121767 };
@@ -24,6 +26,7 @@ const MapComponent = () => {
   const [map, setMap] = useState(null);
   const [customIcon, setCustomIcon] = useState(null);
   const [searchBox, setSearchBox] = useState(null);
+  const [drawerInfo, setDrawerInfo] = useState({ show: false, title: '', description: '' });
 
   useEffect(() => {
     const auth = getAuth();
@@ -83,6 +86,14 @@ const MapComponent = () => {
     }
   };
 
+  const handleMarkerClick = (title, description) => {
+    setDrawerInfo({ show: true, title, description });
+  };
+
+  const handleCloseDrawer = () => {
+    setDrawerInfo({ show: false, title: '', description: '' });
+  };
+
   return (
     <>
       <LoadScript 
@@ -121,20 +132,31 @@ const MapComponent = () => {
             <Marker
               position={currentPosition}
               onLoad={() => console.log('Current location marker loaded at:', currentPosition)}
+              onClick={() => handleMarkerClick('Your Location', 'This is your current location.')}
             />
           )}
 
           {customIcon && (
             <>
-              <Marker position={usjrParish} icon={customIcon} />
-              <Marker position={stoNino} icon={customIcon} />
-              <Marker position={holyCross} icon={customIcon} />
-              <Marker position={perpetualHelp} icon={customIcon} />
-              <Marker position={sanCarlos} icon={customIcon} />
+              <Marker position={usjrParish} icon={customIcon} onClick={() => handleMarkerClick('USJR Parish', 'Details about USJR Parish Main.')}/>
+              <Marker position={stoNino} icon={customIcon} onClick={() => handleMarkerClick('Sto. Niño', 'Details about Sto. Niño.')}/>
+              <Marker position={holyCross} icon={customIcon} onClick={() => handleMarkerClick('Holy Cross', 'Details about Holy Cross Basak.')}/>
+              <Marker position={perpetualHelp} icon={customIcon} onClick={() => handleMarkerClick('Perpetual Help', 'Details about Perpetual Help Camputhaw.')}/>
+              <Marker position={sanCarlos} icon={customIcon} onClick={() => handleMarkerClick('San Carlos', 'Details about San Carlos Main.')}/>
             </>
           )}
         </GoogleMap>
       </LoadScript>
+
+      {/* Drawer for displaying marker details */}
+      <Offcanvas show={drawerInfo.show} onHide={handleCloseDrawer} placement="end">
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>{drawerInfo.title}</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          {drawerInfo.description}
+        </Offcanvas.Body>
+      </Offcanvas>
     </>
   );
 };
