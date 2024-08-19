@@ -27,10 +27,12 @@ const MapComponent = () => {
 
   useEffect(() => {
     const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsUserLoggedIn(!!user);
     });
+    return () => unsubscribe();
   }, [navigate]);
+  
 
   const success = (position) => {
     const positionObj = {
