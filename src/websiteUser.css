@@ -188,4 +188,25 @@
     padding: 1rem;
     gap: 2rem;
   }
+
+  /* Add this to your CSS file or within a <style> tag */
+.modal.right .modal-dialog {
+  position: fixed;
+  right: 0;
+  margin: 0;
+  height: 100%;
+  width: 50%; /* Adjust this width as needed */
+}
+
+.modal.right .modal-content {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.modal.right .modal-header, 
+.modal.right .modal-body, 
+.modal.right .modal-footer {
+  padding: 20px;
+}
+
   
