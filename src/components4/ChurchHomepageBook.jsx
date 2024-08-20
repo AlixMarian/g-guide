@@ -11,6 +11,7 @@ import Marriage from './forms/Marriage';
 import MassIntention from './forms/MassIntention';
 import Baptism from './forms/Baptism';
 import Burial  from './forms/Burial';
+import Confirmation from './forms/Confirmation';
 
 export const ChurchHomepageBook = () => {
   const { churchId } = useParams();
@@ -118,6 +119,7 @@ export const ChurchHomepageBook = () => {
           {selectedService === "Mass Intentions" && <MassIntention />}
           {selectedService === "Baptism" && <Baptism/>}
           {selectedService === "Burials" && <Burial/>}
+          {selectedService === "Confirmation" && <Confirmation/>}
         </div>
       )}
       {selectedServiceType === "Request Document" && (
