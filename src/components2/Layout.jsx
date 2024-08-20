@@ -172,7 +172,7 @@ export const Layout = () => {
                   </defs>
                   <path fill="black" d="M0 0h48v48H0z" mask="url(#ipSAppointment0)"/>
                 </svg>
-                  <span class="badge text-bg-danger">{pendingCount}</span>
+                  <span className="badge text-bg-danger">{pendingCount}</span>
               </i>
               <span className="nav-item">Appointments</span>
               <p className='p-hover'>Appointments</p>

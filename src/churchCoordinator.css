@@ -457,18 +457,19 @@ ul{
 
 .time-picker-custom {
   width: 100% !important;
-  height: 50px !important; /* Adjust height as needed */
-  font-size: 20px !important; /* Adjust font size as needed */
+  height: 50px !important;
+  font-size: 20px !important;
 }
 
 .time-picker-custom input {
-  height: 100% !important; /* Ensure the input takes the full height */
-  font-size: inherit !important; /* Inherit the font size */
+  height: 100% !important;
+  font-size: inherit !important;
 }
 
 .time-picker-custom .react-time-picker__wrapper {
-  height: 100% !important; /* Ensure the wrapper takes the full height */
+  height: 100% !important;
 }
+
 
 /*serviceOffered*/
 
@@ -542,4 +543,34 @@ ul{
   margin: auto;
 
 }
+
+.uploaded-photos-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px; 
+}
+
+.photo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(33.333% - 5px); 
+  margin-bottom: 16px; 
+  box-sizing: border-box;
+}
+
+.photo-item img {
+  max-width: 150px;
+  height: 150px; 
+  object-fit: cover; 
+}
+
+.photo-item button {
+  margin-top: 8px; 
+  width: 80px;
+}
+
+
+
+
 
