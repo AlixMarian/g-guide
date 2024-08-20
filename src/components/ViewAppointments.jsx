@@ -19,6 +19,7 @@ export const ViewAppointments = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [slots, setSlots] = useState([]);
+  const [events, setEvents] = useState({});
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -31,7 +32,6 @@ export const ViewAppointments = () => {
           const userAppointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setAppointments(userAppointments);
 
-          
           const churchIds = [...new Set(userAppointments.map(app => app.churchId))];
           
           if (churchIds.length > 0) {
@@ -49,20 +49,25 @@ export const ViewAppointments = () => {
 
             setChurches(churchMap);
           }
-
-         // Fetch only slots with slotStatus: "taken"
-      const slotsQuery = query(collection(db, 'slot'), where('slotStatus', '==', 'taken'));
-      const allSlotsSnapshot = await getDocs(slotsQuery);
-      const allSlots = allSlotsSnapshot.docs.reduce((acc, doc) => {
-        acc[doc.id] = doc.data();
-        return acc;
-      }, {});
-      setSlots(allSlots);  // Store slots as an object
-
-      console.log("Fetched Slots with 'taken' status:", allSlots);
-
-
-
+            const slotsQuery = query(collection(db, 'slot'), where('slotStatus', '==', 'taken'));
+            const allSlotsSnapshot = await getDocs(slotsQuery);
+            const allSlots = allSlotsSnapshot.docs.reduce((acc, doc) => {
+              acc[doc.id] = doc.data();
+              return acc;
+            }, {});
+            setSlots(allSlots);
+          
+            const eventsQuery = query(
+                collection(db, 'events'),
+                where('eventName', 'in', ['Confirmation', 'confirmation'])
+            );
+            const eventsSnapshot = await getDocs(eventsQuery);
+            const eventsData = eventsSnapshot.docs.reduce((acc, doc) => {
+                const data = doc.data();
+                acc[doc.id] = { ...data, eventDate: new Date(data.eventDate) };
+                return acc;
+            }, {});
+            setEvents(eventsData);  
         } catch (error) {
           toast.error('Error fetching appointments: ' + error.message);
         }
@@ -81,6 +86,7 @@ export const ViewAppointments = () => {
     baptism: "Baptism",
     burial:"Burial",
     marriage: "Marriage",
+    confirmation: "Confirmation",
   };
 
   const getSlotData = (slotId) => {
@@ -123,6 +129,32 @@ export const ViewAppointments = () => {
       return <a href={fileUrl} target="_blank" rel="noopener noreferrer">Download Death Certificate</a>;
     } else {
       return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Death Certificate</a>;
+    }
+  };
+
+  const renderBaptismalCertificate = (fileUrl) => {
+    const fileExtension = fileUrl.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+      return <img src={fileUrl} alt="Baptismal Certificate" style={{ width: '100%' }} />;
+    } else if (fileExtension === 'pdf') {
+      return <iframe src={fileUrl} title="Baptismal Certificate" style={{ width: '100%', height: '500px' }} />;
+    } else if (['doc', 'docx'].includes(fileExtension)) {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Baptismal Certificate</a>;
+    } else {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Baptismal Certificate</a>;
+    }
+  };
+
+  const renderBirthCertificate = (fileUrl) => {
+    const fileExtension = fileUrl.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+      return <img src={fileUrl} alt="Birth Certificate" style={{ width: '100%' }} />;
+    } else if (fileExtension === 'pdf') {
+      return <iframe src={fileUrl} title="Birth Certificate" style={{ width: '100%', height: '500px' }} />;
+    } else if (['doc', 'docx'].includes(fileExtension)) {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Birth Certificate</a>;
+    } else {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Birth Certificate</a>;
     }
   };
 
@@ -319,14 +351,27 @@ export const ViewAppointments = () => {
                   <p><b>Planned Wedding Date:</b> {selectedAppointment.marriage.dateOfMarriage}</p>
                   </div>
               )}
+              {selectedAppointment.appointmentType === 'confirmation' && (
+                <div>
+                  <br />
+                  <h4>Submitted Requirements</h4>
+                  <p><b>Date of Confirmation: </b>{events[selectedAppointment.eventId]?.eventDate?.toLocaleDateString() || 'N/A'}</p>
+                  <p><b>Time of Confirmation: </b>{convertTo12HourFormat(events[selectedAppointment.eventId]?.eventTime) || 'N/A'}</p>
+                  <p><b>First Name:</b> {selectedAppointment.confirmation.firstName}</p>
+                  <p><b>Last Name:</b> {selectedAppointment.confirmation.lastName}</p>
+                  <br/>
+                  <p><b>Baptismal Certificate: </b> {renderBaptismalCertificate(selectedAppointment.confirmation.baptismalCert)}</p> 
+                  <p><b>Birth Certificate: </b> {renderBirthCertificate(selectedAppointment.confirmation.birthCertificate)}</p> 
+                </div>
+              )}
               <br/>
               <h4>Payment Details</h4>
               {/* {renderPaymentImage(selectedAppointment.userFields.paymentImage)} */}
               {selectedAppointment.appointments?.paymentImage && selectedAppointment.appointments.paymentImage !== 'none' ? (
-                                renderPaymentImage(selectedAppointment.appointments.paymentImage)
-                            ) : (
-                                <p>Not yet paid</p>
-                            )}
+                renderPaymentImage(selectedAppointment.appointments.paymentImage)
+                ) : (
+                <p>Not yet paid</p>
+              )}
             </div>
           )}
         </Modal.Body>

@@ -11,16 +11,17 @@ import { toast } from 'react-toastify';
 import Pagination from 'react-bootstrap/Pagination';
 
 export const OngoingAppointments = () => {
-    const navigate = useNavigate();
-    // eslint-disable-next-line no-unused-vars
-    const [userData, setUserData] = useState(null);
+  const navigate = useNavigate();
+  // eslint-disable-next-line no-unused-vars
+  const [userData, setUserData] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [churches, setChurches] = useState({});
-  const [churchQRDetail, setChurchQRDetail] = useState(null); 
+  const [churchQRDetail, setChurchQRDetail] = useState(null);
   const [churchInstruction, setChurchInstruction] = useState(null);
   const [slots, setSlots] = useState([]);
+  const [events, setEvents] = useState({});
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   // eslint-disable-next-line no-unused-vars
   const [paymentImageUrl, setPaymentImageUrl] = useState(null);
@@ -33,9 +34,9 @@ export const OngoingAppointments = () => {
   const auth = getAuth();
   const user = auth.currentUser;
   const fileInputRef = useRef(null);
-
+  
   useChatbot();
-
+  
   useEffect(() => {
     const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
@@ -47,8 +48,7 @@ export const OngoingAppointments = () => {
       }
     });
   }, [navigate]);
-
-
+  
   useEffect(() => {
     const fetchAppointmentsAndSlots = async () => {
       if (user) {
@@ -57,220 +57,245 @@ export const OngoingAppointments = () => {
           const querySnapshot = await getDocs(q);
           const userAppointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setAppointments(userAppointments);
-
-          
+  
           const churchIds = [...new Set(userAppointments.map(app => app.churchId))];
-          
+  
           if (churchIds.length > 0) {
             const churchesData = await Promise.all(
               churchIds.map(id => getDoc(doc(db, 'church', id)))
             );
-
-            
+  
             const churchMap = churchesData.reduce((acc, doc) => {
               if (doc.exists()) {
                 acc[doc.id] = doc.data();
               }
               return acc;
             }, {});
-
+  
             setChurches(churchMap);
           }
-
-         // Fetch only slots with slotStatus: "taken"
-      const slotsQuery = query(collection(db, 'slot'), where('slotStatus', '==', 'taken'));
-      const allSlotsSnapshot = await getDocs(slotsQuery);
-      const allSlots = allSlotsSnapshot.docs.reduce((acc, doc) => {
-        acc[doc.id] = doc.data();
-        return acc;
-      }, {});
-      setSlots(allSlots);  // Store slots as an object
-
-      console.log("Fetched Slots with 'taken' status:", allSlots);
-
-
-
+  
+          const slotsQuery = query(collection(db, 'slot'), where('slotStatus', '==', 'taken'));
+          const allSlotsSnapshot = await getDocs(slotsQuery);
+          const allSlots = allSlotsSnapshot.docs.reduce((acc, doc) => {
+            acc[doc.id] = doc.data();
+            return acc;
+          }, {});
+          setSlots(allSlots);
+  
+          const eventsQuery = query(
+            collection(db, 'events'),
+            where('eventName', 'in', ['Confirmation', 'confirmation'])
+          );
+          const eventsSnapshot = await getDocs(eventsQuery);
+          const eventsData = eventsSnapshot.docs.reduce((acc, doc) => {
+            const data = doc.data();
+            acc[doc.id] = { ...data, eventDate: new Date(data.eventDate) };
+            return acc;
+          }, {});
+          setEvents(eventsData);
         } catch (error) {
           toast.error('Error fetching appointments: ' + error.message);
         }
       }
     };
-
+  
     fetchAppointmentsAndSlots();
   }, [user]);
-
-    const handleViewAppnts = () => {
-        navigate('/view-appointments');
-      };
-
-      const appointmentTypeMapping = {
-        marriageCertificate: "Marriage Certificate",
-        birthCertificate: "Birth Certificate",
-        baptismalCertificate: "Baptismal Certificate",
-        burialCertificate: "Burial Certificate",
-        confirmationCertificate: "Confirmation Certificate",
-        baptism: "Baptism",
-        burial: "Burial",
-        marriage: "Marriage",
-      };
-      
-      const handleShowModal = (appointment) => {
-        setSelectedAppointment(appointment);
-        setShowModal(true);
-      };
-    
-      const handleCloseModal = () => {
-        setShowModal(false);
-        setSelectedAppointment(null);
-      };
-    
-      const handlePayment = async (appointmentId) => {
-        try {
-            setSelectedAppointmentId(appointmentId);
-    
-            const appointmentDoc = await getDoc(doc(db, 'appointments', appointmentId));
-            if (appointmentDoc.exists()) {
-                const appointmentData = appointmentDoc.data();
-                setPaymentImageUrl(appointmentData.userFields.paymentImage || null);
-    
-                
-                const churchId = appointmentData.churchId;
-                const churchDoc = await getDoc(doc(db, 'church', churchId));
-    
-                if (churchDoc.exists()) {
-                    const churchData = churchDoc.data();
-                    setChurchQRDetail(churchData.churchQRDetail || null);
-                    setChurchInstruction(churchData.churchInstruction || null);
-                } else {
-                    console.error('No such church document!');
-                }
-            } else {
-                console.error('No such appointment document!');
-            }
-        } catch (error) {
-            console.error('Error fetching payment image or church details:', error);
-        }
-        setShowPaymentModal(true);
-        console.log(`Initiating payment for appointment ID: ${appointmentId}`);
-      };
-    
-      const handleClosePaymentModal = () => {
-          setShowPaymentModal(false);
-      };
-    
-    
-      const renderDeathCertificate = (fileUrl) => {
-        const fileExtension = fileUrl.split('.').pop().toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-          return <img src={fileUrl} alt="Death Certificate" style={{ width: '100%' }} />;
-        } else if (fileExtension === 'pdf') {
-          return <iframe src={fileUrl} title="Death Certificate" style={{ width: '100%', height: '500px' }} />;
-        } else if (['doc', 'docx'].includes(fileExtension)) {
-          return <a href={fileUrl} target="_blank" rel="noopener noreferrer">Download Death Certificate</a>;
+  
+  const handleViewAppnts = () => {
+    navigate('/view-appointments');
+  };
+  
+  const appointmentTypeMapping = {
+    marriageCertificate: "Marriage Certificate",
+    birthCertificate: "Birth Certificate",
+    baptismalCertificate: "Baptismal Certificate",
+    burialCertificate: "Burial Certificate",
+    confirmationCertificate: "Confirmation Certificate",
+    baptism: "Baptism",
+    burial: "Burial",
+    marriage: "Marriage",
+    confirmation: "Confirmation",
+  };
+  
+  const handleShowModal = (appointment) => {
+    setSelectedAppointment(appointment);
+    setShowModal(true);
+  };
+  
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedAppointment(null);
+  };
+  
+  const handlePayment = async (appointmentId) => {
+    try {
+      setSelectedAppointmentId(appointmentId);
+  
+      const appointmentDoc = await getDoc(doc(db, 'appointments', appointmentId));
+      if (appointmentDoc.exists()) {
+        const appointmentData = appointmentDoc.data();
+        setPaymentImageUrl(appointmentData.userFields.paymentImage || null);
+  
+        const churchId = appointmentData.churchId;
+        const churchDoc = await getDoc(doc(db, 'church', churchId));
+  
+        if (churchDoc.exists()) {
+          const churchData = churchDoc.data();
+          setChurchQRDetail(churchData.churchQRDetail || null);
+          setChurchInstruction(churchData.churchInstruction || null);
         } else {
-          return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Death Certificate</a>;
+          console.error('No such church document!');
         }
-      };
-      
-
-      const handleChoosePayment = (e) => {
-        const { files } = e.target;
-        if (files && files.length > 0) {
-            setSelectedFile(files[0]);
-        } else {
-            setSelectedFile(null);
-        }
-    };
-    
-
-      const handleSubmitPayment = async (e) => {
-        e.preventDefault();
-        const auth = getAuth();
-        const user = auth.currentUser;
-    
-        if (user && selectedFile) {
-            try {
-                const storageRef = ref(getStorage(), `userPaymentReceipt/${user.uid}/${selectedFile.name}`);
-                await uploadBytes(storageRef, selectedFile);
-                const paymentImageUrl = await getDownloadURL(storageRef);
-    
-                await updateDoc(doc(db, "appointments", selectedAppointmentId), {
-                    'appointments.paymentImage': paymentImageUrl,
-                });
-    
-                toast.success("Payment receipt uploaded successfully");
-                
-                setShowPaymentModal(false);
-    
-            } catch (error) {
-                toast.error("Error uploading payment receipt");
-                console.error("Error uploading payment receipt:", error);
-            }
-    
-            fileInputRef.current.value = "";
-            setSelectedFile(null);
-        } else {
-            toast.error("Please select a file to upload");
-        }
-    };
-    
-    const renderPaymentImage = (fileUrl) => {
-      const fileExtension = fileUrl.split('.').pop().toLowerCase();
-      if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-        return <img src={fileUrl} alt="Payment Proof" style={{ width: '100%' }} />;
-      } else if (fileExtension === 'pdf') {
-        return <iframe src={fileUrl} title="Payment Proof" style={{ width: '100%', height: '500px' }} />;
-      } else if (['doc', 'docx'].includes(fileExtension)) {
-        return <a href={fileUrl} target="_blank" rel="noopener noreferrer">Download Payment Proof</a>;
       } else {
-        return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Payment Proof</a>;
+        console.error('No such appointment document!');
       }
-    };
-    
-
-      const filteredAppointments = appointments
-      .sort((a, b) => {
-        if (a.appointmentStatus === "For Payment" && b.appointmentStatus !== "For Payment") {
-          return -1;
-        }
-        if (b.appointmentStatus === "For Payment" && a.appointmentStatus !== "For Payment") {
-          return 1;
-        }
-    
-        const dateA = a.userFields.dateOfRequest ? a.userFields.dateOfRequest.seconds : 0;
-        const dateB = b.userFields.dateOfRequest ? b.userFields.dateOfRequest.seconds : 0;
-        return dateB - dateA;
-      })
-      .filter(appointment => appointment.appointmentStatus === "Pending" || appointment.appointmentStatus === "For Payment");
-    
-    const indexOfLastAppointment = currentAppointmentPage * appointmentsPerPage;
-    const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
-    const currentAppointments = filteredAppointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
-    
-    const pageNumbersAppointment = [];
-    for (let i = 1; i <= Math.ceil(filteredAppointments.length / appointmentsPerPage); i++) {
-      pageNumbersAppointment.push(i);
+    } catch (error) {
+      console.error('Error fetching payment image or church details:', error);
     }
-    
-    const paginateAppointments = (pageNumber) => {
-      setCurrentAppointmentPage(pageNumber);
-    };
-
-    const getSlotData = (slotId) => {
-      console.log("Slots State:", slots);
-      const slot = slots[slotId];
-      console.log("Found Slot Data:", slot);
-      return slot || {};
-    };
-
-    const convertTo12HourFormat = (time) => {
-      if (!time || time === "none") return "none";
-      const [hours, minutes] = time.split(':');
-      let hours12 = (hours % 12) || 12;
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      return `${hours12}:${minutes} ${ampm}`;
-    };
-
+    setShowPaymentModal(true);
+    console.log(`Initiating payment for appointment ID: ${appointmentId}`);
+  };
+  
+  const handleClosePaymentModal = () => {
+    setShowPaymentModal(false);
+  };
+  
+  const renderDeathCertificate = (fileUrl) => {
+    const fileExtension = fileUrl.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+      return <img src={fileUrl} alt="Death Certificate" style={{ width: '100%' }} />;
+    } else if (fileExtension === 'pdf') {
+      return <iframe src={fileUrl} title="Death Certificate" style={{ width: '100%', height: '500px' }} />;
+    } else if (['doc', 'docx'].includes(fileExtension)) {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Death Certificate</a>;
+    } else {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Death Certificate</a>;
+    }
+  };
+  
+  const renderBaptismalCertificate = (fileUrl) => {
+    const fileExtension = fileUrl.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+      return <img src={fileUrl} alt="Baptismal Certificate" style={{ width: '100%' }} />;
+    } else if (fileExtension === 'pdf') {
+      return <iframe src={fileUrl} title="Baptismal Certificate" style={{ width: '100%', height: '500px' }} />;
+    } else if (['doc', 'docx'].includes(fileExtension)) {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Baptismal Certificate</a>;
+    } else {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Baptismal Certificate</a>;
+    }
+  };
+  
+  const renderBirthCertificate = (fileUrl) => {
+    const fileExtension = fileUrl.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+      return <img src={fileUrl} alt="Birth Certificate" style={{ width: '100%' }} />;
+    } else if (fileExtension === 'pdf') {
+      return <iframe src={fileUrl} title="Birth Certificate" style={{ width: '100%', height: '500px' }} />;
+    } else if (['doc', 'docx'].includes(fileExtension)) {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Birth Certificate</a>;
+    } else {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Birth Certificate</a>;
+    }
+  };
+  
+  const handleChoosePayment = (e) => {
+    const { files } = e.target;
+    if (files && files.length > 0) {
+      setSelectedFile(files[0]);
+    } else {
+      setSelectedFile(null);
+    }
+  };
+  
+  const handleSubmitPayment = async (e) => {
+    e.preventDefault();
+    const auth = getAuth();
+    const user = auth.currentUser;
+  
+    if (user && selectedFile) {
+      try {
+        const storageRef = ref(getStorage(), `userPaymentReceipt/${user.uid}/${selectedFile.name}`);
+        await uploadBytes(storageRef, selectedFile);
+        const paymentImageUrl = await getDownloadURL(storageRef);
+  
+        await updateDoc(doc(db, "appointments", selectedAppointmentId), {
+          'appointments.paymentImage': paymentImageUrl,
+        });
+  
+        toast.success("Payment receipt uploaded successfully");
+        setShowPaymentModal(false);
+  
+      } catch (error) {
+        toast.error("Error uploading payment receipt");
+        console.error("Error uploading payment receipt:", error);
+      }
+  
+      fileInputRef.current.value = "";
+      setSelectedFile(null);
+    } else {
+      toast.error("Please select a file to upload");
+    }
+  };
+  
+  const renderPaymentImage = (fileUrl) => {
+    const fileExtension = fileUrl.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+      return <img src={fileUrl} alt="Payment Proof" style={{ width: '100%' }} />;
+    } else if (fileExtension === 'pdf') {
+      return <iframe src={fileUrl} title="Payment Proof" style={{ width: '100%', height: '500px' }} />;
+    } else if (['doc', 'docx'].includes(fileExtension)) {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Payment Proof</a>;
+    } else {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Payment Proof</a>;
+    }
+  };
+  
+  const filteredAppointments = appointments
+    .sort((a, b) => {
+      if (a.appointmentStatus === "For Payment" && b.appointmentStatus !== "For Payment") {
+        return -1;
+      }
+      if (b.appointmentStatus === "For Payment" && a.appointmentStatus !== "For Payment") {
+        return 1;
+      }
+  
+      const dateA = a.userFields.dateOfRequest ? a.userFields.dateOfRequest.seconds : 0;
+      const dateB = b.userFields.dateOfRequest ? b.userFields.dateOfRequest.seconds : 0;
+      return dateB - dateA;
+    })
+    .filter(appointment => appointment.appointmentStatus === "Pending" || appointment.appointmentStatus === "For Payment");
+  
+  const indexOfLastAppointment = currentAppointmentPage * appointmentsPerPage;
+  const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
+  const currentAppointments = filteredAppointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
+  
+  const pageNumbersAppointment = [];
+  for (let i = 1; i <= Math.ceil(filteredAppointments.length / appointmentsPerPage); i++) {
+    pageNumbersAppointment.push(i);
+  }
+  
+  const paginateAppointments = (pageNumber) => {
+    setCurrentAppointmentPage(pageNumber);
+  };
+  
+  const getSlotData = (slotId) => {
+    console.log("Slots State:", slots);
+    const slot = slots[slotId];
+    console.log("Found Slot Data:", slot);
+    return slot || {};
+  };
+  
+  const convertTo12HourFormat = (time) => {
+    if (!time || time === "none") return "none";
+    const [hours, minutes] = time.split(':');
+    let hours12 = (hours % 12) || 12;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    return `${hours12}:${minutes} ${ampm}`;
+  };
+  
     return (
       <div className="col-12 mb-4">
         <div className="card">
@@ -380,7 +405,7 @@ export const OngoingAppointments = () => {
                           <h4>Submitted Requirements</h4>
                           <p><b>First Name:</b> {selectedAppointment.confirmationCertificate.firstName}</p>
                           <p><b>Last Name:</b> {selectedAppointment.confirmationCertificate.lastName}</p>
-                          <p><b>Confirmation Date:</b> {selectedAppointment.confirmationCertificate.confirmationDate}</p>
+                          <p><b>Date of Birth:</b> {selectedAppointment.confirmationCertificate.birthdayDate}</p>
                         </div>
                       )}
                       {selectedAppointment.appointmentType === 'baptismalCertificate' && (
@@ -401,7 +426,7 @@ export const OngoingAppointments = () => {
                         <div>
                           <br />
                           <h4>Submitted Requirements</h4>
-                          {renderDeathCertificate(selectedAppointment.burialCertificate.deathCertificate)}
+                          <p><b>View Death Certificate: </b>{renderDeathCertificate(selectedAppointment.burialCertificate.deathCertificate)}</p>
                         </div>
                       )}
                       {selectedAppointment.appointmentType === 'baptism' && (
@@ -445,7 +470,7 @@ export const OngoingAppointments = () => {
                             const endTime = convertTo12HourFormat(slotData.endTime);
                             return startTime && endTime ? `${startTime} - ${endTime}` : 'N/A';
                           })() : 'N/A'}</p>
-                          {renderDeathCertificate(selectedAppointment.burial.deathCertificate)}
+                          <p><b>View Death Certificate: </b>{renderDeathCertificate(selectedAppointment.burial.deathCertificate)}</p>
                         </div>
                       )}
                       {selectedAppointment.appointmentType === 'marriage' && (
@@ -470,6 +495,19 @@ export const OngoingAppointments = () => {
                           <p><b>Groom&apos;s Last Name:</b> {selectedAppointment.marriage.groomLastName}</p>
                           <br />
                           <p><b>Planned Wedding Date:</b> {selectedAppointment.marriage.dateOfMarriage}</p>
+                        </div>
+                      )}
+                      {selectedAppointment.appointmentType === 'confirmation' && (
+                        <div>
+                          <br />
+                          <h4>Submitted Requirements</h4>
+                          <p><b>Date of Confirmation: </b>{events[selectedAppointment.eventId]?.eventDate?.toLocaleDateString() || 'N/A'}</p>
+                          <p><b>Time of Confirmation: </b>{convertTo12HourFormat(events[selectedAppointment.eventId]?.eventTime) || 'N/A'}</p>
+                          <p><b>First Name:</b> {selectedAppointment.confirmation.firstName}</p>
+                          <p><b>Last Name:</b> {selectedAppointment.confirmation.lastName}</p>
+                          <br/>
+                          <p><b>Baptismal Certificate: </b> {renderBaptismalCertificate(selectedAppointment.confirmation.baptismalCert)}</p> 
+                          <p><b>Birth Certificate: </b> {renderBirthCertificate(selectedAppointment.confirmation.birthCertificate)}</p> 
                         </div>
                       )}
                       <br />
