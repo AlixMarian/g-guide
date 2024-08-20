@@ -211,6 +211,10 @@ export const Appointments = () => {
         fetchMassIntentions(); // Fetch mass intentions on component mount
     }, []);
     
+    const handleShowMassIntentionModal = (intention) => {
+        setSelectedAppointment(intention);
+        setShowModal(true);
+    };
 
     return (
         <>
@@ -395,7 +399,9 @@ export const Appointments = () => {
                             <th scope="col">Date of Request</th>
                             <th scope="col">Mass Date</th>
                             <th scope="col">Mass Time</th>
+                            <th scope="col">AM/PM</th>
                             <th scope="col">Requested by</th>
+                            <th scope="col">Receipt Image</th>
                             <th scope="col">More Info</th>
                         </tr>
                     </thead>
@@ -405,9 +411,19 @@ export const Appointments = () => {
                                 <td>{formatDate(intention.dateOfRequest)}</td>
                                 <td>{intention.massSchedule.massDate}</td>
                                 <td>{intention.massSchedule.massTime}</td>
+                                <td>{intention.massSchedule.massPeriod}</td>
                                 <td>{intention.userName}</td>
                                 <td>
-                                    <Button variant="info" onClick={() => handleShowModal(intention)}>
+                                    {intention.receiptImage ? (
+                                        <a href={intention.receiptImage} target="_blank" rel="noopener noreferrer">
+                                            View Receipt
+                                        </a>
+                                    ) : (
+                                        <span style={{ color: 'red' }}>No Receipt</span>
+                                    )}
+                                </td>
+                                <td>
+                                    <Button variant="info" onClick={() => handleShowMassIntentionModal(intention)}>
                                         <i className="bi bi-info-circle-fill"></i>
                                     </Button>
                                 </td>
@@ -454,13 +470,13 @@ export const Appointments = () => {
                                     <p><strong>Mother First Name:</strong> {selectedAppointment.baptismalCertificate?.motherFirstName}</p>
                                     <p><strong>Mother Last Name:</strong> {selectedAppointment.baptismalCertificate?.motherLastName}</p>
                                 </>
-                            )}
+                            )}  
                             {selectedAppointment.appointmentType === "burialCertificate" && (
                                 <>
                                     <p><strong>Death Certificate:</strong> <a href={selectedAppointment.burialCertificate?.deathCertificate} target="_blank" rel="noopener noreferrer">View Document</a></p>
                                 </>
                             )}
-
+                            
                             <p><strong>Date of Request:</strong> {formatDate(selectedAppointment.userFields?.dateOfRequest)}</p>
 
                             <p><strong>Payment Receipt Image: </strong> {selectedAppointment.appointments?.paymentImage ? (
@@ -523,6 +539,33 @@ export const Appointments = () => {
                     <Button variant="danger" onClick={() => setShowDenyModal(false)}>Cancel</Button>
                     <Button variant="success" onClick={handleSubmitDenial}>Submit</Button>
                     <p style={{ fontSize: '12px', textAlign: 'center', margin: '0 auto', marginTop: '1rem' }}>Note: This message will send to both Email and SMS</p>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showModal} onHide={handleCloseModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Mass Intention Details</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {selectedAppointment && (
+                        <div>
+                            <p><strong>Date of Request:</strong> {formatDate(selectedAppointment.dateOfRequest)}</p>
+                            <p><strong>Mass Schedule:</strong></p>
+                            <p><strong>Mass Date:</strong> {selectedAppointment.massSchedule.massDate}</p>
+                            <p><strong>Mass Time:</strong> {selectedAppointment.massSchedule.massTime}</p>
+                            <p><strong>Mass Period:</strong> {selectedAppointment.massSchedule.massPeriod}</p>
+                            <p><strong>Contact:</strong> {selectedAppointment.userContact}</p>
+                            <p><strong>Email:</strong> {selectedAppointment.userEmail}</p>
+                            <p><strong>Requested by:</strong> {selectedAppointment.userName}</p>
+                            <br/>
+                            <p><strong>Thanksgiving Mass:</strong> {selectedAppointment.thanksgivingMass || "N/A"}</p>
+                            <p><strong>Petition:</strong> {selectedAppointment.petition || "N/A"}</p>
+                            <p><strong>For the Souls of:</strong> {selectedAppointment.forTheSoulOf || "N/A"}</p>
+                        </div>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>Close</Button>
                 </Modal.Footer>
             </Modal>
         </>

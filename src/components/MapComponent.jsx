@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import '../websiteUser.css';
 import NavBar from './NavBar';
 import WebsiteUserNavBar from './WebsiteUserNavBar';
-import { Offcanvas } from 'react-bootstrap'; // Removed Button since it's not used
+import { Offcanvas } from 'react-bootstrap';
 
 const containerStyle = {
   width: '100%',
@@ -30,10 +30,12 @@ const MapComponent = () => {
 
   useEffect(() => {
     const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsUserLoggedIn(!!user);
     });
+    return () => unsubscribe();
   }, [navigate]);
+  
 
   const success = (position) => {
     const positionObj = {
