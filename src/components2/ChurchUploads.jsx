@@ -212,7 +212,6 @@ export const ChurchUploads = () => {
         <div className="container mt-5">
             <div className="card">
                 <div className="row no-gutters">
-                    {/* Left Side: Upload Forms */}
                     <div className="col-md-6">
                         <div className="card-body">
                             <form className="mb-3" onSubmit={handleChurchPhotosUpload}>
