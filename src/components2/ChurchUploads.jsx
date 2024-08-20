@@ -126,57 +126,56 @@ export const ChurchUploads = () => {
 
     const handleChurchPhotosChange = (e) => {
         const { files } = e.target;
-        setChurchPhotos(Array.from(files)); // Convert FileList to an array
+        setChurchPhotos(Array.from(files)); 
     };
 
     const handleChurchPhotosUpload = async (e) => {
         e.preventDefault();
         const auth = getAuth();
         const user = auth.currentUser;
-
+    
         if (!user) {
             toast.error('User not authenticated');
             return;
         }
-
-        if (churchPhotos.length === 0) {
-            toast.error('No files selected');
+    
+        if (!churchPhotosRef.current || !churchPhotosRef.current.files.length) {
+            toast.error('Please select a photo');
             return;
         }
-
+    
         try {
-            // Fetch current photos count
             const q = query(collection(db, "churchPhotos"), where("uploader", "==", user.uid));
             const querySnapshot = await getDocs(q);
             const currentPhotoCount = querySnapshot.size;
-
-            // Check if the total number of photos after upload would exceed 5
+    
             if (currentPhotoCount + churchPhotos.length > 5) {
-                toast.error('You can only upload up to 5 photos');
+                toast.error(`You can only upload ${5 - currentPhotoCount} more photo(s)`);
                 return;
             }
-
-            // Upload the new photos
+    
             const uploadPromises = churchPhotos.map(async (photo) => {
                 const storageRef = ref(storage, `churchPhotos/${user.uid}/${photo.name}`);
                 await uploadBytes(storageRef, photo);
                 const photoUrl = await getDownloadURL(storageRef);
-
+    
                 await addDoc(collection(db, 'churchPhotos'), {
                     photoLink: photoUrl,
                     uploader: user.uid,
                 });
             });
-
+    
             await Promise.all(uploadPromises);
-            fetchChurchPhotos(user.uid);  // Refresh the list of photos after upload
-
+            fetchChurchPhotos(user.uid);  
+    
             toast.success('Church photos uploaded successfully');
             setChurchPhotos([]);
         } catch (error) {
             toast.error('Error uploading church photos');
         }
     };
+    
+    
 
     const handleDeletePhoto = async (photoId, photoLink) => {
         try {
