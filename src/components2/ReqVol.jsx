@@ -186,7 +186,6 @@ export const ReqVol = () => {
       for (const docSnap of querySnapshot.docs) {
         const post = { id: docSnap.id, ...docSnap.data() };
 
-        // Check if the post's endDate has passed and update its status
         if (post.endDate.toDate() < today && post.status !== 'archived') {
           await updateDoc(doc(db, 'requestVolunteers', post.id), { status: 'archived' });
         }
@@ -199,7 +198,7 @@ export const ReqVol = () => {
       console.error('Error fetching posts: ', error);
     });
 
-    return () => unsubscribe(); // Clean up the listener on component unmount
+    return () => unsubscribe(); 
   }, [user]);
 
   const handleArchivePost = async (postId) => {

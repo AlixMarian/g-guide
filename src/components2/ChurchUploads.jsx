@@ -11,7 +11,7 @@ export const ChurchUploads = () => {
 
     const [userData, setUserData] = useState(null);
     const [churchData, setChurchData] = useState({});
-    const [churchPhotos, setChurchPhotos] = useState([]); // Initialize as an empty array
+    const [churchPhotos, setChurchPhotos] = useState([]);
     const [bankProofFile, setBankProofFile] = useState(null);
     const [churchProofFile, setChurchProofFile] = useState(null);
     const churchPhotosRef = useRef(null);
@@ -33,7 +33,7 @@ export const ChurchUploads = () => {
                         const churchDoc = await getDoc(doc(db, "church", user.uid));
                         if (churchDoc.exists()) {
                             setChurchData(churchDoc.data());
-                            fetchChurchPhotos(user.uid);  // Fetch the uploaded photos
+                            fetchChurchPhotos(user.uid); 
                         } else {
                             toast.error("Church data not found");
                         }
@@ -54,7 +54,7 @@ export const ChurchUploads = () => {
             const q = query(collection(db, "churchPhotos"), where("uploader", "==", userId));
             const querySnapshot = await getDocs(q);
             const photos = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setChurchPhotos(photos); // Set the photos array
+            setChurchPhotos(photos); 
         } catch (error) {
             toast.error("Error fetching church photos");
         }
@@ -286,7 +286,6 @@ export const ChurchUploads = () => {
                         </div>
                     </div>
 
-                    {/* Right Side: Uploaded Photos */}
                     <div className="col-md-6">
                         <div className="card-body">
                             <h5 className="card-title"><b>Uploaded Church Photos</b></h5>

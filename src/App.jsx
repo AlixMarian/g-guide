@@ -45,10 +45,10 @@ const App = () => {
         <Route path="/signup" element={<><NavBar/><SignUp /></>} />
         <Route path="/homepage" element={<><WebUserNavBar /><Homepage /></>} />
         <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} /> 
-        <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} /> {/* for web user */}
+        <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
         
-        {/* Routes for church coordinator */}
+        {/* church coordinator routessss */}
         <Route path="/SEA" element={
           <>
             <Layout/>

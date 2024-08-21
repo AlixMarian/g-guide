@@ -148,7 +148,6 @@ const MapComponent = () => {
         </GoogleMap>
       </LoadScript>
 
-      {/* Drawer for displaying marker details */}
       <Offcanvas show={drawerInfo.show} onHide={handleCloseDrawer} placement="end">
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>{drawerInfo.title}</Offcanvas.Title>

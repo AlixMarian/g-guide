@@ -32,8 +32,6 @@ export const SEA = () => {
   const [startDate, setStartDate] = useState('');
 
 
-
-  
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -196,7 +194,6 @@ export const SEA = () => {
  
   return (
     <>
-      {/* Mass Schedule Section */}
       <div className="massInfo">
         <h1>Mass Schedule</h1>
         <table className="table">
@@ -301,7 +298,6 @@ export const SEA = () => {
         </form>
       </div>
 
-      {/* Events Section */}
       <div className="events">
         <h1>Events</h1>
         <table className='table'>
@@ -371,7 +367,6 @@ export const SEA = () => {
         </form>
       </div>
 
-      {/* Announcements Section */}
       <div className="announcementsSEA">
         <h1>Announcements</h1>
         <table className="table">

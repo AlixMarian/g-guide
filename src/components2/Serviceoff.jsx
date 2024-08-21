@@ -11,11 +11,7 @@ export const Serviceoff = () => {
     const [servicesState, setServicesState] = useState({});
     const [userID, setUserID] = useState(null);
 
-
-
     const auth = getAuth();
-
-    
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
@@ -50,8 +46,6 @@ export const Serviceoff = () => {
             fetchData();
         }
     }, [userID]);
-
-
 
     const isSchedule = (serviceName) => {
         const schedules = ["Marriages", "Baptism", "Confirmation", "Burials","Mass Intentions"];
