@@ -64,7 +64,7 @@ export const SysAdminPendingChurch = () => {
       }
 
       try {
-        // Fetch latest data before approval
+        
         await fetchPendingChurches();
 
         const churchDocRef = doc(db, 'church', id);
@@ -74,8 +74,8 @@ export const SysAdminPendingChurch = () => {
         setChurchData(churchData.filter(church => church.id !== id));
         handleCloseModal();
 
-        // Send a confirmation email to the church coordinator
-        await sendMail(email, churchName); // Use coordinatorEmail here
+        
+        await sendMail(email, churchName); 
         toast.success('Confirmation email sent');
       } catch (error) {
         console.error('Error approving church:', error);
@@ -122,7 +122,7 @@ export const SysAdminPendingChurch = () => {
       }
 
       try {
-        // Fetch latest data before denial
+       
         await fetchPendingChurches();
 
         const churchDocRef = doc(db, 'church', id);
@@ -132,7 +132,7 @@ export const SysAdminPendingChurch = () => {
         setChurchData(churchData.filter(church => church.id !== id));
         handleCloseModal();
 
-        await sendRejectionMail(email, churchName); // Use coordinatorEmail here
+        await sendRejectionMail(email, churchName);
         toast.success('Rejection email sent');
       } catch (error) {
         console.error('Error rejecting church:', error);
@@ -145,10 +145,10 @@ export const SysAdminPendingChurch = () => {
     const fileExtension = fileUrl.split('.').pop().toLowerCase();
 
     if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-      // Render an image
+      
       return <img src={fileUrl} alt="Church Proof" style={{ width: '100%' }} />;
     } else if (fileExtension === 'pdf') {
-      // Render a PDF file
+      
       return (
         <iframe
           src={fileUrl}
@@ -157,14 +157,14 @@ export const SysAdminPendingChurch = () => {
         />
       );
     } else if (['doc', 'docx'].includes(fileExtension)) {
-      // Render a link for Word documents
+      
       return (
         <a href={fileUrl} target="_blank" rel="noopener noreferrer">
           Download Proof of Affiliation
         </a>
       );
     } else {
-      // Fallback for other file types
+      
       return (
         <a href={fileUrl} target="_blank" rel="noopener noreferrer">
           Download Proof of Affiliation

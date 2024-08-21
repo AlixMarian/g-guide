@@ -366,7 +366,6 @@ export const ViewAppointments = () => {
               )}
               <br/>
               <h4>Payment Details</h4>
-              {/* {renderPaymentImage(selectedAppointment.userFields.paymentImage)} */}
               {selectedAppointment.appointments?.paymentImage && selectedAppointment.appointments.paymentImage !== 'none' ? (
                 renderPaymentImage(selectedAppointment.appointments.paymentImage)
                 ) : (

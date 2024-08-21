@@ -46,7 +46,7 @@ export const ChurchHomepageBook = () => {
 
   const handleServiceTypeChange = (serviceType) => {
     setSelectedServiceType(serviceType);
-    setSelectedService(''); // Clear selected service when changing service type
+    setSelectedService('');
   };
 
   return (

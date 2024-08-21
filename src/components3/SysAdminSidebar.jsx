@@ -107,7 +107,7 @@ export const SysAdminSidebar = () => {
         </div>
       
         <ul>
-          {/* System admin dashboard */}
+         
           <li className='hover-button' onClick={handleAdminDashboard } style={{ cursor: 'pointer' }} >
             <Link to="/systemAdminDashboard" className="sidebar-button">
               <i className="bx bxs-grid-alt">
@@ -120,7 +120,7 @@ export const SysAdminSidebar = () => {
             </Link>
           </li>
 
-          {/* Pending Churches */}
+          
           <li className='hover-button' onClick={handlePendingChurch} style={{ cursor: 'pointer' }}>
             <Link to="/pending-church" className="sidebar-button">
               <i className="bx bxs-grid-alt">
@@ -133,7 +133,7 @@ export const SysAdminSidebar = () => {
             </Link>
           </li>
 
-          {/* list of users */}
+          
           <li className='hover-button' onClick={handleUsers} style={{ cursor: 'pointer' }}>
             <Link to="/userDB" className="sidebar-button">
               <i className="bx bxs-grid-alt">
@@ -147,7 +147,7 @@ export const SysAdminSidebar = () => {
             </Link>
           </li>
 
-          {/* list of churches */}
+         
           <li className='hover-button' onClick={handleChurchDB} style={{ cursor: 'pointer' }}>
             <Link to="/churchDB" className="sidebar-button">
               <i className="bx bxs-grid-alt">
@@ -161,7 +161,7 @@ export const SysAdminSidebar = () => {
             </Link>
           </li>
 
-          {/* system admin account settings */}
+          
           <li className='hover-button' onClick={handleSysAccount} style={{ cursor: 'pointer' }}>
             <Link to="/sys-account" className="sidebar-button">
               <i className="bx bxs-grid-alt">
@@ -174,7 +174,7 @@ export const SysAdminSidebar = () => {
             </Link>
           </li>
 
-          {/* logout */}
+          
           <li className='hover-button' onClick={handleLogout} style={{ cursor: 'pointer' }}>
             <div className="logout-button sidebar-button" onClick={handleLogout}>
               <Link to="/">
