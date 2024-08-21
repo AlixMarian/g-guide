@@ -76,7 +76,7 @@ export const Homepage = () => {
               <div className="card-body">
                 <h5 className="card-title">In need of a local church?</h5>
                 <p className="card-text">We can help you find your nearest church, get up-to-date information, and connect with them</p>
-                <button type="button" className="btn btn-primary" onClick={() => navigate('/map')}>Open Maps</button>
+                <button type="button" className="btn btn-custom-primary" onClick={() => navigate('/map')}>Open Maps</button>
               </div>
               <img src="src/assets/mapImg.png" className="card-img-bottom" alt="..." />
             </div>
@@ -94,7 +94,7 @@ export const Homepage = () => {
                           <h5 className="card-title mb-0">{church.churchName}</h5>
                           <p className="card-text mb-0">{church.location}</p>
                         </div>
-                        <button className="btn btn-primary" onClick={() => navigate(`/church-homepage/${church.id}`)}>
+                        <button className="btn btn-custom-primary" onClick={() => navigate(`/church-homepage/${church.id}`)}>
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-arrow-right-square-fill" viewBox="0 0 16 16">
                             <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1" />
                           </svg> Visit Church Information Page

@@ -6,7 +6,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from '/backend/firebase';
 import '../websiteUser.css';
 import useChatbot from './Chatbot';
-import { Modal, Button} from 'react-bootstrap'; 
+import { Modal} from 'react-bootstrap'; 
 import { toast } from 'react-toastify';
 import Pagination from 'react-bootstrap/Pagination';
 
@@ -301,7 +301,7 @@ export const OngoingAppointments = () => {
         <div className="card">
           <div className="card-body d-flex align-items-center justify-content-between">
             <h5 className="card-title mb-0"><b>Ongoing Appointments</b></h5>
-            <button type="button" className="btn btn-primary ms-3" onClick={handleViewAppnts}>View Appointment History</button>
+            <button type="button" className="btn btn-custom-primary ms-3" onClick={handleViewAppnts}>View Appointment History</button>
           </div>
           <div className="card-body">
             <div className="row">
@@ -311,17 +311,21 @@ export const OngoingAppointments = () => {
                   return (
                     <div key={appointment.id} className="col-12 mb-3">
                       <div className="card">
-                        <div className="card-body d-flex align-items-center justify-content-between">
-                          <div>
-                            <h5 className="card-title mb-0">{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</h5>
-                            <p className="card-text mb-0"><b>Status: {appointment.appointmentStatus}</b></p>
-                            {church && <p className='card-text mb-0'>Church Name: {church.churchName}</p>}
-                          </div>
-                          <div className="d-flex align-items-center">
-                            {appointment.appointmentStatus === "For Payment" && (
-                              <button className='btn btn-warning ms-2' onClick={() => handlePayment(appointment.id)}>Pay here via QR Code</button>
-                            )}
-                            <button className='btn btn-info ms-2' onClick={() => handleShowModal(appointment)}>View Information</button>
+                        <div className="card-body">
+                          <div className="row align-items-center">
+                            <div className="col-12 col-md-8">
+                              <h5 className="card-title mb-0">
+                                {appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}
+                              </h5>
+                              <p className="card-text mb-0"><b>Status: {appointment.appointmentStatus}</b></p>
+                              {church && <p className='card-text mb-0'>Church Name: {church.churchName}</p>}
+                            </div>
+                            <div className="col-12 col-md-4 d-flex justify-content-md-end mt-3 mt-md-0">
+                              {appointment.appointmentStatus === "For Payment" && (
+                                <button className='btn btn-warning me-2 mb-2 mb-md-0' onClick={() => handlePayment(appointment.id)}>Pay here via QR Code</button>
+                              )}
+                              <button className='btn btn-custom-primary' onClick={() => handleShowModal(appointment)}>View Information</button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -351,16 +355,14 @@ export const OngoingAppointments = () => {
                       </div>
                     </>
                   )}
-                  <form className='submitPayment' onSubmit={handleSubmitPayment}>
+                  <form className="submitPayment d-flex flex-column" onSubmit={handleSubmitPayment}>
                     <h5>Submit Receipt</h5>
                     <input type="file" className="form-control" id="paymentReceiptImage" accept="image/*" onChange={handleChoosePayment} ref={fileInputRef} readOnly />
-                    <button type="submit" className="btn btn-primary mt-2">Upload Receipt</button>
+                    <div className="mt-2 d-flex justify-content-end">
+                      <button type="submit" className="btn btn-custom-primary">Upload Receipt</button>
+                    </div>
                   </form>
                 </Modal.Body>
-                <Modal.Footer>
-                  <Button variant="secondary" onClick={handleClosePaymentModal}>Close</Button>
-                  <Button variant="primary" onClick={() => console.log('Submit')}>Submit</Button>
-                </Modal.Footer>
               </Modal>
     
               <Modal show={showModal} onHide={handleCloseModal} centered>
