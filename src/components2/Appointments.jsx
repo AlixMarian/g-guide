@@ -27,7 +27,8 @@ export const Appointments = () => {
     const [massIntentions, setMassIntentions] = useState([]);
     const [showMassIntentionModal, setShowMassIntentionModal] = useState(false);
     const [selectedMassIntention, setSelectedMassIntention] = useState(null);
-    const [slotDetails, setSlotDetails] = useState({ startDate: "", startTime: "" });
+    const [slots, setSlots] = useState([]);
+
 
     // Get the current user
     const auth = getAuth();
@@ -253,26 +254,27 @@ export const Appointments = () => {
     };
 
     useEffect(() => {
-        const fetchSlotDetails = async () => {
-            if (selectedAppointment?.marriage?.slotId) {
-                try {
-                    const slotRef = doc(db, "slot", selectedAppointment.marriage.slotId);
-                    const slotSnap = await getDoc(slotRef);
-
-                    if (slotSnap.exists()) {
-                        const { startDate, startTime } = slotSnap.data();
-                        setSlotDetails({ startDate, startTime });
-                    } else {
-                        console.log("No such slot!");
-                    }
-                } catch (error) {
-                    console.error("Error fetching slot details:", error);
-                }
+        const fetchSlots = async () => {
+            try {
+                const slotsQuery = query(collection(db, 'slot'), where('slotStatus', '==', 'taken'));
+                const allSlotsSnapshot = await getDocs(slotsQuery);
+                const allSlots = allSlotsSnapshot.docs.reduce((acc, doc) => {
+                    acc[doc.id] = doc.data();
+                    return acc;
+                }, {});
+                setSlots(allSlots);
+            } catch (error) {
+                console.error('Error fetching slots:', error);
             }
         };
+    
+        fetchSlots();
+    }, []);
 
-        fetchSlotDetails();
-    }, [selectedAppointment]);
+    const getSlotData = (slotId) => {
+        const slot = slots[slotId];
+        return slot || {};
+    };
 
     return (
         <>
@@ -493,9 +495,16 @@ export const Appointments = () => {
                             
                             {selectedAppointment.appointmentType === "marriage" && (
                                 <>  
-                                    <p><strong>Slot:</strong></p>
-                                    <p><strong>Date:</strong> {slotDetails.startDate || "N/A"}</p>
-                                    <p><strong>Time:</strong> {slotDetails.startTime || "N/A"}</p>
+                                    <p><b>Selected Date for Marriage:</b> {selectedAppointment.slotId ? (() => {
+                                        const slotData = getSlotData(selectedAppointment.slotId);
+                                        return slotData.startDate || 'N/A';
+                                    })() : 'N/A'}</p>
+                                    <p><b>Selected Time for Marriage:</b> {selectedAppointment.slotId ? (() => {
+                                        const slotData = getSlotData(selectedAppointment.slotId);
+                                        const startTime = convertTo12HourFormat(slotData.startTime);
+                                        const endTime = convertTo12HourFormat(slotData.endTime);
+                                        return startTime && endTime ? `${startTime} - ${endTime}` : 'N/A';
+                                    })() : 'N/A'}</p>
                                     <p><strong>Bride First Name:</strong> {selectedAppointment.marriage?.brideFirstName}</p>
                                     <p><strong>Bride Last Name:</strong> {selectedAppointment.marriage?.brideLastName}</p>
                                     <p><strong>Groom First Name:</strong> {selectedAppointment.marriage?.groomFirstName}</p>
@@ -508,9 +517,16 @@ export const Appointments = () => {
 
                             {selectedAppointment.appointmentType === "baptism" && (
                                 <>  
-                                    <p><strong>Slot:</strong></p>
-                                    <p><strong>Date:</strong> {slotDetails.startDate || "N/A"}</p>
-                                    <p><strong>Time:</strong> {slotDetails.startTime || "N/A"}</p>
+                                    <p><b>Selected Date for Baptism:</b> {selectedAppointment.slotId ? (() => {
+                                        const slotData = getSlotData(selectedAppointment.slotId);
+                                        return slotData.startDate || 'N/A';
+                                    })() : 'N/A'}</p>
+                                    <p><b>Selected Time for Baptism:</b> {selectedAppointment.slotId ? (() => {
+                                        const slotData = getSlotData(selectedAppointment.slotId);
+                                        const startTime = convertTo12HourFormat(slotData.startTime);
+                                        const endTime = convertTo12HourFormat(slotData.endTime);
+                                        return startTime && endTime ? `${startTime} - ${endTime}` : 'N/A';
+                                    })() : 'N/A'}</p>
                                     <p><strong>Child First Name:</strong> {selectedAppointment.baptism?.childFirstName}</p>
                                     <p><strong>Child Last Name:</strong> {selectedAppointment.baptism?.childLastName}</p>
                                     <p><strong>Birthday:</strong> {selectedAppointment.baptism?.dateOfBirth}</p>
@@ -530,9 +546,16 @@ export const Appointments = () => {
 
                             {selectedAppointment.appointmentType === "burial" && (
                                 <>
-                                    <p><strong>Slot:</strong></p>
-                                    <p><strong>Date:</strong> {slotDetails.startDate || "N/A"}</p>
-                                    <p><strong>Time:</strong> {slotDetails.startTime || "N/A"}</p>
+                                    <p><b>Selected Date for Burial Service:</b> {selectedAppointment.slotId ? (() => {
+                                        const slotData = getSlotData(selectedAppointment.slotId);
+                                        return slotData.startDate || 'N/A';
+                                    })() : 'N/A'}</p>
+                                    <p><b>Selected Time for Burial Service:</b> {selectedAppointment.slotId ? (() => {
+                                        const slotData = getSlotData(selectedAppointment.slotId);
+                                        const startTime = convertTo12HourFormat(slotData.startTime);
+                                        const endTime = convertTo12HourFormat(slotData.endTime);
+                                        return startTime && endTime ? `${startTime} - ${endTime}` : 'N/A';
+                                    })() : 'N/A'}</p>
                                     <p><strong>Death Certificate:</strong> <a href={selectedAppointment.burial?.deathCertificate} target="_blank" rel="noopener noreferrer">View Document</a></p>
                                     <br/>
                                 </>
