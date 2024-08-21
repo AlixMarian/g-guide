@@ -36,7 +36,7 @@ const Home = () => {
   
     return items.map((church, index) => (
       <Carousel.Item key={church.id} className={index === 0 ? 'active' : ''}>
-        <div className="row justify-content-center">
+        <div className="homeCarousel row justify-content-center mb-5">
           <div className="col-12 col-md-8 col-lg-6">
             <div className="card shadow-sm border-0">
               <div className="card-body text-center">
