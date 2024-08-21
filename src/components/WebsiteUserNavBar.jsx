@@ -40,7 +40,7 @@ const WebsiteUserNavBar = () => {
       <div className="container-fluid">
         <a className="navbar-brand" href="/homepage">
           <img src={logo} alt="Logo" width="40" height="34" className="d-inline-block align-text-top" />
-          G!Guide
+          G! Guide
         </a>
         
 

@@ -7,7 +7,7 @@ export const NavBar = () => {
       <div className="container-fluid">
         <a className="navbar-brand" href="/home">
           <img src="../src/assets/gGuideLogo.svg" alt="Logo" width="40" height="34" className="d-inline-block align-text-top" />
-          G!Guide
+          G! Guide
         </a>
         
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">

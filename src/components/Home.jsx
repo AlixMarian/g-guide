@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '/backend/firebase'; // Adjust the path based on your setup
+import { db } from '/backend/firebase';
 import { Carousel } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../websiteUser.css';
@@ -28,14 +28,20 @@ const Home = () => {
   }, []);
 
   const renderCarouselItems = () => {
-    return churches.map((church, index) => (
+    const items = churches.length > 0 ? churches : [{
+      id: 'no-churches',
+      churchName: 'Be a Part of Our Family!',
+      churchAddress: 'Register as a Church Coordinator and sign up your church to join our community.',
+    }];
+  
+    return items.map((church, index) => (
       <Carousel.Item key={church.id} className={index === 0 ? 'active' : ''}>
-        <div className="row text-center">
-          <div className="col-12">
-            <div className="card h-100">
-              <div className="card-body">
-                <h5>{church.churchName}</h5>
-                <p>{church.churchAddress}</p>
+        <div className="row justify-content-center">
+          <div className="col-12 col-md-8 col-lg-6">
+            <div className="card shadow-sm border-0">
+              <div className="card-body text-center">
+                <h5 className="card-title mb-2">{church.churchName}</h5>
+                <p className="card-text text-muted">{church.churchAddress}</p>
               </div>
             </div>
           </div>
@@ -43,18 +49,18 @@ const Home = () => {
       </Carousel.Item>
     ));
   };
-
+  
   return (
     <>
       <div id="siteBanner" className="text-center">
         <img src="../src/assets/siteBanner.png" className="d-block w-100" alt="Site Banner" />
       </div>
 
-      <div className="container-xxl partneredChurch mt-4">
-        <h3 className="text-center">Our Partnered Churches</h3>
-        <Carousel id="partneredChurchCarousel" className="carousel carousel-dark slide" data-bs-ride="true">
-          {renderCarouselItems()}
-        </Carousel>
+      <div className="partneredChurch mt-4">
+          <h3 className="text-center mb-4">Our Partnered Churches</h3>
+          <Carousel id="partneredChurchCarousel" className="carousel slide" data-bs-ride="carousel" indicators={false} controls={true} interval={5000} pause="hover">
+            {renderCarouselItems()}
+          </Carousel>
       </div>
 
 
@@ -69,7 +75,7 @@ const Home = () => {
             <img src="../src/assets/findAChurch.png" className="card-img-top" alt="Find a Church" />
             <div className="card-body">
               <h5 className="card-title">Find a Church</h5>
-              <p className="card-text">Easily locate a church based on your device’s location.</p>
+              <p className="card-text">Easily locate a church based on your device&apos;s location.</p>
             </div>
           </div>
           <div className="card">
@@ -83,7 +89,7 @@ const Home = () => {
             <img src="../src/assets/viewChurchInfo.png" className="card-img-top" alt="View Church Information" />
             <div className="card-body">
               <h5 className="card-title">View Church Information</h5>
-              <p className="card-text">Know the church’s mass schedules, language and services they offer.</p>
+              <p className="card-text">Know the church&apos;s mass schedules, language and services they offer.</p>
             </div>
           </div>
           <div className="card">
