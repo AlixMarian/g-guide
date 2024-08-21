@@ -375,8 +375,6 @@ export const ViewAppointments = () => {
           )}
         </Modal.Body>
       </Modal>
-
-
         </div>
       </div>
     </div>

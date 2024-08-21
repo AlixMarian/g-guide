@@ -50,7 +50,6 @@ export const MassIntention = () => {
     fetchUserData();
   }, [user]);
 
-  // Fetch mass schedules
   useEffect(() => {
     const fetchMassSchedules = async () => {
       const q = query(collection(db, 'massSchedules'), where('creatorId', '==', churchId));

@@ -1,24 +1,20 @@
-// src/utils/firebaseUtils.js
-
 import { getDocs, collection, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import { toast } from 'react-toastify';
 
-// Function to get mass list
 export const getMassList = async (setMassList, creatorId) => {
   try {
     const data = await getDocs(collection(db, "massSchedules"));
     const filteredData = data.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id
-    })).filter(doc => doc.creatorId === creatorId); // Filter by creatorId
+    })).filter(doc => doc.creatorId === creatorId);
     setMassList(filteredData);
   } catch (err) {
     console.error(err);
   }
 };
 
-// Function to add new mass schedule
 export const addMassSchedule = async (massData, creatorId, getMassList) => {
   try {
     await addDoc(collection(db, "massSchedules"), { ...massData, creatorId });
@@ -30,7 +26,6 @@ export const addMassSchedule = async (massData, creatorId, getMassList) => {
   }
 };
 
-// Function to delete mass schedule
 export const deleteMassSchedule = async (id, getMassList, creatorId) => {
   try {
     await deleteDoc(doc(db, "massSchedules", id));
@@ -42,7 +37,6 @@ export const deleteMassSchedule = async (id, getMassList, creatorId) => {
   }
 };
 
-// Function to update a mass schedule
 export const updateMassSchedule = async (id, updatedData, callback) => {
   try {
     const massDoc = doc(db, 'massSchedules', id);
@@ -55,21 +49,19 @@ export const updateMassSchedule = async (id, updatedData, callback) => {
   }
 };
 
-// Function to get event list
 export const getEventList = async (setEventList, creatorId) => {
   try {
     const data = await getDocs(collection(db, "events"));
     const filteredData = data.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id
-    })).filter(doc => doc.creatorId === creatorId); // Filter by creatorId
+    })).filter(doc => doc.creatorId === creatorId);
     setEventList(filteredData);
   } catch (err) {
     console.error(err);
   }
 };
 
-// Function to add new event schedule
 export const addEventSchedule = async (eventData, creatorId, getEventList) => {
   try {
     await addDoc(collection(db, "events"), { ...eventData, creatorId });
@@ -81,7 +73,6 @@ export const addEventSchedule = async (eventData, creatorId, getEventList) => {
   }
 };
 
-// Function to delete event schedule
 export const deleteEventSchedule = async (id, getEventList, creatorId) => {
   try {
     await deleteDoc(doc(db, "events", id));
@@ -105,21 +96,19 @@ export const updateEventSchedule = async (id, updatedData, callback) => {
   }
 };
 
-// Function to get announcement list
 export const getAnnouncementList = async (setAnnouncementList, creatorId) => {
   try {
     const data = await getDocs(collection(db, "announcements"));
     const filteredData = data.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id
-    })).filter(doc => doc.creatorId === creatorId); // Filter by creatorId
+    })).filter(doc => doc.creatorId === creatorId); 
     setAnnouncementList(filteredData);
   } catch (err) {
     console.error(err);
   }
 };
 
-// Function to add new announcement
 export const addAnnouncement = async (announcementData, creatorId, getAnnouncementList) => {
   try {
     await addDoc(collection(db, "announcements"), { ...announcementData, creatorId });
@@ -155,7 +144,6 @@ export const updateAnnouncement = async (id, updatedData, callback) => {
 };
 
 
-// Function to get priest list
 export const getPriestList = async (setPriestList, creatorId) => {
   try {
     const data = await getDocs(collection(db, "priest"));
@@ -164,7 +152,7 @@ export const getPriestList = async (setPriestList, creatorId) => {
         ...doc.data(),
         id: doc.id
       }))
-      .filter((doc) => doc.creatorId === creatorId); // Filter by creatorId
+      .filter((doc) => doc.creatorId === creatorId); 
     setPriestList(filteredData);
   } catch (err) {
     console.error(err);
