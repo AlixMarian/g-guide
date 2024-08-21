@@ -100,14 +100,14 @@ export const UserAccountSettings = () => {
 
     if (user) {
       try {
-        // Update user info in Firestore
+        
         const updatedUserInfo = { ...newUserInfo };
         delete updatedUserInfo.password;
         delete updatedUserInfo.confirmPassword;
 
         await updateDoc(doc(db, "users", user.uid), updatedUserInfo);
 
-        // Update password if provided
+        
         if (newUserInfo.password) {
           await updatePassword(user, newUserInfo.password);
         }
@@ -148,7 +148,7 @@ export const UserAccountSettings = () => {
                   readOnly
                 />
               </div>
-              <button type="submit" className="btn btn-primary mt-2">Upload Photo</button>
+              <button type="submit" className="btn btn-custom-primary mt-2">Upload Photo</button>
             </form>
             </div>
             
@@ -216,8 +216,8 @@ export const UserAccountSettings = () => {
                   <input type="password" className="form-control" id="confirmPassword" onChange={handleChangeUserInfo}/>
                 </div>
                 <div className="col-12 d-flex justify-content-between">
-                  <button type="reset" className="btn btn-outline-primary">Reset</button>
-                  <button type="submit" className="btn btn-primary">Save Changes</button>
+                  <button type="reset" className="btn btn-custom-outline">Reset</button>
+                  <button type="submit" className="btn btn-custom-primary">Save Changes</button>
                 </div>
               </form>
             </div>

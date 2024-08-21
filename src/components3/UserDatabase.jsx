@@ -98,11 +98,6 @@ export const UserDatabase = () => {
             <p><strong>Agreed to  Data Consent:</strong> {selectedUser.dataConsent ? 'Yes' : 'No'}</p>
             
           </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Close
-            </Button>
-          </Modal.Footer>
         </Modal>
       )}
     </div>

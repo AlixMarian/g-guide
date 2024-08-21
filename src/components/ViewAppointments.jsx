@@ -172,7 +172,7 @@ export const ViewAppointments = () => {
       <div className="container">
         <div className="row">
         <div className="col-12 mb-4">
-            <button type="button" className="btn btn-primary" onClick={handleBackToHomepage}>Back to Homepage</button>
+            <button type="button" className="btn btn-custom-primary" onClick={handleBackToHomepage}>Back to Homepage</button>
           </div>
           <div className="col-12 mb-4">
             <div className="card">
@@ -200,7 +200,7 @@ export const ViewAppointments = () => {
                                     </div>
                                   )}
                                 </div>
-                                <button className='btn btn-info' onClick={() => handleShowModal(appointment)}>View Information</button>
+                                <button className='btn btn-custom-primary' onClick={() => handleShowModal(appointment)}>View Information</button>
                               </div>
                             </div>
                           </div>
@@ -260,7 +260,7 @@ export const ViewAppointments = () => {
                 <h4>Submitted Requirements</h4>
                 <p><b>First Name:</b> {selectedAppointment.confirmationCertificate.firstName}</p>
                 <p><b>Last Name:</b> {selectedAppointment.confirmationCertificate.lastName}</p>
-                <p><b>Confirmation Date:</b> {selectedAppointment.confirmationCertificate.confirmationDate}</p>
+                <p><b>Date of Birth:</b> {selectedAppointment.confirmationCertificate.birthdayDate}</p>
                 </div>
               )}
 
@@ -366,7 +366,6 @@ export const ViewAppointments = () => {
               )}
               <br/>
               <h4>Payment Details</h4>
-              {/* {renderPaymentImage(selectedAppointment.userFields.paymentImage)} */}
               {selectedAppointment.appointments?.paymentImage && selectedAppointment.appointments.paymentImage !== 'none' ? (
                 renderPaymentImage(selectedAppointment.appointments.paymentImage)
                 ) : (

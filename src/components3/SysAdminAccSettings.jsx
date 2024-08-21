@@ -100,14 +100,12 @@ export const SysAdminAccSettings = () => {
 
     if (user) {
       try {
-        // Update user info in Firestore
         const updatedUserInfo = { ...newUserInfo };
         delete updatedUserInfo.password;
         delete updatedUserInfo.confirmPassword;
 
         await updateDoc(doc(db, "users", user.uid), updatedUserInfo);
 
-        // Update password if provided
         if (newUserInfo.password) {
           await updatePassword(user, newUserInfo.password);
         }

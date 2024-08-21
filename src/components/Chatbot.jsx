@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-// Custom hook to load chatbot scripts
+
 const useChatbot = () => {
   useEffect(() => {
     const chatbotConfigScript = document.createElement('script');

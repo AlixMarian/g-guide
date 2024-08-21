@@ -57,8 +57,8 @@ const WebsiteUserNavBar = () => {
           </ul>
 
           <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <button type="button" className="btn btn-primary" onClick={handleUserAccSttngs}>Account Settings</button>
-            <button type="button" className="btn btn-primary" onClick={handleLogout}>Logout</button>
+            <button type="button" className="btn btn-custom-outline" onClick={handleUserAccSttngs}>Account Settings</button>
+            <button type="button" className="btn btn-custom-primary" onClick={handleLogout}>Logout</button>
           </div>
           
         </div>

@@ -33,13 +33,13 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        {/* Redirect from root path to map */}
+        
         <Route path="/" element={<Navigate to="/map" />} />
 
-        {/* Map route */}
+        
         <Route path="/map" element={<MapComponent />} />
 
-        {/* Routes for website user */}
+        
         <Route path="/home" element={<><NavBar /><Home /></>} />
         <Route path="/login" element={<><NavBar/><Login /></>} />
         <Route path="/signup" element={<><NavBar/><SignUp /></>} />
@@ -107,7 +107,7 @@ const App = () => {
           </>
         } />
 
-        {/* Routes for System Admin  */}
+        
         <Route path="/systemAdminDashboard" element={
           <>
             <SysAdminSidebar/>
@@ -153,7 +153,7 @@ const App = () => {
           </>
         }/>
 
-        {/* Routes for selecting churches */}
+       
         <Route path="/church-options" element={<><WebUserNavBar /><ChurchOptions/></>}/>
         <Route path="/church-homepage/:churchId" element={<><WebUserNavBar /><ChurchHomepage/></>}/>
       </Routes>
