@@ -76,7 +76,7 @@ export const Layout = () => {
       const pendingQuery = query(
         collection(db, "appointments"),
         where("appointmentStatus", "==", "Pending"),
-        where("userFields.requesterId", "==", userId) // Filter by the logged-in user's UID
+        where("churchId", "==", userId) // Filter by the logged-in user's UID
       );
       const pendingSnapshot = await getDocs(pendingQuery);
       setCountPending(pendingSnapshot.size); // Set the count of pending appointments
@@ -177,7 +177,7 @@ export const Layout = () => {
                   </defs>
                   <path fill="black" d="M0 0h48v48H0z" mask="url(#ipSAppointment0)"/>
                 </svg>
-                <span className="badge text-bg-danger">{countPending}</span> {/* Show the pending count here */}
+                <span className="badge text-bg-danger">{countPending}</span> c
               </i>
               <span className="nav-item">Appointments</span>
               <p className='p-hover'>Appointments</p>
