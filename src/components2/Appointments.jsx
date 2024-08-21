@@ -166,15 +166,15 @@ export const Appointments = () => {
         const fetchAppointments = async () => {
             if (!user) return;
 
-            const pendingQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Pending"), where("userFields.requesterId", "==", user.uid));
-            const paymentQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "For Payment"), where("userFields.requesterId", "==", user.uid));
-            const approvedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Approved"), where("userFields.requesterId", "==", user.uid));
-            const deniedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Denied"), where("userFields.requesterId", "==", user.uid));
+            const pendingQueryChurch = query(collection(db, "appointments"), where("appointmentStatus", "==", "Pending"), where("churchId", "==", user.uid));
+            const paymentQueryChurch = query(collection(db, "appointments"), where("appointmentStatus", "==", "For Payment"), where("churchId", "==", user.uid));
+            const approvedQueryChurch = query(collection(db, "appointments"), where("appointmentStatus", "==", "Approved"), where("churchId", "==", user.uid));
+            const deniedQueryChurch = query(collection(db, "appointments"), where("appointmentStatus", "==", "Denied"), where("churchId", "==", user.uid));
 
-            const pendingSnapshot = await getDocs(pendingQuery);
-            const paymentSnapshot = await getDocs(paymentQuery);
-            const approvedSnapshot = await getDocs(approvedQuery);
-            const deniedSnapshot = await getDocs(deniedQuery);
+            const pendingSnapshot = await getDocs(pendingQueryChurch);
+            const paymentSnapshot = await getDocs(paymentQueryChurch);
+            const approvedSnapshot = await getDocs(approvedQueryChurch);
+            const deniedSnapshot = await getDocs(deniedQueryChurch);
 
             const pendingAppointmentsData = pendingSnapshot.docs.map(doc => ({
                 id: doc.id,
