@@ -150,7 +150,7 @@ export const ChurchDatabase = () => {
       {selectedChurch && (
         <Modal show={showModal} onHide={handleCloseModal} centered>
           <Modal.Header closeButton>
-            <Modal.Title>Church Information</Modal.Title>
+            <Modal.Title>Details</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <h4>Church Coordinator Information</h4>
@@ -178,11 +178,6 @@ export const ChurchDatabase = () => {
             <h4>Proof of Affiliation</h4>
               {renderProofOfAffiliation(selectedChurch.churchProof)}
           </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Close
-            </Button>
-          </Modal.Footer>
         </Modal>
       )}
     </div>
