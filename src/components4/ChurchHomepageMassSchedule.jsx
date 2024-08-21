@@ -50,6 +50,15 @@ export const ChurchHomepageMassSchedule = () => {
 
   const { weekdays, weekends } = getSortedSchedules(filteredMassSchedules);
 
+  const convertTo12HourFormat = (time) => {
+    if (!time || time === "none") return "none";
+    const [hours, minutes] = time.split(':');
+    let hours12 = (hours % 12) || 12;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    return `${hours12}:${minutes} ${ampm}`;
+  };
+
+
   return (
     <div>
     <h2>Mass Schedules</h2>
@@ -93,7 +102,7 @@ export const ChurchHomepageMassSchedule = () => {
           {weekdays.map((schedule) => (
             <tr key={schedule.id}>
               <td>{schedule.massDate}</td>
-              <td>{schedule.massTime}</td>
+              <td>{convertTo12HourFormat(schedule.massTime)}</td>
               <td>{schedule.massLanguage}</td>
               <td>{schedule.presidingPriest}</td>
               <td>{schedule.massType}</td>
@@ -124,7 +133,7 @@ export const ChurchHomepageMassSchedule = () => {
           {weekends.map((schedule) => (
             <tr key={schedule.id}>
               <td>{schedule.massDate}</td>
-              <td>{schedule.massTime}</td>
+              <td>{convertTo12HourFormat(schedule.massTime)}</td>
               <td>{schedule.massLanguage}</td>
               <td>{schedule.presidingPriest}</td>
               <td>{schedule.massType}</td>
