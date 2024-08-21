@@ -18,14 +18,12 @@ export const SEA = () => {
   const [priestList, setPriestList] = useState([]);
   const [newMassDate, setNewMassDate] = useState("");
   const [newMassTime, setNewMassTime] = useState("");
-  const [newMassPeriod, setNewMassPeriod] = useState("");
   const [newMassType, setNewMassType] = useState("");
   const [newMassLanguage, setNewMassLanguage] = useState("");
   const [newMassPriest, setNewMassPriest] = useState("");
   const [newEventDate, setNewEventDate] = useState("");
   const [newEventName, setNewEventName] = useState("");
   const [newEventTime, setNewEventTime] = useState("");
-  const [newEventPeriod, setNewEventPeriod] = useState("");
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [editingMass, setEditingMass] = useState(null);
   const [editingEvent, setEditingEvent] = useState(null);
@@ -78,7 +76,6 @@ export const SEA = () => {
     const massData = {
       massDate: newMassDate,
       massTime: newMassTime,
-      massPeriod: newMassPeriod,
       massType: newMassType,
       massLanguage: newMassLanguage,
       presidingPriest: newMassPriest
@@ -90,7 +87,6 @@ export const SEA = () => {
     const massData = {
       massDate: newMassDate,
       massTime: newMassTime,
-      massPeriod: newMassPeriod,
       massType: newMassType,
       massLanguage: newMassLanguage,
       presidingPriest: newMassPriest
@@ -111,7 +107,6 @@ export const SEA = () => {
       eventDate: newEventDate,
       eventName: newEventName,
       eventTime: newEventTime,
-      eventPeriod: newEventPeriod
     };
     addEventSchedule(eventData, userId, () => getEventList(setEventList, userId));
   };
@@ -121,7 +116,6 @@ export const SEA = () => {
       eventDate: newEventDate,
       eventName: newEventName,
       eventTime: newEventTime,
-      eventPeriod: newEventPeriod
     };
     updateEventSchedule(editingEvent.id, eventData, () => {
       getEventList(setEventList, userId);
@@ -167,7 +161,6 @@ export const SEA = () => {
     setEditingMass(mass);
     setNewMassDate(mass.massDate);
     setNewMassTime(mass.massTime);
-    setNewMassPeriod(mass.massPeriod);
     setNewMassType(mass.massType);
     setNewMassLanguage(mass.massLanguage);
     setNewMassPriest(mass.presidingPriest);
@@ -178,24 +171,29 @@ export const SEA = () => {
     setNewEventDate(event.eventDate);
     setNewEventName(event.eventName);
     setNewEventTime(event.eventTime);
-    setNewEventPeriod(event.eventPeriod);
   };
 
   const clearForm = () => {
     setNewMassDate("");
     setNewMassTime("");
-    setNewMassPeriod("");
     setNewMassType("");
     setNewMassLanguage("");
     setNewMassPriest("");
     setNewEventDate("");
     setNewEventName("");
     setNewEventTime("");
-    setNewEventPeriod("");
     setNewAnnouncement('');
   };
-  
 
+  const convertTo12HourFormat = (time) => {
+    if (!time || time === "none") return "none";
+    const [hours, minutes] = time.split(':');
+    let hours12 = (hours % 12) || 12;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    return `${hours12}:${minutes} ${ampm}`;
+  };
+
+ 
   return (
     <>
       {/* Mass Schedule Section */}
@@ -206,7 +204,6 @@ export const SEA = () => {
             <tr>
               <th scope="col">Day</th>
               <th scope="col">Time</th>
-              <th scope="col">AM/PM</th>
               <th scope="col">Type</th>
               <th scope="col">Language</th>
               <th scope="col">Presiding Priest</th>
@@ -217,8 +214,7 @@ export const SEA = () => {
             {massList.map((massSchedules) => (
               <tr key={massSchedules.id}>
                 <td>{massSchedules.massDate}</td>
-                <td>{massSchedules.massTime}</td>
-                <td>{massSchedules.massPeriod}</td>
+                <td>{convertTo12HourFormat(massSchedules.massTime)}</td>
                 <td>{massSchedules.massType}</td>
                 <td>{massSchedules.massLanguage}</td>
                 <td>{massSchedules.presidingPriest}</td>
@@ -253,19 +249,18 @@ export const SEA = () => {
             </select>
             <div className="invalid-feedback">Please select a day</div>
           </div>
-          <div className="col-md-4">
+          <div className="col-md-6">
             <label htmlFor="timeInput" className="form-label">Time</label>
-            <input type="time" required className="form-control" id="timeInput" placeholder="00:00" value={newMassTime} onChange={(e) => setNewMassTime(e.target.value)} />
+            <input 
+            type="time" 
+            className="form-control" 
+            id="timeInput" 
+            placeholder="00:00" 
+            value={newMassTime} 
+            onChange={(e) => setNewMassTime(e.target.value)} 
+            required 
+            />
             <div className="invalid-feedback">Please input a time</div>
-          </div>
-          <div className="col-md-2">
-            <label htmlFor="amPmSelect" className="form-label">AM/PM</label>
-            <select className="form-select" required id="amPmSelect" value={newMassPeriod} onChange={(e) => setNewMassPeriod(e.target.value)}>
-              <option value="" disabled>Select Period</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-            <div className="invalid-feedback">Please select a time period</div>
           </div>
           <div className="col-md-6">
             <label htmlFor="typeSelect" className="form-label">Type</label>
@@ -315,7 +310,6 @@ export const SEA = () => {
               <th scope="col">Date</th>
               <th scope="col">Name</th>
               <th scope="col">Time</th>
-              <th scope="col">AM/PM</th>
               <th></th>
             </tr>
           </thead>
@@ -324,8 +318,7 @@ export const SEA = () => {
               <tr key={events.id}>
                 <td>{events.eventDate}</td>
                 <td>{events.eventName}</td>
-                <td>{events.eventTime}</td>
-                <td>{events.eventPeriod}</td>
+                <td>{convertTo12HourFormat(events.eventTime)}</td>
                 <td>
                   <form>
                     <div className="btn-group" role="group">
@@ -362,19 +355,10 @@ export const SEA = () => {
             <input type="text" className="form-control" id="eventType" value={newEventName} onChange={(e) => setNewEventName(e.target.value)} required/>
             <div className="invalid-feedback">Please provide a name</div>
           </div>
-          <div className="col-4 ">
+          <div className="col-6">
             <label htmlFor="eventTime" className="form-label">Time</label>
             <input type="time" className="form-control" id="eventTime" placeholder="00:00" value={newEventTime} onChange={(e) => setNewEventTime(e.target.value)} required/>
             <div className="invalid-feedback">Please provide a valid time</div>
-          </div>
-          <div className="col-md-2">
-            <label htmlFor="eventAmPm" className="form-label">AM/PM</label>
-            <select className="form-select" id="eventAmPm" value={newEventPeriod} onChange={(e) => setNewEventPeriod(e.target.value)} required>
-              <option value="" disabled>Select Period</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-            <div className="invalid-feedback">Please select time period</div>
           </div>
           <div id='buttons' className="col-md-6">
             <div className="btn-group" role="group">

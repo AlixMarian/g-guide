@@ -4,9 +4,10 @@ import axios from 'axios';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "/backend/firebase"; 
 import { toast } from 'react-toastify';
+import { getAuth } from 'firebase/auth';
 import '../churchCoordinator.css';
 
 export const Appointments = () => {
@@ -24,7 +25,21 @@ export const Appointments = () => {
     const [showDenyModal, setShowDenyModal] = useState(false);
     const [denialReason, setDenialReason] = useState('');
     const [massIntentions, setMassIntentions] = useState([]);
+    const [showMassIntentionModal, setShowMassIntentionModal] = useState(false);
+    const [selectedMassIntention, setSelectedMassIntention] = useState(null);
+    const [slotDetails, setSlotDetails] = useState({ startDate: "", startTime: "" });
 
+    // Get the current user
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    // Ensure that user is authenticated
+    useEffect(() => {
+        if (!user) {
+            // Handle case where user is not authenticated, possibly redirect to login
+            console.log('User not authenticated');
+        }
+    }, [user]);
 
     const handleShowModal = (appointment) => {
         setSelectedAppointment(appointment);
@@ -123,6 +138,10 @@ export const Appointments = () => {
         baptismalCertificate: "Baptismal Certificate",
         burialCertificate: "Burial Certificate",
         confirmationCertificate: "Confirmation Certificate",
+        marriage:"Marriage",
+        baptism:"Baptism",
+        burial:"Burial",
+        confirmation:"Confirmation",
     };
 
     const formatDate = (timestamp) => {
@@ -145,10 +164,12 @@ export const Appointments = () => {
 
     useEffect(() => {
         const fetchAppointments = async () => {
-            const pendingQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Pending"));
-            const paymentQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "For Payment"));
-            const approvedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Approved"));
-            const deniedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Denied"));
+            if (!user) return;
+
+            const pendingQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Pending"), where("userFields.requesterId", "==", user.uid));
+            const paymentQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "For Payment"), where("userFields.requesterId", "==", user.uid));
+            const approvedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Approved"), where("userFields.requesterId", "==", user.uid));
+            const deniedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Denied"), where("userFields.requesterId", "==", user.uid));
 
             const pendingSnapshot = await getDocs(pendingQuery);
             const paymentSnapshot = await getDocs(paymentQuery);
@@ -182,7 +203,7 @@ export const Appointments = () => {
         };
 
         fetchAppointments();
-    }, []);
+    }, [user]);
 
     const filteredAppointments = (appointments) => {
         return appointments.filter(appointment => {
@@ -193,7 +214,9 @@ export const Appointments = () => {
     };
 
     const fetchMassIntentions = async () => {
-        const massIntentionsQuery = query(collection(db, "massIntentions"));
+        if (!user) return;
+
+        const massIntentionsQuery = query(collection(db, "massIntentions"), where("userFields.requesterId", "==", user.uid));
         const massIntentionsSnapshot = await getDocs(massIntentionsQuery);
         const massIntentionsData = massIntentionsSnapshot.docs.map(doc => ({
             id: doc.id,
@@ -209,12 +232,47 @@ export const Appointments = () => {
     
         fetchAppointments();
         fetchMassIntentions(); // Fetch mass intentions on component mount
-    }, []);
-    
+    }, [user]);
+
     const handleShowMassIntentionModal = (intention) => {
-        setSelectedAppointment(intention);
-        setShowModal(true);
+        setSelectedMassIntention(intention);
+        setShowMassIntentionModal(true);
     };
+    
+    const handleCloseMassIntentionModal = () => {
+        setShowMassIntentionModal(false);
+        setSelectedMassIntention(null);
+    };
+    
+    const convertTo12HourFormat = (time) => {
+        if (!time || time === "none") return "none";
+        const [hours, minutes] = time.split(':');
+        let hours12 = (hours % 12) || 12;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        return `${hours12}:${minutes} ${ampm}`;
+    };
+
+    useEffect(() => {
+        const fetchSlotDetails = async () => {
+            if (selectedAppointment?.marriage?.slotId) {
+                try {
+                    const slotRef = doc(db, "slot", selectedAppointment.marriage.slotId);
+                    const slotSnap = await getDoc(slotRef);
+
+                    if (slotSnap.exists()) {
+                        const { startDate, startTime } = slotSnap.data();
+                        setSlotDetails({ startDate, startTime });
+                    } else {
+                        console.log("No such slot!");
+                    }
+                } catch (error) {
+                    console.error("Error fetching slot details:", error);
+                }
+            }
+        };
+
+        fetchSlotDetails();
+    }, [selectedAppointment]);
 
     return (
         <>
@@ -399,9 +457,7 @@ export const Appointments = () => {
                             <th scope="col">Date of Request</th>
                             <th scope="col">Mass Date</th>
                             <th scope="col">Mass Time</th>
-                            <th scope="col">AM/PM</th>
                             <th scope="col">Requested by</th>
-                            <th scope="col">Receipt Image</th>
                             <th scope="col">More Info</th>
                         </tr>
                     </thead>
@@ -410,22 +466,12 @@ export const Appointments = () => {
                             <tr key={index}>
                                 <td>{formatDate(intention.dateOfRequest)}</td>
                                 <td>{intention.massSchedule.massDate}</td>
-                                <td>{intention.massSchedule.massTime}</td>
-                                <td>{intention.massSchedule.massPeriod}</td>
-                                <td>{intention.userName}</td>
+                                <td>{convertTo12HourFormat(intention.massSchedule.massTime)}</td>
+                                <td>{intention.userFields.requesterName}</td>
                                 <td>
-                                    {intention.receiptImage ? (
-                                        <a href={intention.receiptImage} target="_blank" rel="noopener noreferrer">
-                                            View Receipt
-                                        </a>
-                                    ) : (
-                                        <span style={{ color: 'red' }}>No Receipt</span>
-                                    )}
-                                </td>
-                                <td>
-                                    <Button variant="info" onClick={() => handleShowMassIntentionModal(intention)}>
-                                        <i className="bi bi-info-circle-fill"></i>
-                                    </Button>
+                                <Button variant="info" onClick={() => handleShowMassIntentionModal(intention)}>
+                                    <i className="bi bi-info-circle-fill"></i>
+                                </Button>
                                 </td>
                             </tr>
                         ))}
@@ -443,21 +489,84 @@ export const Appointments = () => {
                             <p><strong>Appointment Status:</strong> {selectedAppointment.appointmentStatus}</p>
                             <p><strong>Appointment Option:</strong> {selectedAppointment.appointmentPurpose} </p>
                             <p><strong>Appointment Type:</strong> {appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType}</p>
+                            <br/>
                             
+                            {selectedAppointment.appointmentType === "marriage" && (
+                                <>  
+                                    <p><strong>Slot:</strong></p>
+                                    <p><strong>Date:</strong> {slotDetails.startDate || "N/A"}</p>
+                                    <p><strong>Time:</strong> {slotDetails.startTime || "N/A"}</p>
+                                    <p><strong>Bride First Name:</strong> {selectedAppointment.marriage?.brideFirstName}</p>
+                                    <p><strong>Bride Last Name:</strong> {selectedAppointment.marriage?.brideLastName}</p>
+                                    <p><strong>Groom First Name:</strong> {selectedAppointment.marriage?.groomFirstName}</p>
+                                    <p><strong>Groom Last Name:</strong> {selectedAppointment.marriage?.groomLastName}</p>
+                                    <p><strong>Date of Marriage:</strong> {selectedAppointment.marriage?.dateOfMarriage}</p>
+                                    <br/>
+
+                                </>
+                            )}
+
+                            {selectedAppointment.appointmentType === "baptism" && (
+                                <>  
+                                    <p><strong>Slot:</strong></p>
+                                    <p><strong>Date:</strong> {slotDetails.startDate || "N/A"}</p>
+                                    <p><strong>Time:</strong> {slotDetails.startTime || "N/A"}</p>
+                                    <p><strong>Child First Name:</strong> {selectedAppointment.baptism?.childFirstName}</p>
+                                    <p><strong>Child Last Name:</strong> {selectedAppointment.baptism?.childLastName}</p>
+                                    <p><strong>Birthday:</strong> {selectedAppointment.baptism?.dateOfBirth}</p>
+                                    <p><strong>Place of Birth:</strong> {selectedAppointment.baptism?.placeOfBirth}</p>
+                                    <p><strong>Father First Name:</strong> {selectedAppointment.baptism?.fatherFirstName}</p>
+                                    <p><strong>Father Last Name:</strong> {selectedAppointment.baptism?.fatherLastName}</p>
+                                    <p><strong>Mother First Name:</strong> {selectedAppointment.baptism?.motherFirstName}</p>
+                                    <p><strong>Mother Last Name:</strong> {selectedAppointment.baptism?.motherLastName}</p>
+                                    <br/>
+                                    <p><strong>Other Details:</strong></p>
+                                    <p><strong>Marriage date of parents:</strong> {selectedAppointment.baptism?.marriageDate}</p>
+                                    <p><strong>Name of priest who will baptise:</strong> {selectedAppointment.baptism?.priestOptions}</p>
+                                    <p><strong>Name of Godparents:</strong> {selectedAppointment.baptism?.godParents}</p>
+                                    <br/>
+                                </>
+                            )}
+
+                            {selectedAppointment.appointmentType === "burial" && (
+                                <>
+                                    <p><strong>Slot:</strong></p>
+                                    <p><strong>Date:</strong> {slotDetails.startDate || "N/A"}</p>
+                                    <p><strong>Time:</strong> {slotDetails.startTime || "N/A"}</p>
+                                    <p><strong>Death Certificate:</strong> <a href={selectedAppointment.burial?.deathCertificate} target="_blank" rel="noopener noreferrer">View Document</a></p>
+                                    <br/>
+                                </>
+                            )}
+
+                            {selectedAppointment.appointmentType === "confirmation" && (
+                                <>
+                                    <p><strong>First Name:</strong> {selectedAppointment.confirmation?.firstName}</p>
+                                    <p><strong>Last Name:</strong> {selectedAppointment.confirmation?.lastName}</p>
+                                    <p><strong>Baptismal Certificate:</strong> <a href={selectedAppointment.confirmation?.baptismalCert} target="_blank" rel="noopener noreferrer">View Document</a></p>
+                                    <p><strong>Birth Certificate:</strong> <a href={selectedAppointment.confirmation?.birthCertificate} target="_blank" rel="noopener noreferrer">View Document</a></p>
+                                    <br/>
+                                </>
+                            )}
+
+
                             {selectedAppointment.appointmentType === "confirmationCertificate" && (
                                 <>
                                     <p><strong>Confirmation Date:</strong> {selectedAppointment.confirmationCertificate?.confirmationDate}</p>
                                     <p><strong>First Name:</strong> {selectedAppointment.confirmationCertificate?.firstName}</p>
                                     <p><strong>Last Name:</strong> {selectedAppointment.confirmationCertificate?.lastName}</p>
+                                    <br/>
                                 </>
                             )}
                             {selectedAppointment.appointmentType === "marriageCertificate" && (
-                                <>
+                                <>  
+                                    
                                     <p><strong>Bride First Name:</strong> {selectedAppointment.marriageCertificate?.brideFirstName}</p>
                                     <p><strong>Bride Last Name:</strong> {selectedAppointment.marriageCertificate?.brideLastName}</p>
                                     <p><strong>Groom First Name:</strong> {selectedAppointment.marriageCertificate?.groomFirstName}</p>
                                     <p><strong>Groom Last Name:</strong> {selectedAppointment.marriageCertificate?.groomLastName}</p>
                                     <p><strong>Date of Marriage:</strong> {selectedAppointment.marriageCertificate?.dateOfMarriage}</p>
+                                    <br/>
+
                                 </>
                             )}
                             {selectedAppointment.appointmentType === "baptismalCertificate" && (
@@ -469,14 +578,16 @@ export const Appointments = () => {
                                     <p><strong>Last Name:</strong> {selectedAppointment.baptismalCertificate?.lastName}</p>
                                     <p><strong>Mother First Name:</strong> {selectedAppointment.baptismalCertificate?.motherFirstName}</p>
                                     <p><strong>Mother Last Name:</strong> {selectedAppointment.baptismalCertificate?.motherLastName}</p>
+                                    <br/>
                                 </>
-                            )}  
+                            )}
                             {selectedAppointment.appointmentType === "burialCertificate" && (
                                 <>
                                     <p><strong>Death Certificate:</strong> <a href={selectedAppointment.burialCertificate?.deathCertificate} target="_blank" rel="noopener noreferrer">View Document</a></p>
+                                    <br/>
                                 </>
                             )}
-                            
+
                             <p><strong>Date of Request:</strong> {formatDate(selectedAppointment.userFields?.dateOfRequest)}</p>
 
                             <p><strong>Payment Receipt Image: </strong> {selectedAppointment.appointments?.paymentImage ? (
@@ -542,30 +653,34 @@ export const Appointments = () => {
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={showModal} onHide={handleCloseModal}>
+            <Modal show={showMassIntentionModal} onHide={handleCloseMassIntentionModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>Mass Intention Details</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {selectedAppointment && (
-                        <div>
-                            <p><strong>Date of Request:</strong> {formatDate(selectedAppointment.dateOfRequest)}</p>
-                            <p><strong>Mass Schedule:</strong></p>
-                            <p><strong>Mass Date:</strong> {selectedAppointment.massSchedule.massDate}</p>
-                            <p><strong>Mass Time:</strong> {selectedAppointment.massSchedule.massTime}</p>
-                            <p><strong>Mass Period:</strong> {selectedAppointment.massSchedule.massPeriod}</p>
-                            <p><strong>Contact:</strong> {selectedAppointment.userContact}</p>
-                            <p><strong>Email:</strong> {selectedAppointment.userEmail}</p>
-                            <p><strong>Requested by:</strong> {selectedAppointment.userName}</p>
+                    {selectedMassIntention && (
+                        <>
+                            <p><strong>Date of Request:</strong> {formatDate(selectedMassIntention.dateOfRequest)}</p>
+                            <p><strong>Mass Date:</strong> {selectedMassIntention.massSchedule?.massDate}</p>
+                            <p><strong>Mass Time:</strong> {convertTo12HourFormat(selectedMassIntention.massSchedule?.massTime)}</p>
+                            <p><strong>Requester Contact:</strong> {selectedMassIntention.userFields?.requesterContact}</p>
+                            <p><strong>Requester Email:</strong> {selectedMassIntention.userFields?.requesterEmail}</p>
+                            <p><strong>Requester Name:</strong> {selectedMassIntention.userFields?.requesterName}</p>
+                            
                             <br/>
-                            <p><strong>Thanksgiving Mass:</strong> {selectedAppointment.thanksgivingMass || "N/A"}</p>
-                            <p><strong>Petition:</strong> {selectedAppointment.petition || "N/A"}</p>
-                            <p><strong>For the Souls of:</strong> {selectedAppointment.forTheSoulOf || "N/A"}</p>
-                        </div>
+                            <p><strong>Petition:</strong> {selectedMassIntention.petition}</p>
+                            <p><strong>Thanksgiving Mass:</strong> {selectedMassIntention.thanksgivingMass}</p>
+                            <p><strong>For the Souls of:</strong> {selectedMassIntention.forTheSoulOf}</p>
+                            <br/>
+
+                            <p><strong>Death Certificate:</strong> <a href={selectedMassIntention.receiptImage} target="_blank" rel="noopener noreferrer">View Document</a></p>
+                        </>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseModal}>Close</Button>
+                    <Button variant="secondary" onClick={handleCloseMassIntentionModal}>
+                        Close
+                    </Button>
                 </Modal.Footer>
             </Modal>
         </>
