@@ -96,12 +96,13 @@ export const Church = () => {
       };
 
       const convertTo12HourFormat = (time) => {
-        if (!time) return '';
+        if (!time || time === 'none') return 'none';
         const [hours, minutes] = time.split(':');
         let hours12 = (hours % 12) || 12;
         const ampm = hours >= 12 ? 'PM' : 'AM';
         return `${hours12}:${minutes} ${ampm}`;
       };
+      
 
       
 
