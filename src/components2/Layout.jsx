@@ -10,7 +10,7 @@ import '../churchCoordinator.css';
 export const Layout = () => {
   const [userDetails, setUserDetails] = useState({});
   const [loading, setLoading] = useState(true);
-  const [pendingCount, setPendingCount] = useState(0); // State for pending appointments count
+  const [countPending, setCountPending] = useState(0); // State for pending appointments count
   const btnRef = useRef(null);
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
@@ -23,6 +23,7 @@ export const Layout = () => {
         getUserDetails(user.uid).then(details => {
           if (details) {
             setUserDetails(details);
+            fetchPendingAppointmentsCount(user.uid); // Fetch pending appointments count for the logged-in user
           }
           setLoading(false);
         });
@@ -70,15 +71,19 @@ export const Layout = () => {
     toggleButtonState(sidebar.classList.contains('active'));
   }, [loading]);
 
-  useEffect(() => {
-    const fetchPendingAppointmentsCount = async () => {
-      const pendingQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Pending"));
+  const fetchPendingAppointmentsCount = async (userId) => {
+    try {
+      const pendingQuery = query(
+        collection(db, "appointments"),
+        where("appointmentStatus", "==", "Pending"),
+        where("userFields.requesterId", "==", userId) // Filter by the logged-in user's UID
+      );
       const pendingSnapshot = await getDocs(pendingQuery);
-      setPendingCount(pendingSnapshot.size); // Set the count of pending appointments
-    };
-
-    fetchPendingAppointmentsCount();
-  }, []);
+      setCountPending(pendingSnapshot.size); // Set the count of pending appointments
+    } catch (error) {
+      console.error("Error fetching pending appointments:", error);
+    }
+  };
 
   const handleLogout = () => {
     const auth = getAuth();
@@ -172,7 +177,7 @@ export const Layout = () => {
                   </defs>
                   <path fill="black" d="M0 0h48v48H0z" mask="url(#ipSAppointment0)"/>
                 </svg>
-                  <span className="badge text-bg-danger">{pendingCount}</span>
+                <span className="badge text-bg-danger">{countPending}</span> {/* Show the pending count here */}
               </i>
               <span className="nav-item">Appointments</span>
               <p className='p-hover'>Appointments</p>
