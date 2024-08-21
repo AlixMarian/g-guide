@@ -620,7 +620,7 @@ export const Appointments = () => {
                                 Approve
                             </Button>
                             )}
-                            {![ 'Approved', 'Denied'].includes(selectedAppointment?.appointmentStatus) && (
+                            {!['Denied'].includes(selectedAppointment?.appointmentStatus) && (
                             <Button variant="danger" onClick={() => setShowDenyModal(true)}>
                                 Deny
                             </Button>
