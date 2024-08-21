@@ -260,7 +260,7 @@ export const ViewAppointments = () => {
                 <h4>Submitted Requirements</h4>
                 <p><b>First Name:</b> {selectedAppointment.confirmationCertificate.firstName}</p>
                 <p><b>Last Name:</b> {selectedAppointment.confirmationCertificate.lastName}</p>
-                <p><b>Confirmation Date:</b> {selectedAppointment.confirmationCertificate.confirmationDate}</p>
+                <p><b>Date of Birth:</b> {selectedAppointment.confirmationCertificate.birthdayDate}</p>
                 </div>
               )}
 
