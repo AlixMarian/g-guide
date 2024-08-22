@@ -4,11 +4,11 @@ import axios from 'axios';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "/backend/firebase"; 
 import { toast } from 'react-toastify';
+import { getAuth } from 'firebase/auth';
 import '../churchCoordinator.css';
-import Marriage from "../components4/forms/Marriage";
 
 export const Appointments = () => {
     const [selectedDate, setSelectedDate] = useState(null);
@@ -27,7 +27,19 @@ export const Appointments = () => {
     const [massIntentions, setMassIntentions] = useState([]);
     const [showMassIntentionModal, setShowMassIntentionModal] = useState(false);
     const [selectedMassIntention, setSelectedMassIntention] = useState(null);
+    const [slotDetails, setSlotDetails] = useState({ startDate: "", startTime: "" });
 
+    // Get the current user
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    // Ensure that user is authenticated
+    useEffect(() => {
+        if (!user) {
+            // Handle case where user is not authenticated, possibly redirect to login
+            console.log('User not authenticated');
+        }
+    }, [user]);
 
     const handleShowModal = (appointment) => {
         setSelectedAppointment(appointment);
@@ -152,10 +164,12 @@ export const Appointments = () => {
 
     useEffect(() => {
         const fetchAppointments = async () => {
-            const pendingQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Pending"));
-            const paymentQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "For Payment"));
-            const approvedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Approved"));
-            const deniedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Denied"));
+            if (!user) return;
+
+            const pendingQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Pending"), where("userFields.requesterId", "==", user.uid));
+            const paymentQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "For Payment"), where("userFields.requesterId", "==", user.uid));
+            const approvedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Approved"), where("userFields.requesterId", "==", user.uid));
+            const deniedQuery = query(collection(db, "appointments"), where("appointmentStatus", "==", "Denied"), where("userFields.requesterId", "==", user.uid));
 
             const pendingSnapshot = await getDocs(pendingQuery);
             const paymentSnapshot = await getDocs(paymentQuery);
@@ -189,7 +203,7 @@ export const Appointments = () => {
         };
 
         fetchAppointments();
-    }, []);
+    }, [user]);
 
     const filteredAppointments = (appointments) => {
         return appointments.filter(appointment => {
@@ -200,7 +214,9 @@ export const Appointments = () => {
     };
 
     const fetchMassIntentions = async () => {
-        const massIntentionsQuery = query(collection(db, "massIntentions"));
+        if (!user) return;
+
+        const massIntentionsQuery = query(collection(db, "massIntentions"), where("userFields.requesterId", "==", user.uid));
         const massIntentionsSnapshot = await getDocs(massIntentionsQuery);
         const massIntentionsData = massIntentionsSnapshot.docs.map(doc => ({
             id: doc.id,
@@ -216,7 +232,7 @@ export const Appointments = () => {
     
         fetchAppointments();
         fetchMassIntentions(); // Fetch mass intentions on component mount
-    }, []);
+    }, [user]);
 
     const handleShowMassIntentionModal = (intention) => {
         setSelectedMassIntention(intention);
@@ -234,31 +250,29 @@ export const Appointments = () => {
         let hours12 = (hours % 12) || 12;
         const ampm = hours >= 12 ? 'PM' : 'AM';
         return `${hours12}:${minutes} ${ampm}`;
-      };
-
-      const [slotDetails, setSlotDetails] = useState({ startDate: "", startTime: "" });
-
-    useEffect(() => {
-    const fetchSlotDetails = async () => {
-        if (selectedAppointment?.marriage?.slotId) {
-            try {
-                const slotRef = doc(db, "slot", selectedAppointment.marriage.slotId);
-                const slotSnap = await getDoc(slotRef);
-
-                if (slotSnap.exists()) {
-                    const { startDate, startTime } = slotSnap.data();
-                    setSlotDetails({ startDate, startTime });
-                } else {
-                    console.log("No such slot!");
-                }
-            } catch (error) {
-                console.error("Error fetching slot details:", error);
-            }
-        }
     };
 
-    fetchSlotDetails();
-}, [selectedAppointment]);
+    useEffect(() => {
+        const fetchSlotDetails = async () => {
+            if (selectedAppointment?.marriage?.slotId) {
+                try {
+                    const slotRef = doc(db, "slot", selectedAppointment.marriage.slotId);
+                    const slotSnap = await getDoc(slotRef);
+
+                    if (slotSnap.exists()) {
+                        const { startDate, startTime } = slotSnap.data();
+                        setSlotDetails({ startDate, startTime });
+                    } else {
+                        console.log("No such slot!");
+                    }
+                } catch (error) {
+                    console.error("Error fetching slot details:", error);
+                }
+            }
+        };
+
+        fetchSlotDetails();
+    }, [selectedAppointment]);
 
     return (
         <>
