@@ -8,6 +8,7 @@ import { collection, query, where, getDocs, doc, updateDoc } from "firebase/fire
 import { db } from "/backend/firebase"; 
 import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
+import Marriage from "../components4/forms/Marriage";
 
 export const Appointments = () => {
     const [selectedDate, setSelectedDate] = useState(null);
@@ -125,6 +126,10 @@ export const Appointments = () => {
         baptismalCertificate: "Baptismal Certificate",
         burialCertificate: "Burial Certificate",
         confirmationCertificate: "Confirmation Certificate",
+        marriage:"Marriage",
+        baptism:"Baptism",
+        burial:"Burial",
+        confirmation:"Confirmation",
     };
 
     const formatDate = (timestamp) => {
@@ -230,7 +235,30 @@ export const Appointments = () => {
         const ampm = hours >= 12 ? 'PM' : 'AM';
         return `${hours12}:${minutes} ${ampm}`;
       };
-    
+
+      const [slotDetails, setSlotDetails] = useState({ startDate: "", startTime: "" });
+
+    useEffect(() => {
+    const fetchSlotDetails = async () => {
+        if (selectedAppointment?.marriage?.slotId) {
+            try {
+                const slotRef = doc(db, "slot", selectedAppointment.marriage.slotId);
+                const slotSnap = await getDoc(slotRef);
+
+                if (slotSnap.exists()) {
+                    const { startDate, startTime } = slotSnap.data();
+                    setSlotDetails({ startDate, startTime });
+                } else {
+                    console.log("No such slot!");
+                }
+            } catch (error) {
+                console.error("Error fetching slot details:", error);
+            }
+        }
+    };
+
+    fetchSlotDetails();
+}, [selectedAppointment]);
 
     return (
         <>
@@ -447,21 +475,84 @@ export const Appointments = () => {
                             <p><strong>Appointment Status:</strong> {selectedAppointment.appointmentStatus}</p>
                             <p><strong>Appointment Option:</strong> {selectedAppointment.appointmentPurpose} </p>
                             <p><strong>Appointment Type:</strong> {appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType}</p>
+                            <br/>
                             
+                            {selectedAppointment.appointmentType === "marriage" && (
+                                <>  
+                                    <p><strong>Slot:</strong></p>
+                                    <p><strong>Date:</strong> {slotDetails.startDate || "N/A"}</p>
+                                    <p><strong>Time:</strong> {slotDetails.startTime || "N/A"}</p>
+                                    <p><strong>Bride First Name:</strong> {selectedAppointment.marriage?.brideFirstName}</p>
+                                    <p><strong>Bride Last Name:</strong> {selectedAppointment.marriage?.brideLastName}</p>
+                                    <p><strong>Groom First Name:</strong> {selectedAppointment.marriage?.groomFirstName}</p>
+                                    <p><strong>Groom Last Name:</strong> {selectedAppointment.marriage?.groomLastName}</p>
+                                    <p><strong>Date of Marriage:</strong> {selectedAppointment.marriage?.dateOfMarriage}</p>
+                                    <br/>
+
+                                </>
+                            )}
+
+                            {selectedAppointment.appointmentType === "baptism" && (
+                                <>  
+                                    <p><strong>Slot:</strong></p>
+                                    <p><strong>Date:</strong> {slotDetails.startDate || "N/A"}</p>
+                                    <p><strong>Time:</strong> {slotDetails.startTime || "N/A"}</p>
+                                    <p><strong>Child First Name:</strong> {selectedAppointment.baptism?.childFirstName}</p>
+                                    <p><strong>Child Last Name:</strong> {selectedAppointment.baptism?.childLastName}</p>
+                                    <p><strong>Birthday:</strong> {selectedAppointment.baptism?.dateOfBirth}</p>
+                                    <p><strong>Place of Birth:</strong> {selectedAppointment.baptism?.placeOfBirth}</p>
+                                    <p><strong>Father First Name:</strong> {selectedAppointment.baptism?.fatherFirstName}</p>
+                                    <p><strong>Father Last Name:</strong> {selectedAppointment.baptism?.fatherLastName}</p>
+                                    <p><strong>Mother First Name:</strong> {selectedAppointment.baptism?.motherFirstName}</p>
+                                    <p><strong>Mother Last Name:</strong> {selectedAppointment.baptism?.motherLastName}</p>
+                                    <br/>
+                                    <p><strong>Other Details:</strong></p>
+                                    <p><strong>Marriage date of parents:</strong> {selectedAppointment.baptism?.marriageDate}</p>
+                                    <p><strong>Name of priest who will baptise:</strong> {selectedAppointment.baptism?.priestOptions}</p>
+                                    <p><strong>Name of Godparents:</strong> {selectedAppointment.baptism?.godParents}</p>
+                                    <br/>
+                                </>
+                            )}
+
+                            {selectedAppointment.appointmentType === "burial" && (
+                                <>
+                                    <p><strong>Slot:</strong></p>
+                                    <p><strong>Date:</strong> {slotDetails.startDate || "N/A"}</p>
+                                    <p><strong>Time:</strong> {slotDetails.startTime || "N/A"}</p>
+                                    <p><strong>Death Certificate:</strong> <a href={selectedAppointment.burial?.deathCertificate} target="_blank" rel="noopener noreferrer">View Document</a></p>
+                                    <br/>
+                                </>
+                            )}
+
+                            {selectedAppointment.appointmentType === "confirmation" && (
+                                <>
+                                    <p><strong>First Name:</strong> {selectedAppointment.confirmation?.firstName}</p>
+                                    <p><strong>Last Name:</strong> {selectedAppointment.confirmation?.lastName}</p>
+                                    <p><strong>Baptismal Certificate:</strong> <a href={selectedAppointment.confirmation?.baptismalCert} target="_blank" rel="noopener noreferrer">View Document</a></p>
+                                    <p><strong>Birth Certificate:</strong> <a href={selectedAppointment.confirmation?.birthCertificate} target="_blank" rel="noopener noreferrer">View Document</a></p>
+                                    <br/>
+                                </>
+                            )}
+
+
                             {selectedAppointment.appointmentType === "confirmationCertificate" && (
                                 <>
                                     <p><strong>Confirmation Date:</strong> {selectedAppointment.confirmationCertificate?.confirmationDate}</p>
                                     <p><strong>First Name:</strong> {selectedAppointment.confirmationCertificate?.firstName}</p>
                                     <p><strong>Last Name:</strong> {selectedAppointment.confirmationCertificate?.lastName}</p>
+                                    <br/>
                                 </>
                             )}
                             {selectedAppointment.appointmentType === "marriageCertificate" && (
-                                <>
+                                <>  
+                                    
                                     <p><strong>Bride First Name:</strong> {selectedAppointment.marriageCertificate?.brideFirstName}</p>
                                     <p><strong>Bride Last Name:</strong> {selectedAppointment.marriageCertificate?.brideLastName}</p>
                                     <p><strong>Groom First Name:</strong> {selectedAppointment.marriageCertificate?.groomFirstName}</p>
                                     <p><strong>Groom Last Name:</strong> {selectedAppointment.marriageCertificate?.groomLastName}</p>
                                     <p><strong>Date of Marriage:</strong> {selectedAppointment.marriageCertificate?.dateOfMarriage}</p>
+                                    <br/>
+
                                 </>
                             )}
                             {selectedAppointment.appointmentType === "baptismalCertificate" && (
@@ -473,11 +564,13 @@ export const Appointments = () => {
                                     <p><strong>Last Name:</strong> {selectedAppointment.baptismalCertificate?.lastName}</p>
                                     <p><strong>Mother First Name:</strong> {selectedAppointment.baptismalCertificate?.motherFirstName}</p>
                                     <p><strong>Mother Last Name:</strong> {selectedAppointment.baptismalCertificate?.motherLastName}</p>
+                                    <br/>
                                 </>
                             )}
                             {selectedAppointment.appointmentType === "burialCertificate" && (
                                 <>
                                     <p><strong>Death Certificate:</strong> <a href={selectedAppointment.burialCertificate?.deathCertificate} target="_blank" rel="noopener noreferrer">View Document</a></p>
+                                    <br/>
                                 </>
                             )}
 
@@ -564,6 +657,9 @@ export const Appointments = () => {
                             <p><strong>Petition:</strong> {selectedMassIntention.petition}</p>
                             <p><strong>Thanksgiving Mass:</strong> {selectedMassIntention.thanksgivingMass}</p>
                             <p><strong>For the Souls of:</strong> {selectedMassIntention.forTheSoulOf}</p>
+                            <br/>
+
+                            <p><strong>Death Certificate:</strong> <a href={selectedMassIntention.receiptImage} target="_blank" rel="noopener noreferrer">View Document</a></p>
                         </>
                     )}
                 </Modal.Body>
