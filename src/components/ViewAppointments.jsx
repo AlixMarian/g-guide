@@ -16,8 +16,10 @@ export const ViewAppointments = () => {
 
   const [appointments, setAppointments] = useState([]);
   const [churches, setChurches] = useState({});
+  const [massIntentions,setMassIntentions] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [selectedMassIntention, setSelectedMassIntention] = useState(null);
   const [slots, setSlots] = useState([]);
   const [events, setEvents] = useState({});
   const auth = getAuth();
@@ -76,6 +78,37 @@ export const ViewAppointments = () => {
 
     fetchAppointmentsAndSlots();
   }, [user]);
+
+  useEffect(() => {
+    const fetchMassIntentions = async () => {
+        if (!user) return;
+
+        try {
+            const massIntentionsQuery = query(
+                collection(db, "massIntentions"),
+                where("userFields.requesterId", "==", user.uid)
+            );
+            const massIntentionsSnapshot = await getDocs(massIntentionsQuery);
+            const massIntentionsData = await Promise.all(massIntentionsSnapshot.docs.map(async (docSnapshot) => {
+                const massIntention = docSnapshot.data();
+                const churchDoc = await getDoc(doc(db, "church", massIntention.churchId));
+                const churchData = churchDoc.exists() ? churchDoc.data() : null;
+
+                return {
+                    id: docSnapshot.id,
+                    ...massIntention,
+                    church: churchData,
+                };
+            }));
+            setMassIntentions(massIntentionsData);
+        } catch (error) {
+            toast.error('Error fetching mass intentions: ' + error.message);
+        }
+    };
+
+    fetchMassIntentions();
+}, [user]);
+
 
   const appointmentTypeMapping = {
     marriageCertificate: "Marriage Certificate",
@@ -166,6 +199,19 @@ export const ViewAppointments = () => {
     return `${hours12}:${minutes} ${ampm}`;
   };
 
+  const handleShowMassIntentionModal = (massIntention) => {
+    setSelectedMassIntention(massIntention);
+    setShowModal(true);
+  };
+
+  const formatDate = (timestamp) => {
+    if (!timestamp || !timestamp.seconds) {
+        return 'Invalid Date';
+    }
+    const date = new Date(timestamp.seconds * 1000);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
+  };
 
   return (
     <div className="viewApp">
@@ -214,7 +260,37 @@ export const ViewAppointments = () => {
             </div>
           </div>
 
-          <Modal show={showModal} onHide={handleCloseModal} centered>
+          <div className="col-12 mb-4">
+              <div className="card">
+                  <div className="card-body">
+                      <h5 className="card-title">Mass Intentions</h5>
+                      <div className="row">
+                          {massIntentions.length > 0 ? (
+                              massIntentions.map(massIntention => (
+                                  <div key={massIntention.id} className="col-12 mb-3">
+                                      <div className="card">
+                                          <div className="card-body d-flex align-items-center justify-content-between">
+                                              <div>
+                                                  <h5 className="card-title mb-0">
+                                                    {massIntention.church?.churchName || "Mass Intention"}
+                                                  </h5>
+                                                  <p><b>Date of Request: </b>{formatDate(massIntention.dateOfRequest)}</p>
+                                              </div>
+                                              <button className='btn btn-custom-primary' onClick={() => handleShowMassIntentionModal(massIntention)}>View Information</button>
+                                          </div>
+                                      </div>
+                                  </div>
+                              ))
+                          ) : (
+                              <p>No mass intentions found.</p>
+                          )}
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+
+        <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Information</Modal.Title>
         </Modal.Header>
@@ -375,6 +451,39 @@ export const ViewAppointments = () => {
           )}
         </Modal.Body>
       </Modal>
+      <Modal show={showModal} onHide={handleCloseModal} centered>
+          <Modal.Header closeButton>
+              <Modal.Title>Mass Intention Information</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+              {selectedMassIntention && (
+                  <div>
+                      <h4>Mass Intention Details</h4>
+                      <p><strong>Date of Request:</strong> {selectedMassIntention.dateOfRequest ? formatDate(selectedMassIntention.dateOfRequest) : 'Date not available'}</p>
+
+                      <p><strong>Mass Date:</strong> {selectedMassIntention.massSchedule?.massDate}</p>
+                      <p><strong>Mass Time:</strong> {convertTo12HourFormat(selectedMassIntention.massSchedule?.massTime)}</p>
+                      <p><strong>Requester Contact:</strong> {selectedMassIntention.userFields?.requesterContact}</p>
+                      <p><strong>Requester Email:</strong> {selectedMassIntention.userFields?.requesterEmail}</p>
+                      <p><strong>Requester Name:</strong> {selectedMassIntention.userFields?.requesterName}</p>
+                                  
+                      <br/>
+                      <p><strong>Petition:</strong> {selectedMassIntention.petition}</p>
+                      <p><strong>Thanksgiving Mass:</strong> {selectedMassIntention.thanksgivingMass}</p>
+                      <p><strong>For the Souls of:</strong> {selectedMassIntention.forTheSoulOf}</p>
+                      <br/>
+
+                      <h4>Payment Details</h4>
+                      {selectedMassIntention.receiptImage && selectedMassIntention.receiptImage !== 'none' ? (
+                        renderPaymentImage(selectedMassIntention.receiptImage)
+                      ) : (
+                      <p>Not yet paid</p>
+                      )}
+                  </div>
+              )}
+          </Modal.Body>
+      </Modal>
+
         </div>
       </div>
     </div>
