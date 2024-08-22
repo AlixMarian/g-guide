@@ -21,9 +21,9 @@ export const MassIntention = () => {
     petition: '',
     forTheSoulOf: ''
   });
-
   const [massSchedules, setMassSchedules] = useState([]);
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
+  const [filteredMassSchedules, setFilteredMassSchedules] = useState([]);
 
   useEffect(() => {
     const fetchChurchData = async () => {
@@ -60,10 +60,26 @@ export const MassIntention = () => {
         ...doc.data(),
       }));
       setMassSchedules(schedules);
+      setFilteredMassSchedules(schedules);
     };
 
     fetchMassSchedules();
   }, [churchId]);
+
+  const getSortedSchedules = (schedules) => {
+    const weekdayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    const weekendOrder = ['Sunday', 'Saturday'];
+    
+    const weekdays = schedules.filter(schedule => weekdayOrder.includes(schedule.massDate));
+    const weekends = schedules.filter(schedule => weekendOrder.includes(schedule.massDate));
+    
+    weekdays.sort((a, b) => weekdayOrder.indexOf(a.massDate) - weekdayOrder.indexOf(b.massDate));
+    weekends.sort((a, b) => weekendOrder.indexOf(a.massDate) - weekendOrder.indexOf(b.massDate));
+
+    return { weekdays, weekends };
+  };
+
+  const { weekdays, weekends } = getSortedSchedules(filteredMassSchedules);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -86,10 +102,12 @@ export const MassIntention = () => {
       try {
         const massIntentionData = {
           churchId: churchId,
-          userId: user.uid,
-          userName: `${userData?.firstName || ''} ${userData?.lastName || ''}`,
-          userContact: userData?.contactNum || '',
-          userEmail: userData?.email || '',
+          userFields: {
+          requesterId: user.uid,
+          requesterName: `${userData?.firstName || ''} ${userData?.lastName || ''}`,
+          requesterContact: userData?.contactNum || '',
+          requesterEmail: userData?.email || '',}
+          ,
           dateOfRequest: Timestamp.fromDate(new Date()),
           thanksgivingMass: formData.thanksgivingMass,
           petition: formData.petition,
@@ -166,6 +184,14 @@ export const MassIntention = () => {
     return <div>Loading...</div>;
   }
 
+  const convertTo12HourFormat = (time) => {
+    if (!time || time === "none") return "none";
+    const [hours, minutes] = time.split(':');
+    let hours12 = (hours % 12) || 12;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    return `${hours12}:${minutes} ${ampm}`;
+  };
+
   return (
     <div>
       <form className="massIntentionForm" onSubmit={handleSubmit}>
@@ -205,35 +231,87 @@ export const MassIntention = () => {
           <div className="card-body">
             <h5 className="card-title">Mass Intentions</h5><br/>
             <h6 className="card-title">Please select a mass schedule</h6>
-            <table className='table'>
-              <thead>
-                <tr>
-                  <th scope="col">Select</th>
-                  <th scope="col">Day</th>
-                  <th scope="col">Time</th>
-                  <th scope="col">AM/PM</th>
-                </tr>
-              </thead>
-              <tbody>
-                {massSchedules.map(schedule => (
-                  <tr key={schedule.id}>
-                    <td>
-                      <input
-                        type="radio"
-                        name="schedule"
-                        value={schedule.id}
-                        checked={selectedScheduleId === schedule.id}
-                        onChange={() => handleScheduleSelect(schedule.id)}
-                      />
-                    </td>
-                    <td>{schedule.massDate}</td>
-                    <td>{schedule.massTime}</td>
-                    <td>{schedule.massPeriod}</td>
+            <h3>Weekdays</h3>
+            {weekdays.length === 0 ? (
+              <div className="card mb-3 alert alert-info">
+              <div className="card-body ">
+                <h5 className="card-title">No Weekday Mass Available</h5>
+              </div>
+            </div>
+            ) : (
+              <table className="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Language</th>
+                    <th>Presiding Priest</th>
+                    <th>Mass Type</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-
+                </thead>
+                <tbody>
+                  {weekdays.map((schedule) => (
+                    <tr key={schedule.id}>
+                      <td>
+                        <input
+                            type="radio"
+                            name="massSchedule"
+                            value={schedule.id}
+                            checked={selectedScheduleId === schedule.id}
+                            onChange={() => handleScheduleSelect(schedule.id)}
+                          />
+                        </td>
+                      <td>{schedule.massDate}</td>
+                      <td>{convertTo12HourFormat(schedule.massTime)}</td>
+                      <td>{schedule.massLanguage}</td>
+                      <td>{schedule.presidingPriest}</td>
+                      <td>{schedule.massType}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <h3>Weekends</h3>
+              {weekends.length === 0 ? (
+                <div className="card mb-3 alert alert-info">
+                  <div className="card-body ">
+                    <h5 className="card-title">No Weekend Mass Available</h5>
+                  </div>
+                </div>
+              ) : (
+                <table className="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Day</th>
+                      <th>Time</th>
+                      <th>Language</th>
+                      <th>Presiding Priest</th>
+                      <th>Mass Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {weekends.map((schedule) => (
+                      <tr key={schedule.id}>
+                        <td>
+                        <input
+                            type="radio"
+                            name="massSchedule"
+                            value={schedule.id}
+                            checked={selectedScheduleId === schedule.id}
+                            onChange={() => handleScheduleSelect(schedule.id)}
+                          />
+                        </td>
+                        <td>{schedule.massDate}</td>
+                        <td>{convertTo12HourFormat(schedule.massTime)}</td>
+                        <td>{schedule.massLanguage}</td>
+                        <td>{schedule.presidingPriest}</td>
+                        <td>{schedule.massType}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            <br/>
             <div className="mb-3">
               <label htmlFor="thanksgiving" className="form-label">Thanksgiving</label>
               <textarea className="form-control" id="thanksgiving" name="thanksgivingMass" onChange={handleChange} value={formData.thanksgivingMass || ''}></textarea>
@@ -265,12 +343,11 @@ export const MassIntention = () => {
                 <img src={receiptImageUrl} alt="Receipt" className="img-fluid" />
               </div>
             )}
+            <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="submit" className="btn btn-success me-md-2">Submit Request</button>
+              <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
+            </div>
           </div>
-        </div>
-
-        <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-          <button type="submit" className="btn btn-success me-md-2">Submit Request</button>
-          <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
         </div>
       </form>
     </div>
