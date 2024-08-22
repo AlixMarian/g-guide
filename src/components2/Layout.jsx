@@ -3,14 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { getUserDetails } from '../components2/Services/userServices';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, query, where, getDocs } from "firebase/firestore";
+
 import { db } from "/backend/firebase"; 
+
 import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
 
 export const Layout = () => {
   const [userDetails, setUserDetails] = useState({});
   const [loading, setLoading] = useState(true);
+
   const [countPending, setCountPending] = useState(0); 
+
   const btnRef = useRef(null);
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
@@ -23,7 +27,9 @@ export const Layout = () => {
         getUserDetails(user.uid).then(details => {
           if (details) {
             setUserDetails(details);
+
             fetchPendingAppointmentsCount(user.uid); 
+
           }
           setLoading(false);
         });
@@ -76,10 +82,12 @@ export const Layout = () => {
       const pendingQuery = query(
         collection(db, "appointments"),
         where("appointmentStatus", "==", "Pending"),
+
         where("churchId", "==", userId) 
       );
       const pendingSnapshot = await getDocs(pendingQuery);
       setCountPending(pendingSnapshot.size); 
+
     } catch (error) {
       console.error("Error fetching pending appointments:", error);
     }
@@ -177,7 +185,9 @@ export const Layout = () => {
                   </defs>
                   <path fill="black" d="M0 0h48v48H0z" mask="url(#ipSAppointment0)"/>
                 </svg>
+
                 <span className="badge text-bg-danger">{countPending}</span> c
+
               </i>
               <span className="nav-item">Appointments</span>
               <p className='p-hover'>Appointments</p>
