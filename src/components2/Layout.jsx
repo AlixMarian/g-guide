@@ -3,14 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { getUserDetails } from '../components2/Services/userServices';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "/backend/firebase"; // Adjust the import path as necessary
+import { db } from "/backend/firebase"; 
 import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
 
 export const Layout = () => {
   const [userDetails, setUserDetails] = useState({});
   const [loading, setLoading] = useState(true);
-  const [countPending, setCountPending] = useState(0); // State for pending appointments count
+  const [countPending, setCountPending] = useState(0); 
   const btnRef = useRef(null);
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ export const Layout = () => {
         getUserDetails(user.uid).then(details => {
           if (details) {
             setUserDetails(details);
-            fetchPendingAppointmentsCount(user.uid); // Fetch pending appointments count for the logged-in user
+            fetchPendingAppointmentsCount(user.uid); 
           }
           setLoading(false);
         });
@@ -76,10 +76,10 @@ export const Layout = () => {
       const pendingQuery = query(
         collection(db, "appointments"),
         where("appointmentStatus", "==", "Pending"),
-        where("churchId", "==", userId) // Filter by the logged-in user's UID
+        where("churchId", "==", userId) 
       );
       const pendingSnapshot = await getDocs(pendingQuery);
-      setCountPending(pendingSnapshot.size); // Set the count of pending appointments
+      setCountPending(pendingSnapshot.size); 
     } catch (error) {
       console.error("Error fetching pending appointments:", error);
     }

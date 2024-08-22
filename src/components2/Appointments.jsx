@@ -143,6 +143,7 @@ export const Appointments = () => {
         baptism:"Baptism",
         burial:"Burial",
         confirmation:"Confirmation",
+        massintentions: "Mass Intentions"
     };
 
     const formatDate = (timestamp) => {
@@ -217,7 +218,7 @@ export const Appointments = () => {
     const fetchMassIntentions = async () => {
         if (!user) return;
 
-        const massIntentionsQuery = query(collection(db, "massIntentions"), where("userFields.requesterId", "==", user.uid));
+        const massIntentionsQuery = query(collection(db, "massIntentions"), where("churchId", "==", user.uid));
         const massIntentionsSnapshot = await getDocs(massIntentionsQuery);
         const massIntentionsData = massIntentionsSnapshot.docs.map(doc => ({
             id: doc.id,
@@ -696,7 +697,7 @@ export const Appointments = () => {
                             <p><strong>For the Souls of:</strong> {selectedMassIntention.forTheSoulOf}</p>
                             <br/>
 
-                            <p><strong>Death Certificate:</strong> <a href={selectedMassIntention.receiptImage} target="_blank" rel="noopener noreferrer">View Document</a></p>
+                            <p><strong>Mass Intention receipt:</strong> <a href={selectedMassIntention.receiptImage} target="_blank" rel="noopener noreferrer">View Document</a></p>
                         </>
                     )}
                 </Modal.Body>
