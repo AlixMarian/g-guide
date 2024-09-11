@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, collection, query, where, getDocs, setDoc } from "firebase/firestore";
 import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Modal, Button } from 'react-bootstrap';
 import 'react-toastify/dist/ReactToastify.css';
 import '../websiteUser.css';
 import {signInWithGoogle} from '/backend/googleAuth';
@@ -11,6 +12,8 @@ import useChatbot from './Chatbot';
 
 
 export const Login = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
   const navigate = useNavigate();
 
   useChatbot();
@@ -59,9 +62,14 @@ export const Login = () => {
         const churchDoc = await getDoc(doc(db, 'church', userId));
 
         if (!websiteVisitorSnapshot.empty) {
-            toast.success('Welcome to G! Guide');
-            navigate('/homepage');
-            return;
+          const visitorData = websiteVisitorSnapshot.docs[0].data();
+          if (visitorData.status === 'active') {
+              toast.success('Welcome to G! Guide');
+              navigate('/homepage');
+          } else {
+              toast.error('Your account is not active. Please contact support.');
+          }
+          return;
         }
 
         if (!coordinatorSnapshot.empty) {
@@ -159,6 +167,16 @@ export const Login = () => {
     }
   };
   
+  const handlePasswordReset = async () => {
+    const auth = getAuth();
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      toast.success('Password reset email sent!');
+      setShowModal(false);
+    } catch (error) {
+      toast.error('Failed to send password reset email: ' + error.message);
+    }
+  };
 
   return (
     <div className="loginContainer">
@@ -194,7 +212,7 @@ export const Login = () => {
                 </button>
               </div>
               <div className="text-center mt-3">
-                <a href="/forgot-password" className="text-decoration-none">Forgot Password?</a>
+                <a href="#" className="text-decoration-none" onClick={() => setShowModal(true)}>Forgot Password?</a>
               </div>
               <div className="text-center mt-2">
                 <span>No account? <a href="/signup" className="text-decoration-none">Sign Up</a></span>
@@ -204,6 +222,30 @@ export const Login = () => {
           </div>
         </div>
       </div>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Forgot Password</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div>
+            <label htmlFor="resetEmail" className="form-label">Enter your email address</label>
+            <input 
+              type="email" 
+              className="form-control" 
+              id="resetEmail" 
+              value={resetEmail} 
+              onChange={(e) => setResetEmail(e.target.value)} 
+              required 
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handlePasswordReset}>
+            Send Password Reset Link
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, sendEmailVerification } from 'firebase/auth';
-import { doc, setDoc, collection } from 'firebase/firestore';
+import { doc, setDoc, collection, Timestamp  } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import '../websiteUser.css';
@@ -58,6 +58,7 @@ export const SignUp = () => {
           dataConsent: formData.dataConsent,
           role: 'websiteUser',
           profileImage: 'https://firebasestorage.googleapis.com/v0/b/g-guide-1368b.appspot.com/o/default%2FuserIcon.png?alt=media&token=11e94d91-bf29-4e3e-ab98-a723fead69bc',
+          dateOfRegistration: Timestamp.now(),
         });
 
         toast.success('Please check your email for verification');
@@ -72,6 +73,7 @@ export const SignUp = () => {
 
         await setDoc(webVisitorDocRef, {
           userId: user.uid,
+          status: 'active',
         });
       } catch (visitorError) {
         console.error('Error storing website visitor data:', visitorError);
