@@ -207,3 +207,15 @@
     font-size: 100px;
   }
   
+  table td, table th {
+    font-size: smaller;
+    border: 1px solid black;
+    line-height: 1.4;
+    padding: 10px 10px;
+    text-align: center;
+  }
+
+  table {
+    width: 90%;
+    margin: auto;
+  }

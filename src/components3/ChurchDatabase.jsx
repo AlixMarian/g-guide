@@ -3,7 +3,7 @@ import { Table, Button, Modal, Dropdown } from 'react-bootstrap';
 import { db } from '/backend/firebase';
 import { getDocs, collection } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export const ChurchDatabase = () => {
   const [churches, setChurches] = useState([]);
@@ -116,36 +116,53 @@ export const ChurchDatabase = () => {
             <Dropdown.Item onClick={() => handleStatusChange('denied')}>Denied</Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
-        
       </div>
       <h4 className="mb-3">Now viewing: {selectedStatus}</h4>
-      
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Church Name</th>
-            <th>Email</th>
-            <th>Contact Number</th>
-            <th>Address</th>
-            <th>Status</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredChurches.map(church => (
+     
+
+      <table>
+  <thead>
+    <tr>
+      <th colSpan="3">Coordinator Information</th>
+      <th colSpan="7">Church Information</th>
+      <th rowSpan="8">Proof of Affiliation</th>
+    </tr>
+    <tr>
+      <th>Full Name</th>
+      <th>Email</th>
+      <th>Contact Number</th>
+      <th>Church Name</th>
+      <th>Email</th>
+      <th>Contact Number</th>
+      <th>Address</th>
+      <th>Registration Date</th>
+      <th>Status</th>
+      <th>History</th>
+    </tr>
+  </thead>
+  <tbody>
+  {filteredChurches.map(church => (
             <tr key={church.id}>
+              <td>Full Name</td>
+              <td>Email</td>
+              <td>Contact Number</td>
               <td>{church.churchName}</td>
               <td>{church.churchEmail}</td>
               <td>{church.churchContactNum}</td>
               <td>{church.churchAddress}</td>
+              <td>{church.churchRegistrationDate}</td>
               <td>{church.churchStatus}</td>
               <td>
                 <Button variant="info" onClick={() => handleShowModal(church)}>View Details</Button>
               </td>
+              <td>view</td>
             </tr>
           ))}
-        </tbody>
-      </Table>
+  </tbody>
+</table>
+
+
+
 
       {selectedChurch && (
         <Modal show={showModal} onHide={handleCloseModal} centered>
@@ -155,28 +172,28 @@ export const ChurchDatabase = () => {
           <Modal.Body>
             <h4>Church Coordinator Information</h4>
             <div className="d-flex justify-content-center mb-3">
-                <img src={selectedChurch.profileImage} alt="Profile" 
-                  style={{ 
-                    width: '100px', 
-                    height: '100px', 
-                    borderRadius: '50%' 
-                  }} 
-                />
-              </div>
-              <p><strong>Coordinator Last Name:</strong> {selectedChurch.lastName}</p>
-              <p><strong>Coordinator First Name:</strong> {selectedChurch.firstName}</p>
-              <p><strong>Coordinator Email:</strong> {selectedChurch.email}</p>
-              <p><strong>Contact Number:</strong> {selectedChurch.contactNum}</p>
+              <img src={selectedChurch.profileImage} alt="Profile" 
+                style={{ 
+                  width: '100px', 
+                  height: '100px', 
+                  borderRadius: '50%' 
+                }} 
+              />
+            </div>
+            <p><strong>Coordinator Last Name:</strong> {selectedChurch.lastName}</p>
+            <p><strong>Coordinator First Name:</strong> {selectedChurch.firstName}</p>
+            <p><strong>Coordinator Email:</strong> {selectedChurch.email}</p>
+            <p><strong>Contact Number:</strong> {selectedChurch.contactNum}</p>
             <h4>Church Information</h4>
-              <p><strong>Church Name:</strong> {selectedChurch.churchName}</p>
-              <p><strong>Email:</strong> {selectedChurch.churchEmail}</p>
-              <p><strong>Contact Number:</strong> {selectedChurch.churchContactNum}</p>
-              <p><strong>Address:</strong> {selectedChurch.churchAddress}</p>
-              <p><strong>Status:</strong> {selectedChurch.churchStatus}</p>
-              <p><strong>Registration Date:</strong> {selectedChurch.churchRegistrationDate}</p>
-              <p><strong>History:</strong> {selectedChurch.churchHistory}</p>
+            <p><strong>Church Name:</strong> {selectedChurch.churchName}</p>
+            <p><strong>Email:</strong> {selectedChurch.churchEmail}</p>
+            <p><strong>Contact Number:</strong> {selectedChurch.churchContactNum}</p>
+            <p><strong>Address:</strong> {selectedChurch.churchAddress}</p>
+            <p><strong>Status:</strong> {selectedChurch.churchStatus}</p>
+            <p><strong>Registration Date:</strong> {selectedChurch.churchRegistrationDate}</p>
+            <p><strong>History:</strong> {selectedChurch.churchHistory}</p>
             <h4>Proof of Affiliation</h4>
-              {renderProofOfAffiliation(selectedChurch.churchProof)}
+            {renderProofOfAffiliation(selectedChurch.churchProof)}
           </Modal.Body>
         </Modal>
       )}
