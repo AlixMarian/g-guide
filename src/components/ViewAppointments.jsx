@@ -17,7 +17,8 @@ export const ViewAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [churches, setChurches] = useState({});
   const [massIntentions,setMassIntentions] = useState({});
-  const [showModal, setShowModal] = useState(false);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [showMassIntentionModal, setShowMassIntentionModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [selectedMassIntention, setSelectedMassIntention] = useState(null);
   const [slots, setSlots] = useState([]);
@@ -129,14 +130,24 @@ export const ViewAppointments = () => {
     return slot || {};
   };
   
-  const handleShowModal = (appointment) => {
+  const handleShowAppointmentModal = (appointment) => {
     setSelectedAppointment(appointment);
-    setShowModal(true);
+    setShowAppointmentModal(true);
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
+  const handleShowMassIntentionModal = (massIntention) => {
+    setSelectedMassIntention(massIntention);
+    setShowMassIntentionModal(true);
+  };
+
+  const handleCloseAppointmentModal = () => {
+    setShowAppointmentModal(false);
     setSelectedAppointment(null);
+  };
+
+  const handleCloseMassIntentionModal = () => {
+    setShowMassIntentionModal(false);
+    setSelectedMassIntention(null);
   };
 
   const renderPaymentImage = (fileUrl) => {
@@ -199,11 +210,6 @@ export const ViewAppointments = () => {
     return `${hours12}:${minutes} ${ampm}`;
   };
 
-  const handleShowMassIntentionModal = (massIntention) => {
-    setSelectedMassIntention(massIntention);
-    setShowModal(true);
-  };
-
   const formatDate = (timestamp) => {
     if (!timestamp || !timestamp.seconds) {
         return 'Invalid Date';
@@ -246,7 +252,7 @@ export const ViewAppointments = () => {
                                     </div>
                                   )}
                                 </div>
-                                <button className='btn btn-custom-primary' onClick={() => handleShowModal(appointment)}>View Information</button>
+                                <button className='btn btn-custom-primary' onClick={() => handleShowAppointmentModal(appointment)}>View Information</button>
                               </div>
                             </div>
                           </div>
@@ -290,7 +296,7 @@ export const ViewAppointments = () => {
           </div>
 
 
-        <Modal show={showModal} onHide={handleCloseModal} centered>
+        <Modal show={showAppointmentModal} onHide={handleCloseAppointmentModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Information</Modal.Title>
         </Modal.Header>
@@ -451,7 +457,7 @@ export const ViewAppointments = () => {
           )}
         </Modal.Body>
       </Modal>
-      <Modal show={showModal} onHide={handleCloseModal} centered>
+      <Modal show={showMassIntentionModal} onHide={handleCloseMassIntentionModal} centered>
           <Modal.Header closeButton>
               <Modal.Title>Mass Intention Information</Modal.Title>
           </Modal.Header>
