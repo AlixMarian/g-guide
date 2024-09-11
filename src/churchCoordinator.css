@@ -1,12 +1,93 @@
 
+body .sidebar {
+  position: fixed; 
+  height: 100vh; 
+  width: 150px;
+  background: #1D8BDA;
+  padding: 0.4rem 0.8rem;
+  transition: all 0.5s ease;
+  z-index: 100;
+  display: flexbox;
+  
+}
+
+.sidebar {
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+}
+
+.second-sidebar {
+  position: fixed;
+  width: 100px; /* Set the final width */
+  height: 100vh;
+  background-color: #6DBDFF;
+  padding: 0.4rem 0.8rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  margin-left: 9.4rem;
+  opacity: 0; /* Initially transparent */
+  transition: 0.5s ease, opacity 0.5s ease; /* Smooth transitions for transform and opacity */
+}
+
+.second-sidebar.open {
+  opacity: 1; /* Make it visible */
+}
+
+
+.sidebar-content {
+  margin-top: 6.5rem;
+  display: flex;
+  flex-direction: column; /* Stacks elements vertically */
+  justify-content: center; /* Centers the content vertically */
+  align-items: center; /* Centers the content vertically */
+  gap: .8rem;
+}
+
+.logo {
+  position: fixed; 
+  margin-top: .8rem;
+}
+
+.appointments, .payment-history, .mass-schedule, .volunteer-call, .services-offered, .church-info, .priest-list{
+  display: flex;
+  flex-direction: column; /* Stacks elements vertically */
+  justify-content: center; /* Centers the content vertically */
+  align-items: center; /* Centers the content vertically */
+  gap: .1rem; /* Adds 50px gap between items */
+}
+
+.button-name {
+  margin-top: 10px; /* Adds spacing between the image and the text */
+  font-size: 15px; /* Adjust the size of the text */
+  color: white; /* Changes the text color to white */
+  text-align: center; /* Centers the text */
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.5);
+}
+
+.image-size {
+  height: 30px;
+  width: 30px;
+}
+
+.appointments:hover, .payment-history:hover, .mass-schedule:hover, .volunteer-call:hover, .services-offered:hover, .church-info:hover, .priest-list:hover {
+  padding: 1rem;
+  background-color: #0068A2;
+  width: 150px;
+  height: 80px; /* Changes background color on hover */
+  padding: 5px;
+  transition:  0.5s ease;
+  cursor: pointer;
+}
+
 
 /* ---------------------------------------------------------------------------------------------------- */
+
 
 .main-content {
     position: relative;
     min-height: 100vh;
     top: 0;
-    left: 80px;
+    left: 150px;
     transition: all 0.5s ease;
     width: calc(100% - 80px);
     padding: 1rem;
@@ -32,7 +113,10 @@
     padding: 30px;
     margin: 10px;
   }
-
+  .appoinmentsPage {
+    position: relative; /* Important to set position */
+    z-index: 300; /* Higher value than the sidebar */
+  }
   /*Appointments.jsx*/
 .appointmentDate{
   text-align: center;
@@ -225,16 +309,29 @@ body {
 
 body .sidebar {
   position: fixed; 
-  top: 0;
-  left: 0;
   height: 100vh; 
-  width: 80px;
-  background: #9bc3e4;
+  width: 150px;
+  background: #1D8BDA;
   padding: 0.4rem 0.8rem;
   transition: all 0.5s ease;
   z-index: 100;
+  display: flexbox;
 }
 
+.user {
+  display: flex;
+  justify-content: center; /* Horizontally center */
+  align-items: center; /* Vertically center */
+  flex-direction: column; /* Stack the image and text */
+}
+
+.user-img {
+  display: block;
+  margin: 0 auto;
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+}
 
 .sidebar.active{
   width: 270px;
@@ -256,20 +353,7 @@ body .sidebar {
   left: 90%;
 }
 
-.top i {
-  font-size: 2px;
-  margin-right: 1px;
-}
 
- .top .logo{
-  color:white;
-  display: flex;
-  height: 50px;
-  width: 100%;
-  align-items: center;
-  pointer-events: none;
-  opacity: 0;
-}
 
 .sidebar.active .top .logo{
   opacity: 1;

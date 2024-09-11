@@ -28,6 +28,7 @@ import UserDatabase from './components3/UserDatabase';
 import ChurchDatabase from './components3/ChurchDatabase';
 import ChurchOptions from './components4/ChurchOptions';
 import ChurchHomepage from './components4/ChurchHomepage';
+import Sidebar from './components2/Sidebar';
 
 const App = () => {
   return (
@@ -39,6 +40,7 @@ const App = () => {
         
         <Route path="/map" element={<MapComponent />} />
 
+        <Route path="/sidebar" element={<Sidebar />} />
         
         <Route path="/home" element={<><NavBar /><Home /></>} />
         <Route path="/login" element={<><NavBar/><Login /></>} />
@@ -51,7 +53,7 @@ const App = () => {
         {/* church coordinator routessss */}
         <Route path="/SEA" element={
           <>
-            <Layout/>
+            <Sidebar/>
             <div className="main-content">
               <SEA/>
             </div>
@@ -60,7 +62,7 @@ const App = () => {
 
         <Route path="/Appointments" element={
           <>
-            <Layout/>
+            <Sidebar/>
             <div className="main-content">
               <Appointments/>
             </div>
@@ -68,7 +70,7 @@ const App = () => {
         } />
         <Route path="/ChurchInfo" element={
           <>
-            <Layout/>
+            <Sidebar/>
             <div className="main-content">
               <Church/>
             </div>
@@ -76,7 +78,7 @@ const App = () => {
         } />
         <Route path="/ListofPriest" element={
           <>
-            <Layout/>
+            <Sidebar/>
             <div className="main-content">
               <Listpriest/>
             </div>
@@ -84,7 +86,7 @@ const App = () => {
         } />
         <Route path="/ServiceOffered" element={
           <>
-            <Layout/>
+            <Sidebar/>
             <div className="main-content">
               <Serviceoff/>
             </div>
@@ -92,7 +94,7 @@ const App = () => {
         } />
         <Route path="/RequestforVolunteer" element={
           <>
-            <Layout/>
+            <Sidebar/>
             <div className="main-content">
               <ReqVol/>
             </div>
@@ -100,7 +102,7 @@ const App = () => {
         } />
         <Route path="/AccountSettings" element={
           <>
-            <Layout/>
+            <Sidebar/>
             <div className="main-content">
               <AccountSettings/>
             </div>
@@ -152,6 +154,7 @@ const App = () => {
             </div>
           </>
         }/>
+
 
        
         <Route path="/church-options" element={<><WebUserNavBar /><ChurchOptions/></>}/>
