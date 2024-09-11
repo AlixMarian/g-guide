@@ -59,9 +59,14 @@ export const Login = () => {
         const churchDoc = await getDoc(doc(db, 'church', userId));
 
         if (!websiteVisitorSnapshot.empty) {
-            toast.success('Welcome to G! Guide');
-            navigate('/homepage');
-            return;
+          const visitorData = websiteVisitorSnapshot.docs[0].data();
+          if (visitorData.status === 'active') {
+              toast.success('Welcome to G! Guide');
+              navigate('/homepage');
+          } else {
+              toast.error('Your account is not active. Please contact support.');
+          }
+          return;
         }
 
         if (!coordinatorSnapshot.empty) {
