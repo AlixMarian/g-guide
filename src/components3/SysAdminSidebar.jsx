@@ -46,11 +46,11 @@ export const SysAdminSidebar = () => {
     }
   };
 
-  // Registered Church child item handler
   const handleRegisteredChurch = () => {
     setActiveSection('church-directory');
-    setSecondSidebarOpen(true); // Ensure second sidebar remains open
-    setActiveChild('registered-church'); // Set child as active
+    setSecondSidebarOpen(true); 
+    setActiveChild('registered-church');
+    navigate('/churchDB');
   };
 
   // Cebu Church List child item handler

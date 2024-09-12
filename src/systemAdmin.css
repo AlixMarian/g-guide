@@ -183,7 +183,76 @@ body .admin-second-sidebar {
   align-items: center;
   font-weight: bold;
 }
+.pending-church-page {
+  margin-left: 90px;
+  margin-top: 10px;
+}
 
+.table-container {
+  display: grid;
+  justify-content: center;
+}
+
+table {
+  width: 100%; /* Set to 100% for a better responsive layout */
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 16px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+th, td {
+  padding: 12px 15px; /* Add some extra padding for better readability */
+  border: 1px solid #ddd; /* Lighter border color for a softer look */
+}
+
+/* Header row styling */
+th {
+  background-color: #007BFF; /* Blue header background */
+  color: white; /* White text on blue */
+  font-weight: bold; /* Bold text */
+  font-size: 18px; /* Slightly larger font size for the header */
+}
+
+/* Body rows */
+td {
+  background-color: white; /* White background for the rows */
+  color: #333; /* Slightly darker text color */
+}
+
+/* Hover effect */
+tr:hover {
+  background-color: #d1ecf1; /* Light blue background on hover */
+}
+
+/* Make the action buttons align horizontally and center them */
+.pending-church-action {
+  display: flexbox;
+  justify-content: center;
+  align-items: center;
+  justify-items: center;
+  gap: 3rem;
+  width: auto;
+}
+
+.pending-church-button, .view-proof, .view-history, .approve, .deny {
+  width: 70px; /* Adjust the width */
+  height: 30px; /* Adjust the height */
+  padding: 0.25rem 0.5rem; /* Adjust the padding */
+  font-size: 13px; /* Adjust the font size */
+  color: white;
+}
+
+.view-history, .view-proof {
+  width: 100px;
+  background-color: #007BFF;
+}
+
+.church-database-page {
+  margin-left: 13rem;
+  margin-top: 10px;
+}
 
 /* sidebar */
 /* .sidebar{
@@ -360,15 +429,4 @@ body .admin-second-sidebar {
   }
 
   
-  table td, table th {
-    font-size: smaller;
-    border: 1px solid black;
-    line-height: 1.4;
-    padding: 10px 10px;
-    text-align: center;
-  }
-
-  table {
-    width: 90%;
-    margin: auto;
-  }
+ 
