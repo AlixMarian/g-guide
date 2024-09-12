@@ -1,3 +1,130 @@
+body .admin-sidebar {
+  position: fixed; 
+  height: 100vh; 
+  width: 150px;
+  background: #1D8BDA;
+  padding: 0.4rem 0.8rem;
+  transition: all 0.5s ease;
+  z-index: 100;
+  display: flexbox;
+  
+}
+
+.admin-sidebar {
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+}
+
+.admin-sidebar-content {
+  margin-top: 6.5rem;
+  display: flex;
+  flex-direction: column; /* Stacks elements vertically */
+  justify-content: center; /* Centers the content vertically */
+  align-items: center; /* Centers the content vertically */
+}
+
+.dashboard, .pending-church, .user-directory, .church-directory, .transaction {
+  display: flex;
+  flex-direction: column; /* Stacks elements vertically */
+  justify-content: center; /* Centers the content vertically */
+  align-items: center; /* Centers the content vertically */
+  width: 150px; /* Set fixed width */
+  height: 100px;
+  gap: 0.2rem;
+}
+
+.dashboard:hover, .pending-church:hover, .user-directory:hover, .church-directory:hover, .transaction:hover {
+  transition: 0.5s ease;
+  cursor: pointer;
+  background-color: #0068A2; /* Only change the background color */
+  
+}
+
+.admin-active {
+  background-color: #0068A2;
+  /* width: 150px;
+  height: 100px;
+  cursor: pointer; */
+}
+
+.admin-active:hover {
+  width: 150px; /* Keep width consistent */
+  height: 100px; /* Keep height consistent */
+  transition: background-color 0.5s ease; /* Only transition background color */
+  cursor: pointer;
+}
+
+.admin-image-size {
+  margin-top: 0.5rem;
+  height: 33px;
+  width: 33px;
+}
+
+body .admin-second-sidebar {
+  display: flex;
+  justify-content: center;
+  
+}
+
+.admin-second-sidebar {
+  position: fixed;
+  width: 100px; /* Set the final width */
+  height: 100vh;
+  margin-top: -0.4rem;
+  background-color: #6DBDFF;
+  padding: 0.4rem 0.8rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  margin-left: 15.6rem;
+  opacity: 0; /* Initially transparent */
+  transition: 0.5s ease, opacity 0.5s ease;
+  gap: 1rem;
+}
+
+.admin-second-sidebar.open {
+  opacity: 1; /* Make it visible */
+}
+
+.admin-second-sidebar-content {
+  margin-top: 21.5rem;
+}
+
+.admin-numbers {
+  display: flex;
+  padding: 2px;
+  width: 100px;
+  height: 100px;
+  flex-direction: column; /* Stacks elements vertically */
+  justify-content: center; /* Centers the content vertically */
+  align-items: center; /* Centers the content vertically */
+}
+
+.admin-numbers:hover {
+  background-color: #0068A2;
+  width: 100px;
+  height: 100px;
+  transition: 0.5s ease;
+  cursor: pointer;
+}
+
+.admin-numbers.active {
+  background-color: #0068A2;
+  width: 100px;
+  height: 100px;
+}
+
+.admin-second-button-name {
+  margin-top: 10px; /* Adds spacing between the image and the text */
+  font-size: 13px; /* Adjust the size of the text */
+  color: white; /* Changes the text color to white */
+  text-align: center; /* Centers the text */
+  text-shadow: 0 3px 3px rgba(0, 0, 0, 0.5);
+  /* -webkit-text-stroke: 0.2px black; */
+}
+
+
+
+/* ---------------------------------------------------------------------------------------------------- */
 .sys-main-content{
     position: relative;
     min-height: 100vh;
@@ -8,7 +135,7 @@
     padding: 1rem;
 }
 /* sidebar */
-.sidebar{
+/* .sidebar{
   position: absolute;
   top:0;
   left: 0;
@@ -60,9 +187,9 @@
 .sidebar.active p{
   opacity: 1;
   white-space: nowrap;
-}
+} */
 
-.sidebar ul li{
+/* .sidebar ul li{
   position: relative;
   list-style-type: none;
   height: 50px;
@@ -78,9 +205,9 @@
   text-decoration: none;
   border-radius: 0.8rem;
   white-space: nowrap;
-}
+} */
 
-.sidebar ul li a:hover{
+/* .sidebar ul li a:hover{
   background:white;
   color: black;
 }
@@ -124,8 +251,8 @@
   margin-left: 10px; 
   opacity: 0;
   transition: opacity 0.3s;
-}
-
+} */
+/* 
 .sidebar.collapsed .hover-button:hover .p-hover {
   visibility: visible;
   opacity: 1;
@@ -134,10 +261,10 @@
 .sidebar.active .hover-button:hover .p-hover {
   visibility: hidden;
   opacity: 0;
-}
+} */
 
 
-
+/* 
 .slots {
   border-radius: 0.7rem;
   margin-top: 2%;
@@ -146,7 +273,7 @@
   border: 1px solid black; 
   padding: 30px;
   font-size: 18px;
-}
+} */
 
 
 /* account settings */
