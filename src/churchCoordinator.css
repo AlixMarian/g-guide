@@ -1,5 +1,5 @@
 
-body .sidebar {
+body .coord-sidebar {
   position: fixed; 
   height: 100vh; 
   width: 150px;
@@ -11,7 +11,7 @@ body .sidebar {
   
 }
 
-.sidebar {
+.coord-sidebar {
   display: flex;
   justify-content: center; /* Centers horizontally */
 }
@@ -38,7 +38,6 @@ body .second-sidebar {
   opacity: 1; /* Make it visible */
 }
 
-
 .sidebar-content {
   margin-top: 6.5rem;
   display: flex;
@@ -48,15 +47,22 @@ body .second-sidebar {
   gap: .8rem;
 }
 
-.second-sidebar-content {
-  margin-top: 7rem;
-  display: flex;
-  flex-direction: column; /* Stacks elements vertically */
-  justify-content: center; /* Centers the content vertically */
-  align-items: center; /* Centers the content vertically */
-  gap: .8rem;
+.coord-active {
+  background-color: #0068A2;
+  width: 150px;
+  height: 80px;
+  padding: 1rem;
+  transition: 0.5s ease;
+  cursor: pointer;
 }
 
+.coord-active:hover {
+  background-color: #0068A2; /* Ensure color stays the same */
+  width: 150px; /* Keep width consistent */
+  height: 80px; /* Keep height consistent */
+  transition: background-color 0.5s ease; /* Only transition background color */
+  cursor: pointer;
+}
 
 .logo {
   position: fixed; 
@@ -71,27 +77,33 @@ body .second-sidebar {
   gap: .1rem; /* Adds 50px gap between items */
 }
 
-/* .appointments:hover, .payment-history:hover, .mass-schedule:hover, .volunteer-call:hover, .services-offered:hover, .church-info:hover, .priest-list:hover {
-  background-color: #0068A2;
-  width: 150px;
-  height: 80px;
-  transition:  0.5s ease;
-  cursor: pointer;
-} */
-
-.active {
-  background-color: #0068A2;
-  width: 150px;
-  height: 80px;
-  padding: 1rem;
-  transition:  0.5s ease;
-  cursor: pointer;
-}
 .appointments:hover, .payment-history:hover, .mass-schedule:hover, .volunteer-call:hover, .services-offered:hover, .church-info:hover, .priest-list:hover {
   transition:  0.5s ease;
   cursor: pointer;
+  background-color: #0068A2;
+  width: 150px;
+  height: 80px;
 }
 
+.second-sidebar-appointments-content, .second-sidebar-mass-schedule-content, .second-sidebar-services-offered-content, .second-sidebar-church-info-content {
+  margin-top: 3.53rem;
+  display: flex;
+  flex-direction: column; /* Stacks elements vertically */
+  justify-content: center; /* Centers the content vertically */
+  align-items: center; /* Centers the content vertically */
+}
+
+.second-sidebar-mass-schedule-content {
+  margin-top: 13.56rem;
+}
+
+.second-sidebar-services-offered-content {
+  margin-top: 18.6rem;
+}
+
+.second-sidebar-church-info-content {
+  margin-top: 23.6rem;
+}
 
 .numbers {
   display: flex;
@@ -107,9 +119,15 @@ body .second-sidebar {
 .numbers:hover {
   background-color: #0068A2;
   width: 100px;
-  height: 80px; 
-  transition:  0.5s ease;
+  height: 80px;
+  transition: 0.5s ease;
   cursor: pointer;
+}
+
+.numbers.active {
+  background-color: #0068A2;
+  width: 100px;
+  height: 80px;
 }
 
 .button-name {
@@ -133,6 +151,13 @@ body .second-sidebar {
   height: 30px;
   width: 30px;
 }
+/* .appointments:hover, .payment-history:hover, .mass-schedule:hover, .volunteer-call:hover, .services-offered:hover, .church-info:hover, .priest-list:hover {
+  background-color: #0068A2;
+  width: 150px;
+  height: 80px;
+  transition:  0.5s ease;
+  cursor: pointer;
+} */
 
 
 /* ---------------------------------------------------------------------------------------------------- */
