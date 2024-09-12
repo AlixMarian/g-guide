@@ -45,6 +45,10 @@ export const Sidebar = () => {
     navigate('/ListofPriest');
     setActiveSection('priest-list');
   };
+  
+  const handlePending = () => {
+    navigate('/PendingAppointments');
+  }
 
   const renderSecondSidebarContent = () => {
     switch (activeSection) {
@@ -184,10 +188,33 @@ return (
             </div>
           </div>
         </div>
-
-      <div className={`second-sidebar ${secondSidebarOpen ? 'open' : 'close'}`}>
-        <div className="second-sidebar-appointments-content">
-          {renderSecondSidebarContent()}
+        
+        <div className={`second-sidebar ${secondSidebarOpen ? 'open' : 'close'}`}>
+          <div className="second-sidebar-content">
+            <div className='numbers'>
+              <div 
+                onClick={handlePending}>
+                <input type="image" src="../src/assets/number-1.png" className='image-size' />
+                <h3 className='second-button-name'>Pending</h3>
+              </div>
+            </div>
+            <div className='numbers'>
+              <input type="image" src="../src/assets/number-2.png" className='image-size' />
+              <h3 className='second-button-name'>For Payment</h3>
+            </div>
+            <div className='numbers'>
+              <input type="image" src="../src/assets/number-3.png" className='image-size' />
+              <h3 className='second-button-name'>Approved</h3>
+            </div>
+            <div className='numbers'>
+              <input type="image" src="../src/assets/number-4.png" className='image-size' />
+              <h3 className='second-button-name'>Denied</h3>
+            </div>
+            <div className='numbers'>
+              <input type="image" src="../src/assets/number-5.png" className='image-size' />
+              <h3 className='second-button-name'>Mass Intentions</h3>
+            </div>
+          </div>
         </div>
       </div>
     </div>

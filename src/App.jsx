@@ -17,6 +17,8 @@ import Church from './components2/Church';
 import Listpriest from './components2/Listpriest';
 import Serviceoff from './components2/Serviceoff';
 import ReqVol from './components2/ReqVol';
+import Sidebar from './components2/Sidebar';
+import PendingAppointments from './components2/Appointments/PendingAppointments'
 import AccountSettings from './components2/AccountSett';
 import UserAccountSettings from './components/UserAccountSettings';
 import MapComponent from './components/MapComponent';
@@ -28,7 +30,8 @@ import UserDatabase from './components3/UserDatabase';
 import ChurchDatabase from './components3/ChurchDatabase';
 import ChurchOptions from './components4/ChurchOptions';
 import ChurchHomepage from './components4/ChurchHomepage';
-import Sidebar from './components2/Sidebar';
+
+
 
 const App = () => {
   return (
@@ -50,6 +53,7 @@ const App = () => {
         <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
         
+        
         {/* church coordinator routessss */}
         <Route path="/SEA" element={
           <>
@@ -68,6 +72,14 @@ const App = () => {
             </div>
           </>
         } />
+        <Route path="/PendingAppointments" element={
+          <>
+            <Sidebar/>
+            <div className="appointment-content">
+              <PendingAppointments />
+            </div>
+              </>
+            } />
         <Route path="/ChurchInfo" element={
           <>
             <Sidebar/>
@@ -154,6 +166,8 @@ const App = () => {
             </div>
           </>
         }/>
+
+      
 
 
        
