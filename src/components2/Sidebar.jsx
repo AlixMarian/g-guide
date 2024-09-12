@@ -39,6 +39,10 @@ export const Sidebar = () => {
     navigate('/ListofPriest');
     setActiveSection('priest-list');
   };
+  
+  const handlePending = () => {
+    navigate('/PendingAppointments');
+  }
 
   return (
     <>
@@ -103,8 +107,11 @@ export const Sidebar = () => {
         <div className={`second-sidebar ${secondSidebarOpen ? 'open' : 'close'}`}>
           <div className="second-sidebar-content">
             <div className='numbers'>
-              <input type="image" src="../src/assets/number-1.png" className='image-size' />
-              <h3 className='second-button-name'>Pending</h3>
+              <div 
+                onClick={handlePending}>
+                <input type="image" src="../src/assets/number-1.png" className='image-size' />
+                <h3 className='second-button-name'>Pending</h3>
+              </div>
             </div>
             <div className='numbers'>
               <input type="image" src="../src/assets/number-2.png" className='image-size' />

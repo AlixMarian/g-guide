@@ -186,7 +186,7 @@ export const Layout = () => {
                   <path fill="black" d="M0 0h48v48H0z" mask="url(#ipSAppointment0)"/>
                 </svg>
 
-                <span className="badge text-bg-danger">{countPending}</span> c
+                <span className="badge text-bg-danger">{countPending}</span>
 
               </i>
               <span className="nav-item">Appointments</span>
