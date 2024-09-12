@@ -58,6 +58,7 @@ body .admin-sidebar {
   margin-top: 0.5rem;
   height: 33px;
   width: 33px;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.5));
 }
 
 body .admin-second-sidebar {
