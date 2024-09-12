@@ -193,7 +193,8 @@ return (
           <div className="second-sidebar-content">
             <div className='numbers'>
               <div 
-                onClick={handlePending}>
+                onClick={handlePending}
+              >
                 <input type="image" src="../src/assets/number-1.png" className='image-size' />
                 <h3 className='second-button-name'>Pending</h3>
               </div>
@@ -217,7 +218,6 @@ return (
           </div>
         </div>
       </div>
-    </div>
   </>
 );
 };

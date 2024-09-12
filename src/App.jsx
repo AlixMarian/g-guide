@@ -75,11 +75,9 @@ const App = () => {
         <Route path="/PendingAppointments" element={
           <>
             <Sidebar/>
-            <div className="appointment-content">
               <PendingAppointments />
-            </div>
-              </>
-            } />
+            </>
+        } />
         <Route path="/ChurchInfo" element={
           <>
             <Sidebar/>

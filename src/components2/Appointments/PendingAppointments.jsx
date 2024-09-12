@@ -31,44 +31,7 @@ export const PendingAppointments = ({ user }) => {
         setSelectedAppointment(appointment);
     };
 
-    return (
-        <div className="Appointments">
-            <div className="titleFilter">
-                <h3>Pending Appointments</h3>
-            </div>
-            <br />
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th scope="col">Date of Request</th>
-                        <th scope="col">Appointment Type</th>
-                        <th scope="col">Requested by:</th>
-                        <th scope="col">More Info</th>
-                        <th scope="col">Send SMS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {pendingAppointments.map((appointment, index) => (
-                        <tr key={index}>
-                            <td>{formatDate(appointment.userFields?.dateOfRequest)}</td>
-                            <td>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
-                            <td>{appointment.userFields?.requesterName}</td>
-                            <td>
-                                <Button variant="info" onClick={() => handleShowModal(appointment)}>
-                                    <i className="bi bi-info-circle-fill"></i>
-                                </Button>
-                            </td>
-                            <td>
-                                <Button>
-                                    <i className="bi bi-chat-text"></i>
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
+    
 };
 
 export default PendingAppointments;
