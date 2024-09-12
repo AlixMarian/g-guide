@@ -1,5 +1,5 @@
 
-body .sidebar {
+body .coord-sidebar {
   position: fixed; 
   height: 100vh; 
   width: 150px;
@@ -11,7 +11,7 @@ body .sidebar {
   
 }
 
-.sidebar {
+.coord-sidebar {
   display: flex;
   justify-content: center; /* Centers horizontally */
 }
@@ -79,7 +79,7 @@ body .second-sidebar {
   cursor: pointer;
 } */
 
-.active {
+.coord-active {
   background-color: #0068A2;
   width: 150px;
   height: 80px;
@@ -91,7 +91,6 @@ body .second-sidebar {
   transition:  0.5s ease;
   cursor: pointer;
 }
-
 
 .numbers {
   display: flex;

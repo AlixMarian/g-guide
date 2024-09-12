@@ -43,55 +43,55 @@ export const Sidebar = () => {
   return (
     <>
       <div className="sidebar-container">
-        <div className="sidebar" ref={sidebarRef}>
+        <div className="coord-sidebar" ref={sidebarRef}>
           <div className='logo'>
             <input type="image" src="../src/assets/G-Guide LOGO.png" height="80" width="80" style={{ filter: 'drop-shadow(0 3px 3px rgba(0, 0, 0, 0.5))' }}/>
           </div>
           <div className="sidebar-content">
             <div 
-              className={`appointments ${activeSection === 'appointments' ? 'active' : ''}`} 
+              className={`appointments ${activeSection === 'appointments' ? 'coord.active' : ''}`} 
               onClick={handleAppointment}
             >
               <input type="image" src="../src/assets/appointments.png" className='image-size' />
               <h3 className='button-name'>Appointments</h3>
             </div>
             <div 
-              className={`payment-history ${activeSection === 'payment-history' ? 'active' : ''}`} 
+              className={`payment-history ${activeSection === 'payment-history' ? 'coord.active' : ''}`} 
               onClick={() => setActiveSection('payment-history')}
             >
               <input type="image" src="../src/assets/payment-history.png" className='image-size' />
               <h3 className='button-name'>Payment History</h3>
             </div>
             <div 
-              className={`mass-schedule ${activeSection === 'mass-schedule' ? 'active' : ''}`} 
+              className={`mass-schedule ${activeSection === 'mass-schedule' ? 'coord.active' : ''}`} 
               onClick={handleSEA}
             >
               <input type="image" src="../src/assets/mass schedule.png" className='image-size' />
               <h3 className='button-name'>Mass Schedule</h3>
             </div>
             <div 
-              className={`volunteer-call ${activeSection === 'volunteer-call' ? 'active' : ''}`} 
+              className={`volunteer-call ${activeSection === 'volunteer-call' ? 'coord.active' : ''}`} 
               onClick={handleRequestforVolunteer}
             >
               <input type="image" src="../src/assets/volunteer.png" className='image-size' />
               <h3 className='button-name'>Volunteer Call</h3>
             </div>
             <div 
-              className={`services-offered ${activeSection === 'services-offered' ? 'active' : ''}`} 
+              className={`services-offered ${activeSection === 'services-offered' ? 'coord.active' : ''}`} 
               onClick={handleServiceOffered}
             >
               <input type="image" src="../src/assets/services offered.png" className='image-size' />
               <h3 className='button-name'>Services Offered</h3>
             </div>
             <div 
-              className={`church-info ${activeSection === 'church-info' ? 'active' : ''}`} 
+              className={`church-info ${activeSection === 'church-info' ? 'coord.active' : ''}`} 
               onClick={handleChurchInfo}
             >
               <input type="image" src="../src/assets/church.png" className='image-size' />
               <h3 className='button-name'>Church Info</h3>
             </div>
             <div 
-              className={`priest-list ${activeSection === 'priest-list' ? 'active' : ''}`} 
+              className={`priest-list ${activeSection === 'priest-list' ? 'coord.active' : ''}`} 
               onClick={handleListofPriest}
             >
               <input type="image" src="../src/assets/priest.png" className='image-size' />
