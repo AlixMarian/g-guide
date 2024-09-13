@@ -14,6 +14,7 @@ export const SignUpCoord = () => {
   const [churchList, setChurchList] = useState([]);
   const [filteredChurchList, setFilteredChurchList] = useState([]);
   const [dropdownVisible, setDropdownVisible] = useState(false); // Dropdown visibility state
+  const [selectedChurchID, setSelectedChurchID] = useState(null); // Store the selected church ID
   const [searchInput, setSearchInput] = useState("");
   const [formData, setFormData] = useState({
     email: "",
@@ -155,6 +156,7 @@ export const SignUpCoord = () => {
         churchInstruction: formData.churchInstruction || 'none',
         churchStatus: 'pending',
         coordinatorID: coordinatorID,  // Linking the coordinator ID here
+        churchLocationID: selectedChurchID, // Save the selected churchLocation document ID
       });
 
       toast.success('Your registration is being processed by the admin');
@@ -263,43 +265,45 @@ export const SignUpCoord = () => {
               <div className="row g-3 churchInformation">
                 <h3>Church Information</h3>
                 
-                <div className="col-12">
-                <label htmlFor="churchName" className="form-label">Church Name</label>
-                <div className="dropdown">
-                  <button onClick={toggleDropdown} className="dropbtn">
-                    {searchInput || "Select Church"}
-                  </button>
+                  <div className="col-12">
+                    <label htmlFor="churchName" className="form-label">Church Name</label>
+                    <div className="dropdown">
+                      <button onClick={toggleDropdown} className="dropbtn">
+                        {searchInput || "Select Church"}
+                      </button>
 
-                  {dropdownVisible && (
-                    <div id="myDropdown" className="dropdown-content show">
-                      <input
-                        type="text"
-                        placeholder="Search..."
-                        id="myInput"
-                        value={searchInput}
-                        onChange={filterFunction}
-                      />
+                      {dropdownVisible && (
+                        <div id="myDropdown" className="dropdown-content show">
+                          <input
+                            type="text"
+                            placeholder="Search..."
+                            id="myInput"
+                            value={searchInput}
+                            onChange={filterFunction}
+                          />
 
-                      {filteredChurchList.map((church) => (
-                        <a
-                          key={church.id}
-                          href="#!"
-                          onClick={() => {
-                            setFormData((prevState) => ({
-                              ...prevState,
-                              churchName: church.churchName, // Set selected church name
-                              churchAddress: church.churchLocation, // Set the corresponding church address
-                            }));
-                            setSearchInput(church.churchName); // Display the selected church name in the input
-                            setDropdownVisible(false); // Hide dropdown after selection
-                          }}
-                        >
-                          {church.churchName}
-                        </a>
-                      ))}
+                          {filteredChurchList.map((church) => (
+                            <a
+                              key={church.id}
+                              href="#!"
+                              onClick={() => {
+                                setFormData((prevState) => ({
+                                  ...prevState,
+                                  churchName: church.churchName, // Set selected church name
+                                  churchAddress: church.churchLocation, // Set the corresponding church address
+                                }));
+                                setSearchInput(church.churchName); // Display the selected church name in the input
+                                setSelectedChurchID(church.id); // Set the selected church document ID
+                                setDropdownVisible(false); // Hide dropdown after selection
+                                console.log(`Selected Church ID: ${church.id}`); // Log the document ID
+                              }}
+                            >
+                              {church.churchName}
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
                   </div>
 
                   <div className="col-12">
@@ -365,18 +369,17 @@ export const SignUpCoord = () => {
                   </div>
 
                   <div className="col-12">
-                    <label htmlFor="inputRefundPolicy" className="form-label">Refund Policy</label>
-                    <input
-                      type="text"
+                    <label htmlFor="refundPolicy" className="form-label">Refund Policy</label>
+                    <textarea
                       className="form-control"
                       id="refundPolicy"
+                      rows="6" // Adjust the number of rows as needed to provide a large enough space
                       value={formData.churchInstruction}
                       onChange={handleChange}
-                      placeholder='Please enter refund policy here.'
+                      placeholder="Please enter refund policy here."
                       required
                     />
                   </div>
-                
               </div>
             </div>
 
