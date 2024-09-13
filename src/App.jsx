@@ -20,6 +20,7 @@ import Sidebar from './components2/Sidebar';
 import PendingAppointments from './components2/Appointments/PendingAppointments'
 import ForPaymentAppointments from './components2/Appointments/ForPaymentAppointments'
 import ApprovedAppointments from './components2/Appointments/ApprovedAppointments';
+import DeniedAppointments from './components2/Appointments/DeniedAppointments';
 import AccountSettings from './components2/AccountSett';
 import UserAccountSettings from './components/UserAccountSettings';
 import MapComponent from './components/MapComponent';
@@ -94,6 +95,14 @@ const App = () => {
             <Sidebar/>
               <div className="main-content">
                 <ApprovedAppointments/>
+              </div>
+          </>
+        } />
+        <Route path="/DeniedAppointments" element={
+          <>
+            <Sidebar/>
+              <div className="main-content">
+                <DeniedAppointments/>
               </div>
           </>
         } />

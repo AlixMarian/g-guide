@@ -1,12 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { Button } from 'react-bootstrap';
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "/backend/firebase";
+import { db } from "/backend/firebase"; 
 import '../../churchCoordinator.css'
 
 export const PendingAppointments = ({ user }) => {
     const [pendingAppointments, setPendingAppointments] = useState([]);
-    const [selectedAppointment, setSelectedAppointment] = useState(null);
+
+    const appointmentTypeMapping = {
+        marriageCertificate: "Marriage Certificate",
+        baptismalCertificate: "Baptismal Certificate",
+        burialCertificate: "Burial Certificate",
+        confirmationCertificate: "Confirmation Certificate",
+        marriage:"Marriage",
+        baptism:"Baptism",
+        burial:"Burial",
+        confirmation:"Confirmation",
+        massintentions: "Mass Intentions"
+    };
 
     useEffect(() => {
         const fetchPendingAppointments = async () => {
@@ -21,6 +32,7 @@ export const PendingAppointments = ({ user }) => {
                 id: doc.id,
                 ...doc.data()
             }));
+            console.log("Fetched Data: ", pendingAppointmentsData);
             setPendingAppointments(pendingAppointmentsData);
         };
 
@@ -29,6 +41,15 @@ export const PendingAppointments = ({ user }) => {
 
     const handleShowModal = (appointment) => {
         setSelectedAppointment(appointment);
+    };
+
+    const formatDate = (timestamp) => {
+        if (!timestamp || !timestamp.seconds) {
+            return 'Invalid Date';
+        }
+        const date = new Date(timestamp.seconds * 1000);
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString(undefined, options);
     };
 
     return (
