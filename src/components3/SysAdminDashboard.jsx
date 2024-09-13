@@ -13,7 +13,7 @@ export const SysAdminDashboard = () => {
 
   const animateCount = (startValue, endValue, element) => {
     let current = startValue;
-    const duration = Math.floor(1500 / endValue); // 1500ms 
+    const duration = Math.floor(1500 / endValue); 
 
     const counter = setInterval(() => {
       current += 1;
@@ -89,17 +89,17 @@ export const SysAdminDashboard = () => {
     <div className='admin-dashboard'>
       <h3>Admin Dashboard</h3>
       <div className='dashboard-container'>
-        <div className="card">
-          <div className="card-header">Registered Church Count</div>
-          <div className="card-number church-count">{churchCount}</div>
+        <div className="sysAdmincard">
+          <div className="sysAdmincard-header">Registered Church Count</div>
+          <div className="sysAdmincard-number sysAdminchurch-count">{churchCount}</div>
         </div>
-        <div className="card">
-          <div className="card-header">User Count</div>
-          <div className="card-number user-count">{usersCount}</div>
+        <div className="sysAdmincard">
+          <div className="sysAdmincard-header">User Count</div>
+          <div className="sysAdmincard-number sysAdminuser-count">{usersCount}</div>
         </div>
-        <div className="card">
-          <div className="card-header">Churches in Cebu</div>
-          <div className="card-number cebu-church-count">{cebuChurchCount}</div>
+        <div className="sysAdmincard">
+          <div className="sysAdmincard-header">Churches in Cebu</div>
+          <div className="sysAdmincard-number sysAdmincebu-church-count">{cebuChurchCount}</div>
         </div>
       </div>
     </div>

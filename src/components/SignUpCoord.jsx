@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import { doc, setDoc, collection } from "firebase/firestore";
+import { doc, setDoc, collection, getDocs } from "firebase/firestore";
 import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -11,7 +11,10 @@ import { Modal} from 'react-bootstrap';
 
 export const SignUpCoord = () => {
   const [showDataConsentModal, setShowDataConsentModal] = useState(false);
-
+  const [churchList, setChurchList] = useState([]);
+  const [filteredChurchList, setFilteredChurchList] = useState([]);
+  const [dropdownVisible, setDropdownVisible] = useState(false); // Dropdown visibility state
+  const [searchInput, setSearchInput] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -28,14 +31,61 @@ export const SignUpCoord = () => {
   });
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { id, value, type, checked, files } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [id]: type === "checkbox" ? checked : type === "file" ? files[0] : value, // Handle file input
-    }));
-  };
+    // Toggle dropdown visibility
+    const toggleDropdown = () => {
+      setDropdownVisible(!dropdownVisible);
+    };
+  
+    // Fetch church names and locations from the churchLocation collection
+    useEffect(() => {
+      const fetchChurchData = async () => {
+        try {
+          const querySnapshot = await getDocs(collection(db, 'churchLocation'));
+          const churches = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setChurchList(churches);
+          setFilteredChurchList(churches); // Initialize filtered list
+        } catch (error) {
+          toast.error("Failed to fetch church data");
+          console.error("Error fetching church locations:", error);
+        }
+      };
 
+      fetchChurchData();
+    }, []);
+
+    const handleChange = (e) => {
+      const { id, value, type, checked, files } = e.target;
+      setFormData((prevState) => ({
+        ...prevState,
+        [id]: type === "checkbox" ? checked : type === "file" ? files[0] : value,
+      }));
+  
+      // If the user selects a church from the dropdown, automatically set the church address
+      if (id === "churchName") {
+        const selectedChurch = churchList.find(church => church.churchName === value);
+        if (selectedChurch) {
+          setFormData((prevState) => ({
+            ...prevState,
+            churchAddress: selectedChurch.churchLocation,
+          }));
+        }
+      }
+    };
+
+    // Filter churches based on input
+    const filterFunction = (e) => {
+      const searchValue = e.target.value.toLowerCase();
+      setSearchInput(searchValue);
+
+      const filteredChurches = churchList.filter((church) =>
+        church.churchName.toLowerCase().includes(searchValue)
+      );
+      setFilteredChurchList(filteredChurches);
+    };
+    
   const handleRegister  = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
@@ -51,7 +101,7 @@ export const SignUpCoord = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
       await sendEmailVerification(user);
-      
+
       let churchProofURL = '';
       if (formData.churchProof) {
         const proofRef = ref(storage, `churchVerification/${user.uid}`);
@@ -66,7 +116,7 @@ export const SignUpCoord = () => {
         churchQRDetailURL = await getDownloadURL(qrRef);
       }
 
-      
+      // Save user information in the users collection
       await setDoc(doc(db, 'users', user.uid), {
         lastName: formData.lastName,
         firstName: formData.firstName,
@@ -77,37 +127,40 @@ export const SignUpCoord = () => {
         profileImage: 'https://firebasestorage.googleapis.com/v0/b/g-guide-1368b.appspot.com/o/default%2FuserIcon.png?alt=media&token=11e94d91-bf29-4e3e-ab98-a723fead69bc',
       });
 
-      
-      await setDoc(doc(db, 'church', user.uid), {
+      // Create a document in the 'coordinator' collection and get its ID
+      const churchCoorDocRef = doc(collection(db, 'coordinator')); 
+      const coordinatorID = churchCoorDocRef.id;
+
+      await setDoc(churchCoorDocRef, {
+        userId: user.uid,
+        status: 'pending',
+      });
+
+      // Generate a unique document ID for the church collection
+      const churchDocRef = doc(collection(db, 'church'));
+      //const churchID = churchDocRef.id;
+
+      // Save church details in the church collection with unique churchID and linked coordinatorID
+      await setDoc(churchDocRef, {
         churchName: formData.churchName,
         churchAddress: formData.churchAddress,
         churchEmail: formData.churchEmail,
         churchContactNum: formData.churchContactNum,
         churchProof: churchProofURL,
-        churchRegistrationDate: user.metadata.creationTime,
+        churchRegistrationDate: new Date().toISOString(),
         churchStartTime: 'none',
         churchEndTime: 'none',
         churchHistory: 'none',
         churchQRDetail: churchQRDetailURL,
-        churchInstruction: 'none',
+        churchInstruction: formData.churchInstruction || 'none',
         churchStatus: 'pending',
+        coordinatorID: coordinatorID,  // Linking the coordinator ID here
       });
-    toast.success('Your registration is being processed by the admin');
-    navigate('/login');
 
-    try {
-      const churchCoorDocRef = doc(collection(db, 'coordinator')); 
-      console.log('Generated webVisitorDocRef ID:', churchCoorDocRef.id);
+      toast.success('Your registration is being processed by the admin');
+      navigate('/login');
 
-      await setDoc(churchCoorDocRef, {
-        userId: user.uid,
-      });
-    } catch (visitorError) {
-      console.error('Error storing website visitor data:', visitorError);
-      toast.error('Unable to store visitor data: ' + visitorError.message);
-    }
-
-    } catch (error) {
+    }catch (error) {
       toast.error(error.message);
     }
   };
@@ -210,27 +263,54 @@ export const SignUpCoord = () => {
               <div className="row g-3 churchInformation">
                 <h3>Church Information</h3>
                 
-                  <div className="col-12">
-                    <label htmlFor="inputChurchName" className="form-label">Church Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="churchName"
-                      value={formData.churchName}
-                      onChange={handleChange}
-                      required
-                    />
+                <div className="col-12">
+                <label htmlFor="churchName" className="form-label">Church Name</label>
+                <div className="dropdown">
+                  <button onClick={toggleDropdown} className="dropbtn">
+                    {searchInput || "Select Church"}
+                  </button>
+
+                  {dropdownVisible && (
+                    <div id="myDropdown" className="dropdown-content show">
+                      <input
+                        type="text"
+                        placeholder="Search..."
+                        id="myInput"
+                        value={searchInput}
+                        onChange={filterFunction}
+                      />
+
+                      {filteredChurchList.map((church) => (
+                        <a
+                          key={church.id}
+                          href="#!"
+                          onClick={() => {
+                            setFormData((prevState) => ({
+                              ...prevState,
+                              churchName: church.churchName, // Set selected church name
+                              churchAddress: church.churchLocation, // Set the corresponding church address
+                            }));
+                            setSearchInput(church.churchName); // Display the selected church name in the input
+                            setDropdownVisible(false); // Hide dropdown after selection
+                          }}
+                        >
+                          {church.churchName}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
                   </div>
 
                   <div className="col-12">
-                    <label htmlFor="inputChurchAdd" className="form-label">Church Address</label>
+                    <label htmlFor="churchAddress" className="form-label">Church Address</label>
                     <input
                       type="text"
                       className="form-control"
                       id="churchAddress"
                       value={formData.churchAddress}
                       onChange={handleChange}
-                      required
+                      readOnly
                     />
                   </div>
 
@@ -285,14 +365,14 @@ export const SignUpCoord = () => {
                   </div>
 
                   <div className="col-12">
-                    <label htmlFor="inputChurchInstruction" className="form-label">Instructions for Service Transactions</label>
+                    <label htmlFor="inputRefundPolicy" className="form-label">Refund Policy</label>
                     <input
                       type="text"
                       className="form-control"
-                      id="churchInstruction"
+                      id="refundPolicy"
                       value={formData.churchInstruction}
                       onChange={handleChange}
-                      placeholder='Please enter instructions here, such as the charge per transaction.'
+                      placeholder='Please enter refund policy here.'
                       required
                     />
                   </div>

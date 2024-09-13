@@ -149,7 +149,7 @@ body .admin-second-sidebar {
   margin-top: 10px;
 }
 
-.card {
+.sysAdmincard {
   width: 300px;
   height: 327px;
   background-color: white;
@@ -161,7 +161,7 @@ body .admin-second-sidebar {
   overflow: hidden; /* Ensure header stays inside the card */
 }
 
-.card-header {
+.sysAdmincard-header {
   width: 100%;
   background-color: #0068A2; /* Blue header background */
   color: white;
@@ -173,7 +173,7 @@ body .admin-second-sidebar {
   border-top-right-radius: 8px;
 }
 
-.card-number {
+.sysAdmincard-number {
   font-size: 150px; /* Large font size for the number */
   color: black;
   margin: 0;
