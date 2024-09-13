@@ -1,31 +1,30 @@
 import { useState, useEffect } from 'react';
 import { Table, Button, Modal, Dropdown } from 'react-bootstrap';
 import { db } from '/backend/firebase';
-import { getDocs, collection } from 'firebase/firestore';
+import { getDocs, collection, doc, getDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
 
 export const ChurchDatabase = () => {
   const [churches, setChurches] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [showModal, setShowModal] = useState(false);
   const [selectedChurch, setSelectedChurch] = useState(null);
-  const [modalContent, setModalContent] = useState('history'); // To track which modal content to show
+  const [modalContent, setModalContent] = useState('history');
 
   const navigate = useNavigate();
 
   useEffect(() => {
-      const auth = getAuth();
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          console.log("User signed in:", user);
-        } else {
-          console.log("Unauthorized access");
-          navigate('/login');
-        }
-      });
+    const auth = getAuth();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User signed in:", user);
+      } else {
+        console.log("Unauthorized access");
+        navigate('/login');
+      }
+    });
   }, [navigate]);
 
   useEffect(() => {
@@ -35,25 +34,40 @@ export const ChurchDatabase = () => {
         const churchSnapshot = await getDocs(churchCollection);
         const churchList = churchSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        const usersCollection = collection(db, 'users');
-        const usersSnapshot = await getDocs(usersCollection);
-        const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const processedChurches = [];
 
-        const mappedData = churchList.map((church) => {
-          const user = usersList.find(user => user.id === church.id);
-          return {
+        for (const church of churchList) {
+          if (!church.coordinatorID) continue;  // Skip if coordinatorID is missing
+
+          // Fetch the coordinator using coordinatorID from 'coordinator' collection
+          const coordinatorDocRef = doc(db, 'coordinator', church.coordinatorID);
+          const coordinatorSnapshot = await getDoc(coordinatorDocRef);
+
+          if (!coordinatorSnapshot.exists()) continue;
+
+          const coordinatorData = coordinatorSnapshot.data();
+
+          // Fetch user details using userId from 'users' collection
+          const userDocRef = doc(db, 'users', coordinatorData.userId);
+          const userSnapshot = await getDoc(userDocRef);
+
+          if (!userSnapshot.exists()) continue;
+
+          const userData = userSnapshot.data();
+
+          // Combine the church data with the user data
+          processedChurches.push({
             ...church,
-            lastName: user?.lastName || '',
-            firstName: user?.firstName || '',
-            email: user?.email || '',
-            contactNum: user?.contactNum || '',
-            profileImage: user?.profileImage || '',
-          };
-        });
+            coordinatorName: `${userData.firstName || 'N/A'} ${userData.lastName || 'N/A'}`,
+            coordinatorEmail: userData.email || 'N/A',
+            coordinatorContactNum: userData.contactNum || 'N/A',
+            profileImage: userData.profileImage || 'default-profile.jpg'
+          });
+        }
 
-        setChurches(mappedData);
+        setChurches(processedChurches);
       } catch (error) {
-        console.error('Error fetching church data: ', error);
+        console.error('Error fetching church data:', error);
       }
     };
 
@@ -69,22 +83,19 @@ export const ChurchDatabase = () => {
     setModalContent(content); // 'history' or 'proof'
     setShowModal(true);
   };
-  
 
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedChurch(null);
-    setModalContent(content); // Track which content (history or proof) to show in modal
-
   };
 
   const renderProofOfAffiliation = (fileUrl) => {
     if (!fileUrl) {
       return <p>No proof of affiliation available.</p>;
     }
-    
+
     const fileExtension = fileUrl.split('.').pop().toLowerCase();
-  
+
     if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
       return <img src={fileUrl} alt="Church Proof" style={{ maxWidth: '100%', maxHeight: '500px' }} />;
     } else if (fileExtension === 'pdf') {
@@ -95,12 +106,6 @@ export const ChurchDatabase = () => {
           style={{ width: '100%', height: '500px', border: 'none' }}
         />
       );
-    } else if (['doc', 'docx'].includes(fileExtension)) {
-      return (
-        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-          Download Proof of Affiliation
-        </a>
-      );
     } else {
       return (
         <a href={fileUrl} target="_blank" rel="noopener noreferrer">
@@ -109,7 +114,6 @@ export const ChurchDatabase = () => {
       );
     }
   };
-  
 
   const filteredChurches = selectedStatus === 'All' ? churches : churches.filter(church => church.churchStatus === selectedStatus);
 
@@ -136,7 +140,7 @@ export const ChurchDatabase = () => {
           <tr>
             <th colSpan="4">Coordinator Information</th>
             <th colSpan="7">Church Information</th>
-            <th rowSpan="2">Proof of Affiliation</th> {/* Adjusted rowspan */}
+            <th rowSpan="2">Proof of Affiliation</th>
           </tr>
           <tr>
             <th>Photo</th>
@@ -153,72 +157,65 @@ export const ChurchDatabase = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredChurches.map((church) => {
-            const fullName = `${church.firstName || 'N/A'} ${church.lastName || 'N/A'}`;
-            const email = church.email || 'N/A';
-            const contactNum = church.contactNum || 'N/A';
-
-            return (
-              <tr key={church.id}>
-                <td>
-                  <img
-                    src={church.profileImage || 'default-profile.jpg'}
-                    alt="Profile"
-                    style={{ width: '30px', height: '30px', borderRadius: '50%' }}
-                  />
-                </td>
-                <td>{fullName}</td>
-                <td>{email}</td>
-                <td>{contactNum}</td>
-                <td>{church.churchName}</td>
-                <td>{church.churchEmail}</td>
-                <td>{church.churchContactNum}</td>
-                <td>{church.churchAddress}</td>
-                <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
-                <td>{church.churchStatus}</td>
-                <td>
-                  <Button variant="info" className="view-history" onClick={() => handleShowModal(church, 'history')}>
-                    View History
-                  </Button>
-                </td>
-                <td>
-                  <Button variant="info" className="view-proof" onClick={() => handleShowModal(church, 'proof')}>
-                    View Proof
-                  </Button>
-                </td>
-
-              </tr>
-            );
-          })}
+          {filteredChurches.map((church) => (
+            <tr key={church.id}>
+              <td>
+                <img
+                  src={church.profileImage || 'default-profile.jpg'}
+                  alt="Profile"
+                  style={{ width: '30px', height: '30px', borderRadius: '50%' }}
+                />
+              </td>
+              <td>{church.coordinatorName}</td>
+              <td>{church.coordinatorEmail}</td>
+              <td>{church.coordinatorContactNum}</td>
+              <td>{church.churchName}</td>
+              <td>{church.churchEmail}</td>
+              <td>{church.churchContactNum}</td>
+              <td>{church.churchAddress}</td>
+              <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
+              <td>{church.churchStatus}</td>
+              <td>
+                <Button variant="info" className="view-history" onClick={() => handleShowModal(church, 'history')}>
+                  View History
+                </Button>
+              </td>
+              <td>
+                <Button variant="info" className="view-proof" onClick={() => handleShowModal(church, 'proof')}>
+                  View Proof
+                </Button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
-    {selectedChurch && modalContent === 'history' && (
-      <Modal show={showModal} onHide={handleCloseModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Church History</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p style={{ textAlign: 'justify', textJustify: 'auto' }}>
-            {selectedChurch.churchHistory || 'No history available'}
-          </p>
-        </Modal.Body>
-      </Modal>
-    )}
+      {selectedChurch && modalContent === 'history' && (
+        <Modal show={showModal} onHide={handleCloseModal} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Church History</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p style={{ textAlign: 'justify', textJustify: 'auto' }}>
+              {selectedChurch.churchHistory || 'No history available'}
+            </p>
+          </Modal.Body>
+        </Modal>
+      )}
 
-    {selectedChurch && modalContent === 'proof' && (
-      <Modal show={showModal} onHide={handleCloseModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Proof of Affiliation</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            {renderProofOfAffiliation(selectedChurch.churchProof)}
-          </div>
-        </Modal.Body>
-      </Modal>
-    )}
-  </div>
+      {selectedChurch && modalContent === 'proof' && (
+        <Modal show={showModal} onHide={handleCloseModal} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Proof of Affiliation</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              {renderProofOfAffiliation(selectedChurch.churchProof)}
+            </div>
+          </Modal.Body>
+        </Modal>
+      )}
+    </div>
   );
 };
 

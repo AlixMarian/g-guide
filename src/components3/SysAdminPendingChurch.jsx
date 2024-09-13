@@ -267,7 +267,7 @@
 import { useState, useEffect } from 'react';
 import { Button, Modal, Dropdown } from 'react-bootstrap';
 import { db } from '/backend/firebase';
-import { getDocs, collection } from 'firebase/firestore';
+import { getDocs, doc, collection, getDoc, updateDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -294,36 +294,63 @@ export const SysAdminPendingChurch = () => {
   }, [navigate]);
 
   useEffect(() => {
-    const fetchChurchData = async () => {
+    const fetchData = async () => {
       try {
+        // 1. Fetch all churches with status 'pending' from the 'church' collection
         const churchCollection = collection(db, 'church');
         const churchSnapshot = await getDocs(churchCollection);
-        const churchList = churchSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const churchList = churchSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                                  .filter(church => church.churchStatus === 'pending'); // Only 'pending' churches
 
-        const usersCollection = collection(db, 'users');
-        const usersSnapshot = await getDocs(usersCollection);
-        const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Array to hold the processed church data
+        const processedChurches = [];
 
-        const mappedData = churchList.map((church) => {
-          const user = usersList.find(user => user.id === church.id);
-          return {
+        // 2. Iterate over each pending church to fetch the corresponding coordinator and user data
+        for (const church of churchList) {
+          if (!church.coordinatorID) continue;  // Skip if coordinatorID is missing
+
+          // 2.1 Fetch the coordinator using coordinatorID from the 'coordinator' collection
+          const coordinatorDocRef = doc(db, 'coordinator', church.coordinatorID);
+          const coordinatorSnapshot = await getDoc(coordinatorDocRef);
+          
+          if (!coordinatorSnapshot.exists()) {
+            console.log(`Coordinator not found for church: ${church.churchName}`);
+            continue;
+          }
+
+          const coordinatorData = coordinatorSnapshot.data();
+          
+          // 2.2 Fetch the user details using userId from the 'users' collection
+          const userDocRef = doc(db, 'users', coordinatorData.userId);
+          const userSnapshot = await getDoc(userDocRef);
+          
+          if (!userSnapshot.exists()) {
+            console.log(`User not found for coordinator: ${church.coordinatorID}`);
+            continue;
+          }
+
+          const userData = userSnapshot.data();
+
+          // Combine the church data with user details
+          processedChurches.push({
             ...church,
-            lastName: user?.lastName || '',
-            firstName: user?.firstName || '',
-            email: user?.email || '',
-            contactNum: user?.contactNum || '',
-            profileImage: user?.profileImage || '',
-          };
-        });
+            coordinatorName: `${userData.firstName || 'N/A'} ${userData.lastName || 'N/A'}`,
+            coordinatorEmail: userData.email || 'N/A',
+            coordinatorContactNum: userData.contactNum || 'N/A'
+          });
+        }
 
-        setChurches(mappedData);
+        // Update the state with the processed church data
+        setChurches(processedChurches);
+
       } catch (error) {
-        console.error('Error fetching church data: ', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    fetchChurchData();
+    fetchData();
   }, []);
+
 
   const handleStatusChange = (status) => {
     setSelectedStatus(status);
@@ -372,31 +399,45 @@ export const SysAdminPendingChurch = () => {
     }
   };
 
-  const handleApprove = (church) => {
-    // Add the approve functionality
-    toast.success(`Church ${church.churchName} approved!`);
+  const handleApprove = async (church) => {
+    try {
+      const churchDocRef = doc(db, 'church', church.id);
+      await updateDoc(churchDocRef, { churchStatus: 'approved' });
+
+      toast.success('Church approved');
+      setChurches((prevChurches) => prevChurches.filter(c => c.id !== church.id));
+    } catch (error) {
+      console.error('Error approving church:', error);
+      toast.error('Failed to approve church.');
+    }
   };
 
-  const handleDeny = (church) => {
-    // Add the deny functionality
-    toast.error(`Church ${church.churchName} denied.`);
+  const handleDeny = async (church) => {
+    try {
+      const churchDocRef = doc(db, 'church', church.id);
+      await updateDoc(churchDocRef, { churchStatus: 'rejected' });
+      toast.success('Church rejected');
+      setChurches((prevChurches) => prevChurches.filter(c => c.id !== church.id));
+    } catch (error) {
+      console.error('Error rejecting church:', error);
+      toast.error('Failed to reject church.');
+    }
   };
 
   const filteredChurches = selectedStatus === 'All' ? churches : churches.filter(church => church.churchStatus === selectedStatus);
 
   return (
-    <div className='church-database-page'>
+    <div className='pending-church-page'>
       <h3>Pending Church Registrations</h3>
       <table>
         <thead>
           <tr>
-            <th colSpan="4">Coordinator Information</th>
+            <th colSpan="3">Coordinator Information</th>
             <th colSpan="7">Church Information</th>
-            <th rowSpan="2">Proof of Affiliation</th> {/* Adjusted rowspan */}
+            <th rowSpan="2">Proof of Affiliation</th>
             <th rowSpan="2">Actions</th>
           </tr>
           <tr>
-            <th>Photo</th>
             <th>Full Name</th>
             <th>Email</th>
             <th>Contact Number</th>
@@ -411,22 +452,12 @@ export const SysAdminPendingChurch = () => {
         </thead>
         <tbody>
           {filteredChurches.map((church) => {
-            const fullName = `${church.firstName || 'N/A'} ${church.lastName || 'N/A'}`;
-            const email = church.email || 'N/A';
-            const contactNum = church.contactNum || 'N/A';
-
             return (
               <tr key={church.id}>
-                <td>
-                  <img
-                    src={church.profileImage || 'default-profile.jpg'}
-                    alt="Profile"
-                    style={{ width: '30px', height: '30px', borderRadius: '50%' }}
-                  />
-                </td>
-                <td>{fullName}</td>
-                <td>{email}</td>
-                <td>{contactNum}</td>
+                
+                <td>{church.coordinatorName}</td>
+                <td>{church.coordinatorEmail}</td>
+                <td>{church.coordinatorContactNum}</td>
                 <td>{church.churchName}</td>
                 <td>{church.churchEmail}</td>
                 <td>{church.churchContactNum}</td>

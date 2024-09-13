@@ -183,8 +183,9 @@ body .admin-second-sidebar {
   align-items: center;
   font-weight: bold;
 }
+
 .pending-church-page {
-  margin-left: 90px;
+  margin-left: 80px;
   margin-top: 10px;
 }
 
@@ -197,13 +198,13 @@ table {
   width: 100%; /* Set to 100% for a better responsive layout */
   border-collapse: collapse;
   margin: 20px 0;
-  font-size: 16px;
+  font-size: 12px;
   text-align: center;
   line-height: 1.5;
 }
 
 th, td {
-  padding: 12px 15px; /* Add some extra padding for better readability */
+  padding: 10px 13px; /* Add some extra padding for better readability */
   border: 1px solid #ddd; /* Lighter border color for a softer look */
 }
 
@@ -212,7 +213,7 @@ th {
   background-color: #007BFF; /* Blue header background */
   color: white; /* White text on blue */
   font-weight: bold; /* Bold text */
-  font-size: 18px; /* Slightly larger font size for the header */
+  font-size: 14px; /* Slightly larger font size for the header */
 }
 
 /* Body rows */
@@ -221,12 +222,6 @@ td {
   color: #333; /* Slightly darker text color */
 }
 
-/* Hover effect */
-tr:hover {
-  background-color: #d1ecf1; /* Light blue background on hover */
-}
-
-/* Make the action buttons align horizontally and center them */
 .pending-church-action {
   display: flexbox;
   justify-content: center;
