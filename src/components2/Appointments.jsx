@@ -279,8 +279,6 @@ export const Appointments = () => {
 
     return (
         <>
-            <div className="appoinmentsPage"></div>
-
             <div className="d-flex align-items-center mb-3">
                 <h1 className="me-3">Appointments</h1>
                 <div className="dropdown">
