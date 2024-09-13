@@ -1,269 +1,3 @@
-// import { useState, useEffect } from 'react';
-// import { db } from '/backend/firebase';
-// import { useNavigate } from 'react-router-dom';
-// import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
-// import { Table, Modal, Button } from 'react-bootstrap';
-// import { toast } from 'react-toastify';
-// import { getAuth, onAuthStateChanged } from "firebase/auth";
-// import axios from 'axios';
-
-// export const SysAdminPendingChurch = () => {
-//   const navigate = useNavigate();
-//   const [churchData, setChurchData] = useState([]);
-//   const [showModal, setShowModal] = useState(false);
-//   const [selectedChurch, setSelectedChurch] = useState(null);
-
-//   const fetchPendingChurches = async () => {
-//     try {
-//       const churchCollection = collection(db, 'church');
-//       const churchSnapshot = await getDocs(churchCollection);
-//       const churchList = churchSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-//       const usersCollection = collection(db, 'users');
-//       const usersSnapshot = await getDocs(usersCollection);
-//       const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-//       const mappedData = churchList.map((church) => {
-//         const user = usersList.find(user => user.id === church.id);
-//         return {
-//           ...church,
-//           lastName: user?.lastName || '',
-//           firstName: user?.firstName || '',
-//           email: user?.email || '',
-//           contactNum: user?.contactNum || '',
-//         };
-//       });
-
-//       setChurchData(mappedData.filter(church => church.churchStatus === 'pending'));
-//     } catch (error) {
-//       console.error('Error fetching church data: ', error);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchPendingChurches();
-//   }, []);
-
-//   const handleShowModal = (church) => {
-//     setSelectedChurch(church);
-//     setShowModal(true);
-//   };
-
-//   const handleCloseModal = () => {
-//     setShowModal(false);
-//     setSelectedChurch(null);
-//   };
-
-//   const handleApprove = async () => {
-//     if (selectedChurch) {
-//       const { id, churchName, email } = selectedChurch;
-
-//       if (!id) {
-//         toast.error('Selected church ID is missing.');
-//         return;
-//       }
-
-//       try {
-        
-//         await fetchPendingChurches();
-
-//         const churchDocRef = doc(db, 'church', id);
-//         await updateDoc(churchDocRef, { churchStatus: 'approved' });
-
-//         toast.success('Church approved');
-//         setChurchData(churchData.filter(church => church.id !== id));
-//         handleCloseModal();
-
-        
-//         await sendMail(email, churchName); 
-//         toast.success('Confirmation email sent');
-//       } catch (error) {
-//         console.error('Error approving church:', error);
-//         toast.error('Failed to approve church.');
-//       }
-//     }
-//   };
-
-//   const sendMail = async (email, name) => {
-//     try {
-//       const response = await axios.post('http://localhost:3006/send-email', { email, name });
-//       if (response.status === 200) {
-//         return response.data.message;
-//       } else {
-//         throw new Error('Failed to send email');
-//       }
-//     } catch (error) {
-//       console.error('Error sending email:', error);
-//       throw error;
-//     }
-//   };
-
-//   const sendRejectionMail = async (email, name) => {
-//     try {
-//       const response = await axios.post('http://localhost:3006/send-rejection-email', { email, name });
-//       if (response.status === 200) {
-//         return response.data.message;
-//       } else {
-//         throw new Error('Failed to send rejection email');
-//       }
-//     } catch (error) {
-//       console.error('Error sending rejection email:', error);
-//       throw error;
-//     }
-//   };
-
-//   const handleDeny = async () => {
-//     if (selectedChurch) {
-//       const { id, churchName, email } = selectedChurch;
-
-//       if (!id) {
-//         toast.error('Selected church ID is missing.');
-//         return;
-//       }
-
-//       try {
-       
-//         await fetchPendingChurches();
-
-//         const churchDocRef = doc(db, 'church', id);
-//         await updateDoc(churchDocRef, { churchStatus: 'rejected' });
-
-//         toast.success('Church rejected');
-//         setChurchData(churchData.filter(church => church.id !== id));
-//         handleCloseModal();
-
-//         await sendRejectionMail(email, churchName);
-//         toast.success('Rejection email sent');
-//       } catch (error) {
-//         console.error('Error rejecting church:', error);
-//         toast.error('Failed to reject church.');
-//       }
-//     }
-//   };
-
-//   function renderProofOfAffiliation(fileUrl) {
-//     const fileExtension = fileUrl.split('.').pop().toLowerCase();
-
-//     if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-      
-//       return <img src={fileUrl} alt="Church Proof" style={{ width: '100%' }} />;
-//     } else if (fileExtension === 'pdf') {
-      
-//       return (
-//         <iframe
-//           src={fileUrl}
-//           title="Church Proof"
-//           style={{ width: '100%', height: '500px' }}
-//         />
-//       );
-//     } else if (['doc', 'docx'].includes(fileExtension)) {
-      
-//       return (
-//         <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-//           Download Proof of Affiliation
-//         </a>
-//       );
-//     } else {
-      
-//       return (
-//         <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-//           Download Proof of Affiliation
-//         </a>
-//       );
-//     }
-//   }
-
-//   useEffect(() => {
-//     const auth = getAuth();
-//     onAuthStateChanged(auth, (user) => {
-//       if (user) {
-//         console.log("User signed in:", user);
-//       } else {
-//         console.log("No user signed in.");
-//         navigate('/login');
-//       }
-//     });
-//   }, [navigate]);
-
-//   return (
-//     <div className="pending-church-page">
-//       <h3>Pending Church Registrations</h3>
-//       <div style={{ display: 'grid', justifyContent: 'center' }}>
-//         <Table striped bordered hover style={{ width: '100%' }}>
-//           <thead>
-//             <tr>
-//               <th>Church Name</th>
-//               <th>Coordinator Last Name</th>
-//               <th>Coordinator First Name</th>
-//               <th>Coordinator Email</th>
-//               <th>Registration Date</th>
-//               <th>Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {churchData.map(church => (
-//               <tr key={church.id}>
-//                 <td>{church.churchName}</td>
-//                 <td>{church.lastName}</td>
-//                 <td>{church.firstName}</td>
-//                 <td>{church.email}</td>
-//                 <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
-//                 <td style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-//                 <Button variant="info"  onClick={() => handleShowModal(church)}>
-//                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-info-circle-fill" viewBox="0 0 16 16">
-//                       <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
-//                     </svg>
-//                   </Button>
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </Table>
-
-//         <Modal show={showModal} onHide={handleCloseModal}>
-//           <Modal.Header closeButton>
-//             <Modal.Title>Submitted Information</Modal.Title>
-//           </Modal.Header>
-//           <Modal.Body>
-//             {selectedChurch && (
-//               <>
-//                 <h4>Church Coordinator Information</h4>
-//                 <p><strong>Coordinator Last Name:</strong> {selectedChurch.lastName}</p>
-//                 <p><strong>Coordinator First Name:</strong> {selectedChurch.firstName}</p>
-//                 <p><strong>Coordinator Email:</strong> {selectedChurch.email}</p>
-//                 <p><strong>Contact Number:</strong> {selectedChurch.contactNum}</p>
-
-//                 <h4>Church Information</h4>
-//                 <p><strong>Church Name:</strong> {selectedChurch.churchName}</p>
-//                 <p><strong>Church Address:</strong> {selectedChurch.churchAddress}</p>
-//                 <p><strong>Church Email:</strong> {selectedChurch.churchEmail}</p>
-//                 <p><strong>Church Contact Number:</strong> {selectedChurch.churchContactNum}</p>
-//                 <p><strong>Registration Date:</strong> {new Date(selectedChurch.churchRegistrationDate).toLocaleDateString()}</p>
-
-//                 <h4>Proof of Affiliation</h4>
-//                 {renderProofOfAffiliation(selectedChurch.churchProof)}
-//               </>
-//             )}
-//           </Modal.Body>
-//           <Modal.Footer>
-//             <Button variant="secondary" onClick={handleCloseModal}>
-//               Close
-//             </Button>
-//             <Button variant="success" className="pending-church-action" onClick={handleApprove}>
-//               Approve
-//             </Button>
-//             <Button variant="danger" onClick={handleDeny}>
-//               Deny
-//             </Button>
-//           </Modal.Footer>
-//         </Modal>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default SysAdminPendingChurch;
-
 import { useState, useEffect } from 'react';
 import { Button, Modal, Dropdown } from 'react-bootstrap';
 import { db } from '/backend/firebase';
@@ -272,9 +6,11 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif'; // Import the GIF
 
 export const SysAdminPendingChurch = () => {
   const [churches, setChurches] = useState([]);
+  const [loading, setLoading] = useState(true); // Loading state
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [showModal, setShowModal] = useState(false);
   const [selectedChurch, setSelectedChurch] = useState(null);
@@ -296,6 +32,7 @@ export const SysAdminPendingChurch = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true); // Show loading when data fetching starts
       try {
         // 1. Fetch all churches with status 'pending' from the 'church' collection
         const churchCollection = collection(db, 'church');
@@ -343,15 +80,16 @@ export const SysAdminPendingChurch = () => {
 
         // Update the state with the processed church data
         setChurches(processedChurches);
+        setLoading(false); // Hide loading when data is fetched
 
       } catch (error) {
         console.error('Error fetching data:', error);
+        setLoading(false); // Hide loading if there is an error
       }
     };
 
     fetchData();
   }, []);
-
 
   const handleStatusChange = (status) => {
     setSelectedStatus(status);
@@ -421,6 +159,11 @@ const handleApprove = async (church) => {
       churchStatus: "Approved"
     });
 
+    const coordinatorRef = doc(db, "coordinator", church.coordinatorID); // Ensure coordinatorID is available in the church object
+    await updateDoc(coordinatorRef, {
+      status: "Approved"
+    });
+
     // Send approval email
     await sendEmail(
       church.coordinatorEmail,  // Use the email of the church coordinator
@@ -443,26 +186,28 @@ const handleApprove = async (church) => {
 
 const handleDeny = async (church) => {
   try {
-    // Update the church's status in Firestore
     const churchRef = doc(db, "church", church.id);
     await updateDoc(churchRef, {
-      churchStatus: "Rejected"
+      churchStatus: "Denied"
     });
 
-    // Send rejection email
+    const coordinatorRef = doc(db, "coordinator", church.coordinatorID); // Ensure coordinatorID is available in the church object
+    await updateDoc(coordinatorRef, {
+      status: "Denied"
+    });
+
     await sendEmail(
-      church.coordinatorEmail,  // Use the email of the church coordinator
+      church.coordinatorEmail,  
       "Church Rejection Notification",
       "We regret to inform you that your church registration has been rejected. For more details, please contact our support team."
     );
 
-    // Update the state by removing the rejected church from the list
     setChurches((prevChurches) =>
       prevChurches.filter((c) => c.id !== church.id)
     );
 
     toast.success('Church rejected successfully!');
-    handleCloseModal(); // Close the modal
+    handleCloseModal();
   } catch (error) {
     console.error("Error rejecting church: ", error);
     toast.error('Failed to reject church');
@@ -475,64 +220,71 @@ const handleDeny = async (church) => {
   return (
     <div className='pending-church-page'>
       <h3>Pending Church Registrations</h3>
-      <table>
-        <thead>
-          <tr>
-            <th colSpan="3">Coordinator Information</th>
-            <th colSpan="7">Church Information</th>
-            <th rowSpan="2">Proof of Affiliation</th>
-            <th rowSpan="2">Actions</th>
-          </tr>
-          <tr>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Contact Number</th>
-            <th>Church Name</th>
-            <th>Email</th>
-            <th>Contact Number</th>
-            <th>Address</th>
-            <th>Registration Date</th>
-            <th>Status</th>
-            <th>History</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredChurches.map((church) => {
-            return (
-              <tr key={church.id}>
-                
-                <td>{church.coordinatorName}</td>
-                <td>{church.coordinatorEmail}</td>
-                <td>{church.coordinatorContactNum}</td>
-                <td>{church.churchName}</td>
-                <td>{church.churchEmail}</td>
-                <td>{church.churchContactNum}</td>
-                <td>{church.churchAddress}</td>
-                <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
-                <td>{church.churchStatus}</td>
-                <td>
-                  <Button variant="info" className="view-history" onClick={() => handleShowModal(church, 'history')}>
-                    View History
-                  </Button>
-                </td>
-                <td>
-                  <Button variant="info" className="view-proof" onClick={() => handleShowModal(church, 'proof')}>
-                    View Proof
-                  </Button>
-                </td>
-                <td className="pending-church-action">
-                  <Button variant="success" className="approve" onClick={() => handleApprove(church)}>
-                    Approve
-                  </Button>
-                  <Button variant="danger" className="deny" onClick={() => handleDeny(church)}>
-                    Deny
-                  </Button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+
+      {loading ? ( 
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <img src={loadingGif} alt="Loading..." />
+        </div>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th colSpan="3">Coordinator Information</th>
+              <th colSpan="7">Church Information</th>
+              <th rowSpan="2">Proof of Affiliation</th>
+              <th rowSpan="2">Actions</th>
+            </tr>
+            <tr>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Contact Number</th>
+              <th>Church Name</th>
+              <th>Email</th>
+              <th>Contact Number</th>
+              <th>Address</th>
+              <th>Registration Date</th>
+              <th>Status</th>
+              <th>History</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredChurches.map((church) => {
+              return (
+                <tr key={church.id}>
+                  
+                  <td>{church.coordinatorName}</td>
+                  <td>{church.coordinatorEmail}</td>
+                  <td>{church.coordinatorContactNum}</td>
+                  <td>{church.churchName}</td>
+                  <td>{church.churchEmail}</td>
+                  <td>{church.churchContactNum}</td>
+                  <td>{church.churchAddress}</td>
+                  <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
+                  <td>{church.churchStatus}</td>
+                  <td>
+                    <Button variant="info" className="view-history" onClick={() => handleShowModal(church, 'history')}>
+                      View History
+                    </Button>
+                  </td>
+                  <td>
+                    <Button variant="info" className="view-proof" onClick={() => handleShowModal(church, 'proof')}>
+                      View Proof
+                    </Button>
+                  </td>
+                  <td className="pending-church-action">
+                    <Button variant="success" className="approve" onClick={() => handleApprove(church)}>
+                      Approve
+                    </Button>
+                    <Button variant="danger" className="deny" onClick={() => handleDeny(church)}>
+                      Deny
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
 
       {selectedChurch && modalContent === 'history' && (
         <Modal show={showModal} onHide={handleCloseModal} centered>

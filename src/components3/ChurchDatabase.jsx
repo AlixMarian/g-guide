@@ -5,6 +5,7 @@ import { getDocs, collection, doc, getDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif'; 
 
 export const ChurchDatabase = () => {
   const [churches, setChurches] = useState([]);
@@ -12,6 +13,7 @@ export const ChurchDatabase = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedChurch, setSelectedChurch] = useState(null);
   const [modalContent, setModalContent] = useState('history');
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -29,6 +31,7 @@ export const ChurchDatabase = () => {
 
   useEffect(() => {
     const fetchChurchData = async () => {
+      setLoading(true); // Set loading to true when fetching data
       try {
         const churchCollection = collection(db, 'church');
         const churchSnapshot = await getDocs(churchCollection);
@@ -66,8 +69,10 @@ export const ChurchDatabase = () => {
         }
 
         setChurches(processedChurches);
+        setLoading(false); // Set loading to false after fetching data
       } catch (error) {
         console.error('Error fetching church data:', error);
+        setLoading(false); // Set loading to false if there is an error
       }
     };
 
@@ -120,100 +125,109 @@ export const ChurchDatabase = () => {
   return (
     <div className='church-database-page'>
       <h3>Church Database</h3> <br/>
-      <div className="mb-3">
-        <Dropdown>
-          <Dropdown.Toggle variant="primary" id="dropdown-basic">
-            Filter Status
-          </Dropdown.Toggle>
 
-          <Dropdown.Menu>
-            <Dropdown.Item onClick={() => handleStatusChange('All')}>All</Dropdown.Item>
-            <Dropdown.Item onClick={() => handleStatusChange('pending')}>Pending</Dropdown.Item>
-            <Dropdown.Item onClick={() => handleStatusChange('approved')}>Approved</Dropdown.Item>
-            <Dropdown.Item onClick={() => handleStatusChange('denied')}>Denied</Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
-      </div>
-      <h4 className="mb-3">Now viewing: {selectedStatus}</h4>
-      <table>
-        <thead>
-          <tr>
-            <th colSpan="4">Coordinator Information</th>
-            <th colSpan="7">Church Information</th>
-            <th rowSpan="2">Proof of Affiliation</th>
-          </tr>
-          <tr>
-            <th>Photo</th>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Contact Number</th>
-            <th>Church Name</th>
-            <th>Email</th>
-            <th>Contact Number</th>
-            <th>Address</th>
-            <th>Registration Date</th>
-            <th>Status</th>
-            <th>History</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredChurches.map((church) => (
-            <tr key={church.id}>
-              <td>
-                <img
-                  src={church.profileImage || 'default-profile.jpg'}
-                  alt="Profile"
-                  style={{ width: '30px', height: '30px', borderRadius: '50%' }}
-                />
-              </td>
-              <td>{church.coordinatorName}</td>
-              <td>{church.coordinatorEmail}</td>
-              <td>{church.coordinatorContactNum}</td>
-              <td>{church.churchName}</td>
-              <td>{church.churchEmail}</td>
-              <td>{church.churchContactNum}</td>
-              <td>{church.churchAddress}</td>
-              <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
-              <td>{church.churchStatus}</td>
-              <td>
-                <Button variant="info" className="view-history" onClick={() => handleShowModal(church, 'history')}>
-                  View History
-                </Button>
-              </td>
-              <td>
-                <Button variant="info" className="view-proof" onClick={() => handleShowModal(church, 'proof')}>
-                  View Proof
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {loading ? ( // Show loading GIF when data is being fetched
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <img src={loadingGif} alt="Loading..." />
+        </div>
+      ) : (
+        <>
+          <div className="mb-3">
+            <Dropdown>
+              <Dropdown.Toggle variant="primary" id="dropdown-basic">
+                Filter Status
+              </Dropdown.Toggle>
 
-      {selectedChurch && modalContent === 'history' && (
-        <Modal show={showModal} onHide={handleCloseModal} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>Church History</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <p style={{ textAlign: 'justify', textJustify: 'auto' }}>
-              {selectedChurch.churchHistory || 'No history available'}
-            </p>
-          </Modal.Body>
-        </Modal>
-      )}
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={() => handleStatusChange('All')}>All</Dropdown.Item>
+                <Dropdown.Item onClick={() => handleStatusChange('pending')}>Pending</Dropdown.Item>
+                <Dropdown.Item onClick={() => handleStatusChange('approved')}>Approved</Dropdown.Item>
+                <Dropdown.Item onClick={() => handleStatusChange('denied')}>Denied</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
+          <h4 className="mb-3">Now viewing: {selectedStatus}</h4>
+          <table>
+            <thead>
+              <tr>
+                <th colSpan="4">Coordinator Information</th>
+                <th colSpan="7">Church Information</th>
+                <th rowSpan="2">Proof of Affiliation</th>
+              </tr>
+              <tr>
+                <th>Photo</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Contact Number</th>
+                <th>Church Name</th>
+                <th>Email</th>
+                <th>Contact Number</th>
+                <th>Address</th>
+                <th>Registration Date</th>
+                <th>Status</th>
+                <th>History</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredChurches.map((church) => (
+                <tr key={church.id}>
+                  <td>
+                    <img
+                      src={church.profileImage || 'default-profile.jpg'}
+                      alt="Profile"
+                      style={{ width: '30px', height: '30px', borderRadius: '50%' }}
+                    />
+                  </td>
+                  <td>{church.coordinatorName}</td>
+                  <td>{church.coordinatorEmail}</td>
+                  <td>{church.coordinatorContactNum}</td>
+                  <td>{church.churchName}</td>
+                  <td>{church.churchEmail}</td>
+                  <td>{church.churchContactNum}</td>
+                  <td>{church.churchAddress}</td>
+                  <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
+                  <td>{church.churchStatus}</td>
+                  <td>
+                    <Button variant="info" className="view-history" onClick={() => handleShowModal(church, 'history')}>
+                      View History
+                    </Button>
+                  </td>
+                  <td>
+                    <Button variant="info" className="view-proof" onClick={() => handleShowModal(church, 'proof')}>
+                      View Proof
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-      {selectedChurch && modalContent === 'proof' && (
-        <Modal show={showModal} onHide={handleCloseModal} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>Proof of Affiliation</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              {renderProofOfAffiliation(selectedChurch.churchProof)}
-            </div>
-          </Modal.Body>
-        </Modal>
+          {selectedChurch && modalContent === 'history' && (
+            <Modal show={showModal} onHide={handleCloseModal} centered>
+              <Modal.Header closeButton>
+                <Modal.Title>Church History</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <p style={{ textAlign: 'justify', textJustify: 'auto' }}>
+                  {selectedChurch.churchHistory || 'No history available'}
+                </p>
+              </Modal.Body>
+            </Modal>
+          )}
+
+          {selectedChurch && modalContent === 'proof' && (
+            <Modal show={showModal} onHide={handleCloseModal} centered>
+              <Modal.Header closeButton>
+                <Modal.Title>Proof of Affiliation</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  {renderProofOfAffiliation(selectedChurch.churchProof)}
+                </div>
+              </Modal.Body>
+            </Modal>
+          )}
+        </>
       )}
     </div>
   );
