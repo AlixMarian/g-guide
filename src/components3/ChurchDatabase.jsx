@@ -147,7 +147,7 @@ export const ChurchDatabase = () => {
             </Dropdown>
           </div>
           <h4 className="mb-3">Now viewing: {selectedStatus}</h4>
-          <table>
+          <table className='admin-table'>
             <thead>
               <tr>
                 <th colSpan="4">Coordinator Information</th>

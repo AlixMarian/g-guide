@@ -32,7 +32,7 @@ import UserDatabase from './components3/UserDatabase';
 import ChurchDatabase from './components3/ChurchDatabase';
 import ChurchOptions from './components4/ChurchOptions';
 import ChurchHomepage from './components4/ChurchHomepage';
-
+import ChurchLocations from './components3/SysAdminChurchLocations';
 
 
 const App = () => {
@@ -193,8 +193,14 @@ const App = () => {
           </>
         }/>
 
-      
-
+        <Route path="/churchLocations" element={
+          <>
+            <SysAdminSidebar/>
+            <div className='sys-main-content'>
+              <ChurchLocations/>
+            </div>
+          </>
+        }/> 
 
        
         <Route path="/church-options" element={<><WebUserNavBar /><ChurchOptions/></>}/>

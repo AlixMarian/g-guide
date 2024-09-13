@@ -87,7 +87,7 @@ body .admin-second-sidebar {
 }
 
 .admin-second-sidebar-content {
-  margin-top: 21.5rem;
+  margin-top: 21.45rem;
 }
 
 .admin-numbers {
@@ -184,9 +184,13 @@ body .admin-second-sidebar {
   font-weight: bold;
 }
 
-.pending-church-page {
-  margin-left: 80px;
+.pending-church-page, .church-database-page, .user-db-page, .church-location-page {
+  margin-left: 90px;
   margin-top: 10px;
+}
+
+.pending-church-page {
+  margin-left: 75px;
 }
 
 .table-container {
@@ -194,14 +198,30 @@ body .admin-second-sidebar {
   justify-content: center;
 }
 
+/* church coordinator table */
 table {
   width: 100%; /* Set to 100% for a better responsive layout */
-  border-collapse: collapse;
-  margin: 20px 0;
+  border-collapse: collapse; /* Ensures that borders of cells are shared */
+  margin: 20px auto; /* This centers the table horizontally */
   font-size: 12px;
   text-align: center;
   line-height: 1.5;
+  border: 2px solid #ddd; 
+}
+
+
+.admin-table{
+  max-width: 100%; /* Ensures responsiveness */
+  width: 95%; /* Set to 100% for a better responsive layout */
+  border-collapse: collapse; /* Ensures that borders of cells are shared */
+  margin: 20px auto; /* This centers the table horizontally */
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.5;
+  border: 2px solid #ddd; 
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.5);
   border-radius: 15px;
+  overflow: hidden;
 }
 
 th, td {
@@ -245,10 +265,7 @@ td {
   background-color: #007BFF;
 }
 
-.church-database-page {
-  margin-left: 13rem;
-  margin-top: 10px;
-}
+
 
 /* sidebar */
 /* .sidebar{

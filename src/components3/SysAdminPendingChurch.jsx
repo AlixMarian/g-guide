@@ -220,13 +220,13 @@ const handleDeny = async (church) => {
   return (
     <div className='pending-church-page'>
       <h3>Pending Church Registrations</h3>
-
+      
       {loading ? ( 
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
           <img src={loadingGif} alt="Loading..." />
         </div>
       ) : (
-        <table>
+        <table className='admin-table'>
           <thead>
             <tr>
               <th colSpan="3">Coordinator Information</th>
