@@ -73,9 +73,9 @@ export const SysAdminDashboard = () => {
 
   useEffect(() => {
     const elements = [
-      { element: document.querySelector(".church-count"), count: churchCount },
-      { element: document.querySelector(".user-count"), count: usersCount },
-      { element: document.querySelector(".cebu-church-count"), count: cebuChurchCount }
+      { element: document.querySelector(".sysAdminchurch-count"), count: churchCount },
+      { element: document.querySelector(".sysAdminuser-count"), count: usersCount },
+      { element: document.querySelector(".sysAdmincebu-church-count"), count: cebuChurchCount }
     ];
   
     elements.forEach(({ element, count }) => {
