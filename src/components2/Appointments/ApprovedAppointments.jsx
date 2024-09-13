@@ -2,29 +2,30 @@ import React, { useEffect, useState } from "react";
 import { Button } from 'react-bootstrap';
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "/backend/firebase";
-import '../../churchCoordinator.css'
 
-export const PendingAppointments = ({ user }) => {
-    const [pendingAppointments, setPendingAppointments] = useState([]);
+
+export const ApprovedAppointments = ({ user }) => {
+    const [approvedAppointments, setApprovedAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
 
+    // Fetch Approved Appointments
     useEffect(() => {
-        const fetchPendingAppointments = async () => {
+        const fetchApprovedAppointments = async () => {
             if (!user) return;
-            const pendingQuery = query(
+            const approvedQuery = query(
                 collection(db, "appointments"),
-                where("appointmentStatus", "==", "Pending"),
+                where("appointmentStatus", "==", "Approved"),
                 where("churchId", "==", user.uid)
             );
-            const pendingSnapshot = await getDocs(pendingQuery);
-            const pendingAppointmentsData = pendingSnapshot.docs.map(doc => ({
+            const approvedSnapshot = await getDocs(approvedQuery);
+            const approvedAppointmentsData = approvedSnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
-            setPendingAppointments(pendingAppointmentsData);
+            setApprovedAppointments(approvedAppointmentsData);
         };
 
-        fetchPendingAppointments();
+        fetchApprovedAppointments();
     }, [user]);
 
     const handleShowModal = (appointment) => {
@@ -33,8 +34,7 @@ export const PendingAppointments = ({ user }) => {
 
     return (
         <>
-        
-        <h1 className="me-3">Pending Appointments</h1>
+        <h1 className="me-3">Approved Appointments</h1>
         <div className="Appointments">
             <br />
             <table className="table">
@@ -46,11 +46,10 @@ export const PendingAppointments = ({ user }) => {
                         <th scope="col">Requested by</th>
                         <th scope="col">Requester Contact</th>
                         <th scope="col">More Info</th>
-                        <th scope="col">Send SMS</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {pendingAppointments.map((appointment, index) => (
+                    {approvedAppointments.map((appointment, index) => (
                         <tr key={index}>
                             <td>{formatDate(appointment.userFields?.dateOfRequest)}</td>
                             <td>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
@@ -60,18 +59,13 @@ export const PendingAppointments = ({ user }) => {
                                     <i className="bi bi-info-circle-fill"></i>
                                 </Button>
                             </td>
-                            <td>
-                                <Button>
-                                    <i className="bi bi-chat-text"></i>
-                                </Button>
-                            </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
         </div>
         </>
-    );  
+    );
 };
 
-export default PendingAppointments;
+export default ApprovedAppointments;

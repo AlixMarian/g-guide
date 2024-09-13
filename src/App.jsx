@@ -11,7 +11,6 @@ import ViewAppointments from './components/ViewAppointments';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SEA from './components2/SEA';
-import Layout from './components2/Layout';
 import Appointments from './components2/Appointments';
 import Church from './components2/Church';
 import Listpriest from './components2/Listpriest';
@@ -19,6 +18,8 @@ import Serviceoff from './components2/Serviceoff';
 import ReqVol from './components2/ReqVol';
 import Sidebar from './components2/Sidebar';
 import PendingAppointments from './components2/Appointments/PendingAppointments'
+import ForPaymentAppointments from './components2/Appointments/ForPaymentAppointments'
+import ApprovedAppointments from './components2/Appointments/ApprovedAppointments';
 import AccountSettings from './components2/AccountSett';
 import UserAccountSettings from './components/UserAccountSettings';
 import MapComponent from './components/MapComponent';
@@ -58,25 +59,43 @@ const App = () => {
         <Route path="/SEA" element={
           <>
             <Sidebar/>
-            <div className="main-content">
-              <SEA/>
-            </div>
+              <div className="main-content">
+                <SEA/>
+              </div>
           </>
         } />
 
         <Route path="/Appointments" element={
           <>
             <Sidebar/>
-            <div className="main-content">
-              <Appointments/>
-            </div>
+              <div className="main-content">
+                <Appointments/>
+              </div>
           </>
         } />
         <Route path="/PendingAppointments" element={
           <>
             <Sidebar/>
-              <PendingAppointments />
+              <div className="main-content">
+                <PendingAppointments />
+              </div>
             </>
+        } />
+        <Route path="/ForPaymentAppointments" element={
+          <>
+            <Sidebar/>
+              <div className="main-content">
+                <ForPaymentAppointments/>
+              </div>
+          </>
+        } />
+        <Route path="/ApprovedAppointments" element={
+          <>
+            <Sidebar/>
+              <div className="main-content">
+                <ApprovedAppointments/>
+              </div>
+          </>
         } />
         <Route path="/ChurchInfo" element={
           <>

@@ -2,29 +2,30 @@ import React, { useEffect, useState } from "react";
 import { Button } from 'react-bootstrap';
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "/backend/firebase";
-import '../../churchCoordinator.css'
 
-export const PendingAppointments = ({ user }) => {
-    const [pendingAppointments, setPendingAppointments] = useState([]);
+
+export const ForPaymentAppointments = ({ user }) => {
+    const [forPaymentAppointments, setForPaymentAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
 
+    // Fetch For Payment Appointments
     useEffect(() => {
-        const fetchPendingAppointments = async () => {
+        const fetchForPaymentAppointments = async () => {
             if (!user) return;
-            const pendingQuery = query(
+            const forPaymentQuery = query(
                 collection(db, "appointments"),
-                where("appointmentStatus", "==", "Pending"),
+                where("appointmentStatus", "==", "For Payment"),
                 where("churchId", "==", user.uid)
             );
-            const pendingSnapshot = await getDocs(pendingQuery);
-            const pendingAppointmentsData = pendingSnapshot.docs.map(doc => ({
+            const forPaymentSnapshot = await getDocs(forPaymentQuery);
+            const forPaymentAppointmentsData = forPaymentSnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
-            setPendingAppointments(pendingAppointmentsData);
+            setForPaymentAppointments(forPaymentAppointmentsData);
         };
 
-        fetchPendingAppointments();
+        fetchForPaymentAppointments();
     }, [user]);
 
     const handleShowModal = (appointment) => {
@@ -33,8 +34,7 @@ export const PendingAppointments = ({ user }) => {
 
     return (
         <>
-        
-        <h1 className="me-3">Pending Appointments</h1>
+        <h1 className="me-3">For Payment Appointments</h1>
         <div className="Appointments">
             <br />
             <table className="table">
@@ -50,7 +50,7 @@ export const PendingAppointments = ({ user }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {pendingAppointments.map((appointment, index) => (
+                    {forPaymentAppointments.map((appointment, index) => (
                         <tr key={index}>
                             <td>{formatDate(appointment.userFields?.dateOfRequest)}</td>
                             <td>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
@@ -71,7 +71,7 @@ export const PendingAppointments = ({ user }) => {
             </table>
         </div>
         </>
-    );  
+    );
 };
 
-export default PendingAppointments;
+export default ForPaymentAppointments;
