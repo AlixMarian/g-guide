@@ -271,6 +271,7 @@ import { getDocs, doc, collection, getDoc, updateDoc } from 'firebase/firestore'
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 export const SysAdminPendingChurch = () => {
   const [churches, setChurches] = useState([]);
@@ -399,30 +400,75 @@ export const SysAdminPendingChurch = () => {
     }
   };
 
-  const handleApprove = async (church) => {
+  const sendEmail = async (email, subject, message) => {
     try {
-      const churchDocRef = doc(db, 'church', church.id);
-      await updateDoc(churchDocRef, { churchStatus: 'approved' });
-
-      toast.success('Church approved');
-      setChurches((prevChurches) => prevChurches.filter(c => c.id !== church.id));
+        const response = await axios.post('http://localhost:3006/send-email', {
+            email: email,
+            subject: subject,
+            text: message
+        });
+        console.log('Email sent successfully:', response.data);
     } catch (error) {
-      console.error('Error approving church:', error);
-      toast.error('Failed to approve church.');
+        console.error('Error sending email:', error);
     }
-  };
+};
 
-  const handleDeny = async (church) => {
-    try {
-      const churchDocRef = doc(db, 'church', church.id);
-      await updateDoc(churchDocRef, { churchStatus: 'rejected' });
-      toast.success('Church rejected');
-      setChurches((prevChurches) => prevChurches.filter(c => c.id !== church.id));
-    } catch (error) {
-      console.error('Error rejecting church:', error);
-      toast.error('Failed to reject church.');
-    }
-  };
+const handleApprove = async (church) => {
+  try {
+    // Update the church's status in Firestore
+    const churchRef = doc(db, "church", church.id);
+    await updateDoc(churchRef, {
+      churchStatus: "Approved"
+    });
+
+    // Send approval email
+    await sendEmail(
+      church.coordinatorEmail,  // Use the email of the church coordinator
+      "Church Approval Notification",
+      "Your church has been approved successfully. Thank you for your registration."
+    );
+
+    // Update the state by removing the approved church from the list
+    setChurches((prevChurches) =>
+      prevChurches.filter((c) => c.id !== church.id)
+    );
+
+    toast.success('Church approved successfully!');
+  } catch (error) {
+    console.error("Error approving church: ", error);
+    toast.error('Failed to approve church');
+  }
+};
+
+
+const handleDeny = async (church) => {
+  try {
+    // Update the church's status in Firestore
+    const churchRef = doc(db, "church", church.id);
+    await updateDoc(churchRef, {
+      churchStatus: "Rejected"
+    });
+
+    // Send rejection email
+    await sendEmail(
+      church.coordinatorEmail,  // Use the email of the church coordinator
+      "Church Rejection Notification",
+      "We regret to inform you that your church registration has been rejected. For more details, please contact our support team."
+    );
+
+    // Update the state by removing the rejected church from the list
+    setChurches((prevChurches) =>
+      prevChurches.filter((c) => c.id !== church.id)
+    );
+
+    toast.success('Church rejected successfully!');
+    handleCloseModal(); // Close the modal
+  } catch (error) {
+    console.error("Error rejecting church: ", error);
+    toast.error('Failed to reject church');
+  }
+};
+
 
   const filteredChurches = selectedStatus === 'All' ? churches : churches.filter(church => church.churchStatus === selectedStatus);
 

@@ -34,12 +34,12 @@ app.post('/send-email', async (req, res) => {
     <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0;">
         <div style="max-width: 600px; margin: 20px auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
             <div style="text-align: center; margin-bottom: 20px;">
-                <img src="https://drive.google.com/uc?export=view&id=1QfNPz3OYXCy2mw6CLuYOFj1Mnrfx6nGa" alt="G-Guide Logo" style="max-width: 100px; height: auto;">
+              <img src="https://drive.google.com/uc?export=view&id=147YgWZkT0NN1e7WaUrrIRaXHWKtrJJRi" alt="G-Guide Logo" style="max-width: 100px; height: auto; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.5));">
             </div>
             <div style="margin-bottom: 20px;">
-                <h2 style="color: black;">Hello,</h2>
+                <h3 style="color: black;">Hello,</h3>
             </div>
-            <h1 style="color: black; text-align: center;">${text}</h1>
+            <h3 style="color: black; text-align: left;">${text}</h3>
             <h3 style="color: black;">Best regards,<br><strong>G! Guide Team</strong></h3>
             <hr style="border: 4; border-top: 1px solid #dddddd; margin: 20px 0;">
             <p style="color: #999999; font-size: 14px; text-align: center;">This is an automated message, please do not reply.</p>
