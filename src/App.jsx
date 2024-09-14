@@ -33,7 +33,8 @@ import ChurchDatabase from './components3/ChurchDatabase';
 import ChurchOptions from './components4/ChurchOptions';
 import ChurchHomepage from './components4/ChurchHomepage';
 import ChurchLocations from './components3/SysAdminChurchLocations';
-
+import AdminNavbar from './components3/SysAdminNavbar';
+// import Transaction from './components3/SysAdminTransaction';
 
 const App = () => {
   return (
@@ -42,10 +43,12 @@ const App = () => {
         
         <Route path="/" element={<Navigate to="/map" />} />
 
-        
         <Route path="/map" element={<MapComponent />} />
 
         <Route path="/sidebar" element={<Sidebar />} />
+        
+        <Route path="/admin-navbar" element={<AdminNavbar />} />
+
         
         <Route path="/home" element={<><NavBar /><Home /></>} />
         <Route path="/login" element={<><NavBar/><Login /></>} />
@@ -54,155 +57,198 @@ const App = () => {
         <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} /> 
         <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
-        
+      
         
         {/* church coordinator routessss */}
-        <Route path="/SEA" element={
-          <>
-            <Sidebar/>
-              <div className="main-content">
-                <SEA/>
-              </div>
-          </>
-        } />
 
-        <Route path="/Appointments" element={
-          <>
-            <Sidebar/>
-              <div className="main-content">
-                <Appointments/>
-              </div>
-          </>
-        } />
-        <Route path="/PendingAppointments" element={
+        {/* OLD VERSION WITHOUT NAVBAR */}
+        {/* <Route path="/PendingAppointments" element={
           <>
             <Sidebar/>
               <div className="main-content">
                 <PendingAppointments />
               </div>
             </>
-        } />
-        <Route path="/ForPaymentAppointments" element={
-          <>
-            <Sidebar/>
-              <div className="main-content">
-                <ForPaymentAppointments/>
-              </div>
-          </>
-        } />
-        <Route path="/ApprovedAppointments" element={
-          <>
-            <Sidebar/>
-              <div className="main-content">
-                <ApprovedAppointments/>
-              </div>
-          </>
-        } />
-        <Route path="/DeniedAppointments" element={
-          <>
-            <Sidebar/>
-              <div className="main-content">
-                <DeniedAppointments/>
-              </div>
-          </>
-        } />
-        <Route path="/ChurchInfo" element={
-          <>
-            <Sidebar/>
-            <div className="main-content">
-              <Church/>
+        } /> */}
+
+        <Route path="/SEA" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><SEA /></div>
             </div>
-          </>
-        } />
-        <Route path="/ListofPriest" element={
-          <>
-            <Sidebar/>
-            <div className="main-content">
-              <Listpriest/>
-            </div>
-          </>
-        } />
-        <Route path="/ServiceOffered" element={
-          <>
-            <Sidebar/>
-            <div className="main-content">
-              <Serviceoff/>
-            </div>
-          </>
-        } />
-        <Route path="/RequestforVolunteer" element={
-          <>
-            <Sidebar/>
-            <div className="main-content">
-              <ReqVol/>
-            </div>
-          </>
-        } />
-        <Route path="/AccountSettings" element={
-          <>
-            <Sidebar/>
-            <div className="main-content">
-              <AccountSettings/>
-            </div>
-          </>
+          </div>
         } />
 
+        <Route path="/Appointments" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><Appointments /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/PendingAppointments" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><PendingAppointments /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/ForPaymentAppointments" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><ForPaymentAppointments /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/ApprovedAppointments" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><ApprovedAppointments /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/DeniedAppointments" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><DeniedAppointments /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/ChurchInfo" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><Church /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/ListofPriest" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><Listpriest /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/ServiceOffered" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><Serviceoff /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/RequestforVolunteer" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><ReqVol /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/AccountSettings" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><AccountSettings /></div>
+            </div>
+          </div>
+        } />
+
+
+        {/* System Admin Routes */}
         
         <Route path="/systemAdminDashboard" element={
-          <>
-            <SysAdminSidebar/>
-            <div className='sys-main-content'>
-              <SysAdminDashboard/>
+          <div>
+            <SysAdminSidebar />
+            <div>
+              <AdminNavbar />
+              <div className='sys-main-content'><SysAdminDashboard /></div>
             </div>
-          </>
-        }/>
-
-        <Route path="/pending-church" element={
-          <>
-            <SysAdminSidebar/>
-            <div className='sys-main-content'>
-              <SysAdminPendingChurch/>
-            </div>
-          </>
-        }/>
-
-        <Route path="/sys-account" element={
-          <>
-            <SysAdminSidebar/>
-            <div className='sys-main-content'>
-              <SysAdminAccSettings/>  
-            </div>
-          </>
-        }/>
-
-        <Route path="/userDB" element={
-          <>
-            <SysAdminSidebar/>
-            <div className='sys-main-content'>
-              <UserDatabase/>
-            </div>
-          </>
+          </div>
         } />
-
+        <Route path="/pending-church" element={
+          <div>
+            <SysAdminSidebar />
+            <div>
+              <AdminNavbar />
+              <div className='sys-main-content'><SysAdminPendingChurch /></div>
+            </div>
+          </div>
+        } />
+        <Route path="/sys-account" element={
+          <div>
+            <SysAdminSidebar />
+            <div>
+              <AdminNavbar />
+              <div className='sys-main-content'><SysAdminAccSettings /></div>
+            </div>
+          </div>
+        } />
+        <Route path="/userDB" element={
+          <div>
+            <SysAdminSidebar />
+            <div>
+              <AdminNavbar />
+              <div className='sys-main-content'><UserDatabase /></div>
+            </div>
+          </div>
+        } />
         <Route path="/churchDB" element={
-          <>
-            <SysAdminSidebar/>
-            <div className='sys-main-content'>
-              <ChurchDatabase/>
+          <div>
+            <SysAdminSidebar />
+            <div>
+              <AdminNavbar />
+              <div className='sys-main-content'><ChurchDatabase /></div>
             </div>
-          </>
-        }/>
-
+          </div>
+        } />
         <Route path="/churchLocations" element={
-          <>
-            <SysAdminSidebar/>
-            <div className='sys-main-content'>
-              <ChurchLocations/>
+          <div>
+            <SysAdminSidebar />
+            <div>
+              <AdminNavbar />
+              <div className='sys-main-content'><ChurchLocations /></div>
             </div>
-          </>
-        }/> 
+          </div>
+        } />
+        {/* <Route path="/transaction" element={
+          <div>
+            <SysAdminSidebar />
+            <div>
+              <AdminNavbar />
+              <div className='sys-main-content'><Transaction /></div>
+            </div>
+          </div>
+        } /> */}
 
-       
+
         <Route path="/church-options" element={<><WebUserNavBar /><ChurchOptions/></>}/>
         <Route path="/church-homepage/:churchId" element={<><WebUserNavBar /><ChurchHomepage/></>}/>
       </Routes>
