@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { getAuth, onAuthStateChanged, updatePassword} from "firebase/auth";
+import { getAuth, onAuthStateChanged, updatePassword } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from '/backend/firebase';
@@ -7,11 +7,13 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../websiteUser.css';
+import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
 
 export const SysAdminAccSettings = () => {
   const [userData, setUserData] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [newUserInfo, setNewUserInfo] = useState({});
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
@@ -29,6 +31,8 @@ export const SysAdminAccSettings = () => {
           }
         } catch (error) {
           toast.error("Error fetching user data");
+        } finally {
+          setLoading(false); 
         }
       } else {
         console.log("No user signed in.");
@@ -68,15 +72,12 @@ export const SysAdminAccSettings = () => {
           ...prevState,
           profileImage: profileImageUrl,
         }));
-        
       } catch (error) {
         toast.error("Error updating profile picture");
       }
       fileInputRef.current.value = "";
       setImageFile(null);
     }
-    
-    
   };
 
   const handleChangeUserInfo = (e) => {
@@ -92,7 +93,6 @@ export const SysAdminAccSettings = () => {
     const auth = getAuth();
     const user = auth.currentUser;
 
-    
     if (newUserInfo.password && newUserInfo.password !== newUserInfo.confirmPassword) {
       toast.error("Passwords do not match");
       return;
@@ -121,109 +121,115 @@ export const SysAdminAccSettings = () => {
     }
   };
 
-
   return (
-    <div className="sysAdminAccsettings">
-      <div className="sysAdminUserAccStngs-content">
-        <div className="text-start">
-          <h3>Modify Account Settings</h3>
+    <>
+      {loading && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', position: 'absolute', width: '100%', zIndex: 9999 }}>
+          <img src={loadingGif} alt="Loading..." />
         </div>
-        
-        
-          <div className="row justify-content-center">
+      )}
 
-            <div className="col-lg-6 text-center mb-4">
-            <form className="uploadProfilePic" onSubmit={handleSubmitProfilePic}>
-              <img src={userData?.profileImage || "src/assets/userIcon.png"} className="img-thumbnail" alt="User Icon" />
-              <div className="mb-3">
-              <input
-                  type="file"
-                  className="form-control"
-                  id="profileImage"
-                  accept="image/*"
-                  onChange={handleChangeProfilePic}
-                  ref={fileInputRef}
-                  readOnly
-                />
+      <div>
+        <input type="image" src="../src/assets/bg-image-acc.png" className='bg-image-acc' />
+
+        <h3 style={{ marginLeft: '90px', marginTop: '10px', justifyContent: 'left', color: 'white', textShadow: '1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black'}}>
+          Modify Account Settings
+        </h3>
+
+        <div className="sysAdminAccsettings">
+          <div className="sysAdminUserAccStngs-content">
+            <div className="row justify-content-center">
+              <div className="col-lg-6 text-center mb-4">
+                <form className="uploadProfilePic" onSubmit={handleSubmitProfilePic}>
+                  <img src={userData?.profileImage || "src/assets/userIcon.png"} className="img-thumbnail" alt="User Icon" />
+                  <div className="mb-3">
+                    <input
+                      type="file"
+                      className="form-control"
+                      id="profileImage"
+                      accept="image/*"
+                      onChange={handleChangeProfilePic}
+                      ref={fileInputRef}
+                      readOnly
+                    />
+                  </div>
+                  <button type="submit" className="btn btn-primary mt-2">Upload Photo</button>
+                </form>
               </div>
-              <button type="submit" className="btn btn-primary mt-2">Upload Photo</button>
-            </form>
+              
+              <div className="col-12 col-lg-6">
+                <form className="row g-3 changeUserInfo" onSubmit={handleSubmitNewInfo}>
+                  <div className="col-md-6">
+                    <label htmlFor="lastName" className="form-label">Last Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="lastName"
+                      defaultValue={userData?.lastName || ""}
+                      onFocus={(e) => e.target.placeholder = ''}
+                      onBlur={(e) => e.target.placeholder = userData?.lastName || "Loading..."}
+                      onChange={handleChangeUserInfo}
+                      placeholder={userData ? userData.lastName : "Loading..."}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label htmlFor="firstName" className="form-label">First Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="firstName"
+                      defaultValue={userData?.firstName || ""}
+                      onFocus={(e) => e.target.placeholder = ''}
+                      onBlur={(e) => e.target.placeholder = userData?.firstName || "Loading..."}
+                      onChange={handleChangeUserInfo}
+                      placeholder={userData ? userData.firstName : "Loading..."}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label htmlFor="contactNum" className="form-label">Contact Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="contactNum"
+                      defaultValue={userData?.contactNum || ""}
+                      onFocus={(e) => e.target.placeholder = ''}
+                      onBlur={(e) => e.target.placeholder = userData?.contactNum || "Loading..."}
+                      onChange={handleChangeUserInfo}
+                      placeholder={userData ? userData.contactNum : "Loading..."}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label htmlFor="email" className="form-label">Email Address</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      id="email"
+                      defaultValue={userData?.email || ""}
+                      onFocus={(e) => e.target.placeholder = ''}
+                      onBlur={(e) => e.target.placeholder = userData?.email || "Loading..."}
+                      onChange={handleChangeUserInfo}
+                      placeholder={userData ? userData.email : "Loading..."}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label htmlFor="password" className="form-label">Change Password</label>
+                    <input type="password" className="form-control" id="password" onChange={handleChangeUserInfo}/>
+                  </div>
+                  <div className="col-md-6">
+                    <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                    <input type="password" className="form-control" id="confirmPassword" onChange={handleChangeUserInfo}/>
+                  </div>
+                  <div className="col-12 d-flex justify-content-between">
+                    <button type="reset" className="btn btn-outline-primary">Reset</button>
+                    <button type="submit" className="btn btn-primary">Save Changes</button>
+                  </div>
+                </form>
+              </div>
             </div>
-            
-
-            <div className="col-12 col-lg-6">
-              <form className="row g-3 changeUserInfo" onSubmit={handleSubmitNewInfo}>
-                <div className="col-md-6">
-                  <label htmlFor="lastName" className="form-label">Last Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="lastName"
-                    defaultValue={userData?.lastName || ""}
-                    onFocus={(e) => e.target.placeholder = ''}
-                    onBlur={(e) => e.target.placeholder = userData?.lastName || "Loading..."}
-                    onChange={handleChangeUserInfo}
-                    placeholder={userData ? userData.lastName : "Loading..."}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="firstName" className="form-label">First Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="firstName"
-                    defaultValue={userData?.firstName || ""}
-                    onFocus={(e) => e.target.placeholder = ''}
-                    onBlur={(e) => e.target.placeholder = userData?.firstName || "Loading..."}
-                    onChange={handleChangeUserInfo}
-                    placeholder={userData ? userData.firstName : "Loading..."}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="contactNum" className="form-label">Contact Number</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="contactNum"
-                    defaultValue={userData?.contactNum || ""}
-                    onFocus={(e) => e.target.placeholder = ''}
-                    onBlur={(e) => e.target.placeholder = userData?.contactNum || "Loading..."}
-                    onChange={handleChangeUserInfo}
-                    placeholder={userData ? userData.contactNum : "Loading..."}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="email" className="form-label">Email Address</label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="email"
-                    defaultValue={userData?.email || ""}
-                    onFocus={(e) => e.target.placeholder = ''}
-                    onBlur={(e) => e.target.placeholder = userData?.email || "Loading..."}
-                    onChange={handleChangeUserInfo}
-                    placeholder={userData ? userData.email : "Loading..."}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="password" className="form-label">Change Password</label>
-                  <input type="password" className="form-control" id="password" onChange={handleChangeUserInfo}/>
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-                  <input type="password" className="form-control" id="confirmPassword" onChange={handleChangeUserInfo}/>
-                </div>
-                <div className="col-12 d-flex justify-content-between">
-                  <button type="reset" className="btn btn-outline-primary">Reset</button>
-                  <button type="submit" className="btn btn-primary">Save Changes</button>
-                </div>
-              </form>
-            </div>
-
           </div>
-         
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

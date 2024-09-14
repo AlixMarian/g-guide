@@ -184,9 +184,17 @@ body .admin-second-sidebar {
   font-weight: bold;
 }
 
-.pending-church-page, .church-database-page, .user-db-page, .church-location-page, .transactions-page {
+.pending-church-page, .church-database-page, .user-db-page, .church-location-page, .transactions-page, .sysAdminAccsettings {
   margin-left: 90px;
   margin-top: 10px;
+}
+
+.sysAdminAccsettings {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; 
+  margin-top: -2rem;
 }
 
 .pending-church-page {
@@ -272,6 +280,36 @@ td {
   display: inline-flex;
   gap: 1rem;
   margin-top: 2rem;
+}
+
+.bg-image-acc {
+  z-index: -1;
+  position: absolute;
+  width: 99%;
+  height: 40%;
+  margin-top: -2rem;
+}
+
+.sysAdminUserAccStngs-content {
+  width: 100%;
+  max-width: 1200px;
+  padding: 70px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  margin: 0 auto; /* Centers the content horizontally */
+}
+
+.sysAdminAccsettings img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.sysAdminAccsettings button {
+  width: 150px;
 }
 
 /* sidebar */
@@ -417,36 +455,10 @@ td {
 
 
 /* account settings */
-
-  .sysAdminAccsettings {
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
-  }
   
-  .sysAdminUserAccStngs-content {
-    width: 100%;
-    max-width: 1200px;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
+ 
   
-  .sysAdminAccsettings img {
-    width: 150px;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 50%;
-    margin-bottom: 10px;
-  }
-  
-  .sysAdminAccsettings button {
-    width: 150px;
-  }
+ 
 
   
  
