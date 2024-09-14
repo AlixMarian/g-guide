@@ -1,6 +1,5 @@
-// import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { useRef, useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import '../systemAdmin.css'; // Ensure this file has the necessary CSS styles
 
 export const SysAdminSidebar = () => {
@@ -23,6 +22,13 @@ export const SysAdminSidebar = () => {
   const handlePendingChurch = () => {
     navigate('/pending-church');
     setActiveSection('pending-church');
+    setSecondSidebarOpen(false); // Close second sidebar
+    setActiveChild(null);        // Clear any active child items
+  };
+
+  const handleTransactions = () => {
+    navigate('/transactions');
+    setActiveSection('transactions');
     setSecondSidebarOpen(false); // Close second sidebar
     setActiveChild(null);        // Clear any active child items
   };
@@ -83,12 +89,12 @@ export const SysAdminSidebar = () => {
             <input type="image" src="../src/assets/church.png" className='admin-image-size' />
             <h3 className='button-name'>Church Directory</h3>
           </div>
-          <div className="transaction">
+          <div className={`transactions ${activeSection === 'transactions' ? 'admin-active' : ''}`} onClick={handleTransactions}>
             <input type="image" src="../src/assets/transactions.png" className='admin-image-size' />
-            <h3 className='button-name'>Transaction</h3>
+            <h3 className='button-name'>Transactions</h3>
           </div>
         </div>
-          
+
         <div className={`admin-second-sidebar ${secondSidebarOpen ? 'open' : 'close'}`}>
           <div className="admin-second-sidebar-content">
             <div className={`admin-numbers ${activeChild === 'registered-church' ? 'admin-active' : ''}`} onClick={handleRegisteredChurch}>

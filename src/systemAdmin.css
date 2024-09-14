@@ -23,7 +23,7 @@ body .admin-sidebar {
   align-items: center; /* Centers the content vertically */
 }
 
-.dashboard, .pending-church, .user-directory, .church-directory, .transaction {
+.dashboard, .pending-church, .user-directory, .church-directory, .transactions {
   display: flex;
   flex-direction: column; /* Stacks elements vertically */
   justify-content: center; /* Centers the content vertically */
@@ -184,7 +184,7 @@ body .admin-second-sidebar {
   font-weight: bold;
 }
 
-.pending-church-page, .church-database-page, .user-db-page, .church-location-page {
+.pending-church-page, .church-database-page, .user-db-page, .church-location-page, .transactions-page {
   margin-left: 90px;
   margin-top: 10px;
 }
@@ -252,12 +252,15 @@ td {
   width: auto;
 }
 
-.pending-church-button, .view-proof, .view-history, .approve, .deny {
+.pending-church-button, .view-proof, .view-history, .approve, .deny, .view-payment {
   width: 70px; /* Adjust the width */
   height: 30px; /* Adjust the height */
   padding: 0.25rem 0.5rem; /* Adjust the padding */
   font-size: 13px; /* Adjust the font size */
   color: white;
+}
+.view-payment {
+  width: 100px;
 }
 
 .view-history, .view-proof {
@@ -265,7 +268,11 @@ td {
   background-color: #007BFF;
 }
 
-
+.filter-container{
+  display: inline-flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
 
 /* sidebar */
 /* .sidebar{

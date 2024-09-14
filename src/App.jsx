@@ -34,7 +34,7 @@ import ChurchOptions from './components4/ChurchOptions';
 import ChurchHomepage from './components4/ChurchHomepage';
 import ChurchLocations from './components3/SysAdminChurchLocations';
 import AdminNavbar from './components3/SysAdminNavbar';
-// import Transaction from './components3/SysAdminTransaction';
+import Transactions from './components3/Transactions';
 
 const App = () => {
   return (
@@ -238,15 +238,15 @@ const App = () => {
             </div>
           </div>
         } />
-        {/* <Route path="/transaction" element={
+        <Route path="/transactions" element={
           <div>
             <SysAdminSidebar />
             <div>
               <AdminNavbar />
-              <div className='sys-main-content'><Transaction /></div>
+              <div className='sys-main-content'><Transactions /></div>
             </div>
           </div>
-        } /> */}
+        } />
 
 
         <Route path="/church-options" element={<><WebUserNavBar /><ChurchOptions/></>}/>
