@@ -56,11 +56,15 @@ export const Layout = () => {
   };
 
   const handleApprovedAppointments = () => {
-    navigate('/DeniedAppointments');
+    navigate('/ApprovedAppointments');
   };
 
   const handleDeniedAppointments = () => {
-    navigate('/ApprovedAppointments');
+    navigate('/DeniedAppointments');
+  };
+
+  const handleMassIntentions = () => {
+    navigate('/MassIntentions');
   };
 
   // Close second sidebar if clicked outside
@@ -103,15 +107,17 @@ export const Layout = () => {
               <h3 className="second-button-name">Approved</h3>
             </div>
             </div>
-            <div onClick={handleApprovedAppointments}>
+            <div onClick={handleDeniedAppointments}>
             <div className={`numbers ${activeNumber === 'denied' ? 'active' : ''}`} onClick={() => handleClick('denied')}>
               <input type="image" src="../src/assets/number-4.png" className="image-size" />
               <h3 className="second-button-name">Denied</h3>
             </div>
             </div>
+            <div onClick={handleMassIntentions}>
             <div className={`numbers ${activeNumber === 'mass-intentions' ? 'active' : ''}`} onClick={() => handleClick('mass-intentions')}>
               <input type="image" src="../src/assets/number-5.png" className="image-size" />
               <h3 className="second-button-name">Mass Intentions</h3>
+            </div>
             </div>
           </div>
         );

@@ -21,6 +21,7 @@ import PendingAppointments from './components2/Appointments/PendingAppointments'
 import ForPaymentAppointments from './components2/Appointments/ForPaymentAppointments'
 import ApprovedAppointments from './components2/Appointments/ApprovedAppointments';
 import DeniedAppointments from './components2/Appointments/DeniedAppointments';
+import MassIntentions from './components2/Appointments/MassIntentions';
 import AccountSettings from './components2/AccountSett';
 import UserAccountSettings from './components/UserAccountSettings';
 import MapComponent from './components/MapComponent';
@@ -35,6 +36,7 @@ import ChurchHomepage from './components4/ChurchHomepage';
 import ChurchLocations from './components3/SysAdminChurchLocations';
 import AdminNavbar from './components3/SysAdminNavbar';
 import Transactions from './components3/Transactions';
+
 
 const App = () => {
   return (
@@ -127,6 +129,16 @@ const App = () => {
             <div>
               <AdminNavbar />
               <div className='main-content'><DeniedAppointments /></div>
+            </div>
+          </div>
+        } />
+        
+        <Route path="/MassIntentions" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><MassIntentions /></div>
             </div>
           </div>
         } />
