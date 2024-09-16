@@ -743,7 +743,14 @@ ul{
 .pending-td{
   font-size: 16px;
 }
+/* forPayment appointments */
+.forPayment-th{
+  font-size: 18px;
+}
 
+.forPayment-td{
+  font-size: 16px;
+}
 
 
 
