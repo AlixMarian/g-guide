@@ -132,69 +132,85 @@ export const Listpriest = () => {
   return (
     <>
       <h1>List of Priest</h1>
-      <table className="table">
-        <thead>
-          <tr>
-            <th scope="col">Position</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Fix</th>
-          </tr>
-        </thead>
-        <tbody>
-          {priestList.map((priest) => (
-            <tr key={priest.id}>
-              <td>{priest.priestType}</td>
-              <td>{priest.firstName}</td>
-              <td>{priest.lastName}</td>
-              <td>
-                <div className="btn-group">
-                  <button type="button" className="btn btn-secondary" onClick={() => handleEditPriest(priest)}>Edit</button>
-                  <button type="button" className="btn btn-danger" onClick={() => deletePriest(priest.id)}>Delete</button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="events">
-        <form className="row g-3 needs-validation" noValidate onSubmit={(e) => handleSubmit(e, editingPriest ? onUpdatePriest : onSubmitPriest)}>
-          <h3>{editingPriest ? "Edit Priest" : "Add a Priest"}</h3>
-          <div className="col-md-4">
-            <label className="form-label" htmlFor="priestType">Position</label>
-            <input type="text" className="form-control" id="priestType"
-              value={editingPriest ? updatedPriestType : newPriestType}
-              onChange={(e) => editingPriest ? setUpdatedPriestType(e.target.value) : setNewPriestType(e.target.value)}
-              required/>
-            <div className="invalid-feedback">Please provide a position.</div>
-          </div>
-          <div className="col-md-4">
-            <label className="form-label" htmlFor="priestFirstName">First Name</label>
-            <input type="text" className="form-control" id="priestFirstName"
-              value={editingPriest ? updatedPriestFirstName : newPriestFirstName}
-              onChange={(e) => editingPriest ? setUpdatedPriestFirstName(e.target.value) : setNewPriestFirstName(e.target.value)}
-              required/>
-            <div className="invalid-feedback">Please provide a first name.</div>
-          </div>
-          <div className="col-md-4">
-            <label className="form-label" htmlFor="priestLastName">Last Name</label>
-            <input type="text" className="form-control" id="priestLastName"
-              value={editingPriest ? updatedPriestLastName : newPriestLastName}
-              onChange={(e) => editingPriest ? setUpdatedPriestLastName(e.target.value) : setNewPriestLastName(e.target.value)}
-              required/>
-            <div className="invalid-feedback">Please provide a last name.</div>
-          </div>
-          <div className="col-12" >
-            <div className="btn-group" role="group" >
-              <button type="submit" className="btn btn-success">
-                {editingPriest ? "Confirm Changes" : "Submit"}
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={clearForm}>Clear</button>
+      <div className="container mt-5">
+        <div className="row">
+          {/* Left side - Add/Edit Priest form */}
+          <div className="col-md-5">
+            <div className="card shadow">
+              <div className="card-body">
+                <form className="row g-3 needs-validation" noValidate onSubmit={(e) => handleSubmit(e, editingPriest ? onUpdatePriest : onSubmitPriest)}>
+                  <h3>{editingPriest ? "Edit Priest" : "Add a Priest"}</h3>
+                  <div className="col-md-12 mb-3">
+                    <label className="form-label" htmlFor="priestType">Position</label>
+                    <input type="text" className="form-control" id="priestType"
+                      value={editingPriest ? updatedPriestType : newPriestType}
+                      onChange={(e) => editingPriest ? setUpdatedPriestType(e.target.value) : setNewPriestType(e.target.value)}
+                      required/>
+                    <div className="invalid-feedback">Please provide a position.</div>
+                  </div>
+                  <div className="col-md-12 mb-3">
+                    <label className="form-label" htmlFor="priestFirstName">First Name</label>
+                    <input type="text" className="form-control" id="priestFirstName"
+                      value={editingPriest ? updatedPriestFirstName : newPriestFirstName}
+                      onChange={(e) => editingPriest ? setUpdatedPriestFirstName(e.target.value) : setNewPriestFirstName(e.target.value)}
+                      required/>
+                    <div className="invalid-feedback">Please provide a first name.</div>
+                  </div>
+                  <div className="col-md-12 mb-3">
+                    <label className="form-label" htmlFor="priestLastName">Last Name</label>
+                    <input type="text" className="form-control" id="priestLastName"
+                      value={editingPriest ? updatedPriestLastName : newPriestLastName}
+                      onChange={(e) => editingPriest ? setUpdatedPriestLastName(e.target.value) : setNewPriestLastName(e.target.value)}
+                      required/>
+                    <div className="invalid-feedback">Please provide a last name.</div>
+                  </div>
+                  <div className="col-12 d-flex justify-content-between">
+                    <button type="submit" className="btn btn-success">
+                      {editingPriest ? "Confirm Changes" : "Submit"}
+                    </button>
+                    <button type="button" className="btn btn-secondary" onClick={clearForm}>Clear</button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-        </form>
+
+          {/* Right side - List of Priests table */}
+          <div className="col-md-7">
+            <div className="card shadow">
+              <div className="card-body">
+                <h3>List of Priests</h3>
+                <table className="table table-bordered">
+                  <thead className="table-dark">
+                    <tr>
+                      <th scope="col listPriest-th">Position</th>
+                      <th scope="col listPriest-th">First Name</th>
+                      <th scope="col listPriest-th">Last Name</th>
+                      <th scope="col listPriest-th">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {priestList.map((priest) => (
+                      <tr key={priest.id}>
+                        <td className='listPriest-td'>{priest.priestType}</td>
+                        <td className='listPriest-td'>{priest.firstName}</td>
+                        <td className='listPriest-td'>{priest.lastName}</td>
+                        <td className='listPriest-td'>
+                          <div className="btn-group">
+                            <button type="button" className="btn btn-secondary" onClick={() => handleEditPriest(priest)}>Edit</button>
+                            <button type="button" className="btn btn-danger" onClick={() => deletePriest(priest.id)}>Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
     </>
   );
 };
