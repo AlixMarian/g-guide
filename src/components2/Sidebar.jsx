@@ -31,13 +31,11 @@ export const Layout = () => {
   };
 
   const handleServiceOffered = () => {
-    navigate('/ServiceOffered');
     setSecondSidebarOpen(!secondSidebarOpen);
     setActiveSection('services-offered');
   };
 
   const handleChurchInfo = () => {
-    navigate('/ChurchInfo');
     setSecondSidebarOpen(!secondSidebarOpen);
     setActiveSection('church-info');
   };
@@ -46,6 +44,7 @@ export const Layout = () => {
     navigate('/ListofPriest');
   };
 
+  //
   const handlePending = () => {
     navigate('/PendingAppointments');
   };
@@ -66,6 +65,8 @@ export const Layout = () => {
     navigate('/MassIntentions');
   };
 
+
+  //
   const handleSchedules = () => {
     navigate('/Schedules')
   }
@@ -78,7 +79,26 @@ export const Layout = () => {
     navigate('/Announcements')
   }
 
-  // Close second sidebar if clicked outside
+//
+  const handleExploreServices = () => {
+    navigate('/ExploreServices')
+  }
+
+  const handleSlots = () => {
+    navigate('/Slots')
+  }
+
+
+  //
+  const handleChurchDetails = () => {
+    navigate('/ChurchDetails')
+  }
+
+  const handleChurchUploads = () => {
+    navigate('/ChurchUploads')
+  }
+
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (secondSidebarRef.current && !secondSidebarRef.current.contains(event.target) && !sidebarRef.current.contains(event.target)) {
@@ -158,13 +178,17 @@ export const Layout = () => {
       case 'services-offered':
         return (
           <div className="second-sidebar-services-offered-content">
+            <div onClick={handleExploreServices}>
             <div className={`numbers ${activeNumber === 'schedules' ? 'active' : ''}`} onClick={() => handleClick('schedules')}>
               <input type="image" src="../src/assets/number-1.png" className="image-size" />
               <h3 className="second-button-name">Explore Services</h3>
             </div>
+            </div>
+            <div onClick={handleSlots}>
             <div className={`numbers ${activeNumber === 'church-events' ? 'active' : ''}`} onClick={() => handleClick('church-events')}>
               <input type="image" src="../src/assets/number-2.png" className="image-size" />
               <h3 className="second-button-name">Time Slots</h3>
+            </div>
             </div>
             <div className={`numbers ${activeNumber === 'announcements' ? 'active' : ''}`} onClick={() => handleClick('announcements')}>
               <input type="image" src="../src/assets/number-3.png" className="image-size" />
@@ -175,13 +199,17 @@ export const Layout = () => {
       case 'church-info':
         return (
           <div className="second-sidebar-church-info-content">
+            <div onClick={handleChurchDetails}>
             <div className={`numbers ${activeNumber === 'schedules' ? 'active' : ''}`} onClick={() => handleClick('schedules')}>
               <input type="image" src="../src/assets/number-1.png" className="image-size" />
               <h3 className="second-button-name">Church Details</h3>
             </div>
+            </div>
+            <div onClick={handleChurchUploads}>
             <div className={`numbers ${activeNumber === 'church-events' ? 'active' : ''}`} onClick={() => handleClick('church-events')}>
               <input type="image" src="../src/assets/number-2.png" className="image-size" />
               <h3 className="second-button-name">Church Uploads</h3>
+            </div>
             </div>
           </div>
         );
