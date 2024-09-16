@@ -759,5 +759,12 @@ ul{
 .approved-td{
   font-size: 16px;
 }
+/* denied appointments */
+.denied-th{
+  font-size: 18px;
+}
 
+.denied-td{
+  font-size: 16px;
+}
 

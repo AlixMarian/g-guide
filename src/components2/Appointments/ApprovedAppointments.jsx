@@ -143,7 +143,7 @@ export const ApprovedAppointments = () => {
                 <Modal.Body>
                     {selectedAppointment && (
                         <div>
-                            <p><strong>Appointment Status:</strong> {selectedAppointment.appointmentStatus}</p>
+                            <p><strong>Appointment Status:</strong> <span style={{ color: 'green' }}>{selectedAppointment.appointmentStatus}</span></p>
                             <p><strong>Appointment Option:</strong> {selectedAppointment.appointmentPurpose} </p>
                             <p><strong>Appointment Type:</strong> {appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType}</p>
                             <br/>
