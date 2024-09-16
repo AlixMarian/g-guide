@@ -17,11 +17,6 @@ import Listpriest from './components2/Listpriest';
 import Serviceoff from './components2/Serviceoff';
 import ReqVol from './components2/ReqVol';
 import Sidebar from './components2/Sidebar';
-import PendingAppointments from './components2/Appointments/PendingAppointments'
-import ForPaymentAppointments from './components2/Appointments/ForPaymentAppointments'
-import ApprovedAppointments from './components2/Appointments/ApprovedAppointments';
-import DeniedAppointments from './components2/Appointments/DeniedAppointments';
-import MassIntentions from './components2/Appointments/MassIntentions';
 import AccountSettings from './components2/AccountSett';
 import UserAccountSettings from './components/UserAccountSettings';
 import MapComponent from './components/MapComponent';
@@ -36,6 +31,18 @@ import ChurchHomepage from './components4/ChurchHomepage';
 import ChurchLocations from './components3/SysAdminChurchLocations';
 import AdminNavbar from './components3/SysAdminNavbar';
 import Transactions from './components3/Transactions';
+
+//Appointments
+import PendingAppointments from './components2/Appointments/PendingAppointments'
+import ForPaymentAppointments from './components2/Appointments/ForPaymentAppointments'
+import ApprovedAppointments from './components2/Appointments/ApprovedAppointments';
+import DeniedAppointments from './components2/Appointments/DeniedAppointments';
+import MassIntentions from './components2/Appointments/MassIntentions';
+
+//Mass Schedule
+import Schedules from './components2/SEA/Schedules';
+import ChurchEvents from './components2/SEA/ChurchEvents';
+import Announcements from './components2/SEA/Announcements';
 
 
 const App = () => {
@@ -142,6 +149,41 @@ const App = () => {
             </div>
           </div>
         } />
+
+
+
+        <Route path="/Schedules" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><Schedules /></div>
+            </div>
+          </div>
+        } />
+        
+        <Route path="/ChurchEvents" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><ChurchEvents /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/Announcements" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><Announcements /></div>
+            </div>
+          </div>
+        } />
+
+
+
 
         <Route path="/ChurchInfo" element={
           <div>
