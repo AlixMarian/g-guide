@@ -735,6 +735,14 @@ ul{
   margin-top: 8px; 
   width: 80px;
 }
+/* pending appointments */
+.pending-th {
+  font-size: 18px;
+}
+
+.pending-td{
+  font-size: 16px;
+}
 
 
 

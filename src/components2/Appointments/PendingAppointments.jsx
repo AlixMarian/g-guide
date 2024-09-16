@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Button, Form} from 'react-bootstrap';
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
 import { db } from "/backend/firebase"; 
 import { toast } from 'react-toastify';
 import { getAuth } from 'firebase/auth';
@@ -150,43 +150,47 @@ export const PendingAppointments = () => {
         <>
         
         <h1 className="me-3">Pending Appointments</h1>
-        <div className="Appointments">
-            <br />
+        <div className="d-flex justify-content-center align-items-center mt-5">
+        <div className="card shadow-lg" style={{ width: "80%" }}>
+            <div className="card-body">
             <table className="table">
                 <thead className="table-dark">
-                    <tr>
-                        <th scope="col">Date of Request</th>
-                        <th scope="col">Appointment Option</th>
-                        <th scope="col">Appointment Type</th>
-                        <th scope="col">Requested by</th>
-                        <th scope="col">Requester Contact</th>
-                        <th scope="col">More Info</th>
-                        <th scope="col">Send SMS</th>
-                    </tr>
+                <tr>
+                    <th scope="col" className="pending-th">Date of Request</th>
+                    <th scope="col" className="pending-th">Appointment Option</th>
+                    <th scope="col" className="pending-th">Appointment Type</th>
+                    <th scope="col" className="pending-th">Requested by</th>
+                    <th scope="col" className="pending-th">Requester Contact</th>
+                    <th scope="col" className="pending-th">More Info</th>
+                    <th scope="col" className="pending-th">Send SMS</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {pendingAppointments.map((appointment, index) => (
-                        <tr key={index}>
-                            <td>{formatDate(appointment.userFields?.dateOfRequest)}</td>
-                            <td>{appointment.appointmentPurpose}</td>
-                            <td>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
-                            <td>{appointment.userFields?.requesterName}</td>
-                            <td>{appointment.userFields?.requesterContact}</td>
-                            <td>
-                                <Button variant="info" onClick={() => handleShowModal(appointment)}>
-                                    <i className="bi bi-info-circle-fill"></i>
-                                </Button>
-                            </td>
-                            <td>
-                                <Button>
-                                    <i className="bi bi-chat-text"></i>
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
+                {pendingAppointments.map((appointment, index) => (
+                    <tr key={index}>
+                    <td className="pending-td">{formatDate(appointment.userFields?.dateOfRequest)}</td>
+                    <td className="pending-td">{appointment.appointmentPurpose}</td>
+                    <td className="pending-td">{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
+                    <td className="pending-td">{appointment.userFields?.requesterName}</td>
+                    <td className="pending-td">{appointment.userFields?.requesterContact}</td>
+                    <td>
+                        <Button variant="info" onClick={() => handleShowModal(appointment)}>
+                        <i className="bi bi-info-circle-fill"></i>
+                        </Button>
+                    </td>
+                    <td>
+                        <Button>
+                        <i className="bi bi-chat-text"></i>
+                        </Button>
+                    </td>
+                    </tr>
+                ))}
                 </tbody>
             </table>
+            </div>
         </div>
+        </div>
+
 
         <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
@@ -199,7 +203,7 @@ export const PendingAppointments = () => {
                             <p><strong>Appointment Option:</strong> {selectedAppointment.appointmentPurpose} </p>
                             <p><strong>Appointment Type:</strong> {appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType}</p>
                             <br/>
-                            
+                            <h4>Submitted Details</h4>
                             {selectedAppointment.appointmentType === "marriage" && (
                                 <>  
                                     <p><b>Selected Date for Marriage:</b> {selectedAppointment.slotId ? (() => {
@@ -317,7 +321,7 @@ export const PendingAppointments = () => {
                                     <br/>
                                 </>
                             )}
-
+                            <h4>Requester&apos;s Information</h4>
                             <p><strong>Date of Request:</strong> {formatDate(selectedAppointment.userFields?.dateOfRequest)}</p>
 
                             <p><strong>Payment Receipt Image: </strong> {selectedAppointment.appointments?.paymentImage ? (
