@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import '../churchCoordinator.css';
 
 
-export const ReqVol = () => {
+ const ReqVol = () => {
   const navigate = useNavigate();
   // eslint-disable-next-line no-unused-vars
   const [userData, setUserData] = useState(null);
@@ -259,107 +259,114 @@ export const ReqVol = () => {
 
   return (
     <div className='ReqAnnouncement'>
-      <h1>Request for Volunteers</h1>
+      <h1 className="me-3">Request for Volunteers</h1>
 
-      <div className="createPost col-12 col-lg-12">
-        <h3>{editing ? 'Edit Post' : 'Create Post'}</h3>
-        <form onSubmit={handlePostSubmit}>
-          <div className='titleArea col-md-12'>
-            <label htmlFor="reqVolunteerTitle" className="form-label">Title</label>
-              <input type="text" className="form-control" id="title" value={reqVolunteerTitleInput} onChange={handleTitleChange} required/>
-            <br/>
-          </div>
-          <div className="mb-3">
-            <label htmlFor="startDate" className="form-label">Start Date</label>
+      <div className="d-flex justify-content-center align-items-center mt-5">
+      <div className="card shadow-lg" style={{ width: "90%" }}>
+        <div className="card-body">
+          <h3>{editing ? 'Edit Post' : 'Create Post'}</h3>
+          <form onSubmit={handlePostSubmit}>
+            <div className='titleArea col-md-12'>
+              <label htmlFor="reqVolunteerTitle" className="form-label">Title</label>
+              <input type="text" className="form-control" id="title" value={reqVolunteerTitleInput} onChange={handleTitleChange} required />
+              <br />
+            </div>
 
-            <input 
-              type="date"
-              className="form-control" 
-              id="startDate" 
-              value={startDateInput} 
-              onChange={handleStartDateChange} 
-              min={new Date().toISOString().split('T')[0]} 
-              max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
-              required 
-            />
-          </div>
+            <div className="mb-3">
+              <label htmlFor="startDate" className="form-label">Start Date</label>
+              <input 
+                type="date" 
+                className="form-control" 
+                id="startDate" 
+                value={startDateInput} 
+                onChange={handleStartDateChange} 
+                min={new Date().toISOString().split('T')[0]} 
+                max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
+                required 
+              />
+            </div>
 
-        <div className="mb-3">
-          <label htmlFor="endDate" className="form-label">End Date</label>
-
-          <input 
-                type="date"
+            <div className="mb-3">
+              <label htmlFor="endDate" className="form-label">End Date</label>
+              <input 
+                type="date" 
                 className="form-control" 
                 id="endDate" 
                 value={endDateInput} 
                 onChange={handleEndDateChange} 
-                min={new Date().toISOString().split('T')[0]}
+                min={new Date().toISOString().split('T')[0]} 
                 max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
-                required
+                required 
               />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="event" className="form-label">Associate with Event</label>
-          <select className="form-select" id="event" value={selectedEvent} onChange={handleEventChange} required>
-            <option value="" disabled>Select an event</option>
-            {events.map((event) => (
-              <option key={event.id} value={event.eventName}>
-                {event.eventName}
-              </option>
-            ))}
-          </select>
-        </div>
-
-          <div className='contentArea col-md-12'>
-            <label htmlFor="reqVolunteerBody" className="form-label">Enter Content</label>
-              <textarea className="form-control" id="content" rows="3" value={reqVolunteerBodyInput} onChange={handleBodyChange} required></textarea>
-            <br/>
-          </div>
-
-          
-
-          <div className="d-flex justify-content-end gap-2">
-          <button type="submit" className="btn btn-success me-2">{editing ? 'Update Post' : 'Create Post'}</button>
-          {editing && <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancel</button>}
-          <button type="reset" className="btn btn-danger" onClick={resetForm}>Clear</button>
-        </div>
-
-        </form>
-      </div>
-
-      <div className='displayPost col-12 col-lg-12'>
-        <h2>Your Posts</h2>
-        {posts.map((post) => (
-          <div className="card mb-3" key={post.id}>
-            <div className="card-body">
-              <h5 className="card-title">{post.title}</h5>
-              <small className="text-muted">
-                {`Posted on ${post.uploadDate.toDate().toLocaleDateString()} at ${post.uploadDate.toDate().toLocaleTimeString()}`}
-              </small><br/>
-              <small className="text-muted">
-                {`Duration: ${post.startDate.toDate().toLocaleDateString()} - ${post.endDate.toDate().toLocaleDateString()}`}
-              </small><br/>
-              <small className='text-muted'>
-                Status: {post.status}
-              </small><br/>
-              <p>-----------------</p>
-              <p className="card-text">
-                {`Event: ${post.event}`}
-              </p>
-              <p className="card-text">{post.content}</p>
-              <button className="btn btn-danger" onClick={() => handleDeletePost(post.id)}>Delete Post</button>
-              <button className="btn btn-info ms-2" onClick={() => handleEditPost(post)}>Edit Post</button>
-               {post.status === 'ongoing' && (
-                <button className="btn btn-warning ms-2" onClick={() => handleArchivePost(post.id)}>Archive Post</button>
-              )}
-              {post.status === 'archived' && (
-                <button className="btn btn-success ms-2" onClick={() => handleUnarchivePost(post.id)}>Unarchive Post</button>
-              )}
             </div>
-          </div>
-        ))}
+
+            <div className="mb-3">
+              <label htmlFor="event" className="form-label">Associate with Event</label>
+              <select className="form-select" id="event" value={selectedEvent} onChange={handleEventChange} required>
+                <option value="" disabled>Select an event</option>
+                {events.map((event) => (
+                  <option key={event.id} value={event.eventName}>
+                    {event.eventName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className='contentArea col-md-12'>
+              <label htmlFor="reqVolunteerBody" className="form-label">Enter Content</label>
+              <textarea className="form-control" id="content" rows="3" value={reqVolunteerBodyInput} onChange={handleBodyChange} required></textarea>
+              <br />
+            </div>
+
+            <div className="d-flex justify-content-end gap-2">
+              <button type="submit" className="btn btn-success me-2">{editing ? 'Update Post' : 'Create Post'}</button>
+              {editing && <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancel</button>}
+              <button type="reset" className="btn btn-danger" onClick={resetForm}>Clear</button>
+            </div>
+          </form>
+        </div>
       </div>
+    </div>
+
+
+    <div className='d-flex justify-content-center align-items-center mt-5'>
+      <div className='card shadow-lg' style={{ width: '90%' }}>
+        <div className="card-body">
+          <h2>Your Posts</h2>
+          {posts.map((post) => (
+            <div className="card mb-3" key={post.id}>
+              <div className="card-body">
+                <h5 className="card-title">{post.title}</h5>
+                <small className="text-muted">
+                  {`Posted on ${post.uploadDate.toDate().toLocaleDateString()} at ${post.uploadDate.toDate().toLocaleTimeString()}`}
+                </small><br />
+                <small className="text-muted">
+                  {`Duration: ${post.startDate.toDate().toLocaleDateString()} - ${post.endDate.toDate().toLocaleDateString()}`}
+                </small><br />
+                <small className='text-muted'>
+                  Status: {post.status}
+                </small><br />
+                <p>-----------------</p>
+                <p className="card-text">
+                  {`Event: ${post.event}`}
+                </p>
+                <p className="card-text">{post.content}</p>
+
+                <button className="btn btn-danger" onClick={() => handleDeletePost(post.id)}>Delete Post</button>
+                <button className="btn btn-info ms-2" onClick={() => handleEditPost(post)}>Edit Post</button>
+
+                {post.status === 'ongoing' && (
+                  <button className="btn btn-warning ms-2" onClick={() => handleArchivePost(post.id)}>Archive Post</button>
+                )}
+                {post.status === 'archived' && (
+                  <button className="btn btn-success ms-2" onClick={() => handleUnarchivePost(post.id)}>Unarchive Post</button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
 
     </div>
   );
