@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Modal, Button, Form } from 'react-bootstrap';
+import { useEffect, useState } from "react";
+import { Modal, Button} from 'react-bootstrap';
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "/backend/firebase";
 import { getAuth } from 'firebase/auth';
@@ -65,6 +65,14 @@ export const ApprovedAppointments = () => {
         return date.toLocaleDateString(undefined, options);
     };
 
+    const convertTo12HourFormat = (time) => {
+        if (!time || time === "none") return "none";
+        const [hours, minutes] = time.split(':');
+        let hours12 = (hours % 12) || 12;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        return `${hours12}:${minutes} ${ampm}`;
+    };
+
     useEffect(() => {
         const fetchSlots = async () => {
             try {
@@ -91,37 +99,43 @@ export const ApprovedAppointments = () => {
     return (
         <>
         <h1 className="me-3">Approved Appointments</h1>
-        <div className="Appointments">
-            <br />
+        <div className="d-flex justify-content-center align-items-center mt-5">
+        <div className="card shadow-lg" style={{ width: "80%" }}>
+            <div className="card-body">
             <table className="table">
                 <thead className="table-dark">
-                    <tr>
-                        <th scope="col">Date of Request</th>
-                        <th scope="col">Appointment Option</th>
-                        <th scope="col">Appointment Type</th>
-                        <th scope="col">Requested by</th>
-                        <th scope="col">Requester Contact</th>
-                        <th scope="col">More Info</th>
-                    </tr>
+                <tr>
+                    <th scope="col" className="approved-th">Date of Request</th>
+                    <th scope="col" className="approved-th">Appointment Option</th>
+                    <th scope="col" className="approved-th">Appointment Type</th>
+                    <th scope="col" className="approved-th">Requested by</th>
+                    <th scope="col" className="approved-th">Requester Contact</th>
+                    <th scope="col" className="approved-th">More Info</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {approvedAppointments.map((appointment, index) => (
-                        <tr key={index}>
-                            <td>{formatDate(appointment.userFields?.dateOfRequest)}</td>
-                            <td>{appointment.appointmentPurpose}</td>
-                            <td>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
-                            <td>{appointment.userFields?.requesterName}</td>
-                            <td>{appointment.userFields?.requesterContact}</td>
-                            <td>
-                                <Button variant="info" onClick={() => handleShowModal(appointment)}>
-                                    <i className="bi bi-info-circle-fill"></i>
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
+                {approvedAppointments.map((appointment, index) => (
+                    <tr key={index}>
+                    <td className="approved-td">{formatDate(appointment.userFields?.dateOfRequest)}</td>
+                    <td className="approved-td">{appointment.appointmentPurpose}</td>
+                    <td className="approved-td">
+                        {appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}
+                    </td>
+                    <td className="approved-td">{appointment.userFields?.requesterName}</td>
+                    <td className="approved-td">{appointment.userFields?.requesterContact}</td>
+                    <td className="approved-td">
+                        <Button variant="info" onClick={() => handleShowModal(appointment)}>
+                        <i className="bi bi-info-circle-fill"></i>
+                        </Button>
+                    </td>
+                    </tr>
+                ))}
                 </tbody>
             </table>
+            </div>
         </div>
+        </div>
+
         <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>Appointment Details</Modal.Title>
@@ -133,7 +147,7 @@ export const ApprovedAppointments = () => {
                             <p><strong>Appointment Option:</strong> {selectedAppointment.appointmentPurpose} </p>
                             <p><strong>Appointment Type:</strong> {appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType}</p>
                             <br/>
-                            
+                            <h4>Submitted Details</h4>
                             {selectedAppointment.appointmentType === "marriage" && (
                                 <>  
                                     <p><b>Selected Date for Marriage:</b> {selectedAppointment.slotId ? (() => {
@@ -251,7 +265,7 @@ export const ApprovedAppointments = () => {
                                     <br/>
                                 </>
                             )}
-
+                            <h4>Requester&apos;s Information</h4>
                             <p><strong>Date of Request:</strong> {formatDate(selectedAppointment.userFields?.dateOfRequest)}</p>
 
                             <p><strong>Payment Receipt Image: </strong> {selectedAppointment.appointments?.paymentImage ? (

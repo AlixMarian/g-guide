@@ -751,7 +751,13 @@ ul{
 .forPayment-td{
   font-size: 16px;
 }
+/* approved appointments */
+.approved-th{
+  font-size: 18px;
+}
 
-
+.approved-td{
+  font-size: 16px;
+}
 
 
