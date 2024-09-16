@@ -735,36 +735,11 @@ ul{
   margin-top: 8px; 
   width: 80px;
 }
-/* pending appointments */
-.pending-th {
+
+.pending-th, .forPayment-th, .approved-th, .denied-th, .massIntention-th {
   font-size: 18px;
 }
 
-.pending-td{
+.pending-td, .forPayment-td, .approved-td, .denied-td, .massIntention-td {
   font-size: 16px;
 }
-/* forPayment appointments */
-.forPayment-th{
-  font-size: 18px;
-}
-
-.forPayment-td{
-  font-size: 16px;
-}
-/* approved appointments */
-.approved-th{
-  font-size: 18px;
-}
-
-.approved-td{
-  font-size: 16px;
-}
-/* denied appointments */
-.denied-th{
-  font-size: 18px;
-}
-
-.denied-td{
-  font-size: 16px;
-}
-

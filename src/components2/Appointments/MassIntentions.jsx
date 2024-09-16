@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Modal, Button, Form} from 'react-bootstrap';
+import { useEffect, useState } from "react";
+import { Modal, Button, } from 'react-bootstrap';
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "/backend/firebase"; 
 import { getAuth } from 'firebase/auth';
@@ -13,18 +13,6 @@ export const MassIntentions = () => {
     
     const auth = getAuth();
     const user = auth.currentUser;
-
-    const appointmentTypeMapping = {
-        marriageCertificate: "Marriage Certificate",
-        baptismalCertificate: "Baptismal Certificate",
-        burialCertificate: "Burial Certificate",
-        confirmationCertificate: "Confirmation Certificate",
-        marriage:"Marriage",
-        baptism:"Baptism",
-        burial:"Burial",
-        confirmation:"Confirmation",
-        massintentions: "Mass Intentions"
-    };
 
     useEffect(() => {
         const fetchMassIntentions = async () => {
@@ -74,38 +62,40 @@ export const MassIntentions = () => {
 
     return (
         <>
-        <div className="Appointments">
-            <div className="titleFilter">
-                <h3>Mass Intentions</h3>
-            </div>
-            <br />
+        <h1 className="me-3">Mass Intentions</h1>
+        <div className="d-flex justify-content-center align-items-center mt-5">
+        <div className="card shadow-lg" style={{ width: "80%" }}>
+            <div className="card-body">
             <table className="table">
                 <thead className="table-dark">
-                    <tr>
-                        <th scope="col">Date of Request</th>
-                        <th scope="col">Mass Date</th>
-                        <th scope="col">Mass Time</th>
-                        <th scope="col">Requested by</th>
-                        <th scope="col">More Info</th>
-                    </tr>
+                <tr>
+                    <th scope="col" className="massIntention-th">Date of Request</th>
+                    <th scope="col" className="massIntention-th">Mass Date</th>
+                    <th scope="col" className="massIntention-th">Mass Time</th>
+                    <th scope="col" className="massIntention-th">Requested by</th>
+                    <th scope="col" className="massIntention-th">More Info</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {massIntentions.map((intention, index) => (
-                        <tr key={index}>
-                            <td>{formatDate(intention.dateOfRequest)}</td>
-                            <td>{intention.massSchedule?.massDate}</td>
-                            <td>{convertTo12HourFormat(intention.massSchedule?.massTime)}</td>
-                            <td>{intention.userFields.requesterName}</td>
-                            <td>
-                                <Button variant="info" onClick={() => handleShowMassIntentionModal(intention)}>
-                                    <i className="bi bi-info-circle-fill"></i>
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
+                {massIntentions.map((intention, index) => (
+                    <tr key={index}>
+                    <td className="massIntention-td">{formatDate(intention.dateOfRequest)}</td>
+                    <td className="massIntention-td">{intention.massSchedule?.massDate}</td>
+                    <td className="massIntention-td">{convertTo12HourFormat(intention.massSchedule?.massTime)}</td>
+                    <td className="massIntention-td">{intention.userFields.requesterName}</td>
+                    <td className="massIntention-td">
+                        <Button variant="info" onClick={() => handleShowMassIntentionModal(intention)}>
+                        <i className="bi bi-info-circle-fill"></i>
+                        </Button>
+                    </td>
+                    </tr>
+                ))}
                 </tbody>
             </table>
+            </div>
         </div>
+        </div>
+
 
         <Modal show={showMassIntentionModal} onHide={handleCloseMassIntentionModal}>
                 <Modal.Header closeButton>
@@ -131,11 +121,6 @@ export const MassIntentions = () => {
                         </>
                     )}
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseMassIntentionModal}>
-                        Close
-                    </Button>
-                </Modal.Footer>
             </Modal>
         </>
     );
