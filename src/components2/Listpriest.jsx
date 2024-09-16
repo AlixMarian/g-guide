@@ -164,7 +164,7 @@ export const Listpriest = () => {
                       required/>
                     <div className="invalid-feedback">Please provide a last name.</div>
                   </div>
-                  <div className="col-12 d-flex justify-content-between">
+                  <div className="d-flex justify-content-end gap-2">
                     <button type="submit" className="btn btn-success">
                       {editingPriest ? "Confirm Changes" : "Submit"}
                     </button>

@@ -267,7 +267,7 @@ export const SignUpCoord = () => {
                 
                   <div className="col-12">
                     <label htmlFor="churchName" className="form-label">Church Name</label>
-                    <div className="dropdown">
+                    <div className="dropdownAddress">
                       <button onClick={toggleDropdown} className="dropbtn">
                         {searchInput || "Select Church"}
                       </button>
