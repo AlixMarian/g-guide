@@ -22,7 +22,6 @@ export const Layout = () => {
   };
 
   const handleSEA = () => {
-    navigate('/SEA');
     setSecondSidebarOpen(!secondSidebarOpen);
     setActiveSection('mass-schedule');
   };
@@ -66,6 +65,18 @@ export const Layout = () => {
   const handleMassIntentions = () => {
     navigate('/MassIntentions');
   };
+
+  const handleSchedules = () => {
+    navigate('/Schedules')
+  }
+
+  const handleChurchEvents = () => {
+    navigate('/ChurchEvents')
+  }
+
+  const handleAnnouncements = () => {
+    navigate('/Announcements')
+  }
 
   // Close second sidebar if clicked outside
   useEffect(() => {
@@ -124,17 +135,23 @@ export const Layout = () => {
       case 'mass-schedule':
         return (
           <div className="second-sidebar-mass-schedule-content">
+            <div onClick={handleSchedules}>
             <div className={`numbers ${activeNumber === 'schedules' ? 'active' : ''}`} onClick={() => handleClick('schedules')}>
               <input type="image" src="../src/assets/number-1.png" className="image-size" />
               <h3 className="second-button-name">Schedules</h3>
             </div>
+            </div>
+            <div onClick={handleChurchEvents}>
             <div className={`numbers ${activeNumber === 'church-events' ? 'active' : ''}`} onClick={() => handleClick('church-events')}>
               <input type="image" src="../src/assets/number-2.png" className="image-size" />
               <h3 className="second-button-name">Church Events</h3>
             </div>
+            </div>
+            <div onClick={handleAnnouncements}>
             <div className={`numbers ${activeNumber === 'announcements' ? 'active' : ''}`} onClick={() => handleClick('announcements')}>
               <input type="image" src="../src/assets/number-3.png" className="image-size" />
               <h3 className="second-button-name">Announcements</h3>
+            </div>
             </div>
           </div>
         );
