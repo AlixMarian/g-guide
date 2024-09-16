@@ -99,7 +99,7 @@ export const ChurchEvents = () => {
       return (
         <>
         <div className="events">
-        <h1>Events</h1>
+        <h1>Church Events</h1>
         <table className='table'>
           <thead>
             <tr>

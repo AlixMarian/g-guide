@@ -12,9 +12,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SEA from './components2/SEA';
 import Appointments from './components2/Appointments';
-import Church from './components2/Church';
 import Listpriest from './components2/Listpriest';
-import Serviceoff from './components2/Serviceoff';
 import ReqVol from './components2/ReqVol';
 import Sidebar from './components2/Sidebar';
 import AccountSettings from './components2/AccountSett';
@@ -44,6 +42,13 @@ import Schedules from './components2/SEA/Schedules';
 import ChurchEvents from './components2/SEA/ChurchEvents';
 import Announcements from './components2/SEA/Announcements';
 
+//ServicesOffered
+import ExploreServices from './components2/ServiceOffered/ExploreServices';
+import Slots from './components2/ServiceOffered/Slots';
+
+//ChurchInfo
+import ChurchDetails from './components2/ChurchInfo/ChurchDetails'
+import ChurchUploads from './components2/ChurchInfo/ChurchUploads';
 
 const App = () => {
   return (
@@ -183,17 +188,49 @@ const App = () => {
         } />
 
 
-
-
-        <Route path="/ChurchInfo" element={
+        <Route path="/ExploreServices" element={
           <div>
             <Sidebar />
             <div>
               <AdminNavbar />
-              <div className='main-content'><Church /></div>
+              <div className='main-content'><ExploreServices /></div>
             </div>
           </div>
         } />
+
+        <Route path="/Slots" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><Slots /></div>
+            </div>
+          </div>
+        } />
+
+
+
+        <Route path="/ChurchDetails" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><ChurchDetails /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/ChurchUploads" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><ChurchUploads /></div>
+            </div>
+          </div>
+        } />
+
+
 
         <Route path="/ListofPriest" element={
           <div>
@@ -201,16 +238,6 @@ const App = () => {
             <div>
               <AdminNavbar />
               <div className='main-content'><Listpriest /></div>
-            </div>
-          </div>
-        } />
-
-        <Route path="/ServiceOffered" element={
-          <div>
-            <Sidebar />
-            <div>
-              <AdminNavbar />
-              <div className='main-content'><Serviceoff /></div>
             </div>
           </div>
         } />
