@@ -65,6 +65,9 @@ export const Layout = () => {
     navigate('/MassIntentions');
   };
 
+  const handlePaymentHistory = () => {
+    navigate('/PaymentHistory');
+  };
 
   //
   const handleSchedules = () => {
@@ -235,7 +238,7 @@ export const Layout = () => {
             </div>
             <div 
               className={`payment-history ${activeSection === 'payment-history' ? 'coord-active' : ''}`} 
-              onClick={() => setActiveSection('payment-history')}
+              onClick={handlePaymentHistory}
             >
               <input type="image" src="../src/assets/payment-history.png" className='image-size' />
               <h3 className='button-name'>Payment History</h3>
