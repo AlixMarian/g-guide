@@ -29,18 +29,60 @@ export const ApprovedAppointments = () => {
     useEffect(() => {
         const fetchApprovedAppointments = async () => {
             if (!user) return;
-            const approvedQueryChurch = query(
-                collection(db, "appointments"),
-                where("appointmentStatus", "==", "Approved"),
-                where("churchId", "==", user.uid)
-            );
-            const approvedSnapshot = await getDocs(approvedQueryChurch);
-            const approvedAppointmentsData = approvedSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            console.log("Fetched Data: ", approvedAppointmentsData);
-            setApprovedAppointments(approvedAppointmentsData);
+            try{
+                const coordinatorQuery = query(
+                    collection(db, "coordinator"),
+                    where("userId", "==", user.uid)
+                );
+                const coordinatorSnapshot = await getDocs(coordinatorQuery);
+                
+                if (coordinatorSnapshot.empty) {
+                    console.log("No coordinator found for this user.");
+                    return;
+                }
+                const coordinatorData = coordinatorSnapshot.docs[0].data(); // Assuming only one coordinator per user
+                const coordinatorID = coordinatorSnapshot.docs[0].id; // Get the document ID as the coordinatorID
+
+                if (!coordinatorID) {
+                    console.error("Coordinator ID is undefined.");
+                    return;
+                }
+
+                const churchQuery = query(
+                    collection(db, "church"),
+                    where("coordinatorID", "==", coordinatorID)
+                );
+                const churchSnapshot = await getDocs(churchQuery);
+                
+                if (churchSnapshot.empty) {
+                    console.log("No church found for this coordinator.");
+                    return;
+                }
+
+                const churchData = churchSnapshot.docs[0].data(); // Assuming only one church per coordinator
+                const churchID = churchSnapshot.docs[0].id; // Get the document ID as the churchID
+
+                if (!churchID) {
+                    console.error("Church ID is undefined.");
+                    return;
+                }
+
+                const approvedQueryChurch = query(
+                    collection(db, "appointments"),
+                    where("appointmentStatus", "==", "Approved"),
+                    where("churchId", "==", churchID)
+                );
+                const approvedSnapshot = await getDocs(approvedQueryChurch);
+                const approvedAppointmentsData = approvedSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                console.log("Fetched Data: ", approvedAppointmentsData);
+                setApprovedAppointments(approvedAppointmentsData);
+            } catch (error){
+                console.error("Error fetching appointments: ", error);
+            }
+            
         };
 
         fetchApprovedAppointments();

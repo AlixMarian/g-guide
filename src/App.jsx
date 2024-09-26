@@ -37,6 +37,9 @@ import ApprovedAppointments from './components2/Appointments/ApprovedAppointment
 import DeniedAppointments from './components2/Appointments/DeniedAppointments';
 import MassIntentions from './components2/Appointments/MassIntentions';
 
+//paymenthistory
+import  PaymentHistory  from './components2/PaymentHistory';
+
 //Mass Schedule
 import Schedules from './components2/SEA/Schedules';
 import ChurchEvents from './components2/SEA/ChurchEvents';
@@ -151,6 +154,16 @@ const App = () => {
             <div>
               <AdminNavbar />
               <div className='main-content'><MassIntentions /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/PaymentHistory" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><PaymentHistory/></div>
             </div>
           </div>
         } />

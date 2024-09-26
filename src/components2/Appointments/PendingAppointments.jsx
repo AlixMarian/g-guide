@@ -31,23 +31,71 @@ export const PendingAppointments = () => {
 
     useEffect(() => {
         const fetchPendingAppointments = async () => {
-            if (!user) return;
-            const pendingQuery = query(
-                collection(db, "appointments"),
-                where("appointmentStatus", "==", "Pending"),
-                where("churchId", "==", user.uid)
-            );
-            const pendingSnapshot = await getDocs(pendingQuery);
-            const pendingAppointmentsData = pendingSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            console.log("Fetched Data: ", pendingAppointmentsData);
-            setPendingAppointments(pendingAppointmentsData);
+            if (!user ) return;
+            try {
+                // Step 1: Query the coordinator collection to get the coordinatorID based on the userId
+                const coordinatorQuery = query(
+                    collection(db, "coordinator"),
+                    where("userId", "==", user.uid)
+                );
+                const coordinatorSnapshot = await getDocs(coordinatorQuery);
+                
+                if (coordinatorSnapshot.empty) {
+                    console.log("No coordinator found for this user.");
+                    return;
+                }
+    
+                const coordinatorData = coordinatorSnapshot.docs[0].data(); // Assuming only one coordinator per user
+                const coordinatorID = coordinatorSnapshot.docs[0].id; // Get the document ID as the coordinatorID
+    
+                if (!coordinatorID) {
+                    console.error("Coordinator ID is undefined.");
+                    return;
+                }
+    
+                // Step 2: Query the church collection to get the churchID based on the coordinatorID
+                const churchQuery = query(
+                    collection(db, "church"),
+                    where("coordinatorID", "==", coordinatorID)
+                );
+                const churchSnapshot = await getDocs(churchQuery);
+                
+                if (churchSnapshot.empty) {
+                    console.log("No church found for this coordinator.");
+                    return;
+                }
+    
+                const churchData = churchSnapshot.docs[0].data(); // Assuming only one church per coordinator
+                const churchID = churchSnapshot.docs[0].id; // Get the document ID as the churchID
+    
+                if (!churchID) {
+                    console.error("Church ID is undefined.");
+                    return;
+                }
+    
+                // Step 3: Query the appointments collection to get all pending appointments for the churchID
+                const pendingAppointmentsQuery = query(
+                    collection(db, "appointments"),
+                    where("appointmentStatus", "==", "Pending"),
+                    where("churchId", "==", churchID)
+                );
+                const pendingAppointmentsSnapshot = await getDocs(pendingAppointmentsQuery);
+                const pendingAppointmentsData = pendingAppointmentsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                console.log("Fetched Pending Appointments: ", pendingAppointmentsData);
+                setPendingAppointments(pendingAppointmentsData);
+            } catch (error) {
+                console.error("Error fetching appointments: ", error);
+            }
         };
-
+    
         fetchPendingAppointments();
     }, [user]);
+    
+    
 
     const handleShowModal = (appointment) => {
         setSelectedAppointment(appointment);
