@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { collection, getDocs, query, where, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from '/backend/firebase';
 import '../websiteUser.css';
@@ -223,6 +223,7 @@ export const OngoingAppointments = () => {
   
         await updateDoc(doc(db, "appointments", selectedAppointmentId), {
           'appointments.paymentImage': paymentImageUrl,
+          'appointments.paymentUploadDate': Timestamp.now(),
         });
   
         toast.success("Payment receipt uploaded successfully");

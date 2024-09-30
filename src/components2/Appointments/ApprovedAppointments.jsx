@@ -3,7 +3,7 @@ import { Modal, Button} from 'react-bootstrap';
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "/backend/firebase";
 import { getAuth } from 'firebase/auth';
-import '../../churchCoordinator.css'
+import '../../churchCoordinator.css';
 
 
 export const ApprovedAppointments = () => {
