@@ -320,3 +320,18 @@
 .show {
   display: block;
 } 
+
+.custom-offcanvas {
+  background-color: #F2F2F2; /* Example custom style */
+  width: 25rem !important; /* Custom width */
+  height: 658px;
+  margin-right: 2rem;
+  margin-top: 1rem;
+  justify-content: center;
+  border-radius: 1.5rem;
+
+  /* Center it vertically */
+  top: 50%;
+  transform: translateY(-50%);
+  position: fixed; /* Ensure it's positioned relative to the viewport */
+}
