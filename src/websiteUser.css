@@ -322,16 +322,109 @@
 } 
 
 .custom-offcanvas {
-  background-color: #F2F2F2; /* Example custom style */
-  width: 25rem !important; /* Custom width */
+  background-color: #F2F2F2; 
+  width: 25rem !important;
   height: 658px;
   margin-right: 2rem;
   margin-top: 1rem;
   justify-content: center;
   border-radius: 1.5rem;
-
-  /* Center it vertically */
-  top: 50%;
   transform: translateY(-50%);
-  position: fixed; /* Ensure it's positioned relative to the viewport */
+  position: fixed; 
+  display: flex;
+  padding: 0;
+}
+
+.drawer-img-container {
+  width: 100%;
+  padding: 0;
+  margin: 0; /* Remove margin if present */
+  display: flex; /* Ensure the image container uses flex */
+  justify-content: center; /* Center content if needed */
+}
+
+.drawer-img-container img {
+  width: 100%; /* Image takes full width of the container */
+  height: auto; /* Keep aspect ratio */
+  object-fit: cover; /* Ensure image covers the container area */
+  border-top-left-radius: 1.2rem; /* Match border-radius of drawer */
+  border-top-right-radius: 1.2rem;
+}
+
+.drawer-title {
+  text-align: center; /* This will center the text */
+  font-weight: bold;
+  margin-top: -10px; /* Optional: Make the title bold */
+}
+
+.drawer-content {
+  display: flex;        /* Enables Flexbox */
+  flex-direction: column; /* Arrange items vertically */
+  padding: 15px;
+  gap: 2rem;    
+  margin-top: 1rem;       /* Adds gap between flex items */
+}
+
+.drawer-body-content {
+  flex-grow: 1; /* Ensure this content grows to fill available space */
+}
+
+.drawer-icon-text {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.drawer-icon-text i {
+  margin-right: 10px;
+}
+
+.view-church-btn {
+  width: 100%; /* Make the button full width */
+  background-color: #1D8BDA; /* Customize button color */
+  color: white;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 20px;
+  text-align: center;
+  border: none;
+  margin-top: auto; /* Pushes button to the bottom */
+  margin-bottom: 1rem; /* Adds space below the button */
+}
+
+.map-search-container {
+  background-color: transparent;
+}
+
+.map-search-container .logo-container {
+  display: flex;
+  align-items: center;
+  margin: 20px;
+  gap: 0.5rem;
+  background-color: transparent;
+}
+
+.map-search-container .logo-container img {
+  width: 50px;
+  height: 50px;
+}
+
+.map-search-container .logo-container h3 {
+  margin-left: -0.3rem;
+  margin-top: 0.3rem;
+  font-weight: bold;
+}
+
+.map-search-container .logo-container i {
+  font-size: 1.5rem;
+  margin-left: 10px;
+  margin-top: -0.2rem;
+  cursor: pointer;
+}
+
+.map-search-input {
+  width: 20%;
+  padding: 10px;
+  margin: 20px;
+  background-color: transparent;
 }

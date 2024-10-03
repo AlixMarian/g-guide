@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from '@react-google-maps/api';
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useNavigate } from 'react-router-dom';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '/backend/firebase'; // Adjust based on your project structure
-import '../websiteUser.css';
-import NavBar from './NavBar';
-import WebsiteUserNavBar from './WebsiteUserNavBar';
+import { query, where, collection, getDocs } from 'firebase/firestore';
+import { db } from '/backend/firebase';
 import { Offcanvas } from 'react-bootstrap';
-import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif'; // Add your loading GIF path here
+import 'bootstrap/dist/css/bootstrap.min.css';
+import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
+import coverLogo from '../assets/logo cover.png';
+import logo from '../assets/G-Guide LOGO.png';
+
+const libraries = ['places'];  // Declare libraries as a static array outside the component
 
 const containerStyle = {
   width: '100%',
@@ -18,37 +18,26 @@ const containerStyle = {
 const MapComponent = () => {
   const [currentPosition, setCurrentPosition] = useState(null);
   const [churches, setChurches] = useState([]);
-  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-  const navigate = useNavigate();
+  const [churchPhoto, setChurchPhoto] = useState(coverLogo);  // Holds church photo
+  const [loading, setLoading] = useState(true);
+  const [drawerInfo, setDrawerInfo] = useState({ show: false, title: '', description: '', telephone: '', serviceHours: '' });
   const [map, setMap] = useState(null);
-  const [customIcon, setCustomIcon] = useState(null); // Icon for churches
+  const [customIcon, setCustomIcon] = useState(null);  // Icon for churches
   const [searchBox, setSearchBox] = useState(null);
-  const [drawerInfo, setDrawerInfo] = useState({ show: false, title: '', description: '' });
-  const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsUserLoggedIn(!!user);
-    });
-    return () => unsubscribe();
-  }, [navigate]);
-
-  // Fetch current location
-  const success = (position) => {
-    const positionObj = {
-      lat: position.coords.latitude,
-      lng: position.coords.longitude,
+    const success = (position) => {
+      const positionObj = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+      setCurrentPosition(positionObj);
     };
-    setCurrentPosition(positionObj);
-  };
 
-  const error = (err) => {
-    console.error('Unable to retrieve your location:', err);
-  };
+    const error = (err) => {
+      console.error('Unable to retrieve your location:', err);
+    };
 
-  useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(success, error);
     } else {
@@ -56,45 +45,87 @@ const MapComponent = () => {
     }
   }, []);
 
-  // Fetch churches data from Firestore
-  useEffect(() => {
-    const fetchChurches = async () => {
-      const churchCollection = collection(db, 'churchLocation');
+  // Fetch church data and photos
+  const fetchChurchData = async () => {
+    try {
+      const churchLocationCollection = collection(db, 'churchLocation');
+      const churchLocationSnapshot = await getDocs(churchLocationCollection);
+      const churchLocationList = churchLocationSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const churchCollection = collection(db, 'church');
       const churchSnapshot = await getDocs(churchCollection);
       const churchList = churchSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setChurches(churchList);
-      setLoading(false); // Stop loading when data is fetched
-    };
 
-    fetchChurches();
+      const churchPhotosCollection = collection(db, 'churchPhotos');
+      const churchPhotosSnapshot = await getDocs(churchPhotosCollection);
+      const churchPhotosList = churchPhotosSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const combinedChurchData = churchLocationList.map(location => {
+        const matchedChurch = churchList.find(church => church.churchName === location.churchName);
+        const matchedPhoto = churchPhotosList.find(photo => photo.uploader === (matchedChurch ? matchedChurch.coordinatorID : null));
+
+        return {
+          ...location,
+          ...(matchedChurch || {}),
+          churchPhoto: matchedPhoto ? matchedPhoto.photoLink : coverLogo,  // Add photoLink or default photo
+        };
+      });
+
+      setChurches(combinedChurchData);
+    } catch (error) {
+      console.error('Error fetching church data: ', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchChurchData();
   }, []);
 
-  // Initialize custom icon on map load
   const handleMapLoad = (mapInstance) => {
     setMap(mapInstance);
     if (window.google) {
       setCustomIcon({
-        url: 'src/assets/location.png', // Ensure this points to your custom icon for churches
+        url: 'src/assets/location.png',
         scaledSize: new window.google.maps.Size(40, 40),
         anchor: new window.google.maps.Point(20, 40),
       });
     }
-    setLoading(false); // Stop loading when map loads
+    setLoading(false);
   };
 
-  // Handle marker click for displaying details
-  const handleMarkerClick = (title, description) => {
-    setDrawerInfo({ show: true, title, description });
+  const handleMarkerClick = (church) => {
+    const telephone = church.churchContactNum ? church.churchContactNum : 'No data added yet.';
+    const serviceHours = (!church.churchStartTime || !church.churchEndTime || 
+        church.churchStartTime === "none" || church.churchEndTime === "none")
+      ? 'No data added yet.' 
+      : `${convertTo12HourFormat(church.churchStartTime)} - ${convertTo12HourFormat(church.churchEndTime)}`;
+
+    setChurchPhoto(church.churchPhoto);  // Set the fetched photo for the clicked church
+
+    setDrawerInfo({
+      show: true,
+      title: church.churchName,
+      description: church.churchLocation,
+      telephone,
+      serviceHours,
+    });
   };
 
   const handleCloseDrawer = () => {
-    setDrawerInfo({ show: false, title: '', description: '' });
+    setDrawerInfo({ show: false, title: '', description: '', telephone: '', serviceHours: '' });
   };
 
-  // Adjust marker size based on zoom level
   const onZoomChanged = () => {
     if (map) {
       const zoom = map.getZoom();
@@ -120,6 +151,13 @@ const MapComponent = () => {
     }
   };
 
+  const convertTo12HourFormat = (time) => {
+    const [hours, minutes] = time.split(':');
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const adjustedHours = hours % 12 || 12;
+    return `${adjustedHours}:${minutes} ${period}`;
+  };
+
   return (
     <>
       {loading && (
@@ -127,65 +165,93 @@ const MapComponent = () => {
           <img src={loadingGif} alt="Loading..." style={{ width: '100px', height: '100px' }} />
         </div>
       )}
-      
-      <LoadScript
-        googleMapsApiKey={googleMapsApiKey}
-        libraries={['places']}
-        onError={() => console.error('Error loading Google Maps script')}
-      >
-        {isUserLoggedIn ? <WebsiteUserNavBar /> : <NavBar />}
 
-        <div className="map-search-container">
-          <StandaloneSearchBox
-            onLoad={onLoadSearchBox}
-            onPlacesChanged={onPlacesChanged}
-          >
-            <input
-              type="text"
-              placeholder="Search for a place..."
-              className="map-search-input"
-              style={{ width: '20%', padding: '10px', margin: '20px' }}
-            />
-          </StandaloneSearchBox>
+    <LoadScript
+      googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+      libraries={libraries}
+      onError={() => console.error('Error loading Google Maps script')}
+    >
+      <div className="map-search-container">
+        <div className="logo-container">
+          <img src={logo} alt="Logo" />
+          <h3 style={{ fontFamily: 'Roboto, sans-serif' }}>G! Guide</h3>
+          <i className="fas fa-bars"></i>
         </div>
 
-        <GoogleMap
-          mapContainerStyle={containerStyle}
-          center={currentPosition || { lat: 0, lng: 0 }}
-          zoom={13}
-          onZoomChanged={onZoomChanged}
-          onLoad={handleMapLoad} // Initialize map and custom icon on load
+        <StandaloneSearchBox
+          onLoad={onLoadSearchBox}
+          onPlacesChanged={onPlacesChanged}
         >
-          {currentPosition && (
-            <Marker
-              position={currentPosition}
-              onClick={() => handleMarkerClick('Your Location', 'This is your current location.')}
-            />
-          )}
+          <input
+            type="text"
+            placeholder="Search for a place..."
+            className="map-search-input"
+          />
+        </StandaloneSearchBox>
+      </div>
 
-          {churches.map((church) => (
-            <Marker
-              key={church.id}
-              position={{
-                lat: parseFloat(church.latitude), 
-                lng: parseFloat(church.longitude), 
-              }}
-              icon={customIcon} 
-              onClick={() => handleMarkerClick(church.churchName, church.churchLocation)}
-            />
-          ))}
-        </GoogleMap>
-      </LoadScript>
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={currentPosition || { lat: 0, lng: 0 }}
+        zoom={13}
+        onZoomChanged={onZoomChanged}
+        onLoad={handleMapLoad}
+      >
+        {currentPosition && (
+          <Marker
+            position={currentPosition}
+            onClick={() => handleMarkerClick({ churchName: 'Your Location', churchLocation: 'This is your current location.' })}
+          />
+        )}
+
+        {churches.map((church) => (
+          <Marker
+            key={church.id}
+            position={{
+              lat: parseFloat(church.latitude), 
+              lng: parseFloat(church.longitude),
+            }}
+            icon={customIcon}
+            onClick={() => handleMarkerClick(church)}
+          />
+        ))}
+      </GoogleMap>
+    </LoadScript>
+
 
       <Offcanvas show={drawerInfo.show} onHide={handleCloseDrawer} placement="end" className="custom-offcanvas">
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title>{drawerInfo.title}</Offcanvas.Title>
+        <Offcanvas.Header>
+          <div className="drawer-img-container">
+            <img src={churchPhoto} alt="Church Cover" />
+          </div>
         </Offcanvas.Header>
-        <Offcanvas.Body>
-          {drawerInfo.description}
+        <Offcanvas.Body className="d-flex flex-column">
+          <div className="drawer-body-content">
+            <Offcanvas.Title className='drawer-title'>{drawerInfo.title}</Offcanvas.Title>
+
+            <div className="drawer-content">
+              <div className="drawer-icon-text">
+                <i className="bi bi-geo-alt-fill"></i>
+                <span>{drawerInfo.description}</span>
+              </div>
+
+              <div className="drawer-icon-text">
+                <i className="bi bi-telephone-fill"></i> 
+                <span>{drawerInfo.telephone}</span>
+              </div>
+
+              <div className="drawer-icon-text">
+                <i className="bi bi-clock-fill"></i> 
+                <span>{drawerInfo.serviceHours}</span>
+              </div>
+            </div>
+          </div>
+
+          <button className="view-church-btn">
+            View Church Information
+          </button>
         </Offcanvas.Body>
       </Offcanvas>
-
     </>
   );
 };
