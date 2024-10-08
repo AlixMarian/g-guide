@@ -325,35 +325,35 @@ const MapComponent = () => {
         </div>
 
         <GoogleMap
-  mapContainerStyle={containerStyle}
-  center={currentPosition || { lat: 0, lng: 0 }}
-  zoom={13}
-  onZoomChanged={onZoomChanged}
-  onLoad={handleMapLoad}
->
-  {/* Always display the user's current position */}
-  {currentPosition && (
-    <Marker position={currentPosition} />
-  )}
+        mapContainerStyle={containerStyle}
+        center={currentPosition || { lat: 0, lng: 0 }}
+        zoom={13}
+        onZoomChanged={onZoomChanged}
+        onLoad={handleMapLoad}
+      >
+        {/* Always display the user's current position */}
+        {currentPosition && (
+          <Marker position={currentPosition} />
+        )}
 
-  {/* Display filtered churches if service is selected, otherwise all churches */}
-  {(selectedService ? filteredChurches : churches).map((church) => {
-    if (church.latitude && church.longitude) {
-      return (
-        <Marker
-          key={church.id}
-          position={{
-            lat: parseFloat(church.latitude),
-            lng: parseFloat(church.longitude),
-          }}
-          icon={customIcon}
-          onClick={() => handleMarkerClick(church)}
-        />
-      );
-    }
-    return null;
-  })}
-</GoogleMap>
+        {/* Display filtered churches if service is selected, otherwise all churches */}
+        {(selectedService ? filteredChurches : churches).map((church) => {
+          if (church.latitude && church.longitude) {
+            return (
+              <Marker
+                key={church.id}
+                position={{
+                  lat: parseFloat(church.latitude),
+                  lng: parseFloat(church.longitude),
+                }}
+                icon={customIcon}
+                onClick={() => handleMarkerClick(church)}
+              />
+            );
+          }
+          return null;
+        })}
+      </GoogleMap>
 
 
       </LoadScript>
