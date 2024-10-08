@@ -9,6 +9,7 @@ import coverLogo from '../assets/logo cover.png';
 import logo from '../assets/G-Guide LOGO.png';
 
 const libraries = ['places'];  // Declare libraries as a static array outside the component
+const servicesList = ['Marriages', 'Baptism', 'Burials', 'Confirmation', 'Mass Intentions'];
 
 const containerStyle = {
   width: '100%',
@@ -17,13 +18,16 @@ const containerStyle = {
 
 const MapComponent = () => {
   const [currentPosition, setCurrentPosition] = useState(null);
-  const [churches, setChurches] = useState([]);
+  const [churches, setChurches] = useState([]); // All churches
+  const [filteredChurches, setFilteredChurches] = useState([]); // Filtered churches
   const [churchPhoto, setChurchPhoto] = useState(coverLogo);  // Holds church photo
   const [loading, setLoading] = useState(true);
   const [drawerInfo, setDrawerInfo] = useState({ show: false, title: '', description: '', telephone: '', serviceHours: '' });
   const [map, setMap] = useState(null);
   const [customIcon, setCustomIcon] = useState(null);  // Icon for churches
   const [searchBox, setSearchBox] = useState(null);
+  const [showMenu, setShowMenu] = useState(false); 
+  const [selectedService, setSelectedService] = useState('');  // Selected service
 
   useEffect(() => {
     const success = (position) => {
@@ -44,6 +48,118 @@ const MapComponent = () => {
       console.error('Geolocation is not supported by your browser');
     }
   }, []);
+
+  const fetchChurchesByService = async (selectedService) => {
+    try {
+      console.log(`Selected Service: ${selectedService}`);
+  
+      // Step 1: Query the services collection where activeSchedules contains the selected service
+      const servicesQuery = query(
+        collection(db, 'services'),
+        where('activeSchedules', 'array-contains', selectedService)
+      );
+      const servicesSnapshot = await getDocs(servicesQuery);
+  
+      if (servicesSnapshot.empty) {
+        console.log("No services found for the selected service.");
+        return;
+      }
+  
+      console.log(`Services Found: ${servicesSnapshot.docs.length}`);
+  
+      const userIds = servicesSnapshot.docs.map(serviceDoc => serviceDoc.id);
+      console.log(`Collected userIds from services: ${userIds}`);
+  
+      const churchesList = [];
+  
+      // Step 2: Query the coordinator collection to find documents where userId matches
+      for (const userId of userIds) {
+        const coordinatorQuery = query(
+          collection(db, 'coordinator'),
+          where('userId', '==', userId)
+        );
+        const coordinatorSnapshot = await getDocs(coordinatorQuery);
+  
+        if (!coordinatorSnapshot.empty) {
+          console.log(`Coordinator found for userId: ${userId}`);
+          const coordinatorID = coordinatorSnapshot.docs[0].id; // Use the document ID as coordinatorID
+  
+          // Step 3: Query the church collection using the coordinatorID to get the churchName
+          const churchQuery = query(
+            collection(db, 'church'),
+            where('coordinatorID', '==', coordinatorID)
+          );
+          const churchSnapshot = await getDocs(churchQuery);
+  
+          if (!churchSnapshot.empty) {
+            for (const churchDoc of churchSnapshot.docs) {
+              const churchData = churchDoc.data();
+              const churchName = churchData.churchName;
+  
+              // Step 4: Fetch churchLocation data from the churchLocation collection
+              const churchLocationQuery = query(
+                collection(db, 'churchLocation'),
+                where('churchName', '==', churchName) // Assuming churchName is consistent in both collections
+              );
+  
+              const churchLocationSnapshot = await getDocs(churchLocationQuery);
+  
+              if (!churchLocationSnapshot.empty) {
+                const churchLocationDoc = churchLocationSnapshot.docs[0];
+                const churchLocationData = churchLocationDoc.data();
+                const churchLocation = churchLocationData.churchLocation; // Fetch churchLocation field
+  
+                console.log(`Church Name Found: ${churchName}`);
+                console.log(`Church Location: ${churchLocation}`);
+  
+                // Add the church with its location to the churchesList
+                churchesList.push({
+                  id: churchDoc.id,
+                  churchName: churchName,
+                  churchLocation: churchLocation || "Location not available", 
+                });
+              } else {
+                // If no location is found, still add the church with a "Location not available" message
+                console.log(`No location found for churchName: ${churchName}`);
+                churchesList.push({
+                  id: churchDoc.id,
+                  churchName: churchName,
+                  churchLocation: "Location not available",
+                });
+              }
+            }
+          } else {
+            console.log(`No church found for coordinatorID: ${coordinatorID}`);
+          }
+        } else {
+          console.log(`No coordinator found for userId: ${userId}`);
+        }
+      }
+  
+      // Step 5: Set the filtered churches to be displayed
+      setFilteredChurches(churchesList);
+  
+      if (churchesList.length === 0) {
+        console.log("No churches available for the selected service.");
+      } else {
+        console.log(`Filtered Churches: ${churchesList}`);
+      }
+    } catch (error) {
+      console.error('Error fetching churches by service:', error);
+    }
+  };
+  
+
+  useEffect(() => {
+    if (selectedService) {
+      setLoading(true);
+      fetchChurchesByService(selectedService);
+    }
+  }, [selectedService]);
+
+  const handleServiceChange = (e) => {
+    setSelectedService(e.target.value);
+  };
 
   // Fetch church data and photos
   const fetchChurchData = async () => {
@@ -82,7 +198,7 @@ const MapComponent = () => {
 
       setChurches(combinedChurchData);
     } catch (error) {
-      console.error('Error fetching church data: ', error);
+      console.error('Error fetching church data:', error);
     } finally {
       setLoading(false);
     }
@@ -111,12 +227,12 @@ const MapComponent = () => {
       ? 'No data added yet.' 
       : `${convertTo12HourFormat(church.churchStartTime)} - ${convertTo12HourFormat(church.churchEndTime)}`;
 
-    setChurchPhoto(church.churchPhoto);  // Set the fetched photo for the clicked church
+    setChurchPhoto(church.churchPhoto);  
 
     setDrawerInfo({
       show: true,
       title: church.churchName,
-      description: church.churchLocation,
+      description: church.churchLocation,  // Correctly setting the location here
       telephone,
       serviceHours,
     });
@@ -138,15 +254,18 @@ const MapComponent = () => {
   };
 
   const onLoadSearchBox = (ref) => {
-    setSearchBox(ref);
+    setSearchBox(ref);  // Save reference to the search box
   };
 
   const onPlacesChanged = () => {
-    const places = searchBox.getPlaces();
+    const places = searchBox.getPlaces();  // Get the suggested places
     if (places && places.length > 0) {
       const place = places[0];
       const location = place.geometry.location;
-      setCurrentPosition({ lat: location.lat(), lng: location.lng() });
+      console.log('Selected place:', place);
+      console.log('Location:', location.lat(), location.lng());
+
+      // You can now use this location for map centering or other purposes
       map.panTo({ lat: location.lat(), lng: location.lng() });
     }
   };
@@ -158,6 +277,14 @@ const MapComponent = () => {
     return `${adjustedHours}:${minutes} ${period}`;
   };
 
+  const handleMenu = () => {
+    setShowMenu(true);
+  };
+
+  const handleCloseMenu = () => {
+    setShowMenu(false);
+  };
+
   return (
     <>
       {loading && (
@@ -166,58 +293,46 @@ const MapComponent = () => {
         </div>
       )}
 
-    <LoadScript
-      googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-      libraries={libraries}
-      onError={() => console.error('Error loading Google Maps script')}
-    >
-      <div className="map-search-container">
-        <div className="logo-container">
-          <img src={logo} alt="Logo" />
-          <h3 style={{ fontFamily: 'Roboto, sans-serif' }}>G! Guide</h3>
-          <i className="fas fa-bars"></i>
+      <LoadScript
+        googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+        libraries={['places']}
+        onError={() => console.error('Error loading Google Maps script')}
+      >
+        <div className="map-search-container">
+          <div className="logo-container">
+            <img src={logo} alt="Logo" style={{boxShadow: '2px 6px 6px rgba(0, 0, 0, 0.3)', borderRadius: '30px', marginTop: '-0.5rem'}}/>
+            <h3 style={{ fontFamily: 'Roboto, sans-serif' }}>G! Guide</h3>
+            <i className="fas fa-bars" onClick={handleMenu} ></i>
+          </div>
         </div>
 
-        <StandaloneSearchBox
-          onLoad={onLoadSearchBox}
-          onPlacesChanged={onPlacesChanged}
+        <GoogleMap
+          mapContainerStyle={containerStyle}
+          center={currentPosition || { lat: 0, lng: 0 }}
+          zoom={13}
+          onZoomChanged={onZoomChanged}
+          onLoad={handleMapLoad}
         >
-          <input
-            type="text"
-            placeholder="Search for a place..."
-            className="map-search-input"
-          />
-        </StandaloneSearchBox>
-      </div>
+          {currentPosition && (
+            <Marker
+              position={currentPosition}
+            />
+          )}
 
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={currentPosition || { lat: 0, lng: 0 }}
-        zoom={13}
-        onZoomChanged={onZoomChanged}
-        onLoad={handleMapLoad}
-      >
-        {currentPosition && (
-          <Marker
-            position={currentPosition}
-            onClick={() => handleMarkerClick({ churchName: 'Your Location', churchLocation: 'This is your current location.' })}
-          />
-        )}
-
-        {churches.map((church) => (
-          <Marker
-            key={church.id}
-            position={{
-              lat: parseFloat(church.latitude), 
-              lng: parseFloat(church.longitude),
-            }}
-            icon={customIcon}
-            onClick={() => handleMarkerClick(church)}
-          />
-        ))}
-      </GoogleMap>
-    </LoadScript>
-
+          {/* Display filtered churches as markers */}
+          {(selectedService ? filteredChurches : churches).map((church) => (
+            <Marker
+              key={church.id}
+              position={{
+                lat: parseFloat(church.latitude), 
+                lng: parseFloat(church.longitude),
+              }}
+              icon={customIcon}
+              onClick={() => handleMarkerClick(church)}
+            />
+          ))}
+        </GoogleMap>
+      </LoadScript>
 
       <Offcanvas show={drawerInfo.show} onHide={handleCloseDrawer} placement="end" className="custom-offcanvas">
         <Offcanvas.Header>
@@ -232,7 +347,7 @@ const MapComponent = () => {
             <div className="drawer-content">
               <div className="drawer-icon-text">
                 <i className="bi bi-geo-alt-fill"></i>
-                <span>{drawerInfo.description}</span>
+                <span>{drawerInfo.description}</span>  {/* Displaying location here */}
               </div>
 
               <div className="drawer-icon-text">
@@ -250,6 +365,71 @@ const MapComponent = () => {
           <button className="view-church-btn">
             View Church Information
           </button>
+        </Offcanvas.Body>
+      </Offcanvas>
+
+      <Offcanvas show={showMenu} onHide={handleCloseMenu} placement="start">
+        <Offcanvas.Title>
+          <div className="map-search-container">
+            <div className="logo-container-center">
+              <img src={logo} alt="Logo" style={{width: '60px', height: '60px', justifyContent: 'center', boxShadow: '2px 6px 6px rgba(0, 0, 0, 0.3)', borderRadius: '30px'}} />
+              <h3 style={{ fontFamily: 'Roboto, sans-serif' , marginTop: '0.8rem', fontWeight: 'bold'}}>G! Guide</h3>
+              <button onClick={handleCloseMenu} className="back-button">
+                <i className="bi bi-arrow-return-left"></i>
+              </button>
+            </div>
+          </div>
+        </Offcanvas.Title>
+        <Offcanvas.Body>
+          <div className="center-search">
+            <StandaloneSearchBox onLoad={onLoadSearchBox} onPlacesChanged={onPlacesChanged}>
+              <div className="input-group">
+                <div className="form-outline" style={{ width: '300px' }}>
+                  <input 
+                    id="search-focus" 
+                    type="search" 
+                    className="form-control" 
+                    placeholder="Find your nearest church..." 
+                  />
+                </div>
+                <button type="button" className="btn btn-primary">
+                  <i className="fas fa-search"></i>
+                </button>
+              </div>
+            </StandaloneSearchBox>
+          </div>
+          <div style={{ marginTop: '10px' }}>
+              <select value={selectedService} onChange={handleServiceChange} className="form-select">
+                <option value="">Filter by services available </option>
+                {servicesList.map((service) => (
+                  <option key={service} value={service}>
+                    {service}
+                  </option>
+                ))}
+              </select>
+          </div>
+
+          {filteredChurches.length > 0 ? (
+            <div style={{ marginTop: '30px' }}>
+              <h6 style={{marginBottom: '20px'}}>Churches offering {selectedService}:</h6>
+              <div>
+                {filteredChurches.map((church) => (
+                  <div className="filtered-church-card" key={church.id} >
+                    <h6>{church.churchName}</h6>
+                    <div className="drawer-icon-text">
+                      <i className="bi bi-geo-alt-fill"></i>
+                      <span>{church.churchLocation || 'Location not available'}</span> {/* Displaying location */}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            selectedService && (
+              <p style={{ marginTop: '10px' }}>No churches found offering {selectedService}.</p>
+            )
+          )}
+
         </Offcanvas.Body>
       </Offcanvas>
     </>
