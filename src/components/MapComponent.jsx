@@ -108,16 +108,25 @@ const MapComponent = () => {
                 const churchLocationDoc = churchLocationSnapshot.docs[0];
                 const churchLocationData = churchLocationDoc.data();
                 const churchLocation = churchLocationData.churchLocation; // Fetch churchLocation field
+                const latitude = churchLocationData.latitude;
+                const longitude = churchLocationData.longitude;
   
                 console.log(`Church Name Found: ${churchName}`);
                 console.log(`Church Location: ${churchLocation}`);
-  
-                // Add the church with its location to the churchesList
-                churchesList.push({
+
+                if (latitude && longitude) { 
+                  churchesList.push({
                   id: churchDoc.id,
                   churchName: churchName,
                   churchLocation: churchLocation || "Location not available", 
+                  latitude: latitude,
+                  longitude: longitude
                 });
+                } else {
+                  console.warn(`Missing latitude/longitude for church: ${churchName}`);
+                }
+                // Add the church with its location to the churchesList
+                
               } else {
                 // If no location is found, still add the church with a "Location not available" message
                 console.log(`No location found for churchName: ${churchName}`);
@@ -222,21 +231,25 @@ const MapComponent = () => {
 
   const handleMarkerClick = (church) => {
     const telephone = church.churchContactNum ? church.churchContactNum : 'No data added yet.';
+    
     const serviceHours = (!church.churchStartTime || !church.churchEndTime || 
         church.churchStartTime === "none" || church.churchEndTime === "none")
       ? 'No data added yet.' 
       : `${convertTo12HourFormat(church.churchStartTime)} - ${convertTo12HourFormat(church.churchEndTime)}`;
-
-    setChurchPhoto(church.churchPhoto);  
-
+  
+    const photo = church.churchPhoto ? church.churchPhoto : coverLogo;
+  
     setDrawerInfo({
       show: true,
-      title: church.churchName,
-      description: church.churchLocation,  // Correctly setting the location here
-      telephone,
-      serviceHours,
+      title: church.churchName || 'Church Name Not Available',
+      description: church.churchLocation || 'Location not available',  // Correctly setting the location here
+      telephone: telephone,
+      serviceHours: serviceHours,
     });
+  
+    setChurchPhoto(photo);  // Set church photo or fallback
   };
+  
 
   const handleCloseDrawer = () => {
     setDrawerInfo({ show: false, title: '', description: '', telephone: '', serviceHours: '' });
@@ -254,7 +267,7 @@ const MapComponent = () => {
   };
 
   const onLoadSearchBox = (ref) => {
-    setSearchBox(ref);  // Save reference to the search box
+    setSearchBox(ref);  
   };
 
   const onPlacesChanged = () => {
@@ -285,6 +298,11 @@ const MapComponent = () => {
     setShowMenu(false);
   };
 
+  const handleCancel = () => {
+    window.location.reload();
+  }
+
+
   return (
     <>
       {loading && (
@@ -307,31 +325,37 @@ const MapComponent = () => {
         </div>
 
         <GoogleMap
-          mapContainerStyle={containerStyle}
-          center={currentPosition || { lat: 0, lng: 0 }}
-          zoom={13}
-          onZoomChanged={onZoomChanged}
-          onLoad={handleMapLoad}
-        >
-          {currentPosition && (
-            <Marker
-              position={currentPosition}
-            />
-          )}
+  mapContainerStyle={containerStyle}
+  center={currentPosition || { lat: 0, lng: 0 }}
+  zoom={13}
+  onZoomChanged={onZoomChanged}
+  onLoad={handleMapLoad}
+>
+  {/* Always display the user's current position */}
+  {currentPosition && (
+    <Marker position={currentPosition} />
+  )}
 
-          {/* Display filtered churches as markers */}
-          {(selectedService ? filteredChurches : churches).map((church) => (
-            <Marker
-              key={church.id}
-              position={{
-                lat: parseFloat(church.latitude), 
-                lng: parseFloat(church.longitude),
-              }}
-              icon={customIcon}
-              onClick={() => handleMarkerClick(church)}
-            />
-          ))}
-        </GoogleMap>
+  {/* Display filtered churches if service is selected, otherwise all churches */}
+  {(selectedService ? filteredChurches : churches).map((church) => {
+    if (church.latitude && church.longitude) {
+      return (
+        <Marker
+          key={church.id}
+          position={{
+            lat: parseFloat(church.latitude),
+            lng: parseFloat(church.longitude),
+          }}
+          icon={customIcon}
+          onClick={() => handleMarkerClick(church)}
+        />
+      );
+    }
+    return null;
+  })}
+</GoogleMap>
+
+
       </LoadScript>
 
       <Offcanvas show={drawerInfo.show} onHide={handleCloseDrawer} placement="end" className="custom-offcanvas">
@@ -400,7 +424,7 @@ const MapComponent = () => {
           </div>
           <div style={{ marginTop: '10px' }}>
               <select value={selectedService} onChange={handleServiceChange} className="form-select">
-                <option value="">Filter by services available </option>
+                <option value="">Filter by Services</option>
                 {servicesList.map((service) => (
                   <option key={service} value={service}>
                     {service}
@@ -410,26 +434,35 @@ const MapComponent = () => {
           </div>
 
           {filteredChurches.length > 0 ? (
-            <div style={{ marginTop: '30px' }}>
-              <h6 style={{marginBottom: '20px'}}>Churches offering {selectedService}:</h6>
-              <div>
-                {filteredChurches.map((church) => (
-                  <div className="filtered-church-card" key={church.id} >
-                    <h6>{church.churchName}</h6>
-                    <div className="drawer-icon-text">
-                      <i className="bi bi-geo-alt-fill"></i>
-                      <span>{church.churchLocation || 'Location not available'}</span> {/* Displaying location */}
-                    </div>
+          <div style={{ marginTop: '30px' }}>
+            <h6 style={{ marginBottom: '20px' }}>Churches offering {selectedService}:</h6>
+            <div>
+              {filteredChurches.map((church) => (
+                <div
+                  className="filtered-church-card"
+                  key={church.id}
+                  onClick={() => handleMarkerClick(church)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <h6>{church.churchName}</h6>
+                  <div className="drawer-icon-text">
+                    <i className="bi bi-geo-alt-fill"></i>
+                    <span>{church.churchLocation || 'Location not available'}</span>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          ) : (
-            selectedService && (
+          </div>
+        ) : (
+          selectedService && (
+            <div>
               <p style={{ marginTop: '10px' }}>No churches found offering {selectedService}.</p>
-            )
-          )}
-
+              <button className="view-church-btn" onClick={handleCancel}>
+                Cancel
+              </button>
+            </div>
+          )
+        )}
         </Offcanvas.Body>
       </Offcanvas>
     </>
