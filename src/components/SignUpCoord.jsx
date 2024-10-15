@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import { doc, setDoc, collection, getDocs } from "firebase/firestore";
+import { doc, setDoc, collection, getDocs, Timestamp } from "firebase/firestore";
 import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -126,6 +126,7 @@ export const SignUpCoord = () => {
         dataConsent: formData.dataConsent,
         role: 'churchCoor',
         profileImage: 'https://firebasestorage.googleapis.com/v0/b/g-guide-1368b.appspot.com/o/default%2FuserIcon.png?alt=media&token=11e94d91-bf29-4e3e-ab98-a723fead69bc',
+        dateOfRegistration: Timestamp.now(),
       });
 
       // Create a document in the 'coordinator' collection and get its ID
@@ -134,7 +135,7 @@ export const SignUpCoord = () => {
 
       await setDoc(churchCoorDocRef, {
         userId: user.uid,
-        status: 'pending',
+        status: 'Pending',
       });
 
       // Generate a unique document ID for the church collection
@@ -154,7 +155,8 @@ export const SignUpCoord = () => {
         churchHistory: 'none',
         churchQRDetail: churchQRDetailURL,
         churchInstruction: formData.churchInstruction || 'none',
-        churchStatus: 'pending',
+        refundPolicy:formData.churchRefundPolicy,
+        churchStatus: 'Pending',
         coordinatorID: coordinatorID,  // Linking the coordinator ID here
         churchLocationID: selectedChurchID, // Save the selected churchLocation document ID
       });
@@ -174,11 +176,20 @@ export const SignUpCoord = () => {
     <div className="coord-signup-container">
       <div className="container">
         <div className="row align-items-center">
-          <div className="col-lg-6 d-none d-lg-block">
-            <div id="siteBanner" className="text-center">
-              <img src="../src/assets/signUpCoordBanner.png" className="img-fluid" alt="Site Banner" />
+        <div className="col-lg-6 d-none d-lg-block">
+          <div id="siteBanner" className="text-center d-flex flex-column justify-content-center align-items-center">
+            <img src="../src/assets/signUpCoordBanner.png" className="img-fluid mb-3" alt="Site Banner" />
+            
+            <div id="renewChurch">
+              <p style={{ textAlign: 'center' }}>
+                <span style={{ borderBottom: '1px solid black', padding: '0 10px' }}></span>
+              </p>
+              <p>Already have an existing account?</p>
+              <button className="btn btn-primary mt-3">Renew Church</button> {/* Adjusted with Bootstrap utilities */}
             </div>
           </div>
+        </div>
+
 
           <div className="col-lg-6">
           <form className=" churchInformation" onSubmit={handleRegister}>
@@ -367,14 +378,27 @@ export const SignUpCoord = () => {
                       readOnly
                     />
                   </div>
+                  
+                  <div className="col-md-12">
+                    <label htmlFor="inputChurchInstruction" className="form-label">Instruction for Church Transactions</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="churchInstruction"
+                      value={formData.churchInstruction}
+                      onChange={handleChange}
+                      placeholder='Example: "Please scan the QR Code and save the receipt"'
+                      required
+                    />
+                  </div>
 
                   <div className="col-12">
                     <label htmlFor="refundPolicy" className="form-label">Refund Policy</label>
                     <textarea
                       className="form-control"
-                      id="refundPolicy"
+                      id="churchRefundPolicy"
                       rows="6" // Adjust the number of rows as needed to provide a large enough space
-                      value={formData.churchInstruction}
+                      value={formData.churchRefundPolicy}
                       onChange={handleChange}
                       placeholder="Please enter refund policy here."
                       required

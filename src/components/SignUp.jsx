@@ -73,7 +73,7 @@ export const SignUp = () => {
 
         await setDoc(webVisitorDocRef, {
           userId: user.uid,
-          status: 'active',
+          status: 'Active',
         });
       } catch (visitorError) {
         console.error('Error storing website visitor data:', visitorError);
