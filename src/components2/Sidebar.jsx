@@ -16,7 +16,6 @@ export const Layout = () => {
   };
 
   const handleAppointment = () => {
-    navigate('/Appointments');
     setSecondSidebarOpen(!secondSidebarOpen); // Toggle the second sidebar
     setActiveSection('appointments'); // Set the active section
   };
