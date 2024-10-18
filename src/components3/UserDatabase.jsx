@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getDocs, collection, query, where, doc, updateDoc } from 'firebase/firestore';
+import { getDoc, getDocs, collection, query, where, doc, updateDoc } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import { Table, Button, Dropdown } from 'react-bootstrap';
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
@@ -10,18 +10,18 @@ export const UserDatabase = () => {
   const [selectedRole, setSelectedRole] = useState('All');
   const [loading, setLoading] = useState(true);
 
-  // Reusable fetch function to load users from Firestore
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      // Step 1: Fetch users from the 'users' collection
       const querySnapshot = await getDocs(collection(db, 'users'));
       const userList = await Promise.all(
         querySnapshot.docs.map(async (docSnapshot) => {
           const userData = { id: docSnapshot.id, ...docSnapshot.data() };
           let status = 'N/A';
-
-          // Step 2: Based on user role, fetch the status from either 'websiteVisitor' or 'coordinator' collection
+          let churchName = '';
+          let previousChurchName = '';
+          let churchID = '';
+  
           if (userData.role === 'websiteUser') {
             const websiteVisitorQuery = query(
               collection(db, 'websiteVisitor'),
@@ -29,7 +29,6 @@ export const UserDatabase = () => {
             );
             const websiteVisitorSnapshot = await getDocs(websiteVisitorQuery);
             if (!websiteVisitorSnapshot.empty) {
-              // Assuming there's only one entry per user
               status = websiteVisitorSnapshot.docs[0].data().status || 'N/A';
             }
           } else if (userData.role === 'churchCoor') {
@@ -38,17 +37,37 @@ export const UserDatabase = () => {
               where('userId', '==', userData.id)
             );
             const coordinatorSnapshot = await getDocs(coordinatorQuery);
+  
             if (!coordinatorSnapshot.empty) {
-              // Assuming there's only one entry per user
-              status = coordinatorSnapshot.docs[0].data().status || 'N/A';
+              const coordinatorData = coordinatorSnapshot.docs[0].data();
+              status = coordinatorData.status || 'N/A';
+              churchID = coordinatorData.churchID || '';
+  
+              if (status === 'Deleted' && churchID) {
+                // If the coordinator is deleted, fetch the previous church name based on the churchID
+                const churchDoc = await getDoc(doc(db, 'church', churchID));
+                if (churchDoc.exists()) {
+                  previousChurchName = churchDoc.data().churchName;
+                }
+              } else {
+                // Fetch the current church based on the coordinator ID if the coordinator is not deleted
+                const coordinatorDocId = coordinatorSnapshot.docs[0].id;
+                const churchQuery = query(
+                  collection(db, 'church'),
+                  where('coordinatorID', '==', coordinatorDocId)
+                );
+                const churchSnapshot = await getDocs(churchQuery);
+                if (!churchSnapshot.empty) {
+                  churchName = churchSnapshot.docs[0].data().churchName;
+                }
+              }
             }
           }
-
-          // Return user data with the status field
-          return { ...userData, status };
+  
+          return { ...userData, status, churchName, previousChurchName, churchID };
         })
       );
-
+  
       setUsers(userList);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -56,6 +75,8 @@ export const UserDatabase = () => {
       setLoading(false);
     }
   };
+  
+  
 
   // Fetch users on component mount
   useEffect(() => {
@@ -89,23 +110,26 @@ export const UserDatabase = () => {
         const coordinatorSnapshot = await getDocs(coordinatorQuery);
         if (!coordinatorSnapshot.empty) {
           const coordinatorDocId = coordinatorSnapshot.docs[0].id;
-
-          // Update coordinator status
-          await updateDoc(doc(db, 'coordinator', coordinatorDocId), {
-            status: 'Deleted',
-          });
-          console.log(`User with ID: ${userId} status updated in coordinator.`);
-
+  
           // Step 1: Find the connected church in the "church" collection
           const churchQuery = query(
             collection(db, 'church'),
             where('coordinatorID', '==', coordinatorDocId)
           );
           const churchSnapshot = await getDocs(churchQuery);
-
+  
           if (!churchSnapshot.empty) {
-            // Step 2: Update the church status to "Archived"
+            // Step 2: Get the church document ID
             const churchDocId = churchSnapshot.docs[0].id;
+  
+            // Step 3: Update the coordinator document with the churchID
+            await updateDoc(doc(db, 'coordinator', coordinatorDocId), {
+              status: 'Deleted',
+              churchID: churchDocId // Add the linked church document ID
+            });
+            console.log(`User with ID: ${userId} status updated in coordinator with churchID.`);
+  
+            // Step 4: Update the church status to "Archived"
             await updateDoc(doc(db, 'church', churchDocId), {
               churchStatus: 'Archived',
             });
@@ -202,7 +226,28 @@ export const UserDatabase = () => {
                   <td>{`${user.firstName} ${user.lastName}`}</td>
                   <td>{user.email}</td>
                   <td>{user.contactNum}</td>
-                  <td>{roleTypeMapping[user.role]}</td>
+                  <td>
+  {user.role === 'churchCoor' ? (
+    user.status === 'Deleted' ? (
+      // If the user is a deleted church coordinator, find the previous church name using the churchID
+      user.churchID ? (
+        <span>
+          {`Former Church Coordinator of ${
+            user.previousChurchName || 'Unknown'
+          }`}
+        </span>
+      ) : (
+        'Former Church Coordinator'
+      )
+    ) : (
+      // For active church coordinators
+      `Church Coordinator of ${user.churchName || 'Unknown'}`
+    )
+  ) : (
+    roleTypeMapping[user.role]
+  )}
+</td>
+
                   <td>{user.dataConsent ? 'Yes' : 'No'}</td>
                   <td>{user.status || 'N/A'}</td> {/* Display status */}
                   <td>

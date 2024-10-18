@@ -38,8 +38,10 @@ export const SysAdminPendingChurch = () => {
         const churchCollection = collection(db, 'church');
         const churchSnapshot = await getDocs(churchCollection);
         const churchList = churchSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                                  .filter(church => church.churchStatus === 'Pending'); // Only 'pending' churches
-
+                              .filter(church => 
+                                  church.churchStatus === 'Pending' || 
+                                  church.churchStatus === 'For Renewal'
+                              );
         // Array to hold the processed church data
         const processedChurches = [];
 

@@ -515,3 +515,26 @@
 .form-select:hover {
   border: none;
 }
+
+/* renewal form */
+.renew-container{
+  background-image: url('../src/assets/backgroundimg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: black;
+  padding-bottom: 20px;
+}
+
+.renewalBanner img {
+  max-width: 70%; /* Reduce the width to 50% of its container */
+  height: auto;   /* Maintain aspect ratio */
+  margin: 0 auto; /* Center the image */
+}
+
+
