@@ -29,6 +29,7 @@ import ChurchHomepage from './components4/ChurchHomepage';
 import ChurchLocations from './components3/SysAdminChurchLocations';
 import AdminNavbar from './components3/SysAdminNavbar';
 import Transactions from './components3/Transactions';
+import RenewChurch from './components/RenewChurch';
 
 //Appointments
 import PendingAppointments from './components2/Appointments/PendingAppointments'
@@ -74,6 +75,7 @@ const App = () => {
         <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} /> 
         <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
+        <Route path="/renew-church" element={<><NavBar/><RenewChurch /></>} />
       
         
         {/* church coordinator routessss */}

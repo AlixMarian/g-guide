@@ -63,7 +63,7 @@ export const Login = () => {
 
         if (!websiteVisitorSnapshot.empty) {
           const visitorData = websiteVisitorSnapshot.docs[0].data();
-          if (visitorData.status === 'active') {
+          if (visitorData.status === 'Active') {
               toast.success('Welcome to G! Guide');
               navigate('/homepage');
           } else {
@@ -75,7 +75,7 @@ export const Login = () => {
         if (!coordinatorSnapshot.empty) {
             if (churchDoc.exists()) {
                 const churchData = churchDoc.data();
-                if (churchData.churchStatus === 'approved') {
+                if (churchData.churchStatus === 'Approved') {
                     toast.success('Welcome to G! Guide');
                     navigate('/SEA');
                     return;

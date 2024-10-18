@@ -32,6 +32,11 @@ export const SignUpCoord = () => {
   });
   const navigate = useNavigate();
 
+  const handleRenewChurch = (event) => {
+    event.preventDefault();
+    navigate('/renew-church');
+  };
+
     // Toggle dropdown visibility
     const toggleDropdown = () => {
       setDropdownVisible(!dropdownVisible);
@@ -179,14 +184,6 @@ export const SignUpCoord = () => {
         <div className="col-lg-6 d-none d-lg-block">
           <div id="siteBanner" className="text-center d-flex flex-column justify-content-center align-items-center">
             <img src="../src/assets/signUpCoordBanner.png" className="img-fluid mb-3" alt="Site Banner" />
-            
-            <div id="renewChurch">
-              <p style={{ textAlign: 'center' }}>
-                <span style={{ borderBottom: '1px solid black', padding: '0 10px' }}></span>
-              </p>
-              <p>Already have an existing account?</p>
-              <button className="btn btn-primary mt-3">Renew Church</button> {/* Adjusted with Bootstrap utilities */}
-            </div>
           </div>
         </div>
 
@@ -425,12 +422,19 @@ export const SignUpCoord = () => {
               </div>
             </div>
 
-            <div className="col-12 d-flex flex-column align-items-center mt-3">
-            <div className="d-flex justify-content-center gap-2 mb-2">
-                <button type="reset" className="btn btn-outline-primary">Clear Form</button>
-                <button type="submit" className="btn btn-primary">Sign Up</button>
-              </div>
+            <div className="col-12 d-flex justify-content-center gap-5 mt-3">
+              <button type="reset" className="btn btn-outline-primary">Clear Form</button>
+              <button type="submit" className="btn btn-primary">Sign Up</button>
             </div>
+            
+            <p style={{ textAlign: 'center' }}>
+              <span style={{ borderBottom: '1px solid black', padding: '0 10px' }}><b>Or</b></span>
+            </p>
+
+            <div className="col-12 d-flex justify-content-center mt-3">
+              <button type='button' className="btn btn-primary" style={{ width: '40%' }} onClick={handleRenewChurch}>Renew Church</button>
+            </div>
+
             </form>
           </div>
         </div>

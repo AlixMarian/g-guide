@@ -217,7 +217,7 @@ export const SignUp = () => {
                 </div>
               </div>
 
-              <div className="col-12 d-flex justify-content-center gap-2">
+              <div className="col-12 d-flex justify-content-center gap-5">
                 <button type="reset" className="btn btn-outline-primary">
                   Clear Form
                 </button>
