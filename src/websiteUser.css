@@ -335,6 +335,35 @@
   padding: 0;
 }
 
+/* yeeesss */
+.offcanvas,
+.offcanvas-body {
+  overflow: visible !important;
+}
+
+.pac-container {
+  z-index: 1060 !important;
+}
+
+/* SCROLLBAR */
+.scrollable-section {
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.scrollable-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable-section::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 5px;
+}
+
+.scrollable-section::-webkit-scrollbar-thumb:hover {
+  background-color: #555; 
+}
+
 .drawer-img-container {
   width: 100%;
   padding: 0;
@@ -535,6 +564,20 @@
   max-width: 70%; /* Reduce the width to 50% of its container */
   height: auto;   /* Maintain aspect ratio */
   margin: 0 auto; /* Center the image */
+}
+
+.visita-iglesia {
+  padding: 5px; 
+  margin-left: 3rem;
+  width: 7.8rem;
+  height: 3rem;
+  box-sizing: border-box; /* Make sure width and height do not include padding */
+}
+
+
+.visita-iglesia:hover {
+  background-color: #1D8BDA;
+  color: white;
 }
 
 
