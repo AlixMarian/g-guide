@@ -185,6 +185,38 @@ const handleApprove = async (church) => {
   }
 };
 
+const handleRenew = async (church) => {
+  try {
+    // Update the church's status in Firestore
+    const churchRef = doc(db, "church", church.id);
+    await updateDoc(churchRef, {
+      churchStatus: "Approved"
+    });
+
+    const coordinatorRef = doc(db, "coordinator", church.coordinatorID); // Ensure coordinatorID is available in the church object
+    await updateDoc(coordinatorRef, {
+      status: "Approved"
+    });
+
+    // Send approval email
+    await sendEmail(
+      church.coordinatorEmail,  // Use the email of the church coordinator
+      "Church Renewal Notification",
+      "Your church has been renewed successfully. Thank you for your renewal."
+    );
+
+    // Update the state by removing the approved church from the list
+    setChurches((prevChurches) =>
+      prevChurches.filter((c) => c.id !== church.id)
+    );
+
+    toast.success('Church renewed successfully!');
+  } catch (error) {
+    console.error("Error renweing church: ", error);
+    toast.error('Failed to renew church');
+  }
+};
+
 
 const handleDeny = async (church) => {
   try {
@@ -228,64 +260,91 @@ const handleDeny = async (church) => {
           <img src={loadingGif} alt="Loading..." />
         </div>
       ) : (
-        <table className='admin-table'>
+      <div className="table-responsive">
+        <table className="pending-table table table-striped table-bordered table-hover">
           <thead>
             <tr>
-              <th colSpan="3">Coordinator Information</th>
-              <th colSpan="7">Church Information</th>
-              <th rowSpan="2">Proof of Affiliation</th>
-              <th rowSpan="2">Actions</th>
+              <th colSpan="3" className='pndngchrch-th'>Coordinator Information</th>
+              <th colSpan="7" className='pndngchrch-th'>Church Information</th>
+              <th rowSpan="2" className='pndngchrch-th'>Proof of Affiliation</th>
+              <th rowSpan="2" className='pndngchrch-th'>Actions</th>
             </tr>
             <tr>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Contact Number</th>
-              <th>Church Name</th>
-              <th>Email</th>
-              <th>Contact Number</th>
-              <th>Address</th>
-              <th>Registration Date</th>
-              <th>Status</th>
-              <th>History</th>
+              <th className='pndngchrch-th'>Full Name</th>
+              <th className='pndngchrch-th'>Email</th>
+              <th className='pndngchrch-th'>Contact Number</th>
+              <th className='pndngchrch-th'>Church Name</th>
+              <th className='pndngchrch-th'>Email</th>
+              <th className='pndngchrch-th'>Contact Number</th>
+              <th className='pndngchrch-th'>Address</th>
+              <th className='pndngchrch-th'>Registration Date</th>
+              <th className='pndngchrch-th'>Status</th>
+              <th className='pndngchrch-th'>History</th>
             </tr>
           </thead>
           <tbody>
-            {filteredChurches.map((church) => {
-              return (
-                <tr key={church.id}>
-                  
-                  <td>{church.coordinatorName}</td>
-                  <td>{church.coordinatorEmail}</td>
-                  <td>{church.coordinatorContactNum}</td>
-                  <td>{church.churchName}</td>
-                  <td>{church.churchEmail}</td>
-                  <td>{church.churchContactNum}</td>
-                  <td>{church.churchAddress}</td>
-                  <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
-                  <td>{church.churchStatus}</td>
-                  <td>
-                    <Button variant="info" className="view-history" onClick={() => handleShowModal(church, 'history')}>
-                      View History
+            {filteredChurches.map((church) => (
+              <tr key={church.id}>
+                <td>{church.coordinatorName}</td>
+                <td>{church.coordinatorEmail}</td>
+                <td>{church.coordinatorContactNum}</td>
+                <td>{church.churchName}</td>
+                <td>{church.churchEmail}</td>
+                <td>{church.churchContactNum}</td>
+                <td>{church.churchAddress}</td>
+                <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
+                <td>{church.churchStatus}</td>
+                <td>
+                  <Button
+                    variant="info"
+                    className="view-history"
+                    onClick={() => handleShowModal(church, 'history')}
+                  >
+                    View History
+                  </Button>
+                </td>
+                <td>
+                  <Button
+                    variant="info"
+                    className="view-proof"
+                    onClick={() => handleShowModal(church, 'proof')}
+                  >
+                    View Proof
+                  </Button>
+                </td>
+                <td className="pending-church-action">
+                  {church.churchStatus === 'For Renewal' ? (
+                    <Button
+                      variant="warning"
+                      className='renew mb-2'
+                      onClick={() => handleRenew(church)}
+                    >
+                      Renew
                     </Button>
-                  </td>
-                  <td>
-                    <Button variant="info" className="view-proof" onClick={() => handleShowModal(church, 'proof')}>
-                      View Proof
-                    </Button>
-                  </td>
-                  <td className="pending-church-action">
-                    <Button variant="success" className="approve mb-2" onClick={() => handleApprove(church)}>
+                  ) : church.churchStatus === 'Pending' ? (
+                    <Button
+                      variant="success"
+                      className="approve mb-2"
+                      onClick={() => handleApprove(church)}
+                    >
                       Approve
                     </Button>
-                    <Button variant="danger" className="deny" onClick={() => handleDeny(church)}>
-                      Deny
-                    </Button>
-                  </td>
-                </tr>
-              );
-            })}
+                  ) : null}
+                  <Button
+                   variant='danger'
+                   className='deny mb-2'
+                   onClick={() => handleDeny(church)}
+                  >
+                    Deny
+                  </Button>
+                </td>
+
+              </tr>
+            ))}
           </tbody>
         </table>
+      </div>
+
       )}
 
       {selectedChurch && modalContent === 'history' && (

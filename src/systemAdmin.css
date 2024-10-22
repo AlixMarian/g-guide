@@ -232,6 +232,17 @@ table {
   overflow: hidden;
 }
 
+.pending-table{
+  border-collapse: collapse; /* Ensures that borders of cells are shared */
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.5;
+  border: 2px solid #ddd; 
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.5);
+  border-radius: 15px;
+  overflow: hidden;
+}
+
 th, td {
   padding: 10px 13px; /* Add some extra padding for better readability */
   border: 1px solid #ddd; /* Lighter border color for a softer look */
@@ -244,6 +255,14 @@ th {
   font-weight: bold; /* Bold text */
   font-size: 14px; /* Slightly larger font size for the header */
 }
+
+.pndngchrch-th {
+  background-color: #007BFF !important; /* Blue header background */
+  color: white !important; /* White text on blue */
+  font-weight: bold !important; /* Bold text */
+  font-size: 14px !important; /* Slightly larger font size for the header */
+}
+
 
 /* Body rows */
 td {
@@ -260,7 +279,7 @@ td {
   width: auto;
 }
 
-.pending-church-button, .view-proof, .view-history, .approve, .deny, .view-payment {
+.pending-church-button, .view-proof, .view-history, .approve, .deny, .renew,.view-payment {
   width: 70px; /* Adjust the width */
   height: 30px; /* Adjust the height */
   padding: 0.25rem 0.5rem; /* Adjust the padding */
