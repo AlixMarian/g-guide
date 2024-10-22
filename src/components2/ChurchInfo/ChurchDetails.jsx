@@ -111,50 +111,56 @@ export const ChurchDetails = () => {
             <h1>Church Information</h1>
 
             <div className="churchDetails">
-                <form className="row g-3" onSubmit={handleSubmitNewChurchInfo}>
                 <h3>CHURCH DETAILS</h3>
-                <label htmlFor="exampleFormControlTextarea1" className="form-label">
-                    Church History
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-                        <path fill="black" d="M7.243 17.997H3v-4.243L14.435 2.319a1 1 0 0 1 1.414 0l2.829 2.828a1 1 0 0 1 0 1.415zm-4.243 2h18v2H3z"/>
-                    </svg>
-                </label>
-                <div className="mb-3">
-                <textarea
-                    className="form-control"
-                    id="exampleFormControlTextarea1"
-                    rows="5"
-                    placeholder={churchData.churchHistory || ""}
-                    onChange={(e) => handleChange(e, 'churchHistory')}
-                    ></textarea>
+                <div className='churchHistory'>
+                  <form className="row g-3" onSubmit={handleSubmitNewChurchInfo}>
+                    <label htmlFor="exampleFormControlTextarea1" className="form-label">
+                        Church History
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="black" d="M7.243 17.997H3v-4.243L14.435 2.319a1 1 0 0 1 1.414 0l2.829 2.828a1 1 0 0 1 0 1.415zm-4.243 2h18v2H3z"/>
+                        </svg>
+                    </label>
+                  <div className="mb-3">
+                  <textarea
+                      className="form-control"
+                      id="exampleFormControlTextarea1"
+                      rows="5"
+                      placeholder={churchData.churchHistory || ""}
+                      onChange={(e) => handleChange(e, 'churchHistory')}
+                      ></textarea>
+                  </div>
+                  </form>
                 </div>
+              
                 <br></br>
                 
-                <div className="col-md-3 time-input-container">
-                    <label htmlFor="opening-time" className='me-2'><b>Current Opening Time: </b></label> 
-                    <label htmlFor="existingOpeningTime"> {convertTo12HourFormat(churchData.churchStartTime) || ''}</label><br/>
-                    <input
-                        type="time"
-                        id="opening-time"
-                        name="opening-time"
-                        placeholder={churchData.churchStartTime || ''}
-                        onChange={handleOpeningTimeChange}
-                        className="time-input"
-                    />
-                </div>
+                <div Clas>
+                  <form className="row g-3" onSubmit={handleSubmitNewChurchInfo}>
+                  <div className="col-md-3 time-input-container">
+                      <label htmlFor="opening-time" className='me-2'><b>Current Opening Time: </b></label> 
+                      <label htmlFor="existingOpeningTime"> {convertTo12HourFormat(churchData.churchStartTime) || ''}</label><br/>
+                      <input
+                          type="time"
+                          id="opening-time"
+                          name="opening-time"
+                          placeholder={churchData.churchStartTime || ''}
+                          onChange={handleOpeningTimeChange}
+                          className="time-input"
+                      />
+                  </div>
 
-                <div className='col-md-3 time-input-container'>
-                    <label htmlFor="closing-time" className='me-2'><b>Closing Time:</b></label>
-                    <label htmlFor="existingOpeningTime"> {convertTo12HourFormat(churchData.churchEndTime) || ''}</label><br/>
-                    <input
-                        type="time"
-                        id="closing-time"
-                        name="closing-time"
-                        placeholder={churchData.churchEndTime || ''}
-                        onChange={handleClosingTimeChange}
-                        className="time-input"
-                    />
-                </div>
+                  <div className='col-md-3 time-input-container'>
+                      <label htmlFor="closing-time" className='me-2'><b>Closing Time:</b></label>
+                      <label htmlFor="existingOpeningTime"> {convertTo12HourFormat(churchData.churchEndTime) || ''}</label><br/>
+                      <input
+                          type="time"
+                          id="closing-time"
+                          name="closing-time"
+                          placeholder={churchData.churchEndTime || ''}
+                          onChange={handleClosingTimeChange}
+                          className="time-input"
+                      />
+                  </div>
 
                     <div className="col-md-6">
                         <label htmlFor="churchName" className="form-label"><b>Church Name</b></label>
@@ -167,6 +173,7 @@ export const ChurchDetails = () => {
                             onChange={(e) => handleChange(e, 'churchName')}
                             />
                     </div>
+
                     <div className="col-md-6">
                         <label htmlFor="churchAddress" className="form-label"><b>Church Address</b></label>
                         <input
@@ -177,6 +184,7 @@ export const ChurchDetails = () => {
                             onChange={(e) => handleChange(e, 'churchAddress')}
                         />
                     </div>
+
                     <div className="col-6">
                         <label htmlFor="churchEmail" className="form-label"><b>Church Email</b></label>
                         <input
@@ -187,6 +195,7 @@ export const ChurchDetails = () => {
                             onChange={(e) => handleChange(e, 'churchEmail')}
                         />
                     </div>
+
                     <div className="col-6">
                         <label htmlFor="churchContactNum" className="form-label"><b>Contact Details</b></label>
                         <input
@@ -197,6 +206,7 @@ export const ChurchDetails = () => {
                             onChange={(e) => handleChange(e, 'churchContactNum')}
                         />
                     </div>
+
                     <div className="col-md-6">
                         <label htmlFor="churchRegistrationDate" className="form-label"><b>Registration Date</b></label>
                         <input
@@ -207,6 +217,7 @@ export const ChurchDetails = () => {
                             readOnly
                         />
                     </div>
+
                     <div className="col-md-6">
                         <label htmlFor="churchProof" className="form-label"><b>Church Proof</b></label> <br/>
                         <button className="btn btn-success" onClick={handleViewProof}>
@@ -220,14 +231,6 @@ export const ChurchDetails = () => {
                         View Current Banking QR
                         </button>
                         <br/>
-                        <label htmlFor="transactionMessage" className='form-label'><b><i>Instruction for service transactions:</i></b></label>
-                        <input 
-                          type="text" 
-                          className='form-control' 
-                          id="churchInstruction"
-                          placeholder={churchData.churchInstruction || ""}
-                          onChange={(e) => handleChange(e, 'churchInstruction')}
-                          />
                     </div>
                     
                     <div className="announcement-bttn">
@@ -237,7 +240,8 @@ export const ChurchDetails = () => {
                         <button type="reset" className="btn btn-danger">Clear</button>
                         </div>
                     </div>
-                </form>
+                    </form>
+                  </div>  
             </div>
 
         </>

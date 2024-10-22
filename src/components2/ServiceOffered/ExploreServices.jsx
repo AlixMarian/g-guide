@@ -85,71 +85,106 @@ export const ExploreServices = () => {
 
             <div className="Services">
                 <div className="offer1">
-                    <h4>Appointments</h4>
+                    <div className="header">Appointments</div>
                     <div className="Schedtogs">
                         <div className="form-check">
-                            <input className="form-check-input" type="checkbox" id="marriages" name="Marriages" onChange={handleToggle} checked={!!servicesState['Marriages']} />
-                            <label className="form-check-label" htmlFor="marriages">Marriages</label><br />
+                            <div className="service1 ">
+                                <input className="form-check-input" type="checkbox" id="marriages" name="Marriages" onChange={handleToggle} checked={!!servicesState['Marriages']} />
+                                <label className="form-check-label" htmlFor="marriages">Marriages</label>
+                                <div className='col-xs-2'>
+                                    <input className="fee-input" type="text" id="marriagesFee" name="Marriages Fee" placeholder="input fee"/>
+                                </div>
+                            </div>
+                                <input className="fee-input" type="text" placeholder="Instruction for Service"/><br />
+                        </div>
+
+                        <div className="form-check">
+                            <div className="service1">
+                                <input className="form-check-input" type="checkbox" id="baptism" name="Baptism" onChange={handleToggle} checked={!!servicesState['Baptism']} />
+                                <label className="form-check-label" htmlFor="baptism">Baptism</label>
+                                <div className='col-xs-2'>
+                                    <input className="fee-input" type="text" id="baptismFee" name="Baptism Fee" placeholder="input fee"/>
+                                </div>
+                            </div>
+                            <input className="fee-input" type="text" placeholder="Instruction for Service"/><br />
                         </div>
                         <div className="form-check">
-                            <input className="form-check-input" type="checkbox" id="baptism" name="Baptism" onChange={handleToggle} checked={!!servicesState['Baptism']} />
-                            <label className="form-check-label" htmlFor="baptism">Baptism</label><br />
+                            <div className="service1">
+                                <input className="form-check-input" type="checkbox" id="confirmation" name="Confirmation" onChange={handleToggle} checked={!!servicesState['Confirmation']} />
+                                <label className="form-check-label" htmlFor="confirmation">Confirmation</label>
+                                <div className='col-xs-2'>
+                                    <input className="fee-input" type="text" id="confirmationFee" name="Confirmation Fee" placeholder="input fee"/>
+                                </div>                            
+                            </div>
+                                <input className="fee-input" type="text" placeholder="Instruction for Service"/><br />
                         </div>
                         <div className="form-check">
-                            <input className="form-check-input" type="checkbox" id="confirmation" name="Confirmation" onChange={handleToggle} checked={!!servicesState['Confirmation']} />
-                            <label className="form-check-label" htmlFor="confirmation">Confirmation</label>
+                            <div className="service1">
+                                <input className="form-check-input" type="checkbox" id="burials" name="Burials" onChange={handleToggle} checked={!!servicesState['Burials']} />
+                                <label className="form-check-label" htmlFor="burials">Burials</label>
+                                <div className='col-xs-2'>
+                                    <input className="fee-input" type="text" id="burialFee" name="Burial Fee" placeholder="input fee"/>
+                                </div>
+                            </div>
+                                <input className="fee-input" type="text" placeholder="Instruction for Service"/><br />
                         </div>
                         <div className="form-check">
-                            <input className="form-check-input" type="checkbox" id="burials" name="Burials" onChange={handleToggle} checked={!!servicesState['Burials']} />
-                            <label className="form-check-label" htmlFor="burials">Burials</label>
-                        </div>
-                        <div className="form-check">
-                            <input className="form-check-input" type="checkbox" id="massintentions" name="Mass Intentions" onChange={handleToggle} checked={!!servicesState['Mass Intentions']} />
-                            <label className="form-check-label" htmlFor="massintentions">Mass Intentions</label>
+                            <div className="service1">
+                                <input className="form-check-input" type="checkbox" id="massintentions" name="Mass Intentions" onChange={handleToggle} checked={!!servicesState['Mass Intentions']} />
+                                <label className="form-check-label" htmlFor="massintentions">Mass Intentions</label><br /> 
+                                <div className='col-xs-2'>
+                                    <input className="fee-input" type="text" id="intentionsFee" name="Intentions Fee" placeholder="input fee"/>
+                                </div>
+                            </div>
+                                <input className="fee-input" type="text" placeholder="Instruction for Service"/><br />
                         </div>
                     </div>
                 </div>
 
                 <div className="offer2">
-                    <h4>Request Documents</h4>
+                    <div className="header">Document Requests</div>
                     <div className="Schedtogs">
                         <div className="form-check">
-                            <input className="form-check-input" type="checkbox" id="baptismalCert" name="Baptismal Certificate" onChange={handleToggle} checked={!!servicesState['Baptismal Certificate']} />
-                            <label className="form-check-label" htmlFor="baptismalCert">Baptismal Certificate</label><br />
+                            <div className="service1">
+                                <input className="form-check-input" type="checkbox" id="baptismalCert" name="Baptismal Certificate" onChange={handleToggle} checked={!!servicesState['Baptismal Certificate']} />
+                                <label className="form-check-label" htmlFor="baptismalCert">Baptismal Certificate</label><br />
+                                <div className='col-xs-2'>
+                                    <input className="fee-input" type="text" id="baptismalFee" name="Baptismal Fee" placeholder="input fee"/>
+                                </div>
+                            </div>
+                                <input className="fee-input" type="text" placeholder="Instruction for Service"/><br />
                         </div>
                         <div className="form-check">
-                            <input className="form-check-input" type="checkbox" id="confirmationCert" name="Confirmation Certificate" onChange={handleToggle} checked={!!servicesState['Confirmation Certificate']} />
-                            <label className="form-check-label" htmlFor="confirmationCert">Confirmation Certificate</label><br />
+                            <div className="service1">
+                                <input className="form-check-input" type="checkbox" id="confirmationCert" name="Confirmation Certificate" onChange={handleToggle} checked={!!servicesState['Confirmation Certificate']} />
+                                <label className="form-check-label" htmlFor="confirmationCert">Confirmation Certificate</label><br />
+                                <div className='col-xs-2'>
+                                    <input className="fee-input" type="text" id="confirmationFee" name="Confirmation Fee" placeholder="input fee"/>
+                                </div>
+                            </div>
+                                <input className="fee-input" type="text" placeholder="Instruction for Service"/><br />
                         </div>
                         <div className="form-check">
-                            <input className="form-check-input" type="checkbox" id="marriageCert" name="Marriage Certificate" onChange={handleToggle} checked={!!servicesState['Marriage Certificate']} />
-                            <label className="form-check-label" htmlFor="marriageCert">Marriage Certificate</label><br />
+                            <div className="service1">
+                                <input className="form-check-input" type="checkbox" id="marriageCert" name="Marriage Certificate" onChange={handleToggle} checked={!!servicesState['Marriage Certificate']} />
+                                <label className="form-check-label" htmlFor="marriageCert">Marriage Certificate</label><br />
+                                <div className='col-xs-2'>
+                                    <input className="fee-input" type="text" id="marriagecertFee" name="Mcert Fee" placeholder="input fee"/>
+                                </div>
+                            </div>
+                                <input className="fee-input" type="text" placeholder="Instruction for Service"/><br />
                         </div>
                         <div className="form-check">
-                            <input className="form-check-input" type="checkbox" id="burialCert" name="Burial Certificate" onChange={handleToggle} checked={!!servicesState['Burial Certificate']} />
-                            <label className="form-check-label" htmlFor="burialCert">Burial Certificate</label><br />
+                            <div className="service1">
+                                <input className="form-check-input" type="checkbox" id="burialCert" name="Burial Certificate" onChange={handleToggle} checked={!!servicesState['Burial Certificate']} />
+                                <label className="form-check-label" htmlFor="burialCert">Burial Certificate</label><br />
+                                <div className='col-xs-2'>
+                                    <input className="fee-input" type="text" id="burialcertFee" name="Bcert Fee" placeholder="input fee"/>
+                                </div>
+                            </div>
+                                <input className="fee-input" type="text" placeholder="Instruction for Service"/><br />
                         </div>
                     </div>
-                </div>
-            </div>
-            <div className="ServicesList">
-                <h1>List of Services Offered</h1>
-                <div className="serviceListActive">
-                    <ul className="styled-list me-2">
-                        {activeSchedules.map(service => (
-                            <li key={service} className="styled-list-item">
-                                <span className="service-icon">♦</span> {service}
-                            </li>
-                        ))}
-                    </ul>
-
-                    <ul className="styled-list">
-                        {activeRequests.map(service => (
-                            <li key={service} className="styled-list-item">
-                                <span className="service-icon">♦</span> {service}
-                            </li>
-                        ))}
-                    </ul>
                 </div>
             </div>
         </>

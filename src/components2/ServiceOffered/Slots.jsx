@@ -427,6 +427,8 @@ export const Slots = () => {
             <Pagination.Next disabled={currentPage === totalPages} onClick={handleNextPage} />
           </Pagination>
           <br />
+
+          {/* from here*/}
           <h5>{editing ? 'Modify Selected Time Slot' : 'Create or Disable Time Slots'}</h5>
           <form onSubmit={editing ? handleUpdateSlot : handleCreateSlots}>
             <div className='container'>
@@ -518,6 +520,7 @@ export const Slots = () => {
               </div>
             </div>
           </form>
+          {/* to here*/}
         </div>
       </div>
     </div>
