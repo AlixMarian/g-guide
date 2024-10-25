@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types'; 
 import { Offcanvas } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -51,9 +50,9 @@ const SearchFilter = ({
       </Offcanvas.Title>
       <Offcanvas.Body >
         <div className="center-search">
-          <div className="input-group">
+          <div className="filter-input-group input-group">
             <AutocompleteSearch onPlaceSelected={handlePlaceSelected} />
-            <button type="button" className="btn btn-primary">
+            <button type="button" className="btn btn-custom-filter">
               <i className="fas fa-search"></i>
             </button>
           </div>

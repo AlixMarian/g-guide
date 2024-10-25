@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import '../../churchCoordinator.css';
 
 export const ChurchUploads = () => {
 
@@ -209,11 +210,11 @@ export const ChurchUploads = () => {
 
     return (
         <>
-        <h1>Church Uploads</h1>
-        <div className="container mt-5">
-            <div className="card">
-                <div className="row no-gutters">
-                    <div className="col-md-6">
+            <h1 className="me-3">Church Details</h1>
+            <div className="container mt-5">
+            <div className="row">
+                <div className="col-md-6 mb-4">
+                    <div className="card shadow-lg">
                         <div className="card-body">
                             <form className="mb-3" onSubmit={handleChurchPhotosUpload}>
                                 <div className="mb-3">
@@ -230,13 +231,12 @@ export const ChurchUploads = () => {
                                             ref={churchPhotosRef}
                                             accept="image/*"
                                         />
-                                        <button className="btn btn-outline-secondary" type="submit">
+                                        <button className="btn btn-custom-outline" type="submit">
                                             Upload Photos
                                         </button>
                                     </div>
                                 </div>
                             </form>
-
                             <form className="mb-3" onSubmit={handleBankProofUpload}>
                                 <div className="mb-3">
                                     <label htmlFor="churchBank" className="form-label">
@@ -251,13 +251,12 @@ export const ChurchUploads = () => {
                                             onChange={handleBankProofChange}
                                             ref={bankProofRef}
                                         />
-                                        <button className="btn btn-outline-secondary" type="submit">
+                                        <button className="btn btn-custom-outline" type="submit">
                                             Update QR Code
                                         </button>
                                     </div>
                                 </div>
                             </form>
-
                             <form className="mb-3" onSubmit={handleChurchProofUpload}>
                                 <div className="mb-3">
                                     <label htmlFor="churchProof" className="form-label">
@@ -272,33 +271,30 @@ export const ChurchUploads = () => {
                                             onChange={handleChurchProofChange}
                                             ref={churchProofRef}
                                         />
-                                        <button className="btn btn-outline-secondary" type="submit">
+                                        <button className="btn btn-custom-outline" type="submit">
                                             Update Proof of Affiliation
                                         </button>
                                     </div>
                                 </div>
                             </form>
-
-                            <div className="announcement-bttn">
-                                <br />
-                                <button type="button" className="btn btn-danger" onClick={handleClear}>
-                                    Clear
-                                </button>
-                            </div>
+                            <button type="button" className="btn btn-danger" onClick={handleClear}>
+                                Clear
+                            </button>
                         </div>
                     </div>
-
-                    <div className="col-md-6">
+                </div>
+                <div className="col-md-6 mb-4">
+                    <div className="card shadow-lg">
                         <div className="card-body">
                             <h5 className="card-title"><b>Uploaded Church Photos</b></h5>
                             <div className="uploaded-photos-list">
                                 {churchPhotos.length > 0 ? (
                                     churchPhotos.map(photo => (
-                                        <div key={photo.id} className="photo-item">
+                                        <div key={photo.id} className="photo-item mb-3">
                                             <img 
                                                 src={photo.photoLink} 
                                                 alt="Church" 
-                                                className="img-thumbnail" 
+                                                className="img-thumbnail mb-2" 
                                             />
                                             <button
                                                 className="btn btn-outline-danger btn-sm"

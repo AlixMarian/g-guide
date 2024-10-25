@@ -486,10 +486,9 @@
   margin-top: 20px; 
 }
 
-.input-group {
+.filter-input-group {
   display: flex;
   align-items: center;
-  
 }
 
 .form-outline {
@@ -503,7 +502,7 @@
 
 
 
-.input-group .form-control {
+.filter-input-group .form-control {
   border-radius: 20px 0 0 20px;
   box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.3); /* Adds shadow effect */
   padding: 10px;
@@ -512,7 +511,7 @@
 
 }
 
-.input-group .btn-primary {
+.filter-input-group .btn-custom-filter {
   border-radius: 0 20px 20px 0;
   box-shadow:  2px 6px 6px rgba(0, 0, 0, 0.3); /* Adds shadow effect */
   padding: 10px 15px;
