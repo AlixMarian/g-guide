@@ -566,17 +566,34 @@
 }
 
 .visita-iglesia {
-  padding: 5px; 
+  padding: 5px;
   margin-left: 3rem;
-  width: 7.8rem;
-  height: 3rem;
-  box-sizing: border-box; /* Make sure width and height do not include padding */
+  transition: color 0.5s ease, font-weight 0.2s ease, font-size 0.2s ease;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: none; /* Ensure no underline on the container */
+}
+
+.visita-iglesia h5 {
+  font-size: 20px;
+  margin: 0; /* Remove extra margin */
+  text-decoration: none; /* Ensure no underline */
+  color: inherit; /* Inherit the color from the parent */
+}
+
+.visita-iglesia a {
+  text-decoration: none; /* Ensure links have no underline */
+  color: inherit; /* Make sure link takes the same color as its parent */
+}
+
+.visita-iglesia:hover h5 {
+  font-size: 21px;
+  font-weight: bold;
 }
 
 
-.visita-iglesia:hover {
-  background-color: #1D8BDA;
-  color: white;
-}
+
+
+
 
 

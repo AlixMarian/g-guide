@@ -9,9 +9,10 @@ import coverLogo from '../assets/logo cover.png';
 import logo from '../assets/G-Guide LOGO.png';
 import AutocompleteSearch from '../components/AutocompleteSearch';
 import SearchFilter from '../components/SearchFilter';
+import { Link } from 'react-router-dom';
+// import VisitaIglesia from './VisitaIglesia';
 
-
-const libraries = ['places', 'geometry']; // Add 'geometry' library for distance calculations
+const libraries = ['places', 'geometry']; 
 const servicesList = ['Marriages', 'Baptism', 'Burials', 'Confirmation', 'Mass Intentions'];
 
 const containerStyle = {
@@ -28,11 +29,8 @@ const MapComponent = () => {
   const [drawerInfo, setDrawerInfo] = useState({ show: false, title: '', description: '', telephone: '', serviceHours: '' });
   const [map, setMap] = useState(null);
   const [customIcon, setCustomIcon] = useState(null);  
-  // const [searchBox, setSearchBox] = useState(null);
   const [showMenu, setShowMenu] = useState(false); 
   const [selectedService, setSelectedService] = useState('');  
-  // const autocompleteRef = useRef(null);
-
 
   useEffect(() => {
     const success = (position) => {
@@ -203,21 +201,6 @@ const MapComponent = () => {
     }
 };
 
-
-
-
-//   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-//     const toRadians = (deg) => deg * (Math.PI / 180);
-//     const R = 6371; // Earth radius in km
-//     const dLat = toRadians(lat2 - lat1);
-//     const dLon = toRadians(lon2 - lon1);
-//     const a = Math.sin(dLat / 2) ** 2 +
-//               Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
-//               Math.sin(dLon / 2) ** 2;
-//     return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-// };
-
-  
   const handleMenuOpen = () => {
     setShowMenu(true);
     sortAndSetTopChurches(churches);
@@ -290,8 +273,6 @@ const MapComponent = () => {
     }
   };
 
-  
-
   const handleMapLoad = (mapInstance) => {
     setMap(mapInstance);
     if (window.google) {
@@ -325,7 +306,6 @@ const MapComponent = () => {
     setChurchPhoto(photo);  
   };
   
-
   const handleCloseDrawer = () => {
     setDrawerInfo({ show: false, title: '', description: '', telephone: '', serviceHours: '' });
   };
@@ -341,34 +321,12 @@ const MapComponent = () => {
     }
   };
 
-  // const onLoadSearchBox = (ref) => {
-  //   autocompleteRef.current = ref;
-  // };
-
-  // const onPlacesChanged = () => {
-  //   const place = autocompleteRef.current.getPlace();
-  //   if (place && place.geometry) {
-  //     const location = place.geometry.location;
-  //     console.log('Selected place:', place);
-  //     console.log('Location:', location.lat(), location.lng());
-
-  //     if (map) {
-  //       map.panTo({ lat: location.lat(), lng: location.lng() });
-  //       map.setZoom(15);
-  //     }
-  //   }
-  // };
-
   const convertTo12HourFormat = (time) => {
     const [hours, minutes] = time.split(':');
     const period = hours >= 12 ? 'PM' : 'AM';
     const adjustedHours = hours % 12 || 12;
     return `${adjustedHours}:${minutes} ${period}`;
   };
-
-  // const handleMenu = () => {
-  //   setShowMenu(true);
-  // };
 
   const handleCloseMenu = () => {
     setShowMenu(false);
@@ -387,7 +345,9 @@ const MapComponent = () => {
             <h3 style={{ fontFamily: 'Roboto, sans-serif' }}>G! Guide</h3>
             <i className="fas fa-bars" onClick={handleMenuOpen}></i>
             <div className='visita-iglesia'>
-              <h5>Visita Iglesia</h5>
+            {/* <VisitaIglesia fetchChurchData={fetchChurchData} /> */}
+
+              <Link to='/visita-iglesia'> <h5>Visita Iglesia</h5> </Link>
             </div>
           </div>
         </div>
