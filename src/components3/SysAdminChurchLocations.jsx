@@ -32,7 +32,6 @@ export const SysAdminChurchLocations = () => {
       <h3>Cebu Church List</h3>
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-          {/* Display the loading GIF while fetching data */}
           <img src={loadingGif} alt="Loading..." style={{ width: '100px' }} />
         </div>
       ) : (

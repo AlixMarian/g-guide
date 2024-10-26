@@ -10,6 +10,8 @@ import logo from '../assets/G-Guide LOGO.png';
 import AutocompleteSearch from '../components/AutocompleteSearch';
 import SearchFilter from '../components/SearchFilter';
 import { Link } from 'react-router-dom';
+import { fetchChurchData, handleMapLoad } from '../components/churchDataUtils';
+
 // import VisitaIglesia from './VisitaIglesia';
 
 const libraries = ['places', 'geometry']; 
@@ -227,63 +229,71 @@ const MapComponent = () => {
   };
 
   useEffect(() => {
-    fetchChurchData();
-  }, []);
-
-  // Fetch church data and photos
-  const fetchChurchData = async () => {
-    try {
-      const churchLocationCollection = collection(db, 'churchLocation');
-      const churchLocationSnapshot = await getDocs(churchLocationCollection);
-      const churchLocationList = churchLocationSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      const churchCollection = collection(db, 'church');
-      const churchSnapshot = await getDocs(churchCollection);
-      const churchList = churchSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      const churchPhotosCollection = collection(db, 'churchPhotos');
-      const churchPhotosSnapshot = await getDocs(churchPhotosCollection);
-      const churchPhotosList = churchPhotosSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      const combinedChurchData = churchLocationList.map(location => {
-        const matchedChurch = churchList.find(church => church.churchName === location.churchName);
-        const matchedPhoto = churchPhotosList.find(photo => photo.uploader === (matchedChurch ? matchedChurch.coordinatorID : null));
-
-        return {
-          ...location,
-          ...(matchedChurch || {}),
-          churchPhoto: matchedPhoto ? matchedPhoto.photoLink : coverLogo,  
-        };
-      });
-
-      setChurches(combinedChurchData); 
-    } catch (error) {
-      console.error('Error fetching church data:', error);
-    } finally {
+    const fetchData = async () => {
+      setLoading(true);
+      const data = await fetchChurchData();
+      setChurches(data);
       setLoading(false);
-    }
-  };
+    };
+  
+    fetchData();
+  }, []);
+  
 
-  const handleMapLoad = (mapInstance) => {
-    setMap(mapInstance);
-    if (window.google) {
-      setCustomIcon({
-        url: 'src/assets/location.png',
-        scaledSize: new window.google.maps.Size(40, 40),
-        anchor: new window.google.maps.Point(20, 40),
-      });
-    }
-    setLoading(false);
-  };
+  // // Fetch church data and photos
+  // const fetchChurchData = async () => {
+  //   try {
+  //     const churchLocationCollection = collection(db, 'churchLocation');
+  //     const churchLocationSnapshot = await getDocs(churchLocationCollection);
+  //     const churchLocationList = churchLocationSnapshot.docs.map(doc => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+
+  //     const churchCollection = collection(db, 'church');
+  //     const churchSnapshot = await getDocs(churchCollection);
+  //     const churchList = churchSnapshot.docs.map(doc => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+
+  //     const churchPhotosCollection = collection(db, 'churchPhotos');
+  //     const churchPhotosSnapshot = await getDocs(churchPhotosCollection);
+  //     const churchPhotosList = churchPhotosSnapshot.docs.map(doc => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+
+  //     const combinedChurchData = churchLocationList.map(location => {
+  //       const matchedChurch = churchList.find(church => church.churchName === location.churchName);
+  //       const matchedPhoto = churchPhotosList.find(photo => photo.uploader === (matchedChurch ? matchedChurch.coordinatorID : null));
+
+  //       return {
+  //         ...location,
+  //         ...(matchedChurch || {}),
+  //         churchPhoto: matchedPhoto ? matchedPhoto.photoLink : coverLogo,  
+  //       };
+  //     });
+
+  //     setChurches(combinedChurchData); 
+  //   } catch (error) {
+  //     console.error('Error fetching church data:', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // const handleMapLoad = (mapInstance) => {
+  //   setMap(mapInstance);
+  //   if (window.google) {
+  //     setCustomIcon({
+  //       url: 'src/assets/location.png',
+  //       scaledSize: new window.google.maps.Size(40, 40),
+  //       anchor: new window.google.maps.Point(20, 40),
+  //     });
+  //   }
+  //   setLoading(false);
+  // };
 
   const handleMarkerClick = (church) => {
     const telephone = church.churchContactNum ? church.churchContactNum : 'No data added yet.';
@@ -357,7 +367,9 @@ const MapComponent = () => {
           center={currentPosition || { lat: 0, lng: 0 }}
           zoom={13}
           onZoomChanged={onZoomChanged}
-          onLoad={handleMapLoad}
+          onLoad={(mapInstance) =>
+            handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)
+          }
         >
 
           {currentPosition && <Marker position={currentPosition} />}
