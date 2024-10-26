@@ -58,7 +58,7 @@ const SearchFilter = ({
           </div>
         </div>
         <div style={{ marginTop: '10px' }}>
-          <select value={selectedService} onChange={handleServiceChange} className="filter-form-select">
+          <select value={selectedService} onChange={handleServiceChange} className="filter-form-select form-select">
             <option value="">Filter by Services</option>
             {servicesList.map((service) => (
               <option key={service} value={service}>
