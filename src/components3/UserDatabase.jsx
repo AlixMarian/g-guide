@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getDoc, getDocs, collection, query, where, doc, updateDoc } from 'firebase/firestore';
 import { db } from '/backend/firebase';
-import { Table, Button, Dropdown } from 'react-bootstrap';
+import { Button, Dropdown } from 'react-bootstrap';
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
 import { toast } from 'react-toastify';
 
@@ -199,7 +199,7 @@ export const UserDatabase = () => {
 
           <h4 className='mb-3'>Now viewing: {selectedRole}</h4>
 
-          <Table className='admin-table' striped bordered hover responsive>
+          <table className='admin-table'>
             <thead>
               <tr>
                 <th>Profile Photo</th>
@@ -267,7 +267,7 @@ export const UserDatabase = () => {
                 </tr>
               ))}
             </tbody>
-          </Table>
+          </table>
         </>
       )}
     </div>

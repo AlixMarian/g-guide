@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     getMassList,addMassSchedule,updateMassSchedule,
     deleteMassSchedule,getPriestList} from '../Services/seaServices';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import '../../churchCoordinator.css';
 
@@ -95,10 +94,6 @@ export const Schedules = () =>{
         setNewMassType("");
         setNewMassLanguage("");
         setNewMassPriest("");
-        setNewEventDate("");
-        setNewEventName("");
-        setNewEventTime("");
-        setNewAnnouncement('');
       };
 
       const convertTo12HourFormat = (time) => {
@@ -110,46 +105,18 @@ export const Schedules = () =>{
       };
 
       return (
-      <div className="massInfo">
-        <h1>Mass Schedule</h1>
-        <table className="table">
-          <thead>
-            <tr>
-              <th scope="col">Day</th>
-              <th scope="col">Time</th>
-              <th scope="col">Type</th>
-              <th scope="col">Language</th>
-              <th scope="col">Presiding Priest</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {massList.map((massSchedules) => (
-              <tr key={massSchedules.id}>
-                <td>{massSchedules.massDate}</td>
-                <td>{convertTo12HourFormat(massSchedules.massTime)}</td>
-                <td>{massSchedules.massType}</td>
-                <td>{massSchedules.massLanguage}</td>
-                <td>{massSchedules.presidingPriest}</td>
-                <td>
-                  <form>
-                    <div className="btn-group" role="group">
-                      <button type="button" className="btn btn-secondary" onClick={() => handleEditMassSchedule(massSchedules)}>Edit</button>
-                      <button type="button" className="btn btn-danger" onClick={() => handleDeleteMassSchedule(massSchedules.id)}>Delete</button>
-                    </div>
-                  </form>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <br/>
-        <hr/>
-        <br/>
+      <>
+      <h1 className='me-3'>Mass Schedules</h1>
+      <div className='container mt-5'>
+      <div className="row">
+
+  <div className="col-md-6 mb-4">
+    <div className="card shadow-lg">
+      <div className="card-body">
         <h4>{editingMass ? "Edit Mass Schedule" : "Add Mass Schedule"}</h4>
         <form className="row g-3 needs-validation" noValidate onSubmit={(e) => handleSubmit(e, editingMass ? onUpdateMass : onSubmitMass)}>
           <div className="col-md-6">
-            <label htmlFor="validationTooltip04" className="form-label">Date</label>
+            <label htmlFor="validationTooltip04" className="form-label"><b>Date</b></label>
             <select className="form-select" required id="validationTooltip04" value={newMassDate} onChange={(e) => setNewMassDate(e.target.value)}>
               <option value="" disabled>Select a day</option>
               <option value="Monday">Monday</option>
@@ -163,20 +130,20 @@ export const Schedules = () =>{
             <div className="invalid-feedback">Please select a day</div>
           </div>
           <div className="col-md-6">
-            <label htmlFor="timeInput" className="form-label">Time</label>
+            <label htmlFor="timeInput" className="form-label"><b>Time</b></label>
             <input 
-            type="time" 
-            className="form-control" 
-            id="timeInput" 
-            placeholder="00:00" 
-            value={newMassTime} 
-            onChange={(e) => setNewMassTime(e.target.value)} 
-            required 
+              type="time" 
+              className="form-control" 
+              id="timeInput" 
+              placeholder="00:00" 
+              value={newMassTime} 
+              onChange={(e) => setNewMassTime(e.target.value)} 
+              required 
             />
             <div className="invalid-feedback">Please input a time</div>
           </div>
           <div className="col-md-6">
-            <label htmlFor="typeSelect" className="form-label">Type</label>
+            <label htmlFor="typeSelect" className="form-label"><b>Type</b></label>
             <select className="form-select" required id="typeSelect" value={newMassType} onChange={(e) => setNewMassType(e.target.value)}>
               <option value="" disabled>Select a mass type</option>
               <option value="Concelebrated">Concelebrated</option>
@@ -185,7 +152,7 @@ export const Schedules = () =>{
             <div className="invalid-feedback">Please select a mass type</div>
           </div>
           <div className="col-md-6">
-            <label htmlFor="languageSelect" className="form-label">Language</label>
+            <label htmlFor="languageSelect" className="form-label"><b>Language</b></label>
             <select className="form-select" required id="languageSelect" value={newMassLanguage} onChange={(e) => setNewMassLanguage(e.target.value)}>
               <option value="" disabled>Select a language</option>
               <option value="Cebuano">Cebuano</option>
@@ -193,8 +160,8 @@ export const Schedules = () =>{
             </select>
             <div className="invalid-feedback">Please select a language</div>
           </div>
-          <div className="col-md-6">
-            <label htmlFor="priestSelect" className="form-label">Presiding Priest</label>
+          <div className="col-md-12">
+            <label htmlFor="priestSelect" className="form-label"><b>Presiding Priest</b></label>
             <select className="form-select" required id="priestSelect" value={newMassPriest} onChange={(e) => setNewMassPriest(e.target.value)}>
               <option value="" disabled>Select a priest</option>
               {priestList.map((priest) => (
@@ -203,16 +170,57 @@ export const Schedules = () =>{
             </select>
             <div className="invalid-feedback">Please select a priest</div>
           </div>
-          <div id='buttons' className="col-md-6">
-            <div className="btn-group" role="group">
-              <button type="submit" className="btn btn-success">
+          <div className="d-flex justify-content-end gap-2">
+          <button type="submit" className="btn btn-success">
                 {editingMass ? 'Confirm changes' : 'Submit'}
               </button>
               <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
-            </div>
           </div>
         </form>
       </div>
+    </div>
+  </div>
+
+  
+  <div className="col-md-6 mb-4">
+    <div className="card shadow-lg">
+      <div className="card-body">
+        <table className="table table-bordered">
+          <thead className="table-dark">
+            <tr>
+              <th scope="col">Day</th>
+              <th scope="col">Time</th>
+              <th scope="col">Type</th>
+              <th scope="col">Language</th>
+              <th scope="col">Presiding Priest</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {massList.map((massSchedules) => (
+              <tr key={massSchedules.id}>
+                <td>{massSchedules.massDate}</td>
+                <td>{convertTo12HourFormat(massSchedules.massTime)}</td>
+                <td>{massSchedules.massType}</td>
+                <td>{massSchedules.massLanguage}</td>
+                <td>{massSchedules.presidingPriest}</td>
+                <td>
+                  <div className="btn-group" role="group">
+                    <button type="button" className="btn btn-secondary" onClick={() => handleEditMassSchedule(massSchedules)}>Edit</button>
+                    <button type="button" className="btn btn-danger" onClick={() => handleDeleteMassSchedule(massSchedules.id)}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+      </div>
+      
+      </>  
       );
 };
 

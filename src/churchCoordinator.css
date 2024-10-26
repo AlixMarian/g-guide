@@ -333,31 +333,106 @@ body .second-sidebar {
 }
 
 /*services Offered*/
-.Services{
-  display: inline-flex;
+.Services {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px; /* Space between the two sections */
+  margin-top: 20px;
+}
 
-  padding:10px;
-  margin: 10px;
+.offer1, .offer2 {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width:550px;
+  padding: 20px;
+  border: 1px solid #ddd;
+}
+
+.header {
+  background-color: #1976d2;
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+  border-radius: 6px 6px 0 0;
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.Schedtogs .form-check {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 15px;
+}
+
+.service1,
+.form-check {
+  display: flex;
+  gap: 10px; /* Space between checkbox and label */
+}
+
+.instructions{
+  display: flex;
+}
+
+.form-check input[type="checkbox"] {
+  transform: scale(1.2);
+  margin-right: 5px;
+  accent-color: #1976d2; /* Blue color for the checkbox */
+}
+
+.form-check-label {
+  flex: 1;
+  font-size: 14px;
+  margin-left: 10px;
+  font-weight: 500;
+  color: #333;
+}
+
+.fee-input {
   width: 100%;
+  padding: 5px;
+  margin: 1px 0;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
-.offer1{
-  display: block;
-  border: 1px solid black;
-  border-radius: 10px;
-  padding: 30px;
-  margin: 10px;
-  width: 50%;
+button {
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
 }
 
-.offer2{
-  display: block;
-  border: 1px solid black;
-  border-radius: 10px;
-  padding: 30px;
-  margin: 10px;
-  width: 50%;
+button.confirm {
+  background-color: #4caf50;
+  color: white;
 }
+
+button.clear {
+  background-color: #f44336;
+  color: white;
+}
+
+button:focus, .fee-input:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 5px rgba(25, 118, 210, 0.5);
+}
+
+/* Adjust checkbox and input placement */
+.service1 .fee-input,
+.form-check .fee-input {
+  margin-left: 30px; /* Ensures inputs align properly */
+  width: 80%; /* Responsive width for the input fields */
+}
+
 
 /* request Volunteers*/
 .ReqAnnoucement{
@@ -742,4 +817,9 @@ ul{
 
 .payment-td, .pending-td, .forPayment-td, .approved-td, .denied-td, .massIntention-td, .listPriest-td {
   font-size: 16px;
+}
+
+.btn-custom-outline {
+  color: black;
+  border-color: #9bc3e4;
 }

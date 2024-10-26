@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {getEventList,addEventSchedule,
     updateEventSchedule,deleteEventSchedule} from '../Services/seaServices';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -78,15 +78,9 @@ export const ChurchEvents = () => {
       };
 
       const clearForm = () => {
-        setNewMassDate("");
-        setNewMassTime("");
-        setNewMassType("");
-        setNewMassLanguage("");
-        setNewMassPriest("");
         setNewEventDate("");
         setNewEventName("");
         setNewEventTime("");
-        setNewAnnouncement('');
       };
 
       const convertTo12HourFormat = (time) => {
@@ -98,15 +92,76 @@ export const ChurchEvents = () => {
       };
       return (
         <>
-        <div className="events">
-        <h1>Church Events</h1>
-        <table className='table'>
-          <thead>
+        <h1 className='me-3'>Church Events</h1>
+        <div className="container mt-5">
+        <div className="row">
+
+  <div className="col-md-6 mb-4">
+    <div className="card shadow-lg">
+      <div className="card-body">
+        <h4>{editingEvent ? "Edit Event Schedule" : "Add Event Schedule"}</h4>
+        <form className="row g-3 needs-validation" noValidate onSubmit={(e) => handleSubmit(e, editingEvent ? onUpdateEvent : onSubmitEvent)}>
+          <div className="col-6">
+            <label htmlFor="eventDate" className="form-label"><b>Date</b></label>
+            <input 
+              type="date"
+              className="form-control w-100" 
+              id="eventDate" 
+              value={newEventDate} 
+              onChange={(e) => setNewEventDate(e.target.value)} 
+              min={new Date().toISOString().split('T')[0]} 
+              max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
+              required 
+            />
+            <div className="invalid-feedback">Please provide a valid date</div>
+          </div>
+          <div className="col-6">
+            <label htmlFor="eventTime" className="form-label"><b>Time</b></label>
+            <input 
+              type="time" 
+              className="form-control" 
+              id="eventTime" 
+              placeholder="00:00" 
+              value={newEventTime} 
+              onChange={(e) => setNewEventTime(e.target.value)} 
+              required 
+            />
+            <div className="invalid-feedback">Please provide a valid time</div>
+          </div>
+          <div className="col-md-12">
+            <label htmlFor="eventType" className="form-label"><b>Name</b></label>
+            <input 
+              type="text" 
+              className="form-control" 
+              id="eventType" 
+              value={newEventName} 
+              onChange={(e) => setNewEventName(e.target.value)} 
+              required 
+            />
+            <div className="invalid-feedback">Please provide a name</div>
+          </div>
+          <div className='d-flex justify-content-end gap-2'>
+          <button type="submit" className="btn btn-success">
+                {editingEvent ? 'Confirm Changes' : 'Submit'}
+              </button>
+              <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <div className="col-md-6 mb-4">
+    <div className="card">
+      <div className="card-body">
+        <table className='table table-bordered'>
+          <thead className='table-dark'>
             <tr>
               <th scope="col">Date</th>
               <th scope="col">Name</th>
               <th scope="col">Time</th>
-              <th></th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -116,56 +171,22 @@ export const ChurchEvents = () => {
                 <td>{events.eventName}</td>
                 <td>{convertTo12HourFormat(events.eventTime)}</td>
                 <td>
-                  <form>
-                    <div className="btn-group" role="group">
-                      <button type="button" className="btn btn-secondary" onClick={() => handleEditEventSchedule(events)}>Edit</button>
-                      <button type="button" className="btn btn-danger" onClick={() => handleDeleteEventSchedule(events.id)}>Delete</button>
-                    </div>
-                  </form>
+                  <div className="btn-group" role="group">
+                    <button type="button" className="btn btn-secondary" onClick={() => handleEditEventSchedule(events)}>Edit</button>
+                    <button type="button" className="btn btn-danger" onClick={() => handleDeleteEventSchedule(events.id)}>Delete</button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <br />
-        <hr />
-        <br/>
-        <h4>{editingEvent ? "Edit Event Schedule" : "Add Event Schedule"}</h4>
-        <form className="row g-3 needs-validation" noValidate onSubmit={(e) => handleSubmit(e, editingEvent ? onUpdateEvent : onSubmitEvent)}>
-          <div className="col-6">
-            <label htmlFor="eventDate" className="form-label">Date</label>
-              <input 
-                type="date"
-                className="form-control w-100" 
-                id="eventDate" 
-                value={newEventDate} 
-                onChange={(e) => setNewEventDate(e.target.value)} 
-                min={new Date().toISOString().split('T')[0]} 
-                max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
-                required 
-              />
-              <div className="invalid-feedback">Please provide a valid date</div>
-            </div>
-          <div className="col-md-6">
-            <label htmlFor="eventType" className="form-label">Name</label>
-            <input type="text" className="form-control" id="eventType" value={newEventName} onChange={(e) => setNewEventName(e.target.value)} required/>
-            <div className="invalid-feedback">Please provide a name</div>
-          </div>
-          <div className="col-6">
-            <label htmlFor="eventTime" className="form-label">Time</label>
-            <input type="time" className="form-control" id="eventTime" placeholder="00:00" value={newEventTime} onChange={(e) => setNewEventTime(e.target.value)} required/>
-            <div className="invalid-feedback">Please provide a valid time</div>
-          </div>
-          <div id='buttons' className="col-md-6">
-            <div className="btn-group" role="group">
-              <button type="submit" className="btn btn-success">
-                {editingEvent ? 'Confirm Changes' : 'Submit'}
-              </button>
-              <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
-            </div>
-          </div>
-        </form>
       </div>
+    </div>
+  </div>
+</div>
+
+        
+        </div>
       </>
       );
 };
