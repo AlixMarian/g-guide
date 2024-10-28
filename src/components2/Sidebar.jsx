@@ -90,6 +90,10 @@ export const Layout = () => {
     navigate('/Slots')
   }
 
+  const handleRefundPolicy = () => {
+    navigate('/RefundPolicy')
+  }
+
 
   //
   const handleChurchDetails = () => {
@@ -192,9 +196,11 @@ export const Layout = () => {
               <h3 className="second-button-name">Time Slots</h3>
             </div>
             </div>
+            <div onClick={handleRefundPolicy}>
             <div className={`numbers ${activeNumber === 'announcements' ? 'active' : ''}`} onClick={() => handleClick('announcements')}>
               <input type="image" src="../src/assets/number-3.png" className="image-size" />
               <h3 className="second-button-name">Refund Policy</h3>
+            </div>
             </div>
           </div>
         );

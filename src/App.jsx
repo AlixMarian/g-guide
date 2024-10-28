@@ -49,6 +49,7 @@ import Announcements from './components2/SEA/Announcements';
 //ServicesOffered
 import ExploreServices from './components2/ServiceOffered/ExploreServices';
 import Slots from './components2/ServiceOffered/Slots';
+import RefundPolicy from './components2/ServiceOffered/RefundPolicy';
 
 //ChurchInfo
 import ChurchDetails from './components2/ChurchInfo/ChurchDetails'
@@ -222,6 +223,17 @@ const App = () => {
             </div>
           </div>
         } />
+
+        <Route path="/RefundPolicy" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><RefundPolicy /></div>
+            </div>
+          </div>
+        } />
+
 
 
 

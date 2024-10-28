@@ -285,7 +285,7 @@ import '../churchCoordinator.css';
     <div className='ReqAnnouncement'>
       <h1 className="me-3">Request for Volunteers</h1>
       <div className="container mt-5">
-    <div className="row">
+        <div className="row">
       
       {/* Left side - Create/Edit Post form */}
       <div className="col-md-5">
@@ -355,7 +355,7 @@ import '../churchCoordinator.css';
         </div>
       </div>
          {/* Right side - List of Posts */}
-         <div className="col-md-7">
+         <div className="col-md-6">
             <div className="card shadow-lg">
               <div className="card-body">
 

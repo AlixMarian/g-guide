@@ -176,7 +176,7 @@ export const Listpriest = () => {
           </div>
 
           {/* Right side - List of Priests table */}
-          <div className="col-md-7">
+          <div className="col-md-6">
             <div className="card shadow">
               <div className="card-body">
                 <h3>List of Priests</h3>
