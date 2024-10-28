@@ -408,7 +408,6 @@ button {
   border-radius: 5px;
   border: none;
   cursor: pointer;
-  margin: 10px;
 }
 
 button.confirm {
@@ -827,4 +826,9 @@ ul{
 
 .payment-td, .pending-td, .forPayment-td, .approved-td, .denied-td, .massIntention-td, .listPriest-td {
   font-size: 16px;
+}
+
+.btn-custom-outline {
+  color: black;
+  border-color: #9bc3e4;
 }

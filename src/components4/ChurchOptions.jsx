@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
         const querySnapshot = await getDocs(collection(db, 'church'));
         const approvedChurches = querySnapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(church => church.churchStatus === 'approved');
+          .filter(church => church.churchStatus === 'Approved');
         setChurches(approvedChurches);
       } catch (error) {
         console.error('Error fetching approved churches: ', error);

@@ -168,7 +168,7 @@ export const Listpriest = () => {
                     <button type="submit" className="btn btn-success">
                       {editingPriest ? "Confirm Changes" : "Submit"}
                     </button>
-                    <button type="button" className="btn btn-secondary" onClick={clearForm}>Clear</button>
+                    <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
                   </div>
                 </form>
               </div>

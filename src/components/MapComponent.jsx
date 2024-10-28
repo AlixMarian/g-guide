@@ -9,9 +9,12 @@ import coverLogo from '../assets/logo cover.png';
 import logo from '../assets/G-Guide LOGO.png';
 import AutocompleteSearch from '../components/AutocompleteSearch';
 import SearchFilter from '../components/SearchFilter';
+import { Link } from 'react-router-dom';
+import { fetchChurchData, handleMapLoad } from '../components/churchDataUtils';
 
+// import VisitaIglesia from './VisitaIglesia';
 
-const libraries = ['places', 'geometry']; // Add 'geometry' library for distance calculations
+const libraries = ['places', 'geometry']; 
 const servicesList = ['Marriages', 'Baptism', 'Burials', 'Confirmation', 'Mass Intentions'];
 
 const containerStyle = {
@@ -28,11 +31,8 @@ const MapComponent = () => {
   const [drawerInfo, setDrawerInfo] = useState({ show: false, title: '', description: '', telephone: '', serviceHours: '' });
   const [map, setMap] = useState(null);
   const [customIcon, setCustomIcon] = useState(null);  
-  // const [searchBox, setSearchBox] = useState(null);
   const [showMenu, setShowMenu] = useState(false); 
   const [selectedService, setSelectedService] = useState('');  
-  // const autocompleteRef = useRef(null);
-
 
   useEffect(() => {
     const success = (position) => {
@@ -203,21 +203,6 @@ const MapComponent = () => {
     }
 };
 
-
-
-
-//   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-//     const toRadians = (deg) => deg * (Math.PI / 180);
-//     const R = 6371; // Earth radius in km
-//     const dLat = toRadians(lat2 - lat1);
-//     const dLon = toRadians(lon2 - lon1);
-//     const a = Math.sin(dLat / 2) ** 2 +
-//               Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
-//               Math.sin(dLon / 2) ** 2;
-//     return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-// };
-
-  
   const handleMenuOpen = () => {
     setShowMenu(true);
     sortAndSetTopChurches(churches);
@@ -244,65 +229,71 @@ const MapComponent = () => {
   };
 
   useEffect(() => {
-    fetchChurchData();
-  }, []);
-
-  // Fetch church data and photos
-  const fetchChurchData = async () => {
-    try {
-      const churchLocationCollection = collection(db, 'churchLocation');
-      const churchLocationSnapshot = await getDocs(churchLocationCollection);
-      const churchLocationList = churchLocationSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      const churchCollection = collection(db, 'church');
-      const churchSnapshot = await getDocs(churchCollection);
-      const churchList = churchSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      const churchPhotosCollection = collection(db, 'churchPhotos');
-      const churchPhotosSnapshot = await getDocs(churchPhotosCollection);
-      const churchPhotosList = churchPhotosSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      const combinedChurchData = churchLocationList.map(location => {
-        const matchedChurch = churchList.find(church => church.churchName === location.churchName);
-        const matchedPhoto = churchPhotosList.find(photo => photo.uploader === (matchedChurch ? matchedChurch.coordinatorID : null));
-
-        return {
-          ...location,
-          ...(matchedChurch || {}),
-          churchPhoto: matchedPhoto ? matchedPhoto.photoLink : coverLogo,  
-        };
-      });
-
-      setChurches(combinedChurchData); 
-    } catch (error) {
-      console.error('Error fetching church data:', error);
-    } finally {
+    const fetchData = async () => {
+      setLoading(true);
+      const data = await fetchChurchData();
+      setChurches(data);
       setLoading(false);
-    }
-  };
-
+    };
+  
+    fetchData();
+  }, []);
   
 
-  const handleMapLoad = (mapInstance) => {
-    setMap(mapInstance);
-    if (window.google) {
-      setCustomIcon({
-        url: 'src/assets/location.png',
-        scaledSize: new window.google.maps.Size(40, 40),
-        anchor: new window.google.maps.Point(20, 40),
-      });
-    }
-    setLoading(false);
-  };
+  // // Fetch church data and photos
+  // const fetchChurchData = async () => {
+  //   try {
+  //     const churchLocationCollection = collection(db, 'churchLocation');
+  //     const churchLocationSnapshot = await getDocs(churchLocationCollection);
+  //     const churchLocationList = churchLocationSnapshot.docs.map(doc => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+
+  //     const churchCollection = collection(db, 'church');
+  //     const churchSnapshot = await getDocs(churchCollection);
+  //     const churchList = churchSnapshot.docs.map(doc => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+
+  //     const churchPhotosCollection = collection(db, 'churchPhotos');
+  //     const churchPhotosSnapshot = await getDocs(churchPhotosCollection);
+  //     const churchPhotosList = churchPhotosSnapshot.docs.map(doc => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+
+  //     const combinedChurchData = churchLocationList.map(location => {
+  //       const matchedChurch = churchList.find(church => church.churchName === location.churchName);
+  //       const matchedPhoto = churchPhotosList.find(photo => photo.uploader === (matchedChurch ? matchedChurch.coordinatorID : null));
+
+  //       return {
+  //         ...location,
+  //         ...(matchedChurch || {}),
+  //         churchPhoto: matchedPhoto ? matchedPhoto.photoLink : coverLogo,  
+  //       };
+  //     });
+
+  //     setChurches(combinedChurchData); 
+  //   } catch (error) {
+  //     console.error('Error fetching church data:', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // const handleMapLoad = (mapInstance) => {
+  //   setMap(mapInstance);
+  //   if (window.google) {
+  //     setCustomIcon({
+  //       url: 'src/assets/location.png',
+  //       scaledSize: new window.google.maps.Size(40, 40),
+  //       anchor: new window.google.maps.Point(20, 40),
+  //     });
+  //   }
+  //   setLoading(false);
+  // };
 
   const handleMarkerClick = (church) => {
     const telephone = church.churchContactNum ? church.churchContactNum : 'No data added yet.';
@@ -325,7 +316,6 @@ const MapComponent = () => {
     setChurchPhoto(photo);  
   };
   
-
   const handleCloseDrawer = () => {
     setDrawerInfo({ show: false, title: '', description: '', telephone: '', serviceHours: '' });
   };
@@ -341,34 +331,12 @@ const MapComponent = () => {
     }
   };
 
-  // const onLoadSearchBox = (ref) => {
-  //   autocompleteRef.current = ref;
-  // };
-
-  // const onPlacesChanged = () => {
-  //   const place = autocompleteRef.current.getPlace();
-  //   if (place && place.geometry) {
-  //     const location = place.geometry.location;
-  //     console.log('Selected place:', place);
-  //     console.log('Location:', location.lat(), location.lng());
-
-  //     if (map) {
-  //       map.panTo({ lat: location.lat(), lng: location.lng() });
-  //       map.setZoom(15);
-  //     }
-  //   }
-  // };
-
   const convertTo12HourFormat = (time) => {
     const [hours, minutes] = time.split(':');
     const period = hours >= 12 ? 'PM' : 'AM';
     const adjustedHours = hours % 12 || 12;
     return `${adjustedHours}:${minutes} ${period}`;
   };
-
-  // const handleMenu = () => {
-  //   setShowMenu(true);
-  // };
 
   const handleCloseMenu = () => {
     setShowMenu(false);
@@ -387,7 +355,9 @@ const MapComponent = () => {
             <h3 style={{ fontFamily: 'Roboto, sans-serif' }}>G! Guide</h3>
             <i className="fas fa-bars" onClick={handleMenuOpen}></i>
             <div className='visita-iglesia'>
-              <h5>Visita Iglesia</h5>
+            {/* <VisitaIglesia fetchChurchData={fetchChurchData} /> */}
+
+              <Link to='/visita-iglesia'> <h5>Visita Iglesia</h5> </Link>
             </div>
           </div>
         </div>
@@ -397,7 +367,9 @@ const MapComponent = () => {
           center={currentPosition || { lat: 0, lng: 0 }}
           zoom={13}
           onZoomChanged={onZoomChanged}
-          onLoad={handleMapLoad}
+          onLoad={(mapInstance) =>
+            handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)
+          }
         >
 
           {currentPosition && <Marker position={currentPosition} />}

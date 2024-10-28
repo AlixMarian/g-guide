@@ -30,6 +30,7 @@ import ChurchLocations from './components3/SysAdminChurchLocations';
 import AdminNavbar from './components3/SysAdminNavbar';
 import Transactions from './components3/Transactions';
 import RenewChurch from './components/RenewChurch';
+import VisitaIglesia from './components/VisitaIglesia';
 
 //Appointments
 import PendingAppointments from './components2/Appointments/PendingAppointments'
@@ -67,6 +68,10 @@ const App = () => {
         <Route path="/sidebar" element={<Sidebar />} />
         
         <Route path="/admin-navbar" element={<AdminNavbar />} />
+
+        <Route path="/visita-iglesia" element={<VisitaIglesia />} />
+
+        
 
         
         <Route path="/home" element={<><NavBar /><Home /></>} />
