@@ -283,7 +283,7 @@ export const ChurchUploads = () => {
                         </div>
                     </div>
                 </div>
-                <div className="col-md-6 mb-4">
+                <div className="col-md-5 mb-4">
                     <div className="card shadow-lg">
                         <div className="card-body">
                             <h5 className="card-title"><b>Uploaded Church Photos</b></h5>

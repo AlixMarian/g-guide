@@ -426,6 +426,15 @@ button:focus, .fee-input:focus {
   box-shadow: 0 0 5px rgba(25, 118, 210, 0.5);
 }
 
+/*timeslots*/
+.rigtside{
+  display: block;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 30px;
+  margin: 10px;
+}
+
 /* Adjust checkbox and input placement */
 .service1 .fee-input,
 .form-check .fee-input {

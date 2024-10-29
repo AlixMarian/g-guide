@@ -110,7 +110,7 @@ export const Schedules = () =>{
       <div className='container mt-5'>
       <div className="row">
 
-  <div className="col-md-6 mb-4">
+  <div className="col-md-5 mb-4">
     <div className="card shadow-lg">
       <div className="card-body">
         <h4>{editingMass ? "Edit Mass Schedule" : "Add Mass Schedule"}</h4>
@@ -182,7 +182,7 @@ export const Schedules = () =>{
   </div>
 
   
-  <div className="col-md-6 mb-4">
+  <div className="col-md-6 mb-3">
     <div className="card shadow-lg">
       <div className="card-body">
         <table className="table table-bordered">

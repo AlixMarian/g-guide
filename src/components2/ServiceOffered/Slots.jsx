@@ -353,6 +353,7 @@ export const Slots = () => {
 
   return (
     <div>
+      {/*from here*/}
       <h1>Time Slots</h1>
       <div className='card'>
         <div className='card-body'>
@@ -385,6 +386,8 @@ export const Slots = () => {
               </div>
             </div>
           </div>
+
+        {/*to here*/}
           <br />
           <h5>Created Time Slots</h5>
           <table className="table">
