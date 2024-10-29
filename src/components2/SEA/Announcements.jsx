@@ -127,7 +127,7 @@ export const Announcements = () => {
         </div>
 
         {/* Right Card: Announcements List */}
-        <div className='col-md-6 mb-4'>
+        <div className='col-md-5 mb-4'>
             <div className='card shadow-lg'>
               <div className='card-body'>
                 <h2>Announcements</h2>
