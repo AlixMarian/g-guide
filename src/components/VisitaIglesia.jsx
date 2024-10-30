@@ -1,15 +1,18 @@
+import '../websiteUser.css';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   GoogleMap,
   LoadScript,
   DirectionsRenderer,
   Autocomplete,
+  Marker,
 } from '@react-google-maps/api';
 import { Offcanvas, Button, Form } from 'react-bootstrap';
 import { fetchChurchData } from '../components/churchDataUtils';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { FaBars } from 'react-icons/fa'; // For the drag handle icon
+import { FaBars } from 'react-icons/fa';
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
+import { handleMarkerClick, handleMapLoad, onZoomChanged } from '../components/churchDataUtils';
 
 const containerStyle = {
   width: '100%',
@@ -26,19 +29,35 @@ const VisitaIglesia = () => {
   const [currentPosition, setCurrentPosition] = useState(null);
   const [startLocation, setStartLocation] = useState(null);
   const [startLocationInputValue, setStartLocationInputValue] = useState('');
+  const [customIcon, setCustomIcon] = useState(null);
+  const [showOffcanvas, setShowOffcanvas] = useState(false);
+
   const [destinations, setDestinations] = useState([
     {
-      id: 0,
+      id: 'dest-0',
       destination: null,
       usingCustomDestination: false,
       inputValue: '',
       selectedChurchId: '',
     },
   ]);
-  const [showOffcanvas, setShowOffcanvas] = useState(false);
 
   const startLocationRef = useRef(null);
   const destinationRefs = useRef([React.createRef()]);
+    const portal = useRef(document.createElement('div'));
+
+
+  useEffect(() => {
+    const offcanvasBody = document.querySelector('.offcanvas-body');
+    if (offcanvasBody) {
+      offcanvasBody.appendChild(portal.current);
+    }
+    return () => {
+      if (offcanvasBody && portal.current.parentNode === offcanvasBody) {
+        offcanvasBody.removeChild(portal.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,12 +79,8 @@ const VisitaIglesia = () => {
             lng: position.coords.longitude,
           });
         },
-        (error) => {
-          console.error('Error getting current position:', error);
-        }
+        (error) => console.error('Error getting current position:', error)
       );
-    } else {
-      console.error('Geolocation is not supported by this browser.');
     }
   }, []);
 
@@ -74,17 +89,15 @@ const VisitaIglesia = () => {
   };
 
   const onPlaceChangedStartLocation = () => {
-    if (startLocationRef.current !== null) {
+    if (startLocationRef.current) {
       const place = startLocationRef.current.getPlace();
-      if (place && place.geometry && place.geometry.location) {
+      if (place && place.geometry?.location) {
         setStartLocation({
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng(),
         });
         setStartLocationInputValue(place.formatted_address || place.name);
       }
-    } else {
-      console.log('Autocomplete is not loaded yet!');
     }
   };
 
@@ -96,7 +109,7 @@ const VisitaIglesia = () => {
     const ref = destinationRefs.current[index].current;
     if (ref) {
       const place = ref.getPlace();
-      if (place && place.geometry && place.geometry.location) {
+      if (place && place.geometry?.location) {
         const newDestinations = [...destinations];
         newDestinations[index].destination = {
           lat: place.geometry.location.lat(),
@@ -110,7 +123,7 @@ const VisitaIglesia = () => {
 
   const addDestination = () => {
     const newDestination = {
-      id: destinations.length,
+      id: `dest-${destinations.length}`,
       destination: null,
       usingCustomDestination: false,
       inputValue: '',
@@ -122,11 +135,7 @@ const VisitaIglesia = () => {
 
   const handleCalculateRoute = () => {
     const org = usingCurrentLocation && currentPosition ? currentPosition : startLocation;
-
-    if (!org) {
-      alert('Please select a start location.');
-      return;
-    }
+    if (!org) return alert('Please select a start location.');
 
     const destinationList = destinations.map((d) => d.destination);
     if (destinationList.some((dest) => !dest)) {
@@ -141,15 +150,12 @@ const VisitaIglesia = () => {
       {
         origin: org,
         destination: destinationList[destinationList.length - 1],
-        waypoints: waypoints,
+        waypoints,
         travelMode: window.google.maps.TravelMode[travelMode],
       },
       (result, status) => {
-        if (status === window.google.maps.DirectionsStatus.OK) {
-          setDirectionsResponse(result);
-        } else {
-          console.error(`Error fetching directions: ${status}`);
-        }
+        if (status === window.google.maps.DirectionsStatus.OK) setDirectionsResponse(result);
+        else console.error(`Error fetching directions: ${status}`);
       }
     );
   };
@@ -161,12 +167,6 @@ const VisitaIglesia = () => {
     const [reorderedItem] = reorderedDestinations.splice(result.source.index, 1);
     reorderedDestinations.splice(result.destination.index, 0, reorderedItem);
 
-    const reorderedRefs = Array.from(destinationRefs.current);
-    const [reorderedRef] = reorderedRefs.splice(result.source.index, 1);
-    reorderedRefs.splice(result.destination.index, 0, reorderedRef);
-
-    destinationRefs.current = reorderedRefs;
-
     setDestinations(reorderedDestinations);
   };
 
@@ -175,10 +175,7 @@ const VisitaIglesia = () => {
       <img src={loadingGif} alt="Loading..." style={{ width: '100px' }} />
     </div>
   ) : (
-    <LoadScript
-      googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-      libraries={['places']}
-    >
+    <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={['places']}>
       <Button variant="primary" onClick={() => setShowOffcanvas(true)}>
         Open Directions
       </Button>
@@ -199,10 +196,7 @@ const VisitaIglesia = () => {
             </Form.Group>
 
             {!usingCurrentLocation && (
-              <Autocomplete
-                onLoad={onLoadStartLocation}
-                onPlaceChanged={onPlaceChangedStartLocation}
-              >
+              <Autocomplete onLoad={onLoadStartLocation} onPlaceChanged={onPlaceChangedStartLocation}>
                 <Form.Group controlId="start-location" style={{ marginBottom: '1rem' }}>
                   <Form.Control
                     type="text"
@@ -219,20 +213,15 @@ const VisitaIglesia = () => {
                 {(provided) => (
                   <div {...provided.droppableProps} ref={provided.innerRef}>
                     {destinations.map((dest, index) => (
-                      <Draggable key={`dest-${dest.id}`} draggableId={`dest-${dest.id}`} index={index}>
+                      <Draggable key={dest.id} draggableId={dest.id} index={index}>
                         {(provided) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            style={{
-                              marginBottom: '1rem',
-                              display: 'block',
-                              alignItems: 'center',
-                              ...provided.draggableProps.style,
-                            }}
+                            {...provided.dragHandleProps} // For the drag handle
+                            className="draggable-destination"
                           >
-                            {/* Drag Handle */}
-                            <FaBars {...provided.dragHandleProps} style={{ cursor: 'grab', marginRight: '0.5rem' }} />
+                          <FaBars {...provided.dragHandleProps} className="drag-handle" />
                             <Form.Check
                               type="checkbox"
                               id={`use-custom-destination-${index}`}
@@ -242,23 +231,17 @@ const VisitaIglesia = () => {
                                 const newDestinations = [...destinations];
                                 newDestinations[index].usingCustomDestination =
                                   !newDestinations[index].usingCustomDestination;
-                                newDestinations[index].inputValue = '';
-                                newDestinations[index].selectedChurchId = '';
-                                newDestinations[index].destination = null;
                                 setDestinations(newDestinations);
                               }}
                             />
 
                             {dest.usingCustomDestination ? (
-                              <Autocomplete
-                                onLoad={(autocomplete) => onLoadDestination(index, autocomplete)}
-                                onPlaceChanged={() => onPlaceChangedDestination(index)}
-                              >
+                              <Autocomplete onLoad={(autocomplete) => onLoadDestination(index, autocomplete)} onPlaceChanged={() => onPlaceChangedDestination(index)}>
                                 <Form.Group controlId={`custom-destination-${index}`} style={{ flex: 1, marginLeft: '1rem' }}>
                                   <Form.Control
                                     type="text"
+                                    style={{fontSize:'12px'}}
                                     placeholder={`Enter Destination ${index + 1}`}
-                                    style={{width: '350px'}}
                                     value={dest.inputValue}
                                     onChange={(e) => {
                                       const newDestinations = [...destinations];
@@ -270,22 +253,16 @@ const VisitaIglesia = () => {
                               </Autocomplete>
                             ) : (
                               <Form.Group controlId={`select-destination-${index}`} style={{ flex: 1, marginLeft: '1rem' }}>
-                                <Form.Control
-                                  as="select"
-                                  value={dest.selectedChurchId}
-                                  onChange={(e) => {
-                                    const selectedChurch = churches.find(
-                                      (church) => church.id === e.target.value
-                                    );
-                                    const newDestinations = [...destinations];
-                                    newDestinations[index].selectedChurchId = e.target.value;
-                                    newDestinations[index].destination = {
-                                      lat: parseFloat(selectedChurch.latitude),
-                                      lng: parseFloat(selectedChurch.longitude),
-                                    };
-                                    setDestinations(newDestinations);
-                                  }}
-                                >
+                                <Form.Control as="select" value={dest.selectedChurchId} style={{fontSize:'12px'}} onChange={(e) => {
+                                  const selectedChurch = churches.find((church) => church.id === e.target.value);
+                                  const newDestinations = [...destinations];
+                                  newDestinations[index].selectedChurchId = e.target.value;
+                                  newDestinations[index].destination = {
+                                    lat: parseFloat(selectedChurch.latitude),
+                                    lng: parseFloat(selectedChurch.longitude),
+                                  };
+                                  setDestinations(newDestinations);
+                                }}>
                                   <option value="">Select a Church Destination</option>
                                   {churches.map((church) => (
                                     <option key={church.id} value={church.id}>
@@ -316,19 +293,16 @@ const VisitaIglesia = () => {
         </Offcanvas.Body>
       </Offcanvas>
 
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={currentPosition || { lat: 14.5995, lng: 120.9842 }}
-        zoom={13}
-        onLoad={(mapInstance) => setMap(mapInstance)}
-      >
-        {directionsResponse && (
-          <DirectionsRenderer
-            options={{
-              directions: directionsResponse,
-            }}
-          />
-        )}
+      <GoogleMap mapContainerStyle={containerStyle} center={currentPosition || { lat: 0, lng: 0 }} zoom={13} onZoomChanged={onZoomChanged} onLoad={(mapInstance) => handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)}>
+        {directionsResponse && <DirectionsRenderer options={{ directions: directionsResponse }} />}
+        {currentPosition && <Marker position={currentPosition} />}
+        {!loading &&
+          customIcon &&
+          churches.map((church) =>
+            church.latitude && church.longitude ? (
+              <Marker key={church.id} position={{ lat: parseFloat(church.latitude), lng: parseFloat(church.longitude) }} icon={customIcon} onClick={() => handleMarkerClick(church)} />
+            ) : null
+          )}
       </GoogleMap>
     </LoadScript>
   );
