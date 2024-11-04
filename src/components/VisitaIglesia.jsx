@@ -16,7 +16,7 @@ import { handleMarkerClick, handleMapLoad, onZoomChanged } from '../components/c
 
 const containerStyle = {
   width: '100%',
-  height: '600px',
+  height: '700px',
 };
 
 const VisitaIglesia = () => {
@@ -177,11 +177,11 @@ const VisitaIglesia = () => {
     </div>
   ) : (
     <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={['places']}>
-      <Button variant="primary" onClick={() => setShowOffcanvas(true)}>
+      <Button variant="primary" style={{zIndex: '999', position: 'absolute', top: '10px', left: '190px'}} onClick={() => setShowOffcanvas(true)}>
         Open Directions
       </Button>
 
-      <Offcanvas show={showOffcanvas} onHide={() => setShowOffcanvas(false)} placement="start">
+      <Offcanvas show={showOffcanvas} style={{zIndex: '9999'}} onHide={() => setShowOffcanvas(false)} placement="start">
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Visita Iglesia Directions</Offcanvas.Title>
         </Offcanvas.Header>

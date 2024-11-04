@@ -287,7 +287,7 @@
 .dropdownAddress {
   position: relative;
   display: inline-block;
-  width: 100%; /* Set the width to match the input below */
+  width: 100%;
 }
 
 /* Dropdown Content (Hidden by Default) */
@@ -295,7 +295,7 @@
   display: none;
   position: absolute;
   background-color: #f6f6f6;
-  min-width: 100%; /* Ensure the dropdown content matches the input width */
+  min-width: 100%; 
   max-height: 300px;
   overflow-y: auto;
   border: 1px solid #ddd;
@@ -367,35 +367,35 @@
 .drawer-img-container {
   width: 100%;
   padding: 0;
-  margin: 0; /* Remove margin if present */
-  display: flex; /* Ensure the image container uses flex */
-  justify-content: center; /* Center content if needed */
+  margin: 0;
+  display: flex;
+  justify-content: center;
 }
 
 .drawer-img-container img {
-  width: 100%; /* Image takes full width of the container */
-  height: auto; /* Keep aspect ratio */
-  object-fit: cover; /* Ensure image covers the container area */
-  border-top-left-radius: 1.2rem; /* Match border-radius of drawer */
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-top-left-radius: 1.2rem;
   border-top-right-radius: 1.2rem;
 }
 
 .drawer-title {
-  text-align: center; /* This will center the text */
+  text-align: center;
   font-weight: bold;
-  margin-top: -10px; /* Optional: Make the title bold */
+  margin-top: -10px;
 }
 
 .drawer-content {
-  display: flex;        /* Enables Flexbox */
-  flex-direction: column; /* Arrange items vertically */
+  display: flex;
+  flex-direction: column;
   padding: 15px;
-  gap: 2rem;    
-  margin-top: 1rem;       /* Adds gap between flex items */
+  gap: 2rem;
+  margin-top: 1rem;
 }
 
 .drawer-body-content {
-  flex-grow: 1; /* Ensure this content grows to fill available space */
+  flex-grow: 1;
 }
 
 .drawer-icon-text {
@@ -409,16 +409,16 @@
 }
 
 .view-church-btn {
-  width: 100%; /* Make the button full width */
-  background-color: #1D8BDA; /* Customize button color */
+  width: 100%;
+  background-color: #1D8BDA; 
   color: white;
   font-weight: bold;
   padding: 10px;
   border-radius: 20px;
   text-align: center;
   border: none;
-  margin-top: auto; /* Pushes button to the bottom */
-  margin-bottom: 1rem; /* Adds space below the button */
+  margin-top: auto; 
+  margin-bottom: 1rem; 
 }
 
 .map-search-container {
@@ -500,28 +500,25 @@
   width: 100%;
 }
 
-
-
 .filter-input-group .form-control {
   border-radius: 20px 0 0 20px;
-  box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.3); /* Adds shadow effect */
+  box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.3); 
   padding: 10px;
-  border:  solid #ffffff; /* Optional: Adjust border styling */
-  height: 50px; /* Ensure the input and button are the same height */
+  border:  solid #ffffff;
+  height: 50px; 
 
 }
 
 .filter-input-group .btn-custom-filter {
   border-radius: 0 20px 20px 0;
-  box-shadow:  2px 6px 6px rgba(0, 0, 0, 0.3); /* Adds shadow effect */
+  box-shadow:  2px 6px 6px rgba(0, 0, 0, 0.3);
   padding: 10px 15px;
-  height: 50px; /* Match the height of the input */
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: large;
-  font-weight: bold; /* Makes the button text bigger and bolder */
-  background-color: white;
+  font-weight: bold;   background-color: white;
   color: rgb(67, 158, 255);
   border:  solid #ffffff; 
 }
@@ -560,9 +557,9 @@
 }
 
 .renewalBanner img {
-  max-width: 70%; /* Reduce the width to 50% of its container */
-  height: auto;   /* Maintain aspect ratio */
-  margin: 0 auto; /* Center the image */
+  max-width: 70%; 
+  height: auto;  
+  margin: 0 auto;
 }
 
 .visita-iglesia {
@@ -571,19 +568,19 @@
   transition: color 0.5s ease, font-weight 0.2s ease, font-size 0.2s ease;
   cursor: pointer;
   font-weight: bold;
-  text-decoration: none; /* Ensure no underline on the container */
+  text-decoration: none;
 }
 
 .visita-iglesia h5 {
   font-size: 20px;
-  margin: 0; /* Remove extra margin */
-  text-decoration: none; /* Ensure no underline */
-  color: inherit; /* Inherit the color from the parent */
+  margin: 0; 
+  text-decoration: none; 
+  color: inherit; 
 }
 
 .visita-iglesia a {
-  text-decoration: none; /* Ensure links have no underline */
-  color: inherit; /* Make sure link takes the same color as its parent */
+  text-decoration: none; 
+  color: inherit; 
 }
 
 .visita-iglesia:hover h5 {
