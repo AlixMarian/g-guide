@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, addDoc, query, where } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -20,47 +20,61 @@ export const RefundPolicy = () => {
         const auth = getAuth();
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                fetchServices();
-                fetchRefundPolicies();
+                fetchServices(user.uid); // Fetch services based on user ID
+                fetchRefundPolicies(user.uid); // Fetch policies created by the user
             } else {
                 navigate('/login');
             }
         });
     }, [navigate]);
 
-    const fetchServices = async () => {
+    const fetchServices = async (churchId) => {
         try {
-            const servicesSnapshot = await getDocs(collection(db, 'services'));
-            const servicesList = servicesSnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            console.log("Fetched services:", servicesList); // Debugging log
-            setServices(servicesList);
+            const docRef = doc(db, 'services', churchId);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const servicesList = Object.keys(data)
+                    .filter(key => typeof data[key] === 'object' && data[key].active) // Only include active services
+                    .map(key => ({ name: key, ...data[key] }));
+                setServices(servicesList);
+            } else {
+                toast.error("No services found for this church.");
+            }
         } catch (error) {
             console.error("Error fetching services:", error);
         }
     };
 
-    const fetchRefundPolicies = async () => {
-        const policiesSnapshot = await getDocs(collection(db, 'refundPolicy'));
-        const policiesList = policiesSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-        setRefundPolicies(policiesList);
+    const fetchRefundPolicies = async (creatorId) => {
+        try {
+            const q = query(collection(db, 'refundPolicy'), where('creatorId', '==', creatorId));
+            const policiesSnapshot = await getDocs(q);
+            const policiesList = policiesSnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setRefundPolicies(policiesList);
+        } catch (error) {
+            console.error("Error fetching refund policies:", error);
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const auth = getAuth();
+        const user = auth.currentUser;
+
         if (!selectedService || !refPolicyBodyInput) {
             toast.error('Please select a service and enter a refund policy.');
             return;
         }
 
         const policyData = {
-            serviceName: selectedService,
+            serviceName: selectedService, // Save the service name
             refundPolicy: refPolicyBodyInput,
+            creatorId: user.uid, // Associate the policy with the current user ID
         };
 
         try {
@@ -68,7 +82,7 @@ export const RefundPolicy = () => {
             toast.success('Refund policy saved successfully!');
             setRefPolicyBodyInput(''); // Clear the input
             setSelectedService(''); // Clear the selected service
-            fetchRefundPolicies(); // Refresh the displayed policies
+            fetchRefundPolicies(user.uid); // Refresh the displayed policies
         } catch (error) {
             toast.error('Failed to save refund policy.');
         }
@@ -96,8 +110,8 @@ export const RefundPolicy = () => {
                                         >
                                             <option value="" disabled>Select a service</option>
                                             {services.map((service) => (
-                                                <option key={service.id} value={service.id}>
-                                                    {service.eventName || service.id} {/* Show eventName if exists, otherwise ID */}
+                                                <option key={service.name} value={service.name}>
+                                                    {service.name}
                                                 </option>
                                             ))}
                                         </select>

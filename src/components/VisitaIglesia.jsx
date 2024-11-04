@@ -7,8 +7,8 @@ import {
 } from '@react-google-maps/api';
 import { Offcanvas, Button, Form } from 'react-bootstrap';
 import { fetchChurchData } from '../components/churchDataUtils';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { FaBars } from 'react-icons/fa'; // For the drag handle icon
+//import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+//import { FaBars } from 'react-icons/fa'; // For the drag handle icon
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
 
 const containerStyle = {
