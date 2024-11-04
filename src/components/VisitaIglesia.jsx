@@ -1,13 +1,7 @@
 import '../websiteUser.css';
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  GoogleMap,
-  LoadScript,
-  DirectionsRenderer,
-  Autocomplete,
-  Marker,
-} from '@react-google-maps/api';
+import { GoogleMap, LoadScript, DirectionsRenderer, Autocomplete, Marker } from '@react-google-maps/api';
 import { Offcanvas, Button, Form } from 'react-bootstrap';
 import { fetchChurchData } from '../components/churchDataUtils';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -20,10 +14,13 @@ const containerStyle = {
   height: '700px',
 };
 
+const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"]; // Different colors for each segment
+
+
 const VisitaIglesia = () => {
   const navigate = useNavigate();
   const [churches, setChurches] = useState([]);
-  const [directionsResponse, setDirectionsResponse] = useState(null);
+  const [directionsResponse, setDirectionsResponse] = useState([]);
   const [travelMode, setTravelMode] = useState('DRIVING');
   const [map, setMap] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -136,8 +133,8 @@ const VisitaIglesia = () => {
   };
   
 
-  const handleCalculateRoute = () => {
-    const org = usingCurrentLocation && currentPosition ? currentPosition : startLocation;
+  const handleCalculateRoute = async () => {
+    const org = currentPosition;
     if (!org) return alert('Please select a start location.');
 
     const destinationList = destinations.map((d) => d.destination);
@@ -146,22 +143,56 @@ const VisitaIglesia = () => {
       return;
     }
 
-    const directionsService = new window.google.maps.DirectionsService();
-    const waypoints = destinationList.slice(0, -1).map((location) => ({ location, stopover: true }));
+    // Check if geometry.spherical is available
+    if (!window.google.maps.geometry || !window.google.maps.geometry.spherical) {
+      console.error("Google Maps Geometry library is not loaded.");
+      return;
+    }
 
-    directionsService.route(
-      {
-        origin: org,
-        destination: destinationList[destinationList.length - 1],
-        waypoints,
-        travelMode: window.google.maps.TravelMode[travelMode],
-      },
-      (result, status) => {
-        if (status === window.google.maps.DirectionsStatus.OK) setDirectionsResponse(result);
-        else console.error(`Error fetching directions: ${status}`);
-      }
-    );
+    // Sort destinations by distance from the origin point
+    const sortedDestinations = destinationList
+      .map((destination) => {
+        const distance = window.google.maps.geometry.spherical.computeDistanceBetween(
+          new window.google.maps.LatLng(org.lat, org.lng),
+          new window.google.maps.LatLng(destination.lat, destination.lng)
+        );
+        return { location: destination, distance };
+      })
+      .sort((a, b) => a.distance - b.distance) // Sort by ascending distance
+      .map((item) => item.location); // Extract sorted location objects
+
+    // Clear previous routes
+    setDirectionsResponse([]);
+
+    // Calculate route segments
+    const newDirections = [];
+    for (let i = 0; i < sortedDestinations.length - 1; i++) {
+      const directionsService = new window.google.maps.DirectionsService();
+      const origin = i === 0 ? org : sortedDestinations[i];
+      const destination = sortedDestinations[i + 1];
+
+      directionsService.route(
+        {
+          origin: origin,
+          destination: destination,
+          travelMode: window.google.maps.TravelMode[travelMode],
+        },
+        (result, status) => {
+          if (status === window.google.maps.DirectionsStatus.OK) {
+            newDirections.push({ result, color: colors[i % colors.length] });
+            if (newDirections.length === sortedDestinations.length - 1) {
+              setDirectionsResponse(newDirections);
+            }
+          } else {
+            console.error(`Error fetching directions for segment ${i}: ${status}`);
+          }
+        }
+      );
+    }
   };
+  
+  
+  
 
   const onDragEnd = (result) => {
     if (!result.destination) return;
@@ -178,7 +209,7 @@ const VisitaIglesia = () => {
       <img src={loadingGif} alt="Loading..." style={{ width: '100px' }} />
     </div>
   ) : (
-    <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={['places']}>
+    <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={['places', 'geometry']}>
       <Button variant="primary" style={{zIndex: '999', position: 'absolute', top: '10px', left: '190px'}} onClick={() => setShowOffcanvas(true)}>
         Open Directions
       </Button>
