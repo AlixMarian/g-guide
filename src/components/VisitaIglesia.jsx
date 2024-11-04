@@ -1,4 +1,5 @@
 import '../websiteUser.css';
+import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   GoogleMap,
@@ -20,6 +21,7 @@ const containerStyle = {
 };
 
 const VisitaIglesia = () => {
+  const navigate = useNavigate();
   const [churches, setChurches] = useState([]);
   const [directionsResponse, setDirectionsResponse] = useState(null);
   const [travelMode, setTravelMode] = useState('DRIVING');
@@ -179,6 +181,9 @@ const VisitaIglesia = () => {
     <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={['places']}>
       <Button variant="primary" style={{zIndex: '999', position: 'absolute', top: '10px', left: '190px'}} onClick={() => setShowOffcanvas(true)}>
         Open Directions
+      </Button>
+      <Button variant="primary" style={{zIndex: '999', position: 'absolute', top: '10px', right: '60px'}} onClick={() => navigate('/map')}>
+        <i className="bi bi-arrow-return-left"></i>
       </Button>
 
       <Offcanvas show={showOffcanvas} style={{zIndex: '9999'}} onHide={() => setShowOffcanvas(false)} placement="start">
