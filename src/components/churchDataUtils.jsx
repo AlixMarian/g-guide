@@ -2,6 +2,17 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import coverLogo from '../assets/logo cover.png';
 
+export const onZoomChanged = (map, setCustomIcon) => {
+  if (map) {
+    const zoom = map.getZoom();
+    const newSize = zoom > 15 ? 40 : zoom > 12 ? 30 : 20;
+    setCustomIcon((prevIcon) => ({
+      ...prevIcon,
+      scaledSize: new window.google.maps.Size(newSize, newSize),
+    }));
+  }
+};
+
 export const fetchChurchData = async () => {
   try {
     const churchLocationCollection = collection(db, 'churchLocation');
@@ -60,4 +71,32 @@ export const handleMapLoad = (mapInstance, setMap, setCustomIcon, setLoading) =>
     if (setLoading) {
       setLoading(false);
     }
+  };
+
+  export const handleMarkerClick = (church, setDrawerInfo, setChurchPhoto) => {
+    const telephone = church.churchContactNum ? church.churchContactNum : 'No data added yet.';
+    
+    const serviceHours = (!church.churchStartTime || !church.churchEndTime || 
+        church.churchStartTime === "none" || church.churchEndTime === "none")
+      ? 'No data added yet.' 
+      : `${convertTo12HourFormat(church.churchStartTime)} - ${convertTo12HourFormat(church.churchEndTime)}`;
+  
+    const photo = church.churchPhoto ? church.churchPhoto : coverLogo;
+  
+    setDrawerInfo({
+      show: true,
+      title: church.churchName || 'Church Name Not Available',
+      description: church.churchLocation || 'Location not available',  
+      telephone: telephone,
+      serviceHours: serviceHours,
+    });
+  
+    setChurchPhoto(photo);
+  };
+
+  export const convertTo12HourFormat = (time) => {
+    const [hours, minutes] = time.split(':');
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const adjustedHours = hours % 12 || 12;
+    return `${adjustedHours}:${minutes} ${period}`;
   };

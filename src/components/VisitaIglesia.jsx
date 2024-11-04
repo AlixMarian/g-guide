@@ -1,22 +1,27 @@
+import '../websiteUser.css';
+import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   GoogleMap,
   LoadScript,
   DirectionsRenderer,
   Autocomplete,
+  Marker,
 } from '@react-google-maps/api';
 import { Offcanvas, Button, Form } from 'react-bootstrap';
 import { fetchChurchData } from '../components/churchDataUtils';
-//import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-//import { FaBars } from 'react-icons/fa'; // For the drag handle icon
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { FaBars } from 'react-icons/fa'; // For the drag handle icon
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
+import { handleMarkerClick, handleMapLoad, onZoomChanged } from '../components/churchDataUtils';
 
 const containerStyle = {
   width: '100%',
-  height: '600px',
+  height: '700px',
 };
 
 const VisitaIglesia = () => {
+  const navigate = useNavigate();
   const [churches, setChurches] = useState([]);
   const [directionsResponse, setDirectionsResponse] = useState(null);
   const [travelMode, setTravelMode] = useState('DRIVING');
@@ -26,19 +31,35 @@ const VisitaIglesia = () => {
   const [currentPosition, setCurrentPosition] = useState(null);
   const [startLocation, setStartLocation] = useState(null);
   const [startLocationInputValue, setStartLocationInputValue] = useState('');
+  const [customIcon, setCustomIcon] = useState(null);
+  const [showOffcanvas, setShowOffcanvas] = useState(false);
+
   const [destinations, setDestinations] = useState([
     {
-      id: 0,
+      id: 'dest-0',
       destination: null,
       usingCustomDestination: false,
       inputValue: '',
       selectedChurchId: '',
     },
   ]);
-  const [showOffcanvas, setShowOffcanvas] = useState(false);
 
   const startLocationRef = useRef(null);
   const destinationRefs = useRef([React.createRef()]);
+    const portal = useRef(document.createElement('div'));
+
+
+  useEffect(() => {
+    const offcanvasBody = document.querySelector('.offcanvas-body');
+    if (offcanvasBody) {
+      offcanvasBody.appendChild(portal.current);
+    }
+    return () => {
+      if (offcanvasBody && portal.current.parentNode === offcanvasBody) {
+        offcanvasBody.removeChild(portal.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,12 +81,8 @@ const VisitaIglesia = () => {
             lng: position.coords.longitude,
           });
         },
-        (error) => {
-          console.error('Error getting current position:', error);
-        }
+        (error) => console.error('Error getting current position:', error)
       );
-    } else {
-      console.error('Geolocation is not supported by this browser.');
     }
   }, []);
 
@@ -74,17 +91,15 @@ const VisitaIglesia = () => {
   };
 
   const onPlaceChangedStartLocation = () => {
-    if (startLocationRef.current !== null) {
+    if (startLocationRef.current) {
       const place = startLocationRef.current.getPlace();
-      if (place && place.geometry && place.geometry.location) {
+      if (place && place.geometry?.location) {
         setStartLocation({
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng(),
         });
         setStartLocationInputValue(place.formatted_address || place.name);
       }
-    } else {
-      console.log('Autocomplete is not loaded yet!');
     }
   };
 
@@ -96,7 +111,7 @@ const VisitaIglesia = () => {
     const ref = destinationRefs.current[index].current;
     if (ref) {
       const place = ref.getPlace();
-      if (place && place.geometry && place.geometry.location) {
+      if (place && place.geometry?.location) {
         const newDestinations = [...destinations];
         newDestinations[index].destination = {
           lat: place.geometry.location.lat(),
@@ -110,7 +125,7 @@ const VisitaIglesia = () => {
 
   const addDestination = () => {
     const newDestination = {
-      id: destinations.length,
+      id: `dest-${Date.now()}`, // Unique ID based on timestamp
       destination: null,
       usingCustomDestination: false,
       inputValue: '',
@@ -119,14 +134,11 @@ const VisitaIglesia = () => {
     setDestinations([...destinations, newDestination]);
     destinationRefs.current.push(React.createRef());
   };
+  
 
   const handleCalculateRoute = () => {
     const org = usingCurrentLocation && currentPosition ? currentPosition : startLocation;
-
-    if (!org) {
-      alert('Please select a start location.');
-      return;
-    }
+    if (!org) return alert('Please select a start location.');
 
     const destinationList = destinations.map((d) => d.destination);
     if (destinationList.some((dest) => !dest)) {
@@ -141,15 +153,12 @@ const VisitaIglesia = () => {
       {
         origin: org,
         destination: destinationList[destinationList.length - 1],
-        waypoints: waypoints,
+        waypoints,
         travelMode: window.google.maps.TravelMode[travelMode],
       },
       (result, status) => {
-        if (status === window.google.maps.DirectionsStatus.OK) {
-          setDirectionsResponse(result);
-        } else {
-          console.error(`Error fetching directions: ${status}`);
-        }
+        if (status === window.google.maps.DirectionsStatus.OK) setDirectionsResponse(result);
+        else console.error(`Error fetching directions: ${status}`);
       }
     );
   };
@@ -161,12 +170,6 @@ const VisitaIglesia = () => {
     const [reorderedItem] = reorderedDestinations.splice(result.source.index, 1);
     reorderedDestinations.splice(result.destination.index, 0, reorderedItem);
 
-    const reorderedRefs = Array.from(destinationRefs.current);
-    const [reorderedRef] = reorderedRefs.splice(result.source.index, 1);
-    reorderedRefs.splice(result.destination.index, 0, reorderedRef);
-
-    destinationRefs.current = reorderedRefs;
-
     setDestinations(reorderedDestinations);
   };
 
@@ -175,15 +178,15 @@ const VisitaIglesia = () => {
       <img src={loadingGif} alt="Loading..." style={{ width: '100px' }} />
     </div>
   ) : (
-    <LoadScript
-      googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-      libraries={['places']}
-    >
-      <Button variant="primary" onClick={() => setShowOffcanvas(true)}>
+    <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={['places']}>
+      <Button variant="primary" style={{zIndex: '999', position: 'absolute', top: '10px', left: '190px'}} onClick={() => setShowOffcanvas(true)}>
         Open Directions
       </Button>
+      <Button variant="primary" style={{zIndex: '999', position: 'absolute', top: '10px', right: '60px'}} onClick={() => navigate('/map')}>
+        <i className="bi bi-arrow-return-left"></i>
+      </Button>
 
-      <Offcanvas show={showOffcanvas} onHide={() => setShowOffcanvas(false)} placement="start">
+      <Offcanvas show={showOffcanvas} style={{zIndex: '9999'}} onHide={() => setShowOffcanvas(false)} placement="start">
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Visita Iglesia Directions</Offcanvas.Title>
         </Offcanvas.Header>
@@ -199,10 +202,7 @@ const VisitaIglesia = () => {
             </Form.Group>
 
             {!usingCurrentLocation && (
-              <Autocomplete
-                onLoad={onLoadStartLocation}
-                onPlaceChanged={onPlaceChangedStartLocation}
-              >
+              <Autocomplete onLoad={onLoadStartLocation} onPlaceChanged={onPlaceChangedStartLocation}>
                 <Form.Group controlId="start-location" style={{ marginBottom: '1rem' }}>
                   <Form.Control
                     type="text"
@@ -219,46 +219,47 @@ const VisitaIglesia = () => {
                 {(provided) => (
                   <div {...provided.droppableProps} ref={provided.innerRef}>
                     {destinations.map((dest, index) => (
-                      <Draggable key={`dest-${dest.id}`} draggableId={`dest-${dest.id}`} index={index}>
+                      <Draggable key={dest.id} draggableId={dest.id} index={index}>
                         {(provided) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
+                            className="draggable-destination"
                             style={{
-                              marginBottom: '1rem',
-                              display: 'block',
+                              display: 'flex',
                               alignItems: 'center',
-                              ...provided.draggableProps.style,
+                              marginBottom: '1rem',
+                              position: 'relative',
                             }}
                           >
                             {/* Drag Handle */}
-                            <FaBars {...provided.dragHandleProps} style={{ cursor: 'grab', marginRight: '0.5rem' }} />
+                            <FaBars {...provided.dragHandleProps} className="drag-handle" style={{ marginRight: '0.5rem' }} />
+
                             <Form.Check
                               type="checkbox"
-                              id={`use-custom-destination-${index}`}
-                              label={`Enter Destination ${index + 1}`}
                               checked={dest.usingCustomDestination}
                               onChange={() => {
                                 const newDestinations = [...destinations];
-                                newDestinations[index].usingCustomDestination =
-                                  !newDestinations[index].usingCustomDestination;
+                                newDestinations[index].usingCustomDestination = !newDestinations[index].usingCustomDestination;
                                 newDestinations[index].inputValue = '';
                                 newDestinations[index].selectedChurchId = '';
                                 newDestinations[index].destination = null;
                                 setDestinations(newDestinations);
                               }}
+                              style={{ marginRight: '1rem' }}
                             />
 
+                            {/* Show Autocomplete if usingCustomDestination is true */}
                             {dest.usingCustomDestination ? (
                               <Autocomplete
                                 onLoad={(autocomplete) => onLoadDestination(index, autocomplete)}
                                 onPlaceChanged={() => onPlaceChangedDestination(index)}
                               >
-                                <Form.Group controlId={`custom-destination-${index}`} style={{ flex: 1, marginLeft: '1rem' }}>
+                                <Form.Group controlId={`custom-destination-${index}`} style={{ flex: 1 }}>
                                   <Form.Control
                                     type="text"
                                     placeholder={`Enter Destination ${index + 1}`}
-                                    style={{width: '350px'}}
+                                    style={{ fontSize: '14px', width: '18rem' }}
                                     value={dest.inputValue}
                                     onChange={(e) => {
                                       const newDestinations = [...destinations];
@@ -269,24 +270,26 @@ const VisitaIglesia = () => {
                                 </Form.Group>
                               </Autocomplete>
                             ) : (
-                              <Form.Group controlId={`select-destination-${index}`} style={{ flex: 1, marginLeft: '1rem' }}>
+                              /* Show Dropdown if usingCustomDestination is false */
+                              <Form.Group controlId={`select-destination-${index}`} style={{ flex: 1 }}>
                                 <Form.Control
                                   as="select"
                                   value={dest.selectedChurchId}
+                                  style={{ fontSize: '14px' }}
                                   onChange={(e) => {
-                                    const selectedChurch = churches.find(
-                                      (church) => church.id === e.target.value
-                                    );
+                                    const selectedChurch = churches.find((church) => church.id === e.target.value);
                                     const newDestinations = [...destinations];
                                     newDestinations[index].selectedChurchId = e.target.value;
-                                    newDestinations[index].destination = {
-                                      lat: parseFloat(selectedChurch.latitude),
-                                      lng: parseFloat(selectedChurch.longitude),
-                                    };
+                                    newDestinations[index].destination = selectedChurch
+                                      ? {
+                                          lat: parseFloat(selectedChurch.latitude),
+                                          lng: parseFloat(selectedChurch.longitude),
+                                        }
+                                      : null;
                                     setDestinations(newDestinations);
                                   }}
                                 >
-                                  <option value="">Select a Church Destination</option>
+                                  <option value="">{`Select Church Destination ${index + 1}`}</option>
                                   {churches.map((church) => (
                                     <option key={church.id} value={church.id}>
                                       {church.churchName}
@@ -295,6 +298,18 @@ const VisitaIglesia = () => {
                                 </Form.Control>
                               </Form.Group>
                             )}
+
+                            <Button
+                              variant="link"
+                              className="delete-div-btn"
+                              onClick={() => {
+                                setDestinations((prevDestinations) =>
+                                  prevDestinations.filter((_, i) => i !== index)
+                                );
+                              }}
+                            >
+                              <i className="bi bi-x-circle-fill"></i>
+                            </Button>
                           </div>
                         )}
                       </Draggable>
@@ -304,6 +319,7 @@ const VisitaIglesia = () => {
                 )}
               </Droppable>
             </DragDropContext>
+
 
             <Button variant="link" onClick={addDestination} style={{ marginTop: '1rem' }}>
               + Add another Church Destination
@@ -316,19 +332,16 @@ const VisitaIglesia = () => {
         </Offcanvas.Body>
       </Offcanvas>
 
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={currentPosition || { lat: 14.5995, lng: 120.9842 }}
-        zoom={13}
-        onLoad={(mapInstance) => setMap(mapInstance)}
-      >
-        {directionsResponse && (
-          <DirectionsRenderer
-            options={{
-              directions: directionsResponse,
-            }}
-          />
-        )}
+      <GoogleMap mapContainerStyle={containerStyle} center={currentPosition || { lat: 0, lng: 0 }} zoom={13} onZoomChanged={onZoomChanged} onLoad={(mapInstance) => handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)}>
+        {directionsResponse && <DirectionsRenderer options={{ directions: directionsResponse }} />}
+        {currentPosition && <Marker position={currentPosition} />}
+        {!loading &&
+          customIcon &&
+          churches.map((church) =>
+            church.latitude && church.longitude ? (
+              <Marker key={church.id} position={{ lat: parseFloat(church.latitude), lng: parseFloat(church.longitude) }} icon={customIcon} onClick={() => handleMarkerClick(church)} />
+            ) : null
+          )}
       </GoogleMap>
     </LoadScript>
   );
