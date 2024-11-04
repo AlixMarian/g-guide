@@ -123,7 +123,7 @@ const VisitaIglesia = () => {
 
   const addDestination = () => {
     const newDestination = {
-      id: `dest-${destinations.length}`,
+      id: `dest-${Date.now()}`, // Unique ID based on timestamp
       destination: null,
       usingCustomDestination: false,
       inputValue: '',
@@ -132,6 +132,7 @@ const VisitaIglesia = () => {
     setDestinations([...destinations, newDestination]);
     destinationRefs.current.push(React.createRef());
   };
+  
 
   const handleCalculateRoute = () => {
     const org = usingCurrentLocation && currentPosition ? currentPosition : startLocation;
@@ -218,30 +219,42 @@ const VisitaIglesia = () => {
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            {...provided.dragHandleProps} // For the drag handle
                             className="draggable-destination"
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              marginBottom: '1rem',
+                              position: 'relative',
+                            }}
                           >
-                          <FaBars {...provided.dragHandleProps} className="drag-handle" />
+                            {/* Drag Handle */}
+                            <FaBars {...provided.dragHandleProps} className="drag-handle" style={{ marginRight: '0.5rem' }} />
+
                             <Form.Check
                               type="checkbox"
-                              id={`use-custom-destination-${index}`}
-                              label={`Enter Destination ${index + 1}`}
                               checked={dest.usingCustomDestination}
                               onChange={() => {
                                 const newDestinations = [...destinations];
-                                newDestinations[index].usingCustomDestination =
-                                  !newDestinations[index].usingCustomDestination;
+                                newDestinations[index].usingCustomDestination = !newDestinations[index].usingCustomDestination;
+                                newDestinations[index].inputValue = '';
+                                newDestinations[index].selectedChurchId = '';
+                                newDestinations[index].destination = null;
                                 setDestinations(newDestinations);
                               }}
+                              style={{ marginRight: '1rem' }}
                             />
 
+                            {/* Show Autocomplete if usingCustomDestination is true */}
                             {dest.usingCustomDestination ? (
-                              <Autocomplete onLoad={(autocomplete) => onLoadDestination(index, autocomplete)} onPlaceChanged={() => onPlaceChangedDestination(index)}>
-                                <Form.Group controlId={`custom-destination-${index}`} style={{ flex: 1, marginLeft: '1rem' }}>
+                              <Autocomplete
+                                onLoad={(autocomplete) => onLoadDestination(index, autocomplete)}
+                                onPlaceChanged={() => onPlaceChangedDestination(index)}
+                              >
+                                <Form.Group controlId={`custom-destination-${index}`} style={{ flex: 1 }}>
                                   <Form.Control
                                     type="text"
-                                    style={{fontSize:'12px'}}
                                     placeholder={`Enter Destination ${index + 1}`}
+                                    style={{ fontSize: '14px', width: '18rem' }}
                                     value={dest.inputValue}
                                     onChange={(e) => {
                                       const newDestinations = [...destinations];
@@ -252,18 +265,26 @@ const VisitaIglesia = () => {
                                 </Form.Group>
                               </Autocomplete>
                             ) : (
-                              <Form.Group controlId={`select-destination-${index}`} style={{ flex: 1, marginLeft: '1rem' }}>
-                                <Form.Control as="select" value={dest.selectedChurchId} style={{fontSize:'12px'}} onChange={(e) => {
-                                  const selectedChurch = churches.find((church) => church.id === e.target.value);
-                                  const newDestinations = [...destinations];
-                                  newDestinations[index].selectedChurchId = e.target.value;
-                                  newDestinations[index].destination = {
-                                    lat: parseFloat(selectedChurch.latitude),
-                                    lng: parseFloat(selectedChurch.longitude),
-                                  };
-                                  setDestinations(newDestinations);
-                                }}>
-                                  <option value="">Select a Church Destination</option>
+                              /* Show Dropdown if usingCustomDestination is false */
+                              <Form.Group controlId={`select-destination-${index}`} style={{ flex: 1 }}>
+                                <Form.Control
+                                  as="select"
+                                  value={dest.selectedChurchId}
+                                  style={{ fontSize: '14px' }}
+                                  onChange={(e) => {
+                                    const selectedChurch = churches.find((church) => church.id === e.target.value);
+                                    const newDestinations = [...destinations];
+                                    newDestinations[index].selectedChurchId = e.target.value;
+                                    newDestinations[index].destination = selectedChurch
+                                      ? {
+                                          lat: parseFloat(selectedChurch.latitude),
+                                          lng: parseFloat(selectedChurch.longitude),
+                                        }
+                                      : null;
+                                    setDestinations(newDestinations);
+                                  }}
+                                >
+                                  <option value="">{`Select Church Destination ${index + 1}`}</option>
                                   {churches.map((church) => (
                                     <option key={church.id} value={church.id}>
                                       {church.churchName}
@@ -272,6 +293,18 @@ const VisitaIglesia = () => {
                                 </Form.Control>
                               </Form.Group>
                             )}
+
+                            <Button
+                              variant="link"
+                              className="delete-div-btn"
+                              onClick={() => {
+                                setDestinations((prevDestinations) =>
+                                  prevDestinations.filter((_, i) => i !== index)
+                                );
+                              }}
+                            >
+                              <i className="bi bi-x-circle-fill"></i>
+                            </Button>
                           </div>
                         )}
                       </Draggable>
@@ -281,6 +314,7 @@ const VisitaIglesia = () => {
                 )}
               </Droppable>
             </DragDropContext>
+
 
             <Button variant="link" onClick={addDestination} style={{ marginTop: '1rem' }}>
               + Add another Church Destination

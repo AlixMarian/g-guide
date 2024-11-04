@@ -630,10 +630,22 @@
 
 .draggable-destination .form-check {
   display: block;
-  /* flex-direction:row; */
   margin-bottom: 0.5rem;
 }
 
+.delete-div-btn {
+  position: absolute;
+  top: -0.8rem; 
+  right: -8px; 
+  padding: 0;
+  font-size: 16px;
+  color: red;
+  border: none;
+}
+
+.delete-div-btn::after {
+  color: white;
+}
 
 
 
