@@ -20,6 +20,7 @@ export const Baptism = () => {
     const [disabledDates, setDisabledDates] = useState([]);
     const [activeDates, setActiveDates] = useState([]);
     const [selectedSlotId, setSelectedSlotId] = useState(null);
+    const [refundPolicy, setRefundPolicy] = useState('');
     const [formData,setFormData] = useState({
         fatherFirstName: '',
         fatherLastName: '',
@@ -41,6 +42,7 @@ export const Baptism = () => {
     const getPriestFullName = (priest) => {
         return priest ? `${priest.priestType || ''} ${priest.firstName || ''} ${priest.lastName || ''}`.trim() : '';
     };
+    
     useEffect(() => {
         const fetchChurchData = async () => {
             const docRef = doc(db, 'church', churchId);
@@ -252,6 +254,33 @@ export const Baptism = () => {
         return <div>Loading...</div>;
     }
 
+    const fetchRefundPolicy = async () => {
+        try {
+            const refundPolicyQuery = query(
+                collection(db, 'refundPolicy'),
+                where('serviceName', '==', 'Baptism')
+            );
+            const querySnapshot = await getDocs(refundPolicyQuery);
+            console.log("Query snapshot size:", querySnapshot.size);
+
+            if (!querySnapshot.empty) {
+                const policyData = querySnapshot.docs[0].data();
+                console.log("Fetched policy data:", policyData);
+                setRefundPolicy(policyData.refundPolicy);
+            } else {
+                console.log("No refund policy found for Baptism.");
+                setRefundPolicy("No refund policy available.");
+            }
+        } catch (error) {
+            console.error("Error fetching refund policy:", error.message);
+            toast.error("Error fetching refund policy");
+        }
+    };
+
+    useEffect(() => {
+        fetchRefundPolicy();
+    }, []);
+
   return (
     <div>
     <form className='baptism' onSubmit={handleCreateAppointment}>
@@ -289,6 +318,13 @@ export const Baptism = () => {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div className="userDetails card mb-4">
+      <div className="card-body">
+        <h5 className="card-title">Refund Policy</h5>
+        <p>{refundPolicy}</p>
       </div>
     </div>
 

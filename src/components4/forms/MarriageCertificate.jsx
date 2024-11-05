@@ -213,7 +213,13 @@ export const MarriageCertificate = () => {
                 </div>
             </div>
             
-           
+            <div className="userDetails card mb-4">
+              <div className="card-body">
+                <h5 className="card-title">Refund Policy</h5>
+                
+              </div>
+            </div>
+                  
             <div className="submitReq card mb-4">
                 <div className="card-body">
                     <h5 className="card-title">Submit Requirements</h5>
