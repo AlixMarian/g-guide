@@ -12,7 +12,6 @@ export const Burial = () => {
     const [dateToday, setdateToday] = useState(new Date());
     const [matchedDates, setMatchedDates] = useState([]);
     const { churchId } = useParams();
-    // eslint-disable-next-line no-unused-vars
     const [churchData, setChurchData] = useState(null);
     const [slots, setSlots] = useState([]);
     const [userData, setUserData] = useState(null);
@@ -20,7 +19,7 @@ export const Burial = () => {
     const [disabledDates, setDisabledDates] = useState([]);
     const [activeDates, setActiveDates] = useState([]);
     const [deathCert,setDeathCert] = useState(null);
-    // eslint-disable-next-line no-unused-vars
+    const [refundPolicy, setRefundPolicy] = useState('');
     const [deathCertUrl, setDeathCertUrl] = useState('');
     const [selectedSlotId, setSelectedSlotId] = useState(null);
 
@@ -82,13 +81,33 @@ export const Burial = () => {
                 }
             }
         };
+        fetchRefundPolicy();
         fetchUserData();
     }, [user]);
 
-    const handleDateChange = (date) => {
-        setdateToday(date);
-        checkSlotAvailability(date);
-    };
+    const fetchRefundPolicy = async () => {
+      try {
+          const churchDocRef = doc(db, 'church', churchId);
+          const churchDocSnap = await getDoc(churchDocRef);
+
+          if (churchDocSnap.exists()) {
+              const data = churchDocSnap.data();
+              setRefundPolicy(data.refundPolicy || "No refund policy available."); // Set refund policy or default message
+          } else {
+              console.log("No church data found for refund policy.");
+              setRefundPolicy("No refund policy available.");
+          }
+      } catch (error) {
+          console.error("Error fetching refund policy:", error);
+          toast.error("Failed to fetch refund policy.");
+      }
+  };
+
+  const handleDateChange = (date) => {
+      setdateToday(date);
+      checkSlotAvailability(date);
+  };
+
 
     const checkSlotAvailability = (selectedDate) => {
         const offset = new Date().getTimezoneOffset() / 60;
@@ -255,7 +274,7 @@ export const Burial = () => {
             <div className="userDetails card mb-4">
               <div className="card-body">
                 <h5 className="card-title">Refund Policy</h5>
-                
+                <p>{refundPolicy}</p>
               </div>
             </div>
 

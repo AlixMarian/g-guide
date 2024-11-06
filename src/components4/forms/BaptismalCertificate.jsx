@@ -10,7 +10,6 @@ export const BaptismalCertificate = () => {
     const { churchId } = useParams();
     const auth = getAuth();
     const user = auth.currentUser;
-
     const [churchData, setChurchData] = useState(null);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
