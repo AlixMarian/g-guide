@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GoogleMap, LoadScript, DirectionsRenderer, Autocomplete, Marker } from '@react-google-maps/api';
 import { Offcanvas, Button, Form } from 'react-bootstrap';
 import { fetchChurchData } from '../components/churchDataUtils';
-//import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-//import { FaBars } from 'react-icons/fa'; // For the drag handle icon
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { FaBars } from 'react-icons/fa'; // Drag Handle Icon
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
 import { handleMarkerClick, handleMapLoad, onZoomChanged } from '../components/churchDataUtils';
 
@@ -14,8 +14,7 @@ const containerStyle = {
   height: '700px',
 };
 
-const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"]; // Different colors for each segment
-
+const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"];
 
 const VisitaIglesia = () => {
   const navigate = useNavigate();
@@ -30,6 +29,8 @@ const VisitaIglesia = () => {
   const [startLocationInputValue, setStartLocationInputValue] = useState('');
   const [customIcon, setCustomIcon] = useState(null);
   const [showOffcanvas, setShowOffcanvas] = useState(false);
+  const [markerInfo, setMarkerInfo] = useState(null);
+
 
   const [destinations, setDestinations] = useState([
     {
@@ -43,8 +44,7 @@ const VisitaIglesia = () => {
 
   const startLocationRef = useRef(null);
   const destinationRefs = useRef([React.createRef()]);
-    const portal = useRef(document.createElement('div'));
-
+  const portal = useRef(document.createElement('div'));
 
   useEffect(() => {
     const offcanvasBody = document.querySelector('.offcanvas-body');
@@ -122,7 +122,7 @@ const VisitaIglesia = () => {
 
   const addDestination = () => {
     const newDestination = {
-      id: `dest-${Date.now()}`, // Unique ID based on timestamp
+      id: `dest-${Date.now()}`,
       destination: null,
       usingCustomDestination: false,
       inputValue: '',
@@ -131,68 +131,67 @@ const VisitaIglesia = () => {
     setDestinations([...destinations, newDestination]);
     destinationRefs.current.push(React.createRef());
   };
-  
+  const uniqueDestinations = destinations
+  .map((d) => d.destination)
+  .filter((dest, index, self) => dest && self.findIndex((d) => d.lat === dest.lat && d.lng === dest.lng) === index);
 
   const handleCalculateRoute = async () => {
-    const org = currentPosition;
-    if (!org) return alert('Please select a start location.');
-
-    const destinationList = destinations.map((d) => d.destination);
-    if (destinationList.some((dest) => !dest)) {
-      alert('Please select or enter all destinations.');
+    // Step 1: Ensure we have a valid starting location
+    const origin = usingCurrentLocation ? currentPosition : startLocation;
+    if (!origin) {
+      alert('Please select a start location.');
       return;
     }
-
-    // Check if geometry.spherical is available
-    if (!window.google.maps.geometry || !window.google.maps.geometry.spherical) {
-      console.error("Google Maps Geometry library is not loaded.");
+  
+    if (uniqueDestinations.length === 0) {
+      alert('Please select or enter valid destinations.');
       return;
     }
-
-    // Sort destinations by distance from the origin point
-    const sortedDestinations = destinationList
-      .map((destination) => {
-        const distance = window.google.maps.geometry.spherical.computeDistanceBetween(
-          new window.google.maps.LatLng(org.lat, org.lng),
-          new window.google.maps.LatLng(destination.lat, destination.lng)
-        );
-        return { location: destination, distance };
-      })
-      .sort((a, b) => a.distance - b.distance) // Sort by ascending distance
-      .map((item) => item.location); // Extract sorted location objects
-
-    // Clear previous routes
-    setDirectionsResponse([]);
-
-    // Calculate route segments
+  
+    // Step 3: Reset the directions to start routing from scratch
+    setDirectionsResponse([]); // Clear all previous route directions
+  
+    // Step 4: Combine starting point and destinations
+    const allLocations = [origin, ...uniqueDestinations];
+  
+    // Step 5: Calculate routes between each segment in sequence
     const newDirections = [];
-    for (let i = 0; i < sortedDestinations.length - 1; i++) {
+  
+    for (let i = 0; i < allLocations.length - 1; i++) {
       const directionsService = new window.google.maps.DirectionsService();
-      const origin = i === 0 ? org : sortedDestinations[i];
-      const destination = sortedDestinations[i + 1];
-
-      directionsService.route(
-        {
-          origin: origin,
-          destination: destination,
-          travelMode: window.google.maps.TravelMode[travelMode],
-        },
-        (result, status) => {
-          if (status === window.google.maps.DirectionsStatus.OK) {
-            newDirections.push({ result, color: colors[i % colors.length] });
-            if (newDirections.length === sortedDestinations.length - 1) {
-              setDirectionsResponse(newDirections);
+      const currentOrigin = allLocations[i];
+      const currentDestination = allLocations[i + 1];
+  
+      // Use a promise to wait for each route to complete
+      const routeSegment = await new Promise((resolve, reject) => {
+        directionsService.route(
+          {
+            origin: currentOrigin,
+            destination: currentDestination,
+            travelMode: window.google.maps.TravelMode[travelMode],
+          },
+          (result, status) => {
+            if (status === window.google.maps.DirectionsStatus.OK) {
+              resolve({
+                result,
+                color: colors[i % colors.length], // Assign unique color for each segment
+              });
+            } else {
+              reject(`Error fetching directions for segment ${i + 1}: ${status}`);
             }
-          } else {
-            console.error(`Error fetching directions for segment ${i}: ${status}`);
           }
-        }
-      );
+        );
+      });
+  
+      newDirections.push(routeSegment);
     }
+  
+    // Step 6: Update state with the new directions
+    setDirectionsResponse(newDirections);
   };
   
   
-  
+
 
   const onDragEnd = (result) => {
     if (!result.destination) return;
@@ -210,18 +209,26 @@ const VisitaIglesia = () => {
     </div>
   ) : (
     <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={['places', 'geometry']}>
-      <Button variant="primary" style={{zIndex: '999', position: 'absolute', top: '10px', left: '190px'}} onClick={() => setShowOffcanvas(true)}>
+      <Button
+        variant="primary"
+        style={{ zIndex: '999', position: 'absolute', top: '10px', left: '190px' }}
+        onClick={() => setShowOffcanvas(true)}
+      >
         Open Directions
       </Button>
-      <Button variant="primary" style={{zIndex: '999', position: 'absolute', top: '10px', right: '60px'}} onClick={() => navigate('/map')}>
+      <Button
+        variant="primary"
+        style={{ zIndex: '999', position: 'absolute', top: '10px', right: '60px' }}
+        onClick={() => navigate('/map')}
+      >
         <i className="bi bi-arrow-return-left"></i>
       </Button>
 
-      <Offcanvas show={showOffcanvas} style={{zIndex: '9999'}} onHide={() => setShowOffcanvas(false)} placement="start">
+      <Offcanvas show={showOffcanvas} style={{ zIndex: '9999' }} onHide={() => setShowOffcanvas(false)} placement="start">
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Visita Iglesia Directions</Offcanvas.Title>
         </Offcanvas.Header>
-        <Offcanvas.Body style={{ overflow: 'visible' }}>
+        <Offcanvas.Body>
           <Form>
             <Form.Group controlId="use-current-location" style={{ marginBottom: '1rem' }}>
               <Form.Check
@@ -245,135 +252,165 @@ const VisitaIglesia = () => {
               </Autocomplete>
             )}
 
-            <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable droppableId="destinations">
-                {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef}>
-                    {destinations.map((dest, index) => (
-                      <Draggable key={dest.id} draggableId={dest.id} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className="draggable-destination"
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              marginBottom: '1rem',
-                              position: 'relative',
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="destinations">
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  {destinations.map((dest, index) => (
+                    <Draggable key={dest.id} draggableId={dest.id} index={index}>
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className="draggable-destination"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            marginBottom: '1rem',
+                            position: 'relative',
+                          }}
+                        >
+                          <FaBars {...provided.dragHandleProps} style={{ marginRight: '0.5rem' }} />
+                          <Form.Check
+                            type="checkbox"
+                            checked={dest.usingCustomDestination}
+                            onChange={() => {
+                              const newDestinations = [...destinations];
+                              newDestinations[index].usingCustomDestination = !newDestinations[index].usingCustomDestination;
+                              newDestinations[index].inputValue = '';
+                              newDestinations[index].selectedChurchId = '';
+                              newDestinations[index].destination = null;
+                              setDestinations(newDestinations);
                             }}
-                          >
-                            {/* Drag Handle */}
-                            <FaBars {...provided.dragHandleProps} className="drag-handle" style={{ marginRight: '0.5rem' }} />
-
-                            <Form.Check
-                              type="checkbox"
-                              checked={dest.usingCustomDestination}
-                              onChange={() => {
-                                const newDestinations = [...destinations];
-                                newDestinations[index].usingCustomDestination = !newDestinations[index].usingCustomDestination;
-                                newDestinations[index].inputValue = '';
-                                newDestinations[index].selectedChurchId = '';
-                                newDestinations[index].destination = null;
-                                setDestinations(newDestinations);
-                              }}
-                              style={{ marginRight: '1rem' }}
-                            />
-
-                            {/* Show Autocomplete if usingCustomDestination is true */}
-                            {dest.usingCustomDestination ? (
-                              <Autocomplete
-                                onLoad={(autocomplete) => onLoadDestination(index, autocomplete)}
-                                onPlaceChanged={() => onPlaceChangedDestination(index)}
-                              >
-                                <Form.Group controlId={`custom-destination-${index}`} style={{ flex: 1 }}>
-                                  <Form.Control
-                                    type="text"
-                                    placeholder={`Enter Destination ${index + 1}`}
-                                    style={{ fontSize: '14px', width: '18rem' }}
-                                    value={dest.inputValue}
-                                    onChange={(e) => {
-                                      const newDestinations = [...destinations];
-                                      newDestinations[index].inputValue = e.target.value;
-                                      setDestinations(newDestinations);
-                                    }}
-                                  />
-                                </Form.Group>
-                              </Autocomplete>
-                            ) : (
-                              /* Show Dropdown if usingCustomDestination is false */
-                              <Form.Group controlId={`select-destination-${index}`} style={{ flex: 1 }}>
+                            style={{ marginRight: '1rem' }}
+                          />
+                          {dest.usingCustomDestination ? (
+                            <Autocomplete
+                              onLoad={(autocomplete) => onLoadDestination(index, autocomplete)}
+                              onPlaceChanged={() => onPlaceChangedDestination(index)}
+                            >
+                              <Form.Group controlId={`custom-destination-${index}`} style={{ flex: 1 }}>
                                 <Form.Control
-                                  as="select"
-                                  value={dest.selectedChurchId}
-                                  style={{ fontSize: '14px' }}
+                                  type="text"
+                                  placeholder={`Enter Destination ${index + 1}`}
+                                  value={dest.inputValue}
                                   onChange={(e) => {
-                                    const selectedChurch = churches.find((church) => church.id === e.target.value);
                                     const newDestinations = [...destinations];
-                                    newDestinations[index].selectedChurchId = e.target.value;
-                                    newDestinations[index].destination = selectedChurch
-                                      ? {
-                                          lat: parseFloat(selectedChurch.latitude),
-                                          lng: parseFloat(selectedChurch.longitude),
-                                        }
-                                      : null;
+                                    newDestinations[index].inputValue = e.target.value;
                                     setDestinations(newDestinations);
                                   }}
-                                >
-                                  <option value="">{`Select Church Destination ${index + 1}`}</option>
-                                  {churches.map((church) => (
-                                    <option key={church.id} value={church.id}>
-                                      {church.churchName}
-                                    </option>
-                                  ))}
-                                </Form.Control>
+                                />
                               </Form.Group>
-                            )}
-
-                            <Button
-                              variant="link"
-                              className="delete-div-btn"
-                              onClick={() => {
+                            </Autocomplete>
+                          ) : (
+                            <Form.Group controlId={`select-destination-${index}`} style={{ flex: 1 }}>
+                              <Form.Control
+                                as="select"
+                                value={dest.selectedChurchId}
+                                onChange={(e) => {
+                                  const selectedChurch = churches.find((church) => church.id === e.target.value);
+                                  const newDestinations = [...destinations];
+                                  newDestinations[index].selectedChurchId = e.target.value;
+                                  newDestinations[index].destination = selectedChurch
+                                    ? {
+                                        lat: parseFloat(selectedChurch.latitude),
+                                        lng: parseFloat(selectedChurch.longitude),
+                                      }
+                                    : null;
+                                  setDestinations(newDestinations);
+                                }}
+                              >
+                                <option value="">{`Select Church Destination ${index + 1}`}</option>
+                                {churches.map((church) => (
+                                  <option key={church.id} value={church.id}>
+                                    {church.churchName}
+                                  </option>
+                                ))}
+                              </Form.Control>
+                            </Form.Group>
+                          )}
+                          {/* Delete Button */}
+                          <Button
+                            variant="link"
+                            className="delete-div-btn"
+                            onClick={() => {
+                                // Remove the destination from the list
                                 setDestinations((prevDestinations) =>
-                                  prevDestinations.filter((_, i) => i !== index)
+                                    prevDestinations.filter((_, i) => i !== index)
                                 );
-                              }}
-                            >
-                              <i className="bi bi-x-circle-fill"></i>
-                            </Button>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+
+                                // Recalculate routes after deletion to reassign labels
+                                handleCalculateRoute();
+                            }}
+                        >
+                            <i className="bi bi-x-circle-fill"></i>
+                        </Button>
+
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
 
 
             <Button variant="link" onClick={addDestination} style={{ marginTop: '1rem' }}>
               + Add another Church Destination
             </Button>
 
-            <Button onClick={handleCalculateRoute} variant="primary" style={{ marginTop: '1rem', width: '100%' }}>
+            <Button
+              onClick={handleCalculateRoute}
+              variant="primary"
+              style={{ marginTop: '1rem', width: '100%' }}
+            >
               Get Route
             </Button>
           </Form>
         </Offcanvas.Body>
       </Offcanvas>
 
-      <GoogleMap mapContainerStyle={containerStyle} center={currentPosition || { lat: 0, lng: 0 }} zoom={13} onZoomChanged={onZoomChanged} onLoad={(mapInstance) => handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)}>
-        {directionsResponse && <DirectionsRenderer options={{ directions: directionsResponse }} />}
-        {currentPosition && <Marker position={currentPosition} />}
-        {!loading &&
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={currentPosition || { lat: 0, lng: 0 }}
+        zoom={13}
+        onLoad={(mapInstance) => handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)}
+      >
+      {directionsResponse.map((segment, index) => (
+          <DirectionsRenderer
+              key={index}
+              options={{
+                  directions: segment.result,
+                  polylineOptions: {
+                      strokeColor: segment.color, // Apply segment color
+                      strokeOpacity: 0.8, // Adjust opacity
+                      strokeWeight: 5, // Line thickness
+                  },
+              }}
+          />
+      ))}
+      {currentPosition && (
+          <Marker
+              position={currentPosition}
+              label="A"
+              icon={customIcon}
+          />
+      )}
+      {!loading &&
           customIcon &&
-          churches.map((church) =>
-            church.latitude && church.longitude ? (
-              <Marker key={church.id} position={{ lat: parseFloat(church.latitude), lng: parseFloat(church.longitude) }} icon={customIcon} onClick={() => handleMarkerClick(church)} />
-            ) : null
-          )}
+          uniqueDestinations.map((dest, index) => (
+              <Marker
+                  key={`${dest.lat}-${dest.lng}`}
+                  position={dest}
+                  label={String.fromCharCode('B'.charCodeAt(0) + index)} // Labels starting from 'B'
+                  onClick={() => handleMarkerClick(dest)}
+              />
+          ))}
       </GoogleMap>
+
+
     </LoadScript>
   );
 };
