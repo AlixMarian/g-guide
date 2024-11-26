@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Marker, useLoadScript } from '@react-google-maps/api';
 import { query, where, collection, getDocs } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import { Offcanvas } from 'react-bootstrap';
@@ -199,7 +199,7 @@ const MapComponent = () => {
         console.log("Sorted Churches:", sortedChurches);
 
         // Set the top 5 nearest churches
-        setFilteredChurches(sortedChurches.slice(0, 5));
+        setFilteredChurches(sortedChurches.slice(0, 10));
     }
 };
 
@@ -256,6 +256,7 @@ const MapComponent = () => {
   // };
 
   
+  
 
   const handleCloseMenu = () => {
     setShowMenu(false);
@@ -285,21 +286,21 @@ const MapComponent = () => {
           mapContainerStyle={containerStyle}
           center={currentPosition || { lat: 0, lng: 0 }}
           zoom={13}
-          onZoomChanged={onZoomChanged}
-          onLoad={(mapInstance) =>
-            handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)
-          }
+          onZoomChanged={() => onZoomChanged(map, setCustomIcon)}
+          onLoad={(mapInstance) => handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)}
         >
 
           {currentPosition && <Marker position={currentPosition} />}
           {(selectedService ? filteredChurches : churches).map((church) => {
-            if (church.latitude && church.longitude) {
+            const lat = parseFloat(church.latitude);
+            const lng = parseFloat(church.longitude);
+            if (!isNaN(lat) && !isNaN(lng)) {
               return (
                 <Marker
                   key={church.id}
-                  position={{ lat: parseFloat(church.latitude), lng: parseFloat(church.longitude) }}
+                  position={{ lat, lng }}
                   icon={customIcon}
-                  onClick={() => handleMarkerClick(church)}
+                  onClick={() => handleMarkerClick(church, setDrawerInfo, setChurchPhoto)}
                 />
               );
             }
