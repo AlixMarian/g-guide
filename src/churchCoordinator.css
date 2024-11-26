@@ -339,6 +339,7 @@ body .second-sidebar {
   align-items: flex-start;
   gap: 40px; /* Space between the two sections */
   margin-top: 20px;
+  border: 1px solid #ddd;
 }
 
 .offer1, .offer2 {
