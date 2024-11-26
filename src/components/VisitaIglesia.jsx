@@ -131,10 +131,15 @@ const VisitaIglesia = () => {
     setDestinations([...destinations, newDestination]);
     destinationRefs.current.push(React.createRef());
   };
+
   const uniqueDestinations = destinations
   .map((d) => d.destination)
-  .filter((dest, index, self) => dest && self.findIndex((d) => d.lat === dest.lat && d.lng === dest.lng) === index);
+  .filter((dest, index, self) => {
+    // Ensure that the destination is not null and that it's unique in the array.
+    return dest && self.findIndex((d) => d && d.lat === dest.lat && d.lng === dest.lng) === index;
+  });
 
+  
   const handleCalculateRoute = async () => {
     // Step 1: Ensure we have a valid starting location
     const origin = usingCurrentLocation ? currentPosition : startLocation;
@@ -151,7 +156,7 @@ const VisitaIglesia = () => {
     // Step 3: Reset the directions to start routing from scratch
     setDirectionsResponse([]); // Clear all previous route directions
   
-    // Step 4: Combine starting point and destinations
+    // Step 4: Combine starting point and destinations without duplicates
     const allLocations = [origin, ...uniqueDestinations];
   
     // Step 5: Calculate routes between each segment in sequence
@@ -162,7 +167,6 @@ const VisitaIglesia = () => {
       const currentOrigin = allLocations[i];
       const currentDestination = allLocations[i + 1];
   
-      // Use a promise to wait for each route to complete
       const routeSegment = await new Promise((resolve, reject) => {
         directionsService.route(
           {
@@ -185,13 +189,11 @@ const VisitaIglesia = () => {
   
       newDirections.push(routeSegment);
     }
-  
-    // Step 6: Update state with the new directions
+
     setDirectionsResponse(newDirections);
   };
   
   
-
 
   const onDragEnd = (result) => {
     if (!result.destination) return;
@@ -378,37 +380,61 @@ const VisitaIglesia = () => {
         zoom={13}
         onLoad={(mapInstance) => handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)}
       >
-      {directionsResponse.map((segment, index) => (
+        {/* Render the directions if available */}
+        {directionsResponse.map((segment, index) => (
           <DirectionsRenderer
-              key={index}
-              options={{
-                  directions: segment.result,
-                  polylineOptions: {
-                      strokeColor: segment.color, // Apply segment color
-                      strokeOpacity: 0.8, // Adjust opacity
-                      strokeWeight: 5, // Line thickness
-                  },
-              }}
+            key={index}
+            options={{
+              directions: segment.result,
+              polylineOptions: {
+                strokeColor: segment.color, // Apply segment color
+                strokeOpacity: 0.8, // Adjust opacity
+                strokeWeight: 5, // Line thickness
+              },
+              suppressMarkers: true, // Disable default markers from DirectionsRenderer
+            }}
           />
-      ))}
-      {currentPosition && (
+        ))}
+
+        {/* Render the current position/start location marker unconditionally */}
+        {currentPosition && (
           <Marker
-              position={currentPosition}
-              label="A"
-              icon={customIcon}
+            position={currentPosition}
+            label={{
+              text: "A", // Ensure the label "A" is always shown for current location
+              color: "black", // Make the label more distinct if necessary
+              fontWeight: "bold",
+              fontSize: "16px",
+            }}
+            icon={{
+              url: customIcon, // Use custom icon if available
+              scaledSize: new window.google.maps.Size(30, 30), // Adjust size if needed
+            }}
           />
-      )}
-      {!loading &&
-          customIcon &&
+        )}
+
+        {/* Render the markers for destinations, starting from label 'B' */}
+        {!loading &&
           uniqueDestinations.map((dest, index) => (
-              <Marker
-                  key={`${dest.lat}-${dest.lng}`}
-                  position={dest}
-                  label={String.fromCharCode('B'.charCodeAt(0) + index)} // Labels starting from 'B'
-                  onClick={() => handleMarkerClick(dest)}
-              />
+            <Marker
+              key={`${dest.lat}-${dest.lng}`}
+              position={dest}
+              label={{
+                text: String.fromCharCode('B'.charCodeAt(0) + index), // Labels starting from 'B'
+                color: "black", // Ensure it is distinct and consistent
+                fontWeight: "bold",
+                fontSize: "16px",
+              }}
+              icon={{
+                url: customIcon, // Use custom icon if available
+                scaledSize: new window.google.maps.Size(30, 30), // Adjust size if needed
+              }}
+              onClick={() => handleMarkerClick(dest)}
+            />
           ))}
       </GoogleMap>
+
+
 
 
     </LoadScript>
