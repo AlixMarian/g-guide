@@ -19,7 +19,7 @@ export const Baptism = () => {
     const [disabledDates, setDisabledDates] = useState([]);
     const [activeDates, setActiveDates] = useState([]);
     const [selectedSlotId, setSelectedSlotId] = useState(null);
-    const [refundPolicy, setRefundPolicy] = useState(''); // State for refund policy
+    const [refundPolicy, setRefundPolicy] = useState(''); 
     const [formData, setFormData] = useState({
         fatherFirstName: '',
         fatherLastName: '',

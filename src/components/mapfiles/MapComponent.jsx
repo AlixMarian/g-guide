@@ -4,13 +4,13 @@ import { query, where, collection, getDocs } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import { Offcanvas } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
-import coverLogo from '../assets/logo cover.png';
-import logo from '../assets/G-Guide LOGO.png';
-import AutocompleteSearch from '../components/AutocompleteSearch';
-import SearchFilter from '../components/SearchFilter';
+import loadingGif from '/src/assets/Ripple@1x-1.0s-200px-200px.gif';
+import coverLogo from '/src/assets/logo cover.png';
+import logo from '/src/assets/G-Guide LOGO.png';
+import AutocompleteSearch from './AutocompleteSearch';
+import SearchFilter from './SearchFilter';
 import { Link } from 'react-router-dom';
-import { fetchChurchData, handleMapLoad, handleMarkerClick, onZoomChanged } from '../components/churchDataUtils';
+import { fetchChurchData, handleMapLoad, handleMarkerClick, onZoomChanged } from '/src/components/mapfiles/churchDataUtils';
 
 // import VisitaIglesia from './VisitaIglesia';
 

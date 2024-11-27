@@ -10,6 +10,7 @@ import { Modal} from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import Pagination from 'react-bootstrap/Pagination';
 
+
 export const OngoingAppointments = () => {
   const navigate = useNavigate();
   // eslint-disable-next-line no-unused-vars
@@ -28,6 +29,7 @@ export const OngoingAppointments = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [currentAppointmentPage, setCurrentAppointmentPage] = useState(1);
+  const [refundPolicy, setRefundPolicy] = useState(null);
   
   const appointmentsPerPage = 2;
   
@@ -145,6 +147,7 @@ export const OngoingAppointments = () => {
           const churchData = churchDoc.data();
           setChurchQRDetail(churchData.churchQRDetail || null);
           setChurchInstruction(churchData.churchInstruction || null);
+          setRefundPolicy(churchData.refundPolicy || null);
         } else {
           console.error('No such church document!');
         }
@@ -346,6 +349,12 @@ export const OngoingAppointments = () => {
                     <>
                       <h5>Instructions:</h5>
                       <p>{churchInstruction}</p>
+                    </>
+                  )}  
+                  {refundPolicy && (
+                    <>
+                      <h5>Refund Policy:</h5>
+                      <p>{refundPolicy}</p>
                     </>
                   )}
                   {churchQRDetail && (

@@ -17,7 +17,7 @@ import ReqVol from './components2/ReqVol';
 import Sidebar from './components2/Sidebar';
 import AccountSettings from './components2/AccountSett';
 import UserAccountSettings from './components/UserAccountSettings';
-import MapComponent from './components/MapComponent';
+import MapComponent from './components/mapfiles/MapComponent';
 import SysAdminPendingChurch from './components3/SysAdminPendingChurch';
 import SysAdminDashboard from './components3/SysAdminDashboard';
 import SysAdminAccSettings from './components3/SysAdminAccSettings';

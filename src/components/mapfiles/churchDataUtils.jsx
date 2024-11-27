@@ -1,6 +1,6 @@
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '/backend/firebase';
-import coverLogo from '../assets/logo cover.png';
+import coverLogo from '/src/assets/logo cover.png';
 
 export const onZoomChanged = (map, setCustomIcon) => {
   if (map) {
