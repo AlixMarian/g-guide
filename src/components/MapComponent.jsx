@@ -285,7 +285,7 @@ const MapComponent = () => {
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={currentPosition || { lat: 0, lng: 0 }}
-          zoom={13}
+          zoom={15}
           onZoomChanged={() => onZoomChanged(map, setCustomIcon)}
           onLoad={(mapInstance) => handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)}
         >
