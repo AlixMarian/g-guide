@@ -1,14 +1,13 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import { Table } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../churchCoordinator.css';
 
 const PaymentHistory = () => {
+    // eslint-disable-next-line no-unused-vars
     const [user, setUser] = useState(null);
     const [paymentHistory, setPaymentHistory] = useState([]);
   

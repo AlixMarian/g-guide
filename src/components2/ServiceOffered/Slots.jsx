@@ -5,6 +5,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { toast } from 'react-toastify';
 import '../../churchCoordinator.css';
 import DatePicker from 'react-datepicker';
+import { Table } from 'react-bootstrap';
 import Pagination from 'react-bootstrap/Pagination';
 
 
@@ -83,7 +84,7 @@ export const Slots = () => {
   
   const renderTime = (slot) => {
     if (!slot.startTime || !slot.endTime || slot.startTime === "none" || slot.endTime === "none") {
-      return 'Information unavailable: Date disabled';
+      return 'Date disabled';
     }
     return `${convertTo12HourFormat(slot.startTime)} - ${convertTo12HourFormat(slot.endTime)}`;
   };
@@ -108,53 +109,81 @@ export const Slots = () => {
   const handleCreateSlots = async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
-
-    if (user) {
-      try {
-        if (isRecurring) {
-          const start = new Date(startDate);
-          const end = new Date(endDate);
-
-          const dates = [];
-          let currentDate = start;
-
-          while (currentDate <= end) {
-            dates.push(new Date(currentDate));
-            currentDate.setDate(currentDate.getDate() + 1);
-          }
-
-          const promises = dates.map(async (date) => {
-            const formattedDate = date.toISOString().split('T')[0]; 
-            await addDoc(collection(db, 'slot'), {
-              startDate: formattedDate,
-              startTime,
-              endTime,
-              slotStatus: 'active',
-              churchId: user.uid,
-            });
-          });
-
-          await Promise.all(promises);
-        } else {
-          await addDoc(collection(db, 'slot'), {
-            startDate,
-            startTime,
-            endTime,
-            slotStatus: 'active',
-            churchId: user.uid,
-          });
-        }
-
-        resetForm();
-        toast.success('Slots created successfully');
-        fetchSlots();
-      } catch (error) {
-        toast.error('Error creating slots: ', error);
+  
+    if (!user) {
+      toast.error('No user signed in.');
+      return;
+    }
+  
+    try {
+      const slotsCollection = collection(db, 'slot');
+  
+      // Step 1: Define the date range
+      const start = new Date(startDate);
+      const end = isRecurring && endDate ? new Date(endDate) : start; // Use endDate if recurring, otherwise just the startDate
+  
+      if (!startDate) {
+        toast.error('Please select a valid start date.');
+        return;
       }
-    } else {
-      alert('No user signed in.');
+  
+      const dates = [];
+      let currentDate = new Date(start); // Create a new Date object to avoid mutation
+      while (currentDate <= end) {
+        dates.push(new Date(currentDate)); // Add a copy of the date
+        currentDate.setDate(currentDate.getDate() + 1); // Increment the date
+      }
+  
+      // Step 2: Check for conflicts with disabled slots
+      for (const date of dates) {
+        const formattedDate = date.toISOString().split('T')[0];
+  
+        const disabledQuery = query(
+          slotsCollection,
+          where('startDate', '==', formattedDate),
+          where('slotStatus', '==', 'disabled'),
+          where('churchId', '==', user.uid)
+        );
+  
+        const disabledSnapshot = await getDocs(disabledQuery);
+  
+        if (!disabledSnapshot.empty) {
+          // If conflict is found, show an error and stop
+          toast.error(
+            `Selected date (${formattedDate}) is marked as disabled. Update the existing timeslot first.`
+          );
+  
+          // Highlight the disabled date in the table
+          setSelectedDate(new Date(formattedDate));
+          return; // Exit early to prevent slot creation
+        }
+      }
+  
+      // Step 3: Proceed with creating new slots
+      const creationPromises = dates.map(async (date) => {
+        const formattedDate = date.toISOString().split('T')[0];
+        await addDoc(collection(db, 'slot'), {
+          startDate: formattedDate,
+          startTime,
+          endTime,
+          slotStatus: 'active',
+          churchId: user.uid,
+        });
+      });
+  
+      await Promise.all(creationPromises);
+  
+      // Step 4: Reset form and refresh slots
+      resetForm();
+      toast.success('Slots created successfully');
+      fetchSlots();
+    } catch (error) {
+      console.error('Error creating slots:', error);
+      toast.error('Error creating slots. Please try again.');
     }
   };
+  
+  
 
   const handleDeleteSlot = async (slotId) => {
     try {
@@ -223,89 +252,142 @@ export const Slots = () => {
   const handleDisableSlots = async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
-
+  
     if (user) {
       try {
         const start = new Date(startDate);
-        const end = new Date(endDate);
+        const end = new Date(endDate || startDate); // Default to startDate if endDate is not provided
         const dates = [];
         let currentDate = start;
-
+  
         while (currentDate <= end) {
           dates.push(new Date(currentDate));
           currentDate.setDate(currentDate.getDate() + 1);
         }
-
+  
         const slotsCollection = collection(db, 'slot');
-        const existingDisabledSlotsPromises = dates.map(async (date) => {
+  
+        for (const date of dates) {
           const formattedDate = date.toISOString().split('T')[0];
-          const q = query(
+  
+          // 1. Query active slots for the given date
+          const activeSlotsQuery = query(
+            slotsCollection,
+            where('startDate', '==', formattedDate),
+            where('slotStatus', '==', 'active'),
+            where('churchId', '==', user.uid)
+          );
+  
+          const activeSlotsSnapshot = await getDocs(activeSlotsQuery);
+  
+          // 2. Delete all active slots
+          const deleteActivePromises = activeSlotsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+          await Promise.all(deleteActivePromises);
+  
+          // 3. Check if a disabled entry already exists
+          const disabledSlotsQuery = query(
             slotsCollection,
             where('startDate', '==', formattedDate),
             where('slotStatus', '==', 'disabled'),
             where('churchId', '==', user.uid)
           );
-          const querySnapshot = await getDocs(q);
-          return querySnapshot.docs.length > 0;
-        });
-
-        const existingDisabledSlots = await Promise.all(existingDisabledSlotsPromises);
-
-        const datesToDisable = dates.filter((_, index) => !existingDisabledSlots[index]);
-
-        if (datesToDisable.length > 0) {
-          const promises = datesToDisable.map(async (date) => {
-            const formattedDate = date.toISOString().split('T')[0];
-            await addDoc(collection(db, 'slot'), {
+  
+          const disabledSlotsSnapshot = await getDocs(disabledSlotsQuery);
+  
+          // 4. Add a disabled entry if it doesn't already exist
+          if (disabledSlotsSnapshot.empty) {
+            await addDoc(slotsCollection, {
               startDate: formattedDate,
               startTime: 'none',
               endTime: 'none',
               slotStatus: 'disabled',
               churchId: user.uid,
             });
-          });
-
-          await Promise.all(promises);
-        } else {
-          await addDoc(collection(db, 'slot'), {
-            startDate,
-            startTime: 'none',
-            endTime: 'none',
-            slotStatus: 'disabled',
-            churchId: user.uid,
-          });
+          }
         }
-
+  
+        // Reset the form and refresh slots
         resetForm();
-        toast.success('Date(s) have been disabled');
+        toast.success('Date(s) have been disabled, and active slots have been removed.');
         fetchSlots();
       } catch (error) {
-        toast.error('Error disabling slots: ', error);
+        console.error('Error disabling slots:', error);
+        toast.error('Error disabling slots. Please try again.');
       }
     } else {
       toast.error('No user signed in.');
     }
   };
+  
+  
 
-  const handleDisableSelectedSlot = async () => {
+  const handleDisableSelectedSlot = async (e) => {
+    e.preventDefault();
     const user = auth.currentUser;
-
-    if (user && currentSlotId) {
+  
+    if (user) {
       try {
-        await updateDoc(doc(db, 'slot', currentSlotId), {
-          slotStatus: 'disabled',
-          startTime: 'none',
-          endTime: 'none',
-        });
-
+        const start = new Date(startDate);
+        const end = new Date(endDate || startDate); // Default to startDate if endDate is not provided
+        const dates = [];
+        let currentDate = start;
+  
+        while (currentDate <= end) {
+          dates.push(new Date(currentDate));
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+  
+        const slotsCollection = collection(db, 'slot');
+  
+        for (const date of dates) {
+          const formattedDate = date.toISOString().split('T')[0];
+  
+          // 1. Query active slots for the given date
+          const activeSlotsQuery = query(
+            slotsCollection,
+            where('startDate', '==', formattedDate),
+            where('slotStatus', '==', 'active'),
+            where('churchId', '==', user.uid)
+          );
+  
+          const activeSlotsSnapshot = await getDocs(activeSlotsQuery);
+  
+          // 2. Delete all active slots
+          const deleteActivePromises = activeSlotsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+          await Promise.all(deleteActivePromises);
+  
+          // 3. Check if a disabled entry already exists
+          const disabledSlotsQuery = query(
+            slotsCollection,
+            where('startDate', '==', formattedDate),
+            where('slotStatus', '==', 'disabled'),
+            where('churchId', '==', user.uid)
+          );
+  
+          const disabledSlotsSnapshot = await getDocs(disabledSlotsQuery);
+  
+          // 4. Add a disabled entry if it doesn't already exist
+          if (disabledSlotsSnapshot.empty) {
+            await addDoc(slotsCollection, {
+              startDate: formattedDate,
+              startTime: 'none',
+              endTime: 'none',
+              slotStatus: 'disabled',
+              churchId: user.uid,
+            });
+          }
+        }
+  
+        // Reset the form and refresh slots
         resetForm();
-        toast.success('Slot disabled successfully');
+        toast.success('Date(s) have been disabled, and active slots have been removed.');
         fetchSlots();
       } catch (error) {
-        toast.error('Error disabling slot: ', error);
+        console.error('Error disabling slots:', error);
+        toast.error('Error disabling slots. Please try again.');
       }
     } else {
-      toast.error('No user signed in or no slot selected.');
+      toast.error('No user signed in.');
     }
   };
 
@@ -352,180 +434,207 @@ export const Slots = () => {
   const currentItems = filteredSlots.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div>
-      {/*from here*/}
-      <h1>Time Slots</h1>
-      <div className='card'>
-        <div className='card-body'>
-          <div className="filtering">
-            <div className="row">
-              <div className="col-md-6 mb-3">
-                <div className='filterDates'>
-                  <label className='me-2'><b>Filter by date:</b></label>
-                  <DatePicker
-                  className='form-control'
-                    selected={startDate ? new Date(startDate) : null}
-                    onChange={handleStartDateChange}
-                    showYearDropdown
-                    
-                  />
+    <div className="TimeSlots">
+      <h1 className="me-3">Time Slots</h1>
+      <div className="container mt-5">
+      <div className="row">
+        {/* Left Card: Form */}
+        <div className="col-md-6 mb-4">
+          <div className="card shadow-lg">
+            <div className="card-body">
+              <h3>{editing ? 'Modify Selected Time Slot' : 'Create or Disable Time Slots'}</h3>
+              <form onSubmit={editing ? handleUpdateSlot : handleCreateSlots}>
+                <div className="container">
+                  <div className="row g-3">
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="recurringTimeSlot"
+                        onChange={handleRecurringChange}
+                        checked={isRecurring}
+                      />
+                      <label className="form-check-label" htmlFor="recurringTimeSlot">
+                        Recurring Time Slot?
+                      </label>
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="startDate" className="form-label"><b>Start Date</b></label>
+                      <DatePicker
+                        className="form-control"
+                        id="startDate"
+                        selected={startDate ? new Date(startDate) : null}
+                        onChange={handleStartDateChange}
+                        minDate={new Date()}
+                        maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 2))}
+                        required
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="endDate" className="form-label"><b>End Date</b> <i>(Only for recurring slots)</i></label>
+                      <DatePicker
+                        className="form-control"
+                        id="endDate"
+                        selected={endDate ? new Date(endDate) : null}
+                        onChange={handleEndDateChange}
+                        minDate={new Date()}
+                        readOnly={!isRecurring}
+                        required
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="startTime" className="form-label"><b>Start Time</b></label>
+                      <input
+                        type="time"
+                        className="form-control"
+                        id="startTime"
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="endTime" className="form-label"><b>End Time</b></label>
+                      <input
+                        type="time"
+                        className="form-control"
+                        id="endTime"
+                        value={endTime}
+                        onChange={(e) => setEndTime(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="col-12 mt-3">
+                      <div className="d-flex justify-content-end gap-2">
+                        <button type="submit" className="btn btn-success">{editing ? 'Update Time Slot' : 'Create Time Slot'}</button>
+                        {editing && (
+                          <>
+                            <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancel</button>
+                            <button type="button" className="btn btn-warning" onClick={handleDisableSelectedSlot}>Disable Selected Slot</button>
+                          </>
+                        )}
+                        {!editing && (
+                          <button type="button" className="btn btn-danger" onClick={handleDisableSlots}>Disable Date</button>
+                        )}
+                        <button type="button" className="btn btn-danger" onClick={resetForm}>Clear</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="col-md-6 mb-3">
-                <div className="filterStatus dropdown">
-                  <label className='me-2'><b>Filter by status:</b></label>
-                  <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    {selectedStatus || 'Select Status'}
-                  </button>
-                  <ul className="dropdown-menu">
-                    <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); handleStatusChange('all'); }}>All</a></li>
-                    <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); handleStatusChange('active'); }}>Active Dates</a></li>
-                    <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); handleStatusChange('disabled'); }}>Disabled Dates</a></li>
-                  </ul>
-                </div>
-              </div>
+              </form>
             </div>
           </div>
+        </div>
 
-        {/*to here*/}
-          <br />
-          <h5>Created Time Slots</h5>
-          <table className="table">
-            <thead>
-              <tr>
-                <th scope='col'>Date</th>
-                <th scope='col'>Time</th>
-                <th scope='col'>Status</th>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentItems.map(slot => (
-                <tr key={slot.id}>
-                  <td>{formatFirebaseTimestamp(slot.startDate)}</td>
-                  <td>{renderTime(slot)}</td>
-                  <td>{slot.slotStatus}</td>
-                  <td>
-                    <button className="btn btn-primary me-2" onClick={() => handleEditSlot(slot)}>
-                      Edit
+        {/* Right Card: Time Slots */}
+        <div className="col-md-6 mb-4">
+          <div className="card shadow-lg">
+            <div className="card-body">
+            <h3>Created Time Slots</h3>
+            <div className="filtering">
+              <div className="d-flex justify-content-between align-items-start mb-3">
+                {/* Filter by date */}
+                <div className="form-group">
+                  <label className="form-label"><b>Filter by date:</b></label>
+                  <div className="input-group">
+                    <DatePicker
+                      className="form-control"
+                      selected={selectedDate}
+                      onChange={(date) => setSelectedDate(date)}
+                      showYearDropdown
+                    />
+                    <button className="btn btn-danger" onClick={() => setSelectedDate(null)}>
+                      Clear
                     </button>
-                  </td>
-                  <td>
-                    <button className="btn btn-danger" onClick={() => handleDeleteSlot(slot.id)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <Pagination className="d-flex justify-content-center">
-            <Pagination.Prev disabled={currentPage === 1} onClick={handlePreviousPage} />
-            {pageNumbers.map(number => (
-              <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)} style={{ zIndex: 0 }} >
-                {number}
-              </Pagination.Item>
-            ))}
-            <Pagination.Next disabled={currentPage === totalPages} onClick={handleNextPage} />
-          </Pagination>
-          <br />
+                  </div>
+                </div>
 
-          {/* from here*/}
-          <h5>{editing ? 'Modify Selected Time Slot' : 'Create or Disable Time Slots'}</h5>
-          <form onSubmit={editing ? handleUpdateSlot : handleCreateSlots}>
-            <div className='container'>
-              <div className='row g-3'>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    value={isRecurring}
-                    id="reccuringTimeSlot"
-                    onChange={handleRecurringChange}
-                    checked={isRecurring}
-                  />
-                  <label className="form-check-label" htmlFor="recuringTimeSlot">
-                    Recurring Time Slot?
-                  </label>
-                </div>
-                <div className="col-md-6">
-                  <div className="mb-3">
-                    <label htmlFor="startDate" className="form-label"><b>Start Date</b></label> <br/>
-                    <DatePicker
-                      showIcon
-                      className="form-control w-100"
-                      id="startDate"
-                      selected={startDate ? new Date(startDate) : null}
-                      onChange={handleStartDateChange}
-                      minDate={new Date()}
-                      maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 2))}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="col-md-6 ">
-                  <div className="mb-3">
-                    <label htmlFor="endDate" className="form-label"><b>End Date</b> <i>(Only for recurring slots)</i></label><br/>
-                    <DatePicker
-                      showIcon
-                     className="form-control w-100"
-                      id="endDate"
-                      selected={endDate ? new Date(endDate) : null}
-                      onChange={handleEndDateChange}
-                      minDate={new Date()}
-                      readOnly={!isRecurring}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className='col-md-6'>
-                  <div className="mb-3">
-                    <label htmlFor="startTime" className="form-label"><b>Start Time</b></label>
-                    <input
-                      type="time"
-                      className="form-control"
-                      id="startTime"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className='col-md-6'>
-                  <div className="mb-3">
-                    <label htmlFor="endTime" className="form-label"><b>End Time</b></label>
-                    <input
-                      type="time"
-                      className="form-control"
-                      id="endTime"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className='col-12 mt-3'>
-                  <div className="d-flex justify-content-end gap-2">
-                    <button type="submit" className="btn btn-success">{editing ? 'Update Time Slot' : 'Create Time Slot'}</button>
-                    {editing && (
-                      <>
-                        <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancel</button>
-                        <button type="button" className="btn btn-warning" onClick={handleDisableSelectedSlot}>Disable Selected Slot</button>
-                      </>
-                    )}
-                    {!editing && (
-                      <button type="button" className="btn btn-danger" onClick={handleDisableSlots}>Disable Date</button>
-                    )}
-                    <button type="button" className="btn btn-danger" onClick={resetForm}>Clear</button>
+                {/* Filter by status */}
+                <div className="form-group">
+                  <label className="form-label"><b>Filter by status:</b></label>
+                  <div className="dropdown">
+                    <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                      {selectedStatus || 'Select Status'}
+                    </button>
+                    <ul className="dropdown-menu">
+                      <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); handleStatusChange('all'); }}>All</a></li>
+                      <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); handleStatusChange('active'); }}>Active Dates</a></li>
+                      <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); handleStatusChange('disabled'); }}>Disabled Dates</a></li>
+                      <li><a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); handleStatusChange('taken'); }}>Taken Dates</a></li>
+                    </ul>
                   </div>
                 </div>
               </div>
             </div>
-          </form>
-          {/* to here*/}
+
+              <br />
+              
+              <Table striped bordered hover responsive>
+              <thead className="table-dark">
+                  <tr>
+                    <th className='slots-th'>Date</th>
+                    <th className='slots-th'>Time</th>
+                    <th className='slots-th'>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentItems.map(slot => (
+                    <tr key={slot.id}>
+                      <td className='slots-td'>{formatFirebaseTimestamp(slot.startDate)}</td>
+                      <td className='slots-td'>{renderTime(slot)}</td>
+                      <td
+                        className={`slots-td ${
+                          slot.slotStatus === 'active'
+                            ? 'text-success' // Green for active
+                            : slot.slotStatus === 'disabled'
+                            ? 'text-danger' // Red for disabled
+                            : slot.slotStatus === 'taken'
+                            ? 'text-primary' // Blue for taken
+                            : ''
+                        }`}
+                      >
+                       ● {slot.slotStatus.charAt(0).toUpperCase() + slot.slotStatus.slice(1)} {/* Capitalize the status */}
+                      </td>
+                      <td className='slots-td'>
+  <div className="btn-group" role="group" aria-label="Slot actions">
+    <button
+      type="button"
+      className="btn btn-primary"
+      onClick={() => handleEditSlot(slot)}
+    >
+      Edit
+    </button>
+    <button
+      type="button"
+      className="btn btn-danger"
+      onClick={() => handleDeleteSlot(slot.id)}
+    >
+      Delete
+    </button>
+  </div>
+</td>
+
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+              <Pagination className="d-flex justify-content-center">
+                <Pagination.Prev disabled={currentPage === 1} onClick={handlePreviousPage} />
+                {pageNumbers.map(number => (
+                  <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePageChange(number)}>
+                    {number}
+                  </Pagination.Item>
+                ))}
+                <Pagination.Next disabled={currentPage === totalPages} onClick={handleNextPage} />
+              </Pagination>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
