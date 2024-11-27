@@ -21,6 +21,7 @@
     "express": "^4.19.2",
     "firebase": "^10.12.4",
     "firebase-admin": "^12.3.0",
+    "lucide-react": "^0.461.0",
     "mysql2": "^3.10.2",
     "nodemailer": "^6.9.14",
     "prop-types": "^15.8.1",
