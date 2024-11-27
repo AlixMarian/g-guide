@@ -876,11 +876,11 @@ ul{
   width: 80px;
 }
 
-.payment-th, .pending-th, .forPayment-th, .approved-th, .denied-th, .massIntention-th, .listPriest-th {
+.slots-th, .payment-th, .pending-th, .forPayment-th, .approved-th, .denied-th, .massIntention-th, .listPriest-th {
   font-size: 18px;
 }
 
-.payment-td, .pending-td, .forPayment-td, .approved-td, .denied-td, .massIntention-td, .listPriest-td {
+.slots-td, .payment-td, .pending-td, .forPayment-td, .approved-td, .denied-td, .massIntention-td, .listPriest-td {
   font-size: 16px;
 }
 
