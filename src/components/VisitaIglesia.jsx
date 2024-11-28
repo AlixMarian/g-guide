@@ -8,24 +8,8 @@ import { fetchChurchData } from './mapfiles/churchDataUtils';
 // import { FaBars } from 'react-icons/fa'; // Drag Handle Icon
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
 import { handleMarkerClick, handleMapLoad, onZoomChanged } from './mapfiles/churchDataUtils';
-
-
-const containerStyle = {
-  width: '100%',
-  height: '700px',
-};
-  import '../websiteUser.css';
-  import { useNavigate } from 'react-router-dom';
-  import React, { useState, useEffect, useRef } from 'react';
-  import { GoogleMap, LoadScript, DirectionsRenderer, Autocomplete, Marker } from '@react-google-maps/api';
-  import { Offcanvas, Button, Form } from 'react-bootstrap';
-  import { fetchChurchData } from '../components/churchDataUtils';
-  // import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-  // import { FaBars } from 'react-icons/fa'; // Drag Handle Icon
-  import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
-  import { handleMarkerClick, handleMapLoad, onZoomChanged } from '../components/churchDataUtils';
-  import AutocompleteSearch from '../components/AutocompleteSearch'; // Import your working AutocompleteSearch component
-  import AutoGen from '../components/AutoGen';
+import AutocompleteSearch from '@components/mapfiles/AutocompleteSearch';
+import AutoGen from './mapfiles/AutoGen';
  
   const containerStyle = {
     width: '100%',

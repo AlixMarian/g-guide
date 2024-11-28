@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
-import AutocompleteSearch from '../components/AutocompleteSearch';
+import AutocompleteSearch from '@components/mapfiles/AutocompleteSearch';
 
 const AutoGen = ({ onBack }) => {
   const [usingCurrentLocation, setUsingCurrentLocation] = useState(true);

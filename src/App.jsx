@@ -31,7 +31,7 @@ import AdminNavbar from './components3/SysAdminNavbar';
 import Transactions from './components3/Transactions';
 import RenewChurch from './components/RenewChurch';
 import VisitaIglesia from './components/VisitaIglesia';
-import AutoGen from './components/AutoGen';
+import AutoGen from './components/mapfiles/AutoGen';
 
 
 //Appointments
