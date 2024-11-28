@@ -31,6 +31,8 @@ import AdminNavbar from './components3/SysAdminNavbar';
 import Transactions from './components3/Transactions';
 import RenewChurch from './components/RenewChurch';
 import VisitaIglesia from './components/VisitaIglesia';
+import AutoGen from './components/AutoGen';
+
 
 //Appointments
 import PendingAppointments from './components2/Appointments/PendingAppointments'
@@ -71,7 +73,7 @@ const App = () => {
 
         <Route path="/visita-iglesia" element={<VisitaIglesia />} />
 
-        
+        <Route path="/autogen" element={<AutoGen />} />
 
         
         <Route path="/home" element={<><NavBar /><Home /></>} />
@@ -95,7 +97,6 @@ const App = () => {
               </div>
             </>
         } /> */}
-
         <Route path="/SEA" element={
           <div>
             <Sidebar />
