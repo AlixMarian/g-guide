@@ -12,8 +12,6 @@ import SearchFilter from './SearchFilter';
 import { Link } from 'react-router-dom';
 import { fetchChurchData, handleMapLoad, handleMarkerClick, onZoomChanged } from '/src/components/mapfiles/churchDataUtils';
 
-// import VisitaIglesia from './VisitaIglesia';
-
 const libraries = ['places', 'geometry']; 
 const servicesList = ['Marriages', 'Baptism', 'Burials', 'Confirmation', 'Mass Intentions'];
 
