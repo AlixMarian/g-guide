@@ -8,17 +8,16 @@ import { toast } from 'react-toastify';
 
 export const ConfirmationCertificate = () => {
     const { churchId } = useParams();
-    // eslint-disable-next-line no-unused-vars
     const [churchData, setChurchData] = useState(null);
     const [userData, setUserData] = useState(null); 
     const auth = getAuth();
     const user = auth.currentUser;
     const [loading, setLoading] = useState(true);
     const [authorizationImageFile, setAuthorizationImageFile] = useState(null);
-    // eslint-disable-next-line no-unused-vars
     const [authorizationImageUrl, setAuthorizationImageUrl] = useState('');
     const [showAuthorization, setShowAuthorization] = useState(false);
     const [appointmentPurpose, setAppointmentPurpose] = useState('personal');
+    const [refundPolicy, setRefundPolicy] = useState('');
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -36,6 +35,21 @@ export const ConfirmationCertificate = () => {
         fetchChurchData();
       }, [churchId]);
 
+      const fetchRefundPolicy = async () => {
+        try {
+            const churchDocRef = doc(db, 'church', churchId);
+            const churchDocSnap = await getDoc(churchDocRef);
+            if (churchDocSnap.exists()) {
+                setRefundPolicy(churchDocSnap.data().refundPolicy || "No refund policy available.");
+            } else {
+                setRefundPolicy("No refund policy available.");
+            }
+        } catch (error) {
+            console.error("Error fetching refund policy:", error);
+            toast.error("Failed to fetch refund policy.");
+        }
+    };
+
       useEffect(() => {
         const fetchUserData = async () => {
             if (user) {
@@ -47,6 +61,7 @@ export const ConfirmationCertificate = () => {
                 }
             }
         };
+        fetchRefundPolicy();
         fetchUserData();
     }, [user]);
 
@@ -218,7 +233,7 @@ export const ConfirmationCertificate = () => {
             <div className="userDetails card mb-4">
               <div className="card-body">
                 <h5 className="card-title">Refund Policy</h5>
-                
+                <p>{refundPolicy}</p> 
               </div>
             </div>
       

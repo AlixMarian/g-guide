@@ -11,20 +11,17 @@ import { toast } from 'react-toastify';
 export const Confirmation = () => {
   const [maxDate, setMaxDate] = useState(new Date());
   const { churchId } = useParams();
-  // eslint-disable-next-line no-unused-vars
   const [churchData, setChurchData] = useState(null);
   const [eventsData, setEventsData] = useState([]);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line no-unused-vars
   const [eventTime, setEventTime] = useState('');
   const [eventId, setEventId] = useState('');
   const [baptismalCert,setBaptismalCert] = useState(null);
-  // eslint-disable-next-line no-unused-vars
   const [baptismalCertUrl, setBaptismalCertUrl] = useState('');
   const [birthCert, setBirthCert] = useState(null);
-  // eslint-disable-next-line no-unused-vars
   const [birthCertUrl, setBirthCertUrl] = useState('');
+  const [refundPolicy, setRefundPolicy] = useState(''); 
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -99,6 +96,7 @@ export const Confirmation = () => {
     
     fetchChurchData();
     fetchEventsData().finally(() => setLoading(false)); 
+    fetchRefundPolicy();
   }, [churchId]);
   
 
@@ -120,6 +118,24 @@ export const Confirmation = () => {
     };
     fetchUserData();
   }, [user]);
+
+  const fetchRefundPolicy = async () => {
+    try {
+        const churchDocRef = doc(db, 'church', churchId);
+        const churchDocSnap = await getDoc(churchDocRef);
+
+        if (churchDocSnap.exists()) {
+            const data = churchDocSnap.data();
+            setRefundPolicy(data.refundPolicy || "No refund policy available."); // Set refund policy or default message
+        } else {
+            console.log("No church data found for refund policy.");
+            setRefundPolicy("No refund policy available.");
+        }
+    } catch (error) {
+        console.error("Error fetching refund policy:", error);
+        toast.error("Failed to fetch refund policy.");
+    }
+};
   
 
   const convertTo12HourFormat = (time) => {
@@ -264,7 +280,7 @@ export const Confirmation = () => {
         <div className="userDetails card mb-4">
           <div className="card-body">
             <h5 className="card-title">Refund Policy</h5>
-            
+            <p>{refundPolicy}</p>
           </div>
         </div>
 

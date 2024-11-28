@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { db } from '/backend/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import '../../churchCoordinator.css';
+import { toast } from 'react-toastify';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 export const ExploreServices = () => {
     const [servicesState, setServicesState] = useState({});
     const [userID, setUserId] = useState(null);
+    const [isModified, setIsModified] = useState(false);
 
     useEffect(() => {
         const auth = getAuth();
@@ -22,15 +24,17 @@ export const ExploreServices = () => {
     }, []);
 
     const fetchData = async (uid) => {
-        const userDoc = await getDoc(doc(db, "services", uid));
-        if (userDoc.exists()) {
-            setServicesState(userDoc.data());
+        try {
+            const userDoc = await getDoc(doc(db, "services", uid));
+            if (userDoc.exists()) {
+                setServicesState(userDoc.data());
+            } else {
+                console.log("No data found for the user");
+            }
+        } catch (error) {
+            toast.error("Error fetching services data");
+            console.error("Error fetching services data:", error);
         }
-    };
-
-    const isSchedule = (serviceName) => {
-        const schedules = ["Marriages", "Baptism", "Confirmation", "Burials", "Mass Intentions"];
-        return schedules.includes(serviceName);
     };
 
     const handleToggle = async (event) => {
@@ -43,102 +47,110 @@ export const ExploreServices = () => {
         };
         const updatedServicesState = { ...servicesState, [serviceName]: updatedService };
 
-        await setDoc(doc(db, "services", userID), updatedServicesState, { merge: true });
         setServicesState(updatedServicesState);
+        setIsModified(true);
     };
 
-    const handleInputChange = async (event, serviceName, field) => {
-        const value = event.target.value;
-
+    const handleChange = (serviceName, field, value) => {
         const updatedService = {
             ...servicesState[serviceName],
             [field]: value,
         };
-        const updatedServicesState = { ...servicesState, [serviceName]: updatedService };
-
-        await setDoc(doc(db, "services", userID), updatedServicesState, { merge: true });
-        setServicesState(updatedServicesState);
+        setServicesState({ ...servicesState, [serviceName]: updatedService });
+        setIsModified(true);
     };
 
+    const handleSubmit = async () => {
+        try {
+            await setDoc(doc(db, "services", userID), servicesState, { merge: true });
+            toast.success("Services updated successfully!");
+            setIsModified(false);
+        } catch (error) {
+            toast.error("Error updating services");
+            console.error("Error updating services:", error);
+        }
+    };
+
+    const renderServiceFields = (services) =>
+        services.map((service) => (
+            <div key={service} className="service-item">
+                <div className="service-header">
+                    <input
+                        className="service-checkbox"
+                        type="checkbox"
+                        id={service.toLowerCase().replace(/ /g, '')}
+                        name={service}
+                        onChange={handleToggle}
+                        checked={!!(servicesState[service]?.active)}
+                    />
+                    <label 
+                        className="service-label" 
+                        htmlFor={service.toLowerCase().replace(/ /g, '')}
+                    >
+                        {service}
+                    </label>
+                </div>
+                <div className="service-details">
+                    <input
+                        className="fee-input"
+                        type="number"
+                        min="0"
+                        placeholder="Service Fee"
+                        value={servicesState[service]?.fee || ''}
+                        onChange={(e) => handleChange(service, 'fee', e.target.value)}
+                    />
+                    <textarea
+                        className="instructions-input"
+                        placeholder="Service Instructions"
+                        value={servicesState[service]?.instructions || ''}
+                        onChange={(e) => handleChange(service, 'instructions', e.target.value)}
+                        rows="2"
+                    />
+                </div>
+            </div>
+        ));
+
     return (
-        <>
-            <h1>Explore Services</h1>
-            <div className="Services">
-                <div className="offer1">
-                    <div className="header">Appointments</div>
-                    <div className="Schedtogs">
-                        {["Marriages", "Baptism", "Confirmation", "Burials", "Mass Intentions"].map(service => (
-                            <div key={service} className="form-check">
-                                <div className="service1">
-                                    <input
-                                        className="form-check-input"
-                                        type="checkbox"
-                                        id={service.toLowerCase()}
-                                        name={service}
-                                        onChange={handleToggle}
-                                        checked={!!(servicesState[service]?.active)}
-                                    />
-                                    <label className="form-check-label" htmlFor={service.toLowerCase()}>{service}</label>
-                                    <div className="col-xs-2">
-                                        <input
-                                            className="fee-input"
-                                            type="text"
-                                            placeholder="input fee"
-                                            value={servicesState[service]?.fee || ''}
-                                            onChange={(e) => handleInputChange(e, service, 'fee')}
-                                        />
-                                    </div>
-                                </div>
-                                <input
-                                    className="fee-input"
-                                    type="text"
-                                    placeholder="Instruction for Service"
-                                    value={servicesState[service]?.instructions || ''}
-                                    onChange={(e) => handleInputChange(e, service, 'instructions')}
-                                /><br />
-                            </div>
-                        ))}
+        <div className="explore-services-container">
+            <h1 className="page-title">Configure Church Services</h1>
+            <div className="services-grid">
+                <div className="service-section">
+                    <div className="section-header">Appointments</div>
+                    <div className="service-list">
+                        {renderServiceFields([
+                            "Marriages",
+                            "Baptism",
+                            "Confirmation",
+                            "Burials",
+                            "Mass Intentions",
+                        ])}
                     </div>
                 </div>
 
-                <div className="offer2">
-                    <div className="header">Document Requests</div>
-                    <div className="Schedtogs">
-                        {["Baptismal Certificate", "Confirmation Certificate", "Marriage Certificate", "Burial Certificate"].map(service => (
-                            <div key={service} className="form-check">
-                                <div className="service1">
-                                    <input
-                                        className="form-check-input"
-                                        type="checkbox"
-                                        id={service.toLowerCase().replace(" ", "")}
-                                        name={service}
-                                        onChange={handleToggle}
-                                        checked={!!(servicesState[service]?.active)}
-                                    />
-                                    <label className="form-check-label" htmlFor={service.toLowerCase().replace(" ", "")}>{service}</label>
-                                    <div className="col-xs-2">
-                                        <input
-                                            className="fee-input"
-                                            type="text"
-                                            placeholder="input fee"
-                                            value={servicesState[service]?.fee || ''}
-                                            onChange={(e) => handleInputChange(e, service, 'fee')}
-                                        />
-                                    </div>
-                                </div>
-                                <input
-                                    className="fee-input"
-                                    type="text"
-                                    placeholder="Instruction for Service"
-                                    value={servicesState[service]?.instructions || ''}
-                                    onChange={(e) => handleInputChange(e, service, 'instructions')}
-                                /><br />
-                            </div>
-                        ))}
+                <div className="service-section">
+                    <div className="section-header">Document Requests</div>
+                    <div className="service-list">
+                        {renderServiceFields([
+                            "Baptismal Certificate",
+                            "Confirmation Certificate",
+                            "Marriage Certificate",
+                            "Burial Certificate",
+                        ])}
                     </div>
                 </div>
             </div>
-        </>
+
+            <div className="submit-container">
+                <button 
+                    className="submit-button" 
+                    onClick={handleSubmit}
+                    disabled={!isModified}
+                >
+                    {isModified ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
+                    Save Changes
+                </button>
+            </div>
+        </div>
     );
 };
 

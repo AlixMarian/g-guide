@@ -2,10 +2,10 @@ import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { Offcanvas } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import AutocompleteSearch from '../components/AutocompleteSearch';
-import logo from '../assets/G-Guide LOGO.png';
-import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
-import { handleMarkerClick } from '../components/churchDataUtils';
+import AutocompleteSearch from './AutocompleteSearch';
+import logo from '/src/assets/G-Guide LOGO.png';
+import loadingGif from '/src/assets/Ripple@1x-1.0s-200px-200px.gif';
+import { handleMarkerClick } from './churchDataUtils';
 
 const SearchFilter = ({
   showMenu,
