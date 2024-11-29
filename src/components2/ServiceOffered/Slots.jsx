@@ -511,14 +511,18 @@ export const Slots = () => {
                         <button type="submit" className="btn btn-success">{editing ? 'Update Time Slot' : 'Create Time Slot'}</button>
                         {editing && (
                           <>
-                            <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancel</button>
                             <button type="button" className="btn btn-warning" onClick={handleDisableSelectedSlot}>Disable Selected Slot</button>
                           </>
                         )}
                         {!editing && (
-                          <button type="button" className="btn btn-danger" onClick={handleDisableSlots}>Disable Date</button>
+                          <button type="button" className="btn btn-warning" onClick={handleDisableSlots}>Disable Date</button>
                         )}
                         <button type="button" className="btn btn-danger" onClick={resetForm}>Clear</button>
+                        {editing && (
+                          <>
+                            <button type="button" className="btn btn-dark" onClick={handleCancelEdit}>Cancel</button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -571,7 +575,7 @@ export const Slots = () => {
 
               <br />
               
-              <Table striped bordered hover responsive>
+              <Table striped bordered hover responsive style={{ borderRadius: '12px', overflow: 'hidden', borderCollapse: 'hidden' }}>
               <thead className="table-dark">
                   <tr>
                     <th className='slots-th'>Date</th>
