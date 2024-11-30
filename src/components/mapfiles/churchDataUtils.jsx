@@ -55,7 +55,7 @@ export const fetchChurchData = async () => {
     return combinedChurchData;
   } catch (error) {
     console.error('Error fetching church data:', error);
-    return []; // Return an empty array on error
+    return []; 
   }
 };
 
@@ -63,7 +63,7 @@ export const handleMapLoad = (mapInstance, setMap, setCustomIcon, setLoading) =>
     setMap(mapInstance);
     if (window.google) {
       setCustomIcon({
-        url: 'src/assets/location.png', // Adjust the path if necessary
+        url: 'src/assets/location.png', 
         scaledSize: new window.google.maps.Size(40, 40),
         anchor: new window.google.maps.Point(20, 40),
       });

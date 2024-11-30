@@ -56,7 +56,6 @@ const MapComponent = () => {
     try {
       console.log(`Selected Service: ${selectedService}`);
   
-      // Step 1: Query the services collection where activeSchedules contains the selected service
       const servicesQuery = query(
         collection(db, 'services'),
         where('activeSchedules', 'array-contains', selectedService)
@@ -75,7 +74,6 @@ const MapComponent = () => {
   
       const churchesList = [];
   
-      // Step 2: Query the coordinator collection to find documents where userId matches
       for (const userId of userIds) {
         const coordinatorQuery = query(
           collection(db, 'coordinator'),
@@ -85,9 +83,8 @@ const MapComponent = () => {
   
         if (!coordinatorSnapshot.empty) {
           console.log(`Coordinator found for userId: ${userId}`);
-          const coordinatorID = coordinatorSnapshot.docs[0].id; // Use the document ID as coordinatorID
+          const coordinatorID = coordinatorSnapshot.docs[0].id;
   
-          // Step 3: Query the church collection using the coordinatorID to get the churchName
           const churchQuery = query(
             collection(db, 'church'),
             where('coordinatorID', '==', coordinatorID)
@@ -99,10 +96,9 @@ const MapComponent = () => {
               const churchData = churchDoc.data();
               const churchName = churchData.churchName;
   
-              // Step 4: Fetch churchLocation data from the churchLocation collection
               const churchLocationQuery = query(
                 collection(db, 'churchLocation'),
-                where('churchName', '==', churchName) // Assuming churchName is consistent in both collections
+                where('churchName', '==', churchName)
               );
   
               const churchLocationSnapshot = await getDocs(churchLocationQuery);
@@ -110,7 +106,7 @@ const MapComponent = () => {
               if (!churchLocationSnapshot.empty) {
                 const churchLocationDoc = churchLocationSnapshot.docs[0];
                 const churchLocationData = churchLocationDoc.data();
-                const churchLocation = churchLocationData.churchLocation; // Fetch churchLocation field
+                const churchLocation = churchLocationData.churchLocation; 
                 const latitude = churchLocationData.latitude;
                 const longitude = churchLocationData.longitude;
   
@@ -128,10 +124,7 @@ const MapComponent = () => {
                 } else {
                   console.warn(`Missing latitude/longitude for church: ${churchName}`);
                 }
-                // Add the church with its location to the churchesList
-                
               } else {
-                // If no location is found, still add the church with a "Location not available" message
                 console.log(`No location found for churchName: ${churchName}`);
                 churchesList.push({
                   id: churchDoc.id,
@@ -147,8 +140,6 @@ const MapComponent = () => {
           console.log(`No coordinator found for userId: ${userId}`);
         }
       }
-  
-      // Step 5: Set the filtered churches to be displayed
       setFilteredChurches(churchesList);
       setChurches(churchesList);
       sortAndSetTopChurches(churchesList);
@@ -170,11 +161,9 @@ const MapComponent = () => {
         const currentLatLng = new window.google.maps.LatLng(lat, lng);
 
         const sortedChurches = churchesList.map((church) => {
-            // Ensure latitude and longitude are numbers
             const latitude = parseFloat(church.latitude);
             const longitude = parseFloat(church.longitude);
 
-            // Check if lat/long values are valid numbers
             if (!isNaN(latitude) && !isNaN(longitude)) {
                 const churchLatLng = new window.google.maps.LatLng(latitude, longitude);
                 const distance = window.google.maps.geometry.spherical.computeDistanceBetween(churchLatLng, currentLatLng) / 1000; // Convert to km
@@ -186,17 +175,12 @@ const MapComponent = () => {
                 console.warn(`Invalid latitude or longitude for church: ${church.churchName}`);
                 return {
                     ...church,
-                    distance: Infinity, // Set distance to a high value if lat/long are invalid
+                    distance: Infinity,
                 };
             }
         });
-
-        // Sort the churches by distance in ascending order
         sortedChurches.sort((a, b) => a.distance - b.distance);
-
         console.log("Sorted Churches:", sortedChurches);
-
-        // Set the top 5 nearest churches
         setFilteredChurches(sortedChurches.slice(0, 10));
     }
 };
@@ -241,20 +225,6 @@ const MapComponent = () => {
   const handleCloseDrawer = () => {
     setDrawerInfo({ show: false, title: '', description: '', telephone: '', serviceHours: '' });
   };
-
-  // const onZoomChanged = () => {
-  //   if (map) {
-  //     const zoom = map.getZoom();
-  //     const newSize = zoom > 15 ? 40 : zoom > 12 ? 30 : 20;
-  //     setCustomIcon((prevIcon) => ({
-  //       ...prevIcon,
-  //       scaledSize: new window.google.maps.Size(newSize, newSize),
-  //     }));
-  //   }
-  // };
-
-  
-  
 
   const handleCloseMenu = () => {
     setShowMenu(false);
