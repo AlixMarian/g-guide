@@ -3,7 +3,9 @@ import '../churchCoordinator.css';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { db } from '/backend/firebase';
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
+import Pagination from 'react-bootstrap/Pagination';
 
 export const Listpriest = () => {
   const [priestList, setPriestList] = useState([]);
@@ -15,6 +17,8 @@ export const Listpriest = () => {
   const [updatedPriestLastName, setUpdatedPriestLastName] = useState("");
   const [editingPriest, setEditingPriest] = useState(null); 
   const [userId, setUserId] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   const priestCollectionRef = collection(db, "priest");
 
   useEffect(() => {
@@ -129,13 +133,17 @@ export const Listpriest = () => {
     setEditingPriest(null);
   };
 
+  const totalPages = Math.ceil(priestList.length / itemsPerPage);
+  const lastItemIndex = currentPage * itemsPerPage;
+  const firstItemIndex = lastItemIndex - itemsPerPage;
+  const currentPriests = priestList.slice(firstItemIndex, lastItemIndex);
+
   return (
     <>
       <h1>List of Priest</h1>
       <div className="container mt-5">
         <div className="row">
-          {/* Left side - Add/Edit Priest form */}
-          <div className="col-md-5">
+          <div className="col-md-4 mb-4">
             <div className="card shadow">
               <div className="card-body">
                 <form className="row g-3 needs-validation" noValidate onSubmit={(e) => handleSubmit(e, editingPriest ? onUpdatePriest : onSubmitPriest)}>
@@ -169,42 +177,65 @@ export const Listpriest = () => {
                       {editingPriest ? "Confirm Changes" : "Submit"}
                     </button>
                     <button type="button" className="btn btn-danger" onClick={clearForm}>Clear</button>
+                    {editingPriest && (
+                      <button type="button" className="btn btn-dark" onClick={() => setEditingPriest(null)}>Cancel</button>
+                    )}
                   </div>
                 </form>
               </div>
             </div>
           </div>
 
-          {/* Right side - List of Priests table */}
-          <div className="col-md-6">
+          <div className="col-md-8">
             <div className="card shadow">
               <div className="card-body">
                 <h3>List of Priests</h3>
-                <table className="table table-bordered">
-                  <thead className="table-dark">
+                <Table striped bordered hover responsive style={{ borderRadius: '12px', overflow: 'hidden', borderCollapse: 'hidden' }}>
+                <thead className="table-dark">
                     <tr>
-                      <th scope="col listPriest-th">Position</th>
-                      <th scope="col listPriest-th">First Name</th>
-                      <th scope="col listPriest-th">Last Name</th>
-                      <th scope="col listPriest-th">Action</th>
+                      <th className="listPriest-th">Position</th>
+                      <th className="listPriest-th">First Name</th>
+                      <th className="listPriest-th">Last Name</th>
+                      <th className="listPriest-th">Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {priestList.map((priest) => (
+                  {priestList.length > 0 ? (
+                    currentPriests.map((priest) => (
                       <tr key={priest.id}>
                         <td className='listPriest-td'>{priest.priestType}</td>
                         <td className='listPriest-td'>{priest.firstName}</td>
                         <td className='listPriest-td'>{priest.lastName}</td>
                         <td className='listPriest-td'>
                           <div className="btn-group">
-                            <button type="button" className="btn btn-secondary" onClick={() => handleEditPriest(priest)}>Edit</button>
+                            <button type="button" className="btn btn-primary" onClick={() => handleEditPriest(priest)}>Edit</button>
                             <button type="button" className="btn btn-danger" onClick={() => deletePriest(priest.id)}>Delete</button>
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="text-center py-5">
+                        <h4 className="text-muted">No priests found</h4>
+                      </td>
+                    </tr>
+                  )}
                   </tbody>
-                </table>
+                </Table>
+                <div className="d-flex justify-content-center mt-3">
+                  <Pagination>
+                    <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />
+                    <Pagination.Prev onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} />
+                    {[...Array(totalPages).keys()].map((number) => (
+                      <Pagination.Item key={number + 1} active={number + 1 === currentPage} onClick={() => setCurrentPage(number + 1)}>
+                        {number + 1}
+                      </Pagination.Item>
+                    ))}
+                    <Pagination.Next onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} />
+                    <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
+                  </Pagination>
+                </div>
               </div>
             </div>
           </div>

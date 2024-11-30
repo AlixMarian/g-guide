@@ -109,18 +109,15 @@ export const Slots = () => {
   const handleCreateSlots = async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
-  
+
     if (!user) {
       toast.error('No user signed in.');
       return;
     }
-  
     try {
       const slotsCollection = collection(db, 'slot');
-  
-      // Step 1: Define the date range
       const start = new Date(startDate);
-      const end = isRecurring && endDate ? new Date(endDate) : start; // Use endDate if recurring, otherwise just the startDate
+      const end = isRecurring && endDate ? new Date(endDate) : start;
   
       if (!startDate) {
         toast.error('Please select a valid start date.');
@@ -128,13 +125,12 @@ export const Slots = () => {
       }
   
       const dates = [];
-      let currentDate = new Date(start); // Create a new Date object to avoid mutation
+      let currentDate = new Date(start);
       while (currentDate <= end) {
-        dates.push(new Date(currentDate)); // Add a copy of the date
-        currentDate.setDate(currentDate.getDate() + 1); // Increment the date
+        dates.push(new Date(currentDate)); 
+        currentDate.setDate(currentDate.getDate() + 1); 
       }
   
-      // Step 2: Check for conflicts with disabled slots
       for (const date of dates) {
         const formattedDate = date.toISOString().split('T')[0];
   
@@ -148,18 +144,15 @@ export const Slots = () => {
         const disabledSnapshot = await getDocs(disabledQuery);
   
         if (!disabledSnapshot.empty) {
-          // If conflict is found, show an error and stop
           toast.error(
             `Selected date (${formattedDate}) is marked as disabled. Update the existing timeslot first.`
           );
   
-          // Highlight the disabled date in the table
           setSelectedDate(new Date(formattedDate));
-          return; // Exit early to prevent slot creation
+          return;
         }
       }
   
-      // Step 3: Proceed with creating new slots
       const creationPromises = dates.map(async (date) => {
         const formattedDate = date.toISOString().split('T')[0];
         await addDoc(collection(db, 'slot'), {
@@ -172,8 +165,6 @@ export const Slots = () => {
       });
   
       await Promise.all(creationPromises);
-  
-      // Step 4: Reset form and refresh slots
       resetForm();
       toast.success('Slots created successfully');
       fetchSlots();
@@ -183,8 +174,6 @@ export const Slots = () => {
     }
   };
   
-  
-
   const handleDeleteSlot = async (slotId) => {
     try {
       await deleteDoc(doc(db, 'slot', slotId));
@@ -256,7 +245,7 @@ export const Slots = () => {
     if (user) {
       try {
         const start = new Date(startDate);
-        const end = new Date(endDate || startDate); // Default to startDate if endDate is not provided
+        const end = new Date(endDate || startDate);
         const dates = [];
         let currentDate = start;
   
@@ -269,8 +258,6 @@ export const Slots = () => {
   
         for (const date of dates) {
           const formattedDate = date.toISOString().split('T')[0];
-  
-          // 1. Query active slots for the given date
           const activeSlotsQuery = query(
             slotsCollection,
             where('startDate', '==', formattedDate),
@@ -280,11 +267,9 @@ export const Slots = () => {
   
           const activeSlotsSnapshot = await getDocs(activeSlotsQuery);
   
-          // 2. Delete all active slots
           const deleteActivePromises = activeSlotsSnapshot.docs.map(doc => deleteDoc(doc.ref));
           await Promise.all(deleteActivePromises);
   
-          // 3. Check if a disabled entry already exists
           const disabledSlotsQuery = query(
             slotsCollection,
             where('startDate', '==', formattedDate),
@@ -294,7 +279,6 @@ export const Slots = () => {
   
           const disabledSlotsSnapshot = await getDocs(disabledSlotsQuery);
   
-          // 4. Add a disabled entry if it doesn't already exist
           if (disabledSlotsSnapshot.empty) {
             await addDoc(slotsCollection, {
               startDate: formattedDate,
@@ -306,7 +290,6 @@ export const Slots = () => {
           }
         }
   
-        // Reset the form and refresh slots
         resetForm();
         toast.success('Date(s) have been disabled, and active slots have been removed.');
         fetchSlots();
@@ -319,8 +302,6 @@ export const Slots = () => {
     }
   };
   
-  
-
   const handleDisableSelectedSlot = async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -328,7 +309,7 @@ export const Slots = () => {
     if (user) {
       try {
         const start = new Date(startDate);
-        const end = new Date(endDate || startDate); // Default to startDate if endDate is not provided
+        const end = new Date(endDate || startDate);
         const dates = [];
         let currentDate = start;
   
@@ -342,7 +323,6 @@ export const Slots = () => {
         for (const date of dates) {
           const formattedDate = date.toISOString().split('T')[0];
   
-          // 1. Query active slots for the given date
           const activeSlotsQuery = query(
             slotsCollection,
             where('startDate', '==', formattedDate),
@@ -352,11 +332,9 @@ export const Slots = () => {
   
           const activeSlotsSnapshot = await getDocs(activeSlotsQuery);
   
-          // 2. Delete all active slots
           const deleteActivePromises = activeSlotsSnapshot.docs.map(doc => deleteDoc(doc.ref));
           await Promise.all(deleteActivePromises);
   
-          // 3. Check if a disabled entry already exists
           const disabledSlotsQuery = query(
             slotsCollection,
             where('startDate', '==', formattedDate),
@@ -366,7 +344,6 @@ export const Slots = () => {
   
           const disabledSlotsSnapshot = await getDocs(disabledSlotsQuery);
   
-          // 4. Add a disabled entry if it doesn't already exist
           if (disabledSlotsSnapshot.empty) {
             await addDoc(slotsCollection, {
               startDate: formattedDate,
@@ -377,8 +354,6 @@ export const Slots = () => {
             });
           }
         }
-  
-        // Reset the form and refresh slots
         resetForm();
         toast.success('Date(s) have been disabled, and active slots have been removed.');
         fetchSlots();
@@ -397,7 +372,7 @@ export const Slots = () => {
 
   const resetForm = () => {
     setStartDate(null);
-  setEndDate(null);
+    setEndDate(null);
     setStartTime('');
     setEndTime('');
     setIsRecurring(false);
@@ -438,7 +413,6 @@ export const Slots = () => {
       <h1 className="me-3">Time Slots</h1>
       <div className="container mt-5">
       <div className="row">
-        {/* Left Card: Form */}
         <div className="col-md-6 mb-4">
           <div className="card shadow-lg">
             <div className="card-body">
@@ -532,14 +506,12 @@ export const Slots = () => {
           </div>
         </div>
 
-        {/* Right Card: Time Slots */}
         <div className="col-md-6 mb-4">
           <div className="card shadow-lg">
             <div className="card-body">
             <h3>Created Time Slots</h3>
             <div className="filtering">
               <div className="d-flex justify-content-between align-items-start mb-3">
-                {/* Filter by date */}
                 <div className="form-group">
                   <label className="form-label"><b>Filter by date:</b></label>
                   <div className="input-group">
@@ -554,8 +526,6 @@ export const Slots = () => {
                     </button>
                   </div>
                 </div>
-
-                {/* Filter by status */}
                 <div className="form-group">
                   <label className="form-label"><b>Filter by status:</b></label>
                   <div className="dropdown">
@@ -573,17 +543,18 @@ export const Slots = () => {
               </div>
             </div>
 
-              <br />
-              
-              <Table striped bordered hover responsive style={{ borderRadius: '12px', overflow: 'hidden', borderCollapse: 'hidden' }}>
+          <br />
+
+          {currentItems.length > 0 ? (  
+            <Table striped bordered hover responsive style={{ borderRadius: '12px', overflow: 'hidden', borderCollapse: 'hidden' }}>
               <thead className="table-dark">
                   <tr>
                     <th className='slots-th'>Date</th>
                     <th className='slots-th'>Time</th>
                     <th className='slots-th'>Status</th>
-                    <th></th>
+                    <th className='slots-th'>Action</th>
                   </tr>
-                </thead>
+              </thead>
                 <tbody>
                   {currentItems.map(slot => (
                     <tr key={slot.id}>
@@ -592,39 +563,31 @@ export const Slots = () => {
                       <td
                         className={`slots-td ${
                           slot.slotStatus === 'active'
-                            ? 'text-success' // Green for active
+                            ? 'text-success' 
                             : slot.slotStatus === 'disabled'
-                            ? 'text-danger' // Red for disabled
+                            ? 'text-danger'
                             : slot.slotStatus === 'taken'
-                            ? 'text-primary' // Blue for taken
+                            ? 'text-primary' 
                             : ''
                         }`}
                       >
-                       ● {slot.slotStatus.charAt(0).toUpperCase() + slot.slotStatus.slice(1)} {/* Capitalize the status */}
+                       ● {slot.slotStatus.charAt(0).toUpperCase() + slot.slotStatus.slice(1)}
                       </td>
                       <td className='slots-td'>
-  <div className="btn-group" role="group" aria-label="Slot actions">
-    <button
-      type="button"
-      className="btn btn-primary"
-      onClick={() => handleEditSlot(slot)}
-    >
-      Edit
-    </button>
-    <button
-      type="button"
-      className="btn btn-danger"
-      onClick={() => handleDeleteSlot(slot.id)}
-    >
-      Delete
-    </button>
-  </div>
-</td>
-
+                        <div className="btn-group" role="group" aria-label="Slot actions">
+                          <button type="button" className="btn btn-primary" onClick={() => handleEditSlot(slot)}>Edit</button>
+                          <button type="button" className="btn btn-danger" onClick={() => handleDeleteSlot(slot.id)}>Delete</button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </Table>
+            ) : (
+              <div className="text-center py-5">
+                <h4 className="text-muted">No events found</h4>
+              </div>
+            )}
               <Pagination className="d-flex justify-content-center">
                 <Pagination.Prev disabled={currentPage === 1} onClick={handlePreviousPage} />
                 {pageNumbers.map(number => (
