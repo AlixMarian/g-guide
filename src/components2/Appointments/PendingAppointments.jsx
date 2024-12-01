@@ -4,6 +4,7 @@ import { collection, query, where, getDocs, doc, updateDoc } from "firebase/fire
 import { db } from "/backend/firebase"; 
 import { toast } from 'react-toastify';
 import { getAuth } from 'firebase/auth';
+import axios from 'axios';
 import '../../churchCoordinator.css'
 
 export const PendingAppointments = () => {
@@ -94,6 +95,19 @@ export const PendingAppointments = () => {
     
         fetchPendingAppointments();
     }, [user]);
+
+    const sendEmail = async (email, subject, message) => {
+        try {
+            const response = await axios.post('http://localhost:3006/send-email', {
+                email: email,
+                subject: subject,
+                text: message
+            });
+            console.log('Email sent successfully:', response.data);
+        } catch (error) {
+            console.error('Error sending email:', error);
+        }
+    };
     
     
 
@@ -199,7 +213,7 @@ export const PendingAppointments = () => {
         
         <h1 className="me-3">Pending Appointments</h1>
         <div className="d-flex justify-content-center align-items-center mt-5">
-        <div className="card shadow-lg" style={{ width: "80%" }}>
+        <div className="card shadow-lg" style={{ width: "85%" }}>
             <div className="card-body">
             <table className="table">
                 <thead className="table-dark">
@@ -210,7 +224,7 @@ export const PendingAppointments = () => {
                     <th scope="col" className="pending-th">Requested by</th>
                     <th scope="col" className="pending-th">Requester Contact</th>
                     <th scope="col" className="pending-th">More Info</th>
-                    <th scope="col" className="pending-th">Send SMS</th>
+                    <th scope="col" className="pending-th">Send Message</th>
                 </tr>
                 </thead>
                 <tbody>

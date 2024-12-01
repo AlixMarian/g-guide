@@ -4,6 +4,7 @@ import { collection, query, where, getDocs, doc, updateDoc } from "firebase/fire
 import { db } from "/backend/firebase";
 import { toast } from 'react-toastify';
 import { getAuth } from 'firebase/auth';
+import axios from 'axios';
 import '../../churchCoordinator.css'
 
 export const ForPaymentAppointments = () => {
@@ -28,6 +29,19 @@ export const ForPaymentAppointments = () => {
         massintentions: "Mass Intentions"
     };
 
+    const sendEmail = async (email, subject, message) => {
+        try {
+            const response = await axios.post('http://localhost:3006/send-email', {
+                email: email,
+                subject: subject,
+                text: message
+            });
+            console.log('Email sent successfully:', response.data);
+        } catch (error) {
+            console.error('Error sending email:', error);
+        }
+    };
+
     useEffect(() => {
         const fetchForPaymentAppointments = async () => {
             if (!user) return;
@@ -42,8 +56,8 @@ export const ForPaymentAppointments = () => {
                     console.log("No coordinator found for this user.");
                     return;
                 }
-                const coordinatorData = coordinatorSnapshot.docs[0].data(); // Assuming only one coordinator per user
-                const coordinatorID = coordinatorSnapshot.docs[0].id; // Get the document ID as the coordinatorID
+                const coordinatorData = coordinatorSnapshot.docs[0].data();
+                const coordinatorID = coordinatorSnapshot.docs[0].id;
 
                 if (!coordinatorID) {
                     console.error("Coordinator ID is undefined.");
@@ -61,8 +75,8 @@ export const ForPaymentAppointments = () => {
                     return;
                 }
 
-                const churchData = churchSnapshot.docs[0].data(); // Assuming only one church per coordinator
-                const churchID = churchSnapshot.docs[0].id; // Get the document ID as the churchID
+                const churchData = churchSnapshot.docs[0].data();
+                const churchID = churchSnapshot.docs[0].id;
 
                 if (!churchID) {
                     console.error("Church ID is undefined.");
@@ -192,7 +206,7 @@ export const ForPaymentAppointments = () => {
         <>
         <h1 className="me-3">For Payment Appointments</h1>
         <div className="d-flex justify-content-center align-items-center mt-5">
-        <div className="card shadow-lg" style={{ width: "80%" }}>
+        <div className="card shadow-lg" style={{ width: "85%" }}>
             <div className="card-body">
             <table className="table">
                 <thead className="table-dark">
@@ -203,7 +217,7 @@ export const ForPaymentAppointments = () => {
                     <th scope="col" className="forPayment-th">Requested by</th>
                     <th scope="col" className="forPayment-th">Requester Contact</th>
                     <th scope="col" className="forPayment-th">More Info</th>
-                    <th scope="col" className="forPayment-th">Send SMS</th>
+                    <th scope="col" className="forPayment-th">Send Message</th>
                 </tr>
                 </thead>
                 <tbody>

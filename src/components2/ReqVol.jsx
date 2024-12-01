@@ -8,7 +8,7 @@ import { Pagination, Dropdown, DropdownButton } from 'react-bootstrap';
 import '../churchCoordinator.css';
 
 
- const ReqVol = () => {
+export const ReqVol = () => {
   const navigate = useNavigate();
   // eslint-disable-next-line no-unused-vars
   const [userData, setUserData] = useState(null);
@@ -74,19 +74,14 @@ import '../churchCoordinator.css';
     });
   }, [navigate]);
 
-  
-
   const handlePostSubmit = async (e) => {
     e.preventDefault();
-    
     
     const startDate = new Date(startDateInput);
     const endDate = new Date(endDateInput);
     
-    
     const startDateTimestamp = Timestamp.fromDate(startDate);
     const endDateTimestamp = Timestamp.fromDate(endDate);
-  
     
     if (editing) {
       try {
@@ -124,17 +119,15 @@ import '../churchCoordinator.css';
         toast.error('No user signed in.');
       }
     }
-  
-    
     resetForm();
     fetchPosts();
   };
   
-    // Filter posts based on status
-    const filterPosts = (posts) => {
-      if (filterStatus === 'All') return posts;
-      return posts.filter(post => post.status === filterStatus.toLowerCase());
-    };
+   
+  const filterPosts = (posts) => {
+    if (filterStatus === 'All') return posts;
+    return posts.filter(post => post.status === filterStatus.toLowerCase());
+  };
   
   const fetchPosts = async () => {
     const auth = getAuth();
@@ -171,8 +164,6 @@ import '../churchCoordinator.css';
     }
   };
 
-  
-
   useEffect(() => {
     const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
@@ -201,15 +192,12 @@ import '../churchCoordinator.css';
         if (post.endDate.toDate() < today && post.status !== 'archived') {
           await updateDoc(doc(db, 'requestVolunteers', post.id), { status: 'archived' });
         }
-
         postsList.push(post);
       }
-
       setPosts(postsList);
     }, (error) => {
       console.error('Error fetching posts: ', error);
     });
-
     return () => unsubscribe(); 
   }, [user]);
 
@@ -240,10 +228,8 @@ import '../churchCoordinator.css';
     setReqVolunteerBodyInput(post.content);
     setSelectedEvent(post.event);
   
-    
     const startDate = post.startDate.toDate();
     const endDate = post.endDate.toDate();
-    
     
     const startDateString = startDate.toISOString().split('T')[0];
     const endDateString = endDate.toISOString().split('T')[0];
@@ -255,7 +241,6 @@ import '../churchCoordinator.css';
     setCurrentPostId(post.id);
   };
   
-
   const handleCancelEdit = () => {
     resetForm();
   };
@@ -286,155 +271,155 @@ import '../churchCoordinator.css';
       <h1 className="me-3">Request for Volunteers</h1>
       <div className="container mt-5">
         <div className="row">
-      
-      {/* Left side - Create/Edit Post form */}
-      <div className="col-md-5">
-        <div className="card shadow-lg" style={{ width: "100%" }}>
-          <div className="card-body">
-            <h3>{editing ? 'Edit Post' : 'Create Post'}</h3>
-            <form onSubmit={handlePostSubmit}>
-              <div className='titleArea col-md-12'>
-                <label htmlFor="reqVolunteerTitle" className="form-label">Title</label>
-                <input type="text" className="form-control" id="title" value={reqVolunteerTitleInput} onChange={handleTitleChange} required />
-                <br />
-              </div>
+          <div className="col-md-5">
+            <div className="card shadow-lg" style={{ width: "100%" }}>
+              <div className="card-body">
+                <h3>{editing ? 'Edit Post' : 'Create Post'}</h3>
+                <form onSubmit={handlePostSubmit}>
+                  <div className='titleArea col-md-12'>
+                    <label htmlFor="reqVolunteerTitle" className="form-label">Title</label>
+                    <input type="text" className="form-control" id="title" value={reqVolunteerTitleInput} onChange={handleTitleChange} required />
+                    <br />
+                  </div>
 
-              <div className="mb-3">
-                <label htmlFor="startDate" className="form-label">Start Date</label>
-                <input 
-                  type="date" 
-                  className="form-control" 
-                  id="startDate" 
-                  value={startDateInput} 
-                  onChange={handleStartDateChange} 
-                  min={new Date().toISOString().split('T')[0]} 
-                  max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
-                  required 
-                />
-              </div>
+                  <div className="mb-3">
+                    <label htmlFor="startDate" className="form-label">Start Date</label>
+                    <input 
+                      type="date" 
+                      className="form-control" 
+                      id="startDate" 
+                      value={startDateInput} 
+                      onChange={handleStartDateChange} 
+                      min={new Date().toISOString().split('T')[0]} 
+                      max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
+                      required 
+                    />
+                  </div>
 
-              <div className="mb-3">
-                <label htmlFor="endDate" className="form-label">End Date</label>
-                <input 
-                  type="date" 
-                  className="form-control" 
-                  id="endDate" 
-                  value={endDateInput} 
-                  onChange={handleEndDateChange} 
-                  min={new Date().toISOString().split('T')[0]} 
-                  max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
-                  required 
-                />
-              </div>
+                  <div className="mb-3">
+                    <label htmlFor="endDate" className="form-label">End Date</label>
+                    <input 
+                      type="date" 
+                      className="form-control" 
+                      id="endDate" 
+                      value={endDateInput} 
+                      onChange={handleEndDateChange} 
+                      min={new Date().toISOString().split('T')[0]} 
+                      max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
+                      required 
+                    />
+                  </div>
 
-              <div className="mb-3">
-                <label htmlFor="event" className="form-label">Associate with Event</label>
-                <select className="form-select" id="event" value={selectedEvent} onChange={handleEventChange} required>
-                  <option value="" disabled>Select an event</option>
-                  {events.map((event) => (
-                    <option key={event.id} value={event.eventName}>
-                      {event.eventName}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className="mb-3">
+                    <label htmlFor="event" className="form-label">Associate with Event</label>
+                    <select className="form-select" id="event" value={selectedEvent} onChange={handleEventChange} required>
+                      <option value="" disabled>Select an event</option>
+                      {events.map((event) => (
+                        <option key={event.id} value={event.eventName}>
+                          {event.eventName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              <div className='contentArea col-md-12'>
-                <label htmlFor="reqVolunteerBody" className="form-label">Enter Content</label>
-                <textarea className="form-control" id="content" rows="3" value={reqVolunteerBodyInput} onChange={handleBodyChange} required></textarea>
-                <br />
-              </div>
+                  <div className='contentArea col-md-12'>
+                    <label htmlFor="reqVolunteerBody" className="form-label">Enter Content</label>
+                    <textarea className="form-control" id="content" rows="3" value={reqVolunteerBodyInput} onChange={handleBodyChange} required></textarea>
+                    <br />
+                  </div>
 
-              <div className="d-flex justify-content-end gap-2">
-                <button type="submit" className="btn btn-success me-2">{editing ? 'Update Post' : 'Create Post'}</button>
-                {editing && <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>Cancel</button>}
-                <button type="reset" className="btn btn-danger" onClick={resetForm}>Clear</button>
+                  <div className="d-flex justify-content-end gap-2">
+                    <button type="submit" className="btn btn-success">{editing ? 'Update Post' : 'Create Post'}</button>
+                    <button type="reset" className="btn btn-danger" onClick={resetForm}>Clear</button>
+                    {editing && <button type="button" className="btn btn-dark" onClick={handleCancelEdit}>Cancel</button>}
+                  </div>
+                </form>
               </div>
-            </form>
+            </div>
           </div>
-        </div>
-      </div>
-         {/* Right side - List of Posts */}
-         <div className="col-md-6">
+
+         <div className="col-md-7">
             <div className="card shadow-lg">
               <div className="card-body">
-
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h2>Your Posts</h2>
-                  <DropdownButton className="ms-auto" id="dropdown-status-filter" title={`Filter Status: ${filterStatus}`}>
+                  <h3>Your Posts</h3>
+                  <DropdownButton className="ms-auto btn-secondary" id="dropdown-status-filter" title={`Filter Status: ${filterStatus}`} variant="secondary">
                     <Dropdown.Item onClick={() => setFilterStatus('All')}>All</Dropdown.Item>
                     <Dropdown.Item onClick={() => setFilterStatus('Archived')}>Archived</Dropdown.Item>
                     <Dropdown.Item onClick={() => setFilterStatus('Ongoing')}>Ongoing</Dropdown.Item>
                   </DropdownButton>
                 </div>
+                
+                  {currentPosts.length > 0 ? (
+                    currentPosts.map((post) => (
+                    <div className="card mb-3" key={post.id}>
+                      <div className="card-body">
+                        <h5 className="card-title">{post.title}</h5>
+                        <small className="text-muted">
+                          {`Posted on ${post.uploadDate.toDate().toLocaleDateString()} at ${post.uploadDate.toDate().toLocaleTimeString()}`}
+                        </small>
+                        <br />
+                        <small className="text-muted">
+                          {`Duration: ${post.startDate.toDate().toLocaleDateString()} - ${post.endDate.toDate().toLocaleDateString()}`}
+                        </small>
+                        <br />
+                        <small className="text-muted">
+                          Status: {post.status}
+                        </small>
+                        <br />
+                        <p>-----------------</p>
+                        <p className="card-text">
+                          {`Event: ${post.event}`}
+                        </p>
+                        <p className="card-text">{post.content}</p>
 
-                {currentPosts.map((post) => (
-                  <div className="card mb-3" key={post.id}>
-                    <div className="card-body">
-                      <h5 className="card-title">{post.title}</h5>
-                      <small className="text-muted">
-                        {`Posted on ${post.uploadDate.toDate().toLocaleDateString()} at ${post.uploadDate.toDate().toLocaleTimeString()}`}
-                      </small>
-                      <br />
-                      <small className="text-muted">
-                        {`Duration: ${post.startDate.toDate().toLocaleDateString()} - ${post.endDate.toDate().toLocaleDateString()}`}
-                      </small>
-                      <br />
-                      <small className="text-muted">
-                        Status: {post.status}
-                      </small>
-                      <br />
-                      <p>-----------------</p>
-                      <p className="card-text">
-                        {`Event: ${post.event}`}
-                      </p>
-                      <p className="card-text">{post.content}</p>
-
-                      <button className="btn btn-danger" onClick={() => handleDeletePost(post.id)}>
-                        Delete Post
-                      </button>
-                      <button className="btn btn-info ms-2" onClick={() => handleEditPost(post)}>
-                        Edit Post
-                      </button>
-
-                      {post.status === 'ongoing' && (
-                        <button className="btn btn-warning ms-2" onClick={() => handleArchivePost(post.id)}>
-                          Archive Post
+                        <button className="btn btn-danger" onClick={() => handleDeletePost(post.id)}>
+                          Delete Post
                         </button>
-                      )}
-                      {post.status === 'archived' && (
-                        <button className="btn btn-success ms-2" onClick={() => handleUnarchivePost(post.id)}>
-                          Unarchive Post
+                        <button className="btn btn-primary ms-2" onClick={() => handleEditPost(post)}>
+                          Edit Post
                         </button>
-                      )}
+
+                        {post.status === 'ongoing' && (
+                          <button className="btn btn-warning ms-2" onClick={() => handleArchivePost(post.id)}>
+                            Archive Post
+                          </button>
+                        )}
+                        {post.status === 'archived' && (
+                          <button className="btn btn-success ms-2" onClick={() => handleUnarchivePost(post.id)}>
+                            Unarchive Post
+                          </button>
+                        )}
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-5">
+                    <h4 className="text-muted">No volunteer requests found</h4>
                   </div>
-                ))}
-
-                {/* Pagination Component */}
+                )}
                 <div className="d-flex justify-content-center mt-4">
-                  <Pagination>
-                    <Pagination.First onClick={() => handlePageChange(1)} disabled={currentPage === 1} />
-                    <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
-                    {[...Array(totalPages).keys()].map((number) => (
-                      <Pagination.Item
-                        key={number + 1}
-                        active={number + 1 === currentPage}
-                        onClick={() => handlePageChange(number + 1)}
-                      >
-                        {number + 1}
-                      </Pagination.Item>
-                    ))}
-                    <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
-                    <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} />
-                  </Pagination>
+                      <Pagination>
+                        <Pagination.First onClick={() => handlePageChange(1)} disabled={currentPage === 1} />
+                        <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+                        {[...Array(totalPages).keys()].map((number) => (
+                          <Pagination.Item
+                            key={number + 1}
+                            active={number + 1 === currentPage}
+                            onClick={() => handlePageChange(number + 1)}
+                          >
+                            {number + 1}
+                          </Pagination.Item>
+                        ))}
+                        <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
+                        <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} />
+                      </Pagination>
                 </div>
-
-          </div>
+              </div>
+            </div>
+          </div>      
         </div>
-      </div>      
-    </div>
-    </div>
+      </div>
     </div>
   );
 };

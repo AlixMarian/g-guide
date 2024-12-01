@@ -4,109 +4,95 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db} from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Modal} from 'react-bootstrap';
 import '../../churchCoordinator.css';
 
 
 export const ChurchDetails = () => {
+  // eslint-disable-next-line no-unused-vars
+  const [userData, setUserData] = useState(null);
+  const [churchData, setChurchData] = useState({});
+  const [newChurchInfo, setNewChurchInfo] = useState({});
+  const [showBankModal, setShowBankModal] = useState(false);
+  const navigate = useNavigate();
 
-    const [userData, setUserData] = useState(null);
-    const [churchData, setChurchData] = useState({});
-    const [newChurchInfo, setNewChurchInfo] = useState({});
-   
-    const navigate = useNavigate();
-
-    const handleOpeningTimeChange = (e) => {
-        
-        handleChange(e, 'churchStartTime');
-      };
+  const handleOpeningTimeChange = (e) => {handleChange(e, 'churchStartTime');};
+  const handleClosingTimeChange = (e) => {handleChange(e, 'churchEndTime');};
+  const handleViewBank = () => setShowBankModal(true);
+  const handleCloseBankModal = () => setShowBankModal(false);
+  const handleViewProof = () => {window.open(churchData.churchProof, '_blank', 'noopener,noreferrer');};
     
-      const handleClosingTimeChange = (e) => {
-       
-        handleChange(e, 'churchEndTime');
-      };
+  useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        console.log("User signed in:", user);
+        console.log("User id signed in:", user.uid);
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUserData(userData);
 
-    const handleViewProof = () => {
-        window.open(churchData.churchProof, '_blank', 'noopener,noreferrer');
-    };
-    
-    const handleViewBank = () => {
-        window.open(churchData.churchQRDetail, '_blank', 'noopener,noreferrer');
-    };
-  
-    useEffect(() => {
-      const auth = getAuth();
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          console.log("User signed in:", user);
-          console.log("User id signed in:", user.uid);
-          try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
-              setUserData(userData);
-  
 
-              const churchDoc = await getDoc(doc(db, "church", user.uid));
-              if (churchDoc.exists()) {
-                setChurchData(churchDoc.data());
-              } else {
-                toast.error("Church data not found");
-              }
+            const churchDoc = await getDoc(doc(db, "church", user.uid));
+            if (churchDoc.exists()) {
+              setChurchData(churchDoc.data());
             } else {
-              toast.error("User data not found");
+              toast.error("Church data not found");
             }
-          } catch (error) {
-            toast.error("Error fetching user data");
+          } else {
+            toast.error("User data not found");
           }
-        } else {
-          console.log("No user signed in.");
-          navigate('/login');
+        } catch (error) {
+          toast.error("Error fetching user data");
         }
-      });
-    }, [navigate]);
+      } else {
+        console.log("No user signed in.");
+        navigate('/login');
+      }
+    });
+  }, [navigate]);
 
-    const handleChange = (e, field) => {
-        const { value } = e.target;
-        setNewChurchInfo((prevState) => ({
-          ...prevState,
-          [field]: value
-        }));
-      };
+  const handleChange = (e, field) => {
+    const { value } = e.target;
+    setNewChurchInfo((prevState) => ({
+      ...prevState,
+      [field]: value
+    }));
+  };
     
-      const handleSubmitNewChurchInfo = async (e) => {
-        e.preventDefault();
-        const auth = getAuth();
-        const user = auth.currentUser;
-    
-        if (user) {
-          try {
-            const churchDocRef = doc(db, "church", user.uid);
-            const updatedChurchInfo = { ...newChurchInfo };
-    
-            await updateDoc(churchDocRef, updatedChurchInfo);
-    
-            toast.success("Church data updated successfully");
-          } catch (error) {
-            toast.error("Error updating church data");
-          }
-        } else {
-          toast.error("User data is missing");
-          console.log(user.uid);
-        }
-      };
+  const handleSubmitNewChurchInfo = async (e) => {
+    e.preventDefault();
+    const auth = getAuth();
+    const user = auth.currentUser;
 
-      const convertTo12HourFormat = (time) => {
-        if (!time || time === 'none') return 'none';
-        const [hours, minutes] = time.split(':');
-        let hours12 = (hours % 12) || 12;
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        return `${hours12}:${minutes} ${ampm}`;
-      };
-      
+    if (user) {
+      try {
+        const churchDocRef = doc(db, "church", user.uid);
+        const updatedChurchInfo = { ...newChurchInfo };
 
-      
+        await updateDoc(churchDocRef, updatedChurchInfo);
 
-    return (
+        toast.success("Church data updated successfully");
+      } catch (error) {
+        toast.error("Error updating church data");
+      }
+    } else {
+      toast.error("User data is missing");
+      console.log(user.uid);
+    }
+  };
+
+  const convertTo12HourFormat = (time) => {
+    if (!time || time === 'none') return 'none';
+    const [hours, minutes] = time.split(':');
+    let hours12 = (hours % 12) || 12;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    return `${hours12}:${minutes} ${ampm}`;
+  };
+
+  return (
       <>
       <h1 className="me-3">Church Details</h1>
       <div className="d-flex justify-content-center align-items-center mt-5">
@@ -218,14 +204,14 @@ export const ChurchDetails = () => {
 
               <div className="col-12 col-lg-6">
                 <label htmlFor="churchProof" className="form-label"><b>Church Proof</b></label> <br />
-                <button className="btn btn-success" onClick={handleViewProof}>
+                <button className="btn btn-info" onClick={handleViewProof}>
                   View Submitted Proof
                 </button>
               </div>
 
               <div className="col-12 col-lg-6">
                 <label htmlFor="churchQRDetail" className="form-label"><b>Banking Details</b></label> <br />
-                <button className="btn btn-success" onClick={handleViewBank}>
+                <button type="button" className="btn btn-info" onClick={handleViewBank}>
                   View Current Banking QR
                 </button>
                 <br />
@@ -235,13 +221,29 @@ export const ChurchDetails = () => {
                 <button type="submit" className="btn btn-success">Confirm Change</button>
                 <button type="reset" className="btn btn-danger">Clear</button>
               </div>
-
             </form>
+
+            <Modal show={showBankModal} onHide={handleCloseBankModal}>
+              <Modal.Header closeButton>
+                <Modal.Title>Banking QR Code</Modal.Title>
+              </Modal.Header>
+              <Modal.Body className="text-center">
+                {churchData.churchQRDetail ? (
+                  <img
+                    src={churchData.churchQRDetail}
+                    alt="Banking QR"
+                    style={{ maxWidth: '100%', height: 'auto' }}
+                  />
+                ) : (
+                  <p>No QR code available</p>
+                )}
+              </Modal.Body>
+            </Modal>
           </div>
         </div>
       </div>
       </>
-    );
-};
+  );
+  };
 
 export default ChurchDetails;
