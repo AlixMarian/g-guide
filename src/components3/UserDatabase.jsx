@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getDoc, getDocs, collection, query, where, doc, updateDoc } from 'firebase/firestore';
 import { db } from '/backend/firebase';
-import { Button, Dropdown } from 'react-bootstrap';
+import { Button, Dropdown, Pagination} from 'react-bootstrap';
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
 import { toast } from 'react-toastify';
 
@@ -9,6 +9,8 @@ export const UserDatabase = () => {
   const [users, setUsers] = useState([]);
   const [selectedRole, setSelectedRole] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
+  const itemsPerPage = 5; // Limit entries per page
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -85,6 +87,7 @@ export const UserDatabase = () => {
 
   const handleRoleChange = (role) => {
     setSelectedRole(role);
+    setCurrentPage(1);
   };
 
   const handleDeleteUser = async (userId, role) => {
@@ -98,7 +101,7 @@ export const UserDatabase = () => {
         if (!websiteVisitorSnapshot.empty) {
           const websiteVisitorDocId = websiteVisitorSnapshot.docs[0].id;
           await updateDoc(doc(db, 'websiteVisitor', websiteVisitorDocId), {
-            status: 'Deleted',
+            status: 'Inactive',
           });
           console.log(`User with ID: ${userId} status updated in websiteVisitor.`);
         }
@@ -124,7 +127,7 @@ export const UserDatabase = () => {
   
             // Step 3: Update the coordinator document with the churchID
             await updateDoc(doc(db, 'coordinator', coordinatorDocId), {
-              status: 'Deleted',
+              status: 'Inactive',
               churchID: churchDocId // Add the linked church document ID
             });
             console.log(`User with ID: ${userId} status updated in coordinator with churchID.`);
@@ -147,9 +150,16 @@ export const UserDatabase = () => {
     }
   };
 
-  const filteredUsers = users
+    // Pagination logic
+    const filteredUsers = users
     .filter((user) => user.role !== 'sysAdmin')
     .filter((user) => selectedRole === 'All' || user.role === selectedRole);
+
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+    const paginatedUsers = filteredUsers.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
 
   const roleTypeMapping = {
     churchCoor: "Church Coordinator",
@@ -158,7 +168,7 @@ export const UserDatabase = () => {
 
   return (
     <div className='user-db-page'>
-      <h3>User Database</h3> <br />
+      <h1 className="me-3">User Database</h1>
 
       {loading ? (
         <div
@@ -179,7 +189,7 @@ export const UserDatabase = () => {
         <>
           <div className='mb-3'>
             <Dropdown>
-              <Dropdown.Toggle variant='primary' id='dropdown-basic'>
+              <Dropdown.Toggle variant='secondary' id='dropdown-basic'>
                 Filter Roles
               </Dropdown.Toggle>
 
@@ -197,24 +207,26 @@ export const UserDatabase = () => {
             </Dropdown>
           </div>
 
-          <h4 className='mb-3'>Now viewing: {selectedRole}</h4>
+          <h4 className='mb-3'>
+            Now viewing: {selectedRole === 'All' ? 'All Users' : roleTypeMapping[selectedRole] || 'Unknown Role'}
+          </h4>
 
-          <table className='admin-table'>
+          <table className='admin-table table table-striped table-bordered table-hover'>
             <thead>
               <tr>
-                <th>Profile Photo</th>
-                <th>Full Name</th>
-                <th>Email</th>
-                <th>Contact Number</th>
-                <th>Role</th>
-                <th>Agreed to Data Consent</th>
-                <th>Status</th> {/* New Status Column */}
-                <th>Date of Registration</th>
-                <th>Action</th>
+                <th className='custom-th'>Profile Photo</th>
+                <th className='custom-th'>Full Name</th>
+                <th className='custom-th'>Email</th>
+                <th className='custom-th'>Contact Number</th>
+                <th className='custom-th'>Role</th>
+                <th className='custom-th'>Agreed to Data Consent</th>
+                <th className='custom-th'>Status</th> {/* New Status Column */}
+                <th className='custom-th'>Date of Registration</th>
+                <th className='custom-th'>Action</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user) => (
+              {paginatedUsers.map((user) => (
                 <tr key={user.id}>
                   <td>
                     <img
@@ -227,29 +239,44 @@ export const UserDatabase = () => {
                   <td>{user.email}</td>
                   <td>{user.contactNum}</td>
                   <td>
-  {user.role === 'churchCoor' ? (
-    user.status === 'Deleted' ? (
-      // If the user is a deleted church coordinator, find the previous church name using the churchID
-      user.churchID ? (
-        <span>
-          {`Former Church Coordinator of ${
-            user.previousChurchName || 'Unknown'
-          }`}
-        </span>
-      ) : (
-        'Former Church Coordinator'
-      )
-    ) : (
-      // For active church coordinators
-      `Church Coordinator of ${user.churchName || 'Unknown'}`
-    )
-  ) : (
-    roleTypeMapping[user.role]
-  )}
-</td>
+                  {user.role === 'churchCoor' ? (
+                    user.status === 'Inactive' ? (
+                      // If the user is a deleted church coordinator, find the previous church name using the churchID
+                      user.churchID ? (
+                        <span>
+                          {`Former Church Coordinator of ${
+                            user.previousChurchName || 'Unknown'
+                          }`}
+                        </span>
+                      ) : (
+                        'Former Church Coordinator'
+                      )
+                    ) : (
+                      // For active church coordinators
+                      `Church Coordinator of ${user.churchName || 'Unknown'}`
+                    )
+                  ) : (
+                    roleTypeMapping[user.role]
+                  )}
+                </td>
 
                   <td>{user.dataConsent ? 'Yes' : 'No'}</td>
-                  <td>{user.status || 'N/A'}</td> {/* Display status */}
+                  <td
+                    style={{
+                      color:
+                        user.status === 'Active'
+                          ? 'green'
+                          : user.status === 'Inactive'
+                          ? 'red'
+                          : user.status === 'Pending'
+                          ? '#b8860b'
+                          : 'black',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    ●{user.status || 'N/A'}
+                  </td>
+
                   <td>
                     {/* Convert Firebase Timestamp to readable date */}
                     {user.dateOfRegistration
@@ -268,6 +295,23 @@ export const UserDatabase = () => {
               ))}
             </tbody>
           </table>
+          <div className="d-flex justify-content-center mt-3">
+            <Pagination>
+              <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />
+              <Pagination.Prev onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} />
+              {[...Array(totalPages).keys()].map((page) => (
+                <Pagination.Item
+                  key={page + 1}
+                  active={page + 1 === currentPage}
+                  onClick={() => setCurrentPage(page + 1)}
+                >
+                  {page + 1}
+                </Pagination.Item>
+              ))}
+              <Pagination.Next onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} />
+              <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
+            </Pagination>
+          </div>
         </>
       )}
     </div>
