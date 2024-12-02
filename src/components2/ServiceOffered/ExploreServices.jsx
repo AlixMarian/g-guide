@@ -111,8 +111,9 @@ export const ExploreServices = () => {
         ));
 
     return (
+    <>
+        <h1 >Configure Church Services</h1>
         <div className="explore-services-container">
-            <h1 className="page-title">Configure Church Services</h1>
             <div className="services-grid">
                 <div className="service-section">
                     <div className="section-header">Appointments</div>
@@ -151,6 +152,7 @@ export const ExploreServices = () => {
                 </button>
             </div>
         </div>
+        </>
     );
 };
 
