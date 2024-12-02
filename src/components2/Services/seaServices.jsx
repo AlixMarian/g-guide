@@ -2,41 +2,47 @@ import { getDocs, collection, addDoc, deleteDoc, doc, updateDoc } from 'firebase
 import { db } from '/backend/firebase';
 import { toast } from 'react-toastify';
 
-export const getMassList = async (setMassList, creatorId) => {
+// Fetch all Mass Schedules for a given churchId
+export const getMassList = async (setMassList, churchId) => {
   try {
     const data = await getDocs(collection(db, "massSchedules"));
-    const filteredData = data.docs.map((doc) => ({
-      ...doc.data(),
-      id: doc.id
-    })).filter(doc => doc.creatorId === creatorId);
+    const filteredData = data.docs
+      .map((doc) => ({
+        ...doc.data(),
+        id: doc.id
+      }))
+      .filter(doc => doc.churchId === churchId); // Changed from creatorId to churchId
     setMassList(filteredData);
   } catch (err) {
     console.error(err);
   }
 };
 
-export const addMassSchedule = async (massData, creatorId, getMassList) => {
+// Add a new Mass Schedule
+export const addMassSchedule = async (massData, churchId, getMassList) => {
   try {
-    await addDoc(collection(db, "massSchedules"), { ...massData, creatorId });
+    await addDoc(collection(db, "massSchedules"), { ...massData }); // Removed creatorId and retained massData
     toast.success('Mass schedule added successfully!');
-    getMassList(creatorId);
+    getMassList(churchId); // Changed argument to churchId
   } catch (err) {
     toast.error('Error adding mass schedule!');
     console.error(err);
   }
 };
 
-export const deleteMassSchedule = async (id, getMassList, creatorId) => {
+// Delete a Mass Schedule by ID
+export const deleteMassSchedule = async (id, getMassList, churchId) => {
   try {
     await deleteDoc(doc(db, "massSchedules", id));
     toast.success('Mass schedule deleted successfully!');
-    getMassList(creatorId);
+    getMassList(churchId); // Changed argument to churchId
   } catch (err) {
     toast.error('Error deleting mass schedule!');
     console.error(err);
   }
 };
 
+// Update an existing Mass Schedule
 export const updateMassSchedule = async (id, updatedData, callback) => {
   try {
     const massDoc = doc(db, 'massSchedules', id);
@@ -49,35 +55,54 @@ export const updateMassSchedule = async (id, updatedData, callback) => {
   }
 };
 
-export const getEventList = async (setEventList, creatorId) => {
+// Fetch all Priests for a given churchId
+export const getPriestList = async (setPriestList, churchId) => {
+  try {
+    const data = await getDocs(collection(db, "priest"));
+    const filteredData = data.docs
+      .map((doc) => ({
+        ...doc.data(),
+        id: doc.id
+      }))
+      .filter(doc => doc.churchId === churchId); // Changed from creatorId to churchId
+    setPriestList(filteredData);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+// Additional utility methods (unchanged)
+export const getEventList = async (setEventList, churchId) => {
   try {
     const data = await getDocs(collection(db, "events"));
-    const filteredData = data.docs.map((doc) => ({
-      ...doc.data(),
-      id: doc.id
-    })).filter(doc => doc.creatorId === creatorId);
+    const filteredData = data.docs
+      .map((doc) => ({
+        ...doc.data(),
+        id: doc.id
+      }))
+      .filter(doc => doc.churchId === churchId); // Changed from creatorId to churchId
     setEventList(filteredData);
   } catch (err) {
     console.error(err);
   }
 };
 
-export const addEventSchedule = async (eventData, creatorId, getEventList) => {
+export const addEventSchedule = async (eventData, churchId, getEventList) => {
   try {
-    await addDoc(collection(db, "events"), { ...eventData, creatorId });
+    await addDoc(collection(db, "events"), { ...eventData }); // Removed creatorId
     toast.success('Event schedule added successfully!');
-    getEventList(creatorId);
+    getEventList(churchId); // Changed argument to churchId
   } catch (err) {
     toast.error('Error adding event schedule!');
     console.error(err);
   }
 };
 
-export const deleteEventSchedule = async (id, getEventList, creatorId) => {
+export const deleteEventSchedule = async (id, getEventList, churchId) => {
   try {
     await deleteDoc(doc(db, "events", id));
     toast.success('Event schedule deleted successfully!');
-    getEventList(creatorId);
+    getEventList(churchId); // Changed argument to churchId
   } catch (err) {
     toast.error('Error deleting event schedule!');
     console.error(err);
@@ -96,35 +121,37 @@ export const updateEventSchedule = async (id, updatedData, callback) => {
   }
 };
 
-export const getAnnouncementList = async (setAnnouncementList, creatorId) => {
+export const getAnnouncementList = async (setAnnouncementList, churchId) => {
   try {
     const data = await getDocs(collection(db, "announcements"));
-    const filteredData = data.docs.map((doc) => ({
-      ...doc.data(),
-      id: doc.id
-    })).filter(doc => doc.creatorId === creatorId); 
+    const filteredData = data.docs
+      .map((doc) => ({
+        ...doc.data(),
+        id: doc.id
+      }))
+      .filter(doc => doc.churchId === churchId); // Changed from creatorId to churchId
     setAnnouncementList(filteredData);
   } catch (err) {
     console.error(err);
   }
 };
 
-export const addAnnouncement = async (announcementData, creatorId, getAnnouncementList) => {
+export const addAnnouncement = async (announcementData, churchId, getAnnouncementList) => {
   try {
-    await addDoc(collection(db, "announcements"), { ...announcementData, creatorId });
+    await addDoc(collection(db, "announcements"), { ...announcementData }); // Removed creatorId
     toast.success('Announcement added successfully!');
-    getAnnouncementList(creatorId);
+    getAnnouncementList(churchId); // Changed argument to churchId
   } catch (err) {
     toast.error('Error adding announcement!');
     console.error(err);
   }
 };
 
-export const deleteAnnouncement = async (id, getAnnouncementList, creatorId) => {
+export const deleteAnnouncement = async (id, getAnnouncementList, churchId) => {
   try {
     await deleteDoc(doc(db, "announcements", id));
     toast.success('Announcement deleted successfully!');
-    getAnnouncementList(creatorId);
+    getAnnouncementList(churchId); // Changed argument to churchId
   } catch (err) {
     toast.error('Error deleting Announcement!');
     console.error(err);
@@ -140,21 +167,5 @@ export const updateAnnouncement = async (id, updatedData, callback) => {
   } catch (error) {
     toast.error('Error updating Announcement!');
     console.error("Error updating Announcement: ", error);
-  }
-};
-
-
-export const getPriestList = async (setPriestList, creatorId) => {
-  try {
-    const data = await getDocs(collection(db, "priest"));
-    const filteredData = data.docs
-      .map((doc) => ({
-        ...doc.data(),
-        id: doc.id
-      }))
-      .filter((doc) => doc.creatorId === creatorId); 
-    setPriestList(filteredData);
-  } catch (err) {
-    console.error(err);
   }
 };

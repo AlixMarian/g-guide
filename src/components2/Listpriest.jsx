@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import '../churchCoordinator.css';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { db } from '/backend/firebase';
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, query, where } from 'firebase/firestore';
 import { Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import Pagination from 'react-bootstrap/Pagination';
 
 export const Listpriest = () => {
+  const [churchId, setChurchId] = useState("");
   const [priestList, setPriestList] = useState([]);
   const [newPriestType, setNewPriestType] = useState("");
   const [newPriestFirstName, setNewPriestFirstName] = useState("");
@@ -16,6 +17,7 @@ export const Listpriest = () => {
   const [updatedPriestFirstName, setUpdatedPriestFirstName] = useState("");
   const [updatedPriestLastName, setUpdatedPriestLastName] = useState("");
   const [editingPriest, setEditingPriest] = useState(null); 
+  // eslint-disable-next-line no-unused-vars
   const [userId, setUserId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -23,16 +25,48 @@ export const Listpriest = () => {
 
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUserId(user.uid);
-        getPriestList(user.uid);
+        await fetchChurchId(user.uid);
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, []); 
 
-  const getPriestList = async (creatorId) => {
+  useEffect(() => {
+    if (churchId) {
+      getPriestList();
+    }
+  }, [churchId]);
+
+  const fetchChurchId = async (userId) => {
+    try {
+      const coordinatorQuery = query(collection(db, 'coordinator'), where('userId', '==', userId));
+      const coordinatorSnapshot = await getDocs(coordinatorQuery);
+
+      if (!coordinatorSnapshot.empty) {
+        const coordinatorDoc = coordinatorSnapshot.docs[0];
+        const churchQuery = query(collection(db, 'church'), where('coordinatorID', '==', coordinatorDoc.id));
+        const churchSnapshot = await getDocs(churchQuery);
+
+        if (!churchSnapshot.empty) {
+          const churchDoc = churchSnapshot.docs[0];
+          setChurchId(churchDoc.id);
+          console.log("Fetched churchId:", churchDoc.id);
+        } else {
+          toast.error('No associated church found for this coordinator.');
+        }
+      } else {
+        toast.error('No coordinator found for the logged-in user.');
+      }
+    } catch (error) {
+      console.error("Error fetching churchId:", error);
+      toast.error('Failed to fetch church details.');
+    }
+  };
+
+  const getPriestList = async () => {
     try {
       const data = await getDocs(priestCollectionRef);
       const filteredData = data.docs
@@ -40,11 +74,11 @@ export const Listpriest = () => {
           ...doc.data(),
           id: doc.id
         }))
-        .filter((doc) => doc.creatorId === creatorId); 
-      console.log({ filteredData });
+        .filter((doc) => doc.churchId === churchId);
       setPriestList(filteredData);
     } catch (err) {
       console.error(err);
+      toast.error('Error fetching priests.');
     }
   };
 
@@ -65,7 +99,7 @@ export const Listpriest = () => {
       priestType: newPriestType,
       firstName: newPriestFirstName,
       lastName: newPriestLastName,
-      creatorId: userId 
+      churchId: churchId
     };
     addPriest(priestData);
   };
@@ -74,7 +108,8 @@ export const Listpriest = () => {
     const priestData = {
       priestType: updatedPriestType,
       firstName: updatedPriestFirstName,
-      lastName: updatedPriestLastName
+      lastName: updatedPriestLastName,
+      churchId: churchId
     };
     updatePriestData(editingPriest.id, priestData);
   };
@@ -83,7 +118,7 @@ export const Listpriest = () => {
     try {
       await addDoc(priestCollectionRef, priestData);
       toast.success('Priest added successfully!');
-      getPriestList(userId);
+      getPriestList();
       clearForm();
     } catch (err) {
       toast.error('Error adding priest!');
@@ -96,7 +131,7 @@ export const Listpriest = () => {
     try {
       await updateDoc(priestDoc, priestData);
       toast.success('Priest updated successfully!');
-      getPriestList(userId); 
+      getPriestList();
       clearForm();
     } catch (err) {
       toast.error('Error updating priest!');
@@ -109,7 +144,7 @@ export const Listpriest = () => {
     try {
       await deleteDoc(priestDoc);
       toast.success('Priest deleted successfully!');
-      getPriestList(userId); 
+      getPriestList();
     } catch (err) {
       toast.error('Error deleting priest!');
       console.error(err);

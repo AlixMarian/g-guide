@@ -40,70 +40,107 @@ export const Login = () => {
         const user = userCredential.user;
         const userId = user.uid;
 
-        
+        console.log("Logged in user ID:", userId);
+
+        // Fetch user document
         const userDoc = await getDoc(doc(db, 'users', userId));
         if (!userDoc.exists()) {
+            console.error('User document not found for user ID:', userId); // Debug
             toast.error('User details not found.');
             return;
         }
 
-        
-        const coordinatorQuery = query(collection(db, 'coordinator'), where('userId', '==', userId));
-        const adminQuery = query(collection(db, 'admin'), where('userId', '==', userId));
-        const websiteVisitorQuery = query(collection(db, 'websiteVisitor'), where('userId', '==', userId));
+        const userData = userDoc.data();
+        console.log("User document data:", userData);
 
-        const [coordinatorSnapshot, adminSnapshot, websiteVisitorSnapshot] = await Promise.all([
-            getDocs(coordinatorQuery),
-            getDocs(adminQuery),
-            getDocs(websiteVisitorQuery),
-        ]);
+       
+        const userRole = userData.role;
+        console.log("User role:", userRole);
 
-        
-        const churchDoc = await getDoc(doc(db, 'church', userId));
+        if (userRole === 'churchCoor') {
+            
+            const coordinatorQuery = query(collection(db, 'coordinator'), where('userId', '==', userId));
+            const coordinatorSnapshot = await getDocs(coordinatorQuery);
 
-        if (!websiteVisitorSnapshot.empty) {
-          const visitorData = websiteVisitorSnapshot.docs[0].data();
-          if (visitorData.status === 'Active') {
-              toast.success('Welcome to G! Guide');
-              navigate('/homepage');
-          } else {
-              toast.error('Your account is not active. Please contact support.');
-          }
-          return;
-        }
+            if (!coordinatorSnapshot.empty) {
+                const coordinatorDoc = coordinatorSnapshot.docs[0];
+                const coordinatorData = coordinatorDoc.data();
+                const coordinatorId = coordinatorDoc.id; 
+                console.log("Coordinator data:", coordinatorData);
 
-        if (!coordinatorSnapshot.empty) {
-            if (churchDoc.exists()) {
-                const churchData = churchDoc.data();
-                if (churchData.churchStatus === 'Approved') {
-                    toast.success('Welcome to G! Guide');
-                    navigate('/SEA');
-                    return;
-                } else if (churchData.churchStatus === 'pending') {
-                    toast.error('Your church registration is not yet approved. Please wait for admin approval.');
-                    return;
+                
+                const churchQuery = query(collection(db, 'church'), where('coordinatorID', '==', coordinatorId));
+                const churchSnapshot = await getDocs(churchQuery);
+
+                if (!churchSnapshot.empty) {
+                    const churchDoc = churchSnapshot.docs[0];
+                    const churchData = churchDoc.data();
+                    console.log("Church data:", churchData);
+
+                    
+                    if (churchData.churchStatus === 'Approved') {
+                        toast.success('Welcome to G! Guide');
+                        navigate('/SEA');
+                        return;
+                    } else if (churchData.churchStatus === 'Pending') {
+                        toast.error('Your church registration is not yet approved. Please wait for admin approval.');
+                        return;
+                    } else if (churchData.churchStatus === 'Denied') {
+                        toast.error('Your church registration has been denied.');
+                        return;
+                    }
                 } else {
-                    toast.error('Your church registration has been denied');
+                    console.error("No church document found for coordinator ID:", coordinatorId);
+                    toast.error('Church details not found.');
                     return;
                 }
             } else {
-                toast.error('Church details not found.');
+                console.error("No coordinator data found for user ID:", userId);
+                toast.error('Coordinator details not found.');
                 return;
             }
-        }
+        } else if (userRole === 'sysAdmin') {
+            const adminQuery = query(collection(db, 'admin'), where('userId', '==', userId));
+            const adminSnapshot = await getDocs(adminQuery);
 
-        if (!adminSnapshot.empty) {
-            toast.success('Welcome to G! Guide');
-            navigate('/systemAdminDashboard');
-            return;
-        }
+            if (!adminSnapshot.empty) {
+                toast.success('Welcome to G! Guide');
+                navigate('/systemAdminDashboard');
+                return;
+            } else {
+                console.error("Admin data not found for user ID:", userId);
+                toast.error('Admin details not found.');
+                return;
+            }
+        } else if (userRole === 'websiteUser') {
+            const websiteVisitorQuery = query(collection(db, 'websiteVisitor'), where('userId', '==', userId));
+            const websiteVisitorSnapshot = await getDocs(websiteVisitorQuery);
 
-        toast.error('Invalid user role.');
+            if (!websiteVisitorSnapshot.empty) {
+                const visitorData = websiteVisitorSnapshot.docs[0].data();
+                console.log("Website visitor data:", visitorData);
+
+                if (visitorData.status === 'Active') {
+                    toast.success('Welcome to G! Guide');
+                    navigate('/homepage');
+                } else {
+                    toast.error('Your account is not active. Please contact support.');
+                }
+                return;
+            } else {
+                console.error("Website visitor data not found for user ID:", userId);
+                toast.error('Website visitor details not found.');
+                return;
+            }
+        } else {
+            console.error("Unknown user role:", userRole);
+            toast.error('Invalid user role.');
+        }
     } catch (error) {
+        console.error("Login error:", error);
         toast.error(error.message);
     }
 };
-
 
 
   useEffect(() => {

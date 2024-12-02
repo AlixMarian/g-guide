@@ -10,6 +10,7 @@ import '../websiteUser.css';
 import { Modal} from 'react-bootstrap';
 
 export const SignUpCoord = () => {
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const [showDataConsentModal, setShowDataConsentModal] = useState(false);
   const [churchList, setChurchList] = useState([]);
   const [filteredChurchList, setFilteredChurchList] = useState([]);
@@ -24,6 +25,7 @@ export const SignUpCoord = () => {
     firstName: "",
     contactNum: "",
     dataConsent: false,
+    termsCondition: false,
     churchName: "",
     churchAddress: "",
     churchEmail: "",
@@ -102,6 +104,10 @@ export const SignUpCoord = () => {
       toast.error('Agree to data consent to proceed');
       return;
     }
+    if (!formData.termsCondition) {
+      toast.error('Agree to terms and condition to proceed');
+      return;
+    }
     const auth = getAuth();
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
@@ -129,6 +135,7 @@ export const SignUpCoord = () => {
         contactNum: formData.contactNum,
         email: formData.email,
         dataConsent: formData.dataConsent,
+        termsCondition:formData.termsCondition,
         role: 'churchCoor',
         profileImage: 'https://firebasestorage.googleapis.com/v0/b/g-guide-1368b.appspot.com/o/default%2FuserIcon.png?alt=media&token=11e94d91-bf29-4e3e-ab98-a723fead69bc',
         dateOfRegistration: Timestamp.now(),
@@ -159,7 +166,6 @@ export const SignUpCoord = () => {
         churchEndTime: 'none',
         churchHistory: 'none',
         churchQRDetail: churchQRDetailURL,
-        churchInstruction: formData.churchInstruction || 'none',
         refundPolicy:formData.churchRefundPolicy,
         churchStatus: 'Pending',
         coordinatorID: coordinatorID,  // Linking the coordinator ID here
@@ -176,6 +182,9 @@ export const SignUpCoord = () => {
 
   const handleShowDataConsentModal = () => setShowDataConsentModal(true);
   const handleCloseDataConsentModal = () => setShowDataConsentModal(false);
+
+  const handleShowTermsModal = () => setShowTermsModal(true);
+  const handleCloseTermsModal = () => setShowTermsModal(false);
   
   return (
     <div className="coord-signup-container">
@@ -375,19 +384,6 @@ export const SignUpCoord = () => {
                       readOnly
                     />
                   </div>
-                  
-                  <div className="col-md-12">
-                    <label htmlFor="inputChurchInstruction" className="form-label">Instruction for Church Transactions</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="churchInstruction"
-                      value={formData.churchInstruction}
-                      onChange={handleChange}
-                      placeholder='Example: "Please scan the QR Code and save the receipt"'
-                      required
-                    />
-                  </div>
 
                   <div className="col-12">
                     <label htmlFor="refundPolicy" className="form-label">Refund Policy</label>
@@ -417,6 +413,23 @@ export const SignUpCoord = () => {
                 <label className="form-check-label" htmlFor="dataConsent" >
                     <b>I agree to the 
                       <label className='form-check-label ms-1'onClick={handleShowDataConsentModal} style={{ color: 'blue' }}> G! Guide Data Privacy Policy</label> 
+                    </b>
+                </label>
+              </div>
+            </div>
+
+            <div className="col-12">
+              <div className="form-check">
+              <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id="termsCondition"
+                      checked={formData.termsCondition}
+                      onChange={handleChange}
+                    />
+                <label className="form-check-label" htmlFor="termsCondition" >
+                    <b>I agree to the 
+                      <label className='form-check-label ms-1'onClick={handleShowTermsModal} style={{ color: 'blue' }}> G! Guide Terms and Conditions</label> 
                     </b>
                 </label>
               </div>
@@ -476,7 +489,46 @@ export const SignUpCoord = () => {
           <h5>Changes to This Policy</h5>
           <p>We may update this privacy policy from time to time. Any changes will be posted on this page, and we will notify you via email or through our app.</p>
           <h5>Contact Us</h5>
-          <p>If you have any questions or concerns about this privacy policy or our data practices, please contact us at <b>g!guide@gmail.com</b>.</p>
+          <p>If you have any questions or concerns about this privacy policy or our data practices, please contact us at <a href="mailto:g!guide@gmail.com">g!guide@gmail.com</a></p>
+        </Modal.Body>
+      </Modal>
+
+      <Modal show={showTermsModal} onHide={handleCloseTermsModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>G! Guide Terms and Conditions</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Welcome to G! Guide! By signing up as a church coordinator, you agree to the terms and conditions outlined below. These terms define your responsibilities and the grounds upon which your account may be made inactive.</p>
+          <h5>1. Acceptance of Terms</h5>
+          <p>By registering as a church coordinator, you confirm that:</p>
+          <ul className='ms-5'>
+            <li>You are authorized by the church you represent to manage its activities on the G! Guide platform.</li>
+            <li>You agree to provide accurate and up-to-date information.</li>
+            <li>You will comply with these terms and any applicable laws.</li>
+          </ul>
+          <h5>2. Responsibilities of Church Coordinators</h5>
+          <p>As a church coordinator, your responsibilities include:</p>
+          <ul className='ms-5'>
+            <li>Ensuring the accurate and timely management of church services and bookings.</li>
+            <li>Maintaining the confidentiality of your account credentials.</li>
+            <li>Adhering to ethical and professional standards in all interactions with users and the G! Guide system.</li>
+            <li>Updating your church&apos;s information promptly in case of changes.</li>
+          </ul>
+          <h5>3. Grounds for Account Inactivation</h5>
+          <p>G! Guide reserves the right to make a church coordinator’s account inactive under the following circumstances:</p>
+          <ul className='ms-5'>
+            <li><b>Inappropriate Behavior:</b> If the coordinator engages in harassment, fraudulent activities, unethical conduct, or any behavior deemed inappropriate by the system admin.</li>
+            <li><b>Church-Initiated Requests:</b> If the church formally requests the inactivation of its coordinator&apos;s account for any reason.</li>
+            <li><b>Violation of Terms:</b> Failure to comply with these terms, including the provision of inaccurate information or misuse of the platform.</li>
+            <li><b>Non-Compliance with Guidelines:</b> Persistent failure to respond to user inquiries, manage bookings, or follow platform procedures.</li>
+          </ul>
+          <p>When an account is made inactive, the coordinator will be notified via email with the reason for inactivation. Appeals or inquiries can be directed to <a href="mailto:g!guide@gmail.com">g!guide@gmail.com</a>.</p>
+          <h5>4. Contact Us</h5>
+          <p>If you have any questions, concerns, or require support, please contact us at: <a href="mailto:g!guide@gmail.com">g!guide@gmail.com</a></p>
+          
+
+          <h5>5. Acknowledgment and Agreement</h5>
+          <p>By proceeding with the sign-up, you acknowledge that you have read, understood, and agree to the terms and conditions outlined above.</p>
         </Modal.Body>
       </Modal>
 
