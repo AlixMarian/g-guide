@@ -253,7 +253,7 @@ const MapComponent = () => {
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={currentPosition || { lat: 0, lng: 0 }}
-          zoom={15}
+          zoom={14}
           onZoomChanged={() => onZoomChanged(map, setCustomIcon)}
           onLoad={(mapInstance) => handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)}
         >
@@ -276,40 +276,6 @@ const MapComponent = () => {
           })}
         </GoogleMap>
       </LoadScript>
-
-      <Offcanvas show={drawerInfo.show} onHide={handleCloseDrawer} placement="end" className="custom-offcanvas">
-        <Offcanvas.Header>
-          <div className="drawer-img-container">
-            <img src={churchPhoto} alt="Church Cover" />
-          </div>
-        </Offcanvas.Header>
-        <Offcanvas.Body className="d-flex flex-column">
-          <div className="drawer-body-content">
-            <Offcanvas.Title className='drawer-title'>{drawerInfo.title}</Offcanvas.Title>
-
-            <div className="drawer-content">
-              <div className="drawer-icon-text">
-                <i className="bi bi-geo-alt-fill"></i>
-                <span>{drawerInfo.description}</span> 
-              </div>
-
-              <div className="drawer-icon-text">
-                <i className="bi bi-telephone-fill"></i> 
-                <span>{drawerInfo.telephone}</span>
-              </div>
-
-              <div className="drawer-icon-text">
-                <i className="bi bi-clock-fill"></i> 
-                <span>{drawerInfo.serviceHours}</span>
-              </div>
-            </div>
-          </div>
-
-          <button className="view-church-btn">
-            View Church Information
-          </button>
-        </Offcanvas.Body>
-      </Offcanvas>
 
       <SearchFilter
         showMenu={showMenu}

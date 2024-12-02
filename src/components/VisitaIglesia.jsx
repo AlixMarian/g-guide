@@ -5,7 +5,7 @@ import { GoogleMap, LoadScript, DirectionsRenderer, Marker } from '@react-google
 import { Offcanvas, Button, Form } from 'react-bootstrap';
 import { fetchChurchData } from './mapfiles/churchDataUtils';
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
-import { handleMarkerClick, handleMapLoad, onZoomChanged as handleZoomChanged } from './mapfiles/churchDataUtils';
+import { handleMarkerClick, handleMapLoad, onZoomChanged } from './mapfiles/churchDataUtils';
 import AutocompleteSearch from '@components/mapfiles/AutocompleteSearch';
 import AutoGen from './mapfiles/AutoGen';
 import coverLogo from '/src/assets/logo cover.png';
@@ -408,7 +408,6 @@ const VisitaIglesia = () => {
           ))}
         </Form.Control>
       </Form.Group>
-
           {destinations.map((dest, index) => (
             <div key={dest.id} className="destination-item d-flex align-items-center mb-3 position-relative">
               <Form.Check type="checkbox" checked={dest.usingCustomDestination} style={{ marginRight: '1rem' }}
@@ -485,8 +484,9 @@ const VisitaIglesia = () => {
       key={mapKey}
       mapContainerStyle={containerStyle}
       center={currentPosition || { lat: 0, lng: 0 }}
-        zoom={13}
-        onLoad={(mapInstance) => handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)}
+      onZoomChanged={() => onZoomChanged(map, setCustomIcon)}
+      zoom={14}
+      onLoad={(mapInstance) => handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading)}
     >
       
     {currentPosition && <Marker position={currentPosition} />} 
