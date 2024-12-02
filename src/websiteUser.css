@@ -324,7 +324,7 @@
 .custom-offcanvas {
   background-color: #F2F2F2; 
   width: 25rem !important;
-  height: 658px;
+  height: 90%;
   margin-right: 2rem;
   margin-top: 1rem;
   justify-content: center;
@@ -347,7 +347,7 @@
 
 /* SCROLLBAR */
 .scrollable-section {
-  max-height: 450px;
+  max-height: calc(65vh - 5rem) !important;
   overflow-y: auto;
 }
 
