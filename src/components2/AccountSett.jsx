@@ -126,7 +126,7 @@ export const AccountSettings = () => {
 
   return (
     <div className="churchCoorAccStngs">
-      <div className="churchCoorAccStngs-content">
+      <div className="churchCoorAccStngs-content shadow-lg">
         <div className="text-start">
           <h3>Modify Account Settings</h3>
         </div>
@@ -156,7 +156,7 @@ export const AccountSettings = () => {
             <div className="col-12 col-lg-6">
               <form className="row g-3 changeUserInfo" onSubmit={handleSubmitNewInfo}>
                 <div className="col-md-6">
-                  <label htmlFor="lastName" className="form-label">Last Name</label>
+                  <label htmlFor="lastName" className="form-label"><b>Last Name</b></label>
                   <input
                     type="text"
                     className="form-control"
@@ -169,7 +169,7 @@ export const AccountSettings = () => {
                   />
                 </div>
                 <div className="col-md-6">
-                  <label htmlFor="firstName" className="form-label">First Name</label>
+                  <label htmlFor="firstName" className="form-label"><b>First Name</b></label>
                   <input
                     type="text"
                     className="form-control"
@@ -182,7 +182,7 @@ export const AccountSettings = () => {
                   />
                 </div>
                 <div className="col-md-6">
-                  <label htmlFor="contactNum" className="form-label">Contact Number</label>
+                  <label htmlFor="contactNum" className="form-label"><b>Contact Number</b></label>
                   <input
                     type="text"
                     className="form-control"
@@ -195,7 +195,7 @@ export const AccountSettings = () => {
                   />
                 </div>
                 <div className="col-md-6">
-                  <label htmlFor="email" className="form-label">Email Address</label>
+                  <label htmlFor="email" className="form-label"><b>Email Address</b></label>
                   <input
                     type="email"
                     className="form-control"
@@ -208,11 +208,11 @@ export const AccountSettings = () => {
                   />
                 </div>
                 <div className="col-md-6">
-                  <label htmlFor="password" className="form-label">Change Password</label>
+                  <label htmlFor="password" className="form-label"><b>Change Password</b></label>
                   <input type="password" className="form-control" id="password" onChange={handleChangeUserInfo}/>
                 </div>
                 <div className="col-md-6">
-                  <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                  <label htmlFor="confirmPassword" className="form-label"><b>Confirm Password</b></label>
                   <input type="password" className="form-control" id="confirmPassword" onChange={handleChangeUserInfo}/>
                 </div>
                 <div className="col-12 d-flex justify-content-between">

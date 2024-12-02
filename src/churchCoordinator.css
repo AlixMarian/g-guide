@@ -870,11 +870,11 @@ ul{
   width: 80px;
 }
 
-.slots-th, .payment-th, .pending-th, .forPayment-th, .approved-th, .denied-th, .massIntention-th, .listPriest-th {
+.massSched-th, .events-th, .slots-th, .payment-th, .pending-th, .forPayment-th, .approved-th, .denied-th, .massIntention-th, .listPriest-th {
   font-size: 18px;
 }
 
-.slots-td, .payment-td, .pending-td, .forPayment-td, .approved-td, .denied-td, .massIntention-td, .listPriest-td {
+.massSched-td, .events-td, .slots-td, .payment-td, .pending-td, .forPayment-td, .approved-td, .denied-td, .massIntention-td, .listPriest-td {
   font-size: 16px;
 }
 

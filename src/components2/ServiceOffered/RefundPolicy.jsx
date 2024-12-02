@@ -84,9 +84,9 @@ export const RefundPolicy = () => {
             <h1 className="me-3">Refund Policy</h1>
             <div className="container mt-5">
                 <div className="row">
-                    {/* Left side - Edit Refund Policy form */}
+                    
                     <div className="col-md-5">
-                        <div className="card shadow-lg" style={{ width: "100%" }}>
+                        <div className="card shadow-lg">
                             <div className="card-body">
                                 <h3>Edit Refund Policy</h3>
                                 <form onSubmit={handleSubmit}>
@@ -100,24 +100,24 @@ export const RefundPolicy = () => {
                                             required
                                         ></textarea>
                                         <br />
-                                        <button type="submit" className="btn btn-primary">Update Policy</button>
+                                        <div className="d-flex justify-content-end">
+                                            <button type="submit" className="btn btn-success">Update Policy</button>
+                                        </div>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
 
-                    {/* Right side - Display current refund policy */}
-                    <div className="col-md-6">
+                    
+                    <div className="col-md-7">
                         <div className="card shadow-lg">
                             <div className="card-body">
+                            <h3 className="card-title">Refund Policy</h3>
                                 {!loading && churchData && churchData.refundPolicy ? (
-                                    <div className="card mb-3">
-                                        <div className="card-body">
-                                            <h5 className="card-title">Refund Policy</h5>
-                                            <p className="card-text">{churchData.refundPolicy}</p>
-                                        </div>
-                                    </div>
+                                <>
+                                <p className="card-text">{churchData.refundPolicy}</p>
+                                </>
                                 ) : (
                                     <p>No refund policy available.</p>
                                 )}

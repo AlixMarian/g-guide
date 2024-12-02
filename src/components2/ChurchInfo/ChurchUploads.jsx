@@ -283,7 +283,7 @@ export const ChurchUploads = () => {
                         </div>
                     </div>
                 </div>
-                <div className="col-md-5 mb-4">
+                <div className="col-md-6 mb-4">
                     <div className="card shadow-lg">
                         <div className="card-body">
                             <h5 className="card-title"><b>Uploaded Church Photos</b></h5>
@@ -291,21 +291,14 @@ export const ChurchUploads = () => {
                                 {churchPhotos.length > 0 ? (
                                     churchPhotos.map(photo => (
                                         <div key={photo.id} className="photo-item mb-3">
-                                            <img 
-                                                src={photo.photoLink} 
-                                                alt="Church" 
-                                                className="img-thumbnail mb-2" 
-                                            />
-                                            <button
-                                                className="btn btn-outline-danger btn-sm"
-                                                onClick={() => handleDeletePhoto(photo.id, photo.photoLink)}
-                                            >
-                                                Delete
-                                            </button>
+                                            <img src={photo.photoLink} alt="Church" className="img-thumbnail mb-2" />
+                                            <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeletePhoto(photo.id, photo.photoLink)}>Delete</button>
                                         </div>
                                     ))
                                 ) : (
-                                    <p>No photos uploaded yet.</p>
+                                    <div className="text-center py-5">
+                                        <h4 className="text-muted">No volunteer requests found</h4>
+                                    </div>
                                 )}
                             </div>
                         </div>

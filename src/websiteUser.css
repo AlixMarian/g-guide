@@ -644,6 +644,16 @@
   color: white;
 }
 
+/* visita-iglesia map size*/
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
 
-
-
+.google-map-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; 
+}

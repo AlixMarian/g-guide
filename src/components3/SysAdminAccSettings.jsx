@@ -132,9 +132,9 @@ export const SysAdminAccSettings = () => {
       <div>
         <input type="image" src="../src/assets/bg-image-acc.png" className='bg-image-acc' />
 
-        <h3 style={{ marginLeft: '90px', marginTop: '10px', justifyContent: 'left', color: 'white', textShadow: '1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black'}}>
+        <h1 style={{ marginLeft: '90px', marginTop: '10px', justifyContent: 'left', color: 'white', textShadow: '1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black'}}>
           Modify Account Settings
-        </h3>
+        </h1>
 
         <div className="sysAdminAccsettings">
           <div className="sysAdminUserAccStngs-content">

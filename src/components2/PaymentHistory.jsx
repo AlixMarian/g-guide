@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '/backend/firebase';
-import { Table } from 'react-bootstrap';
+import { Table, Modal, Button } from 'react-bootstrap';
 import 'react-toastify/dist/ReactToastify.css';
 import '../churchCoordinator.css';
 
@@ -10,6 +10,8 @@ const PaymentHistory = () => {
     // eslint-disable-next-line no-unused-vars
     const [user, setUser] = useState(null);
     const [paymentHistory, setPaymentHistory] = useState([]);
+    const [selectedImage, setSelectedImage] = useState(null); // State for modal image
+    const [showImageModal, setShowImageModal] = useState(false); // State for modal visibility
   
     useEffect(() => {
         const fetchPaymentHistory = async () => {
@@ -103,7 +105,7 @@ const PaymentHistory = () => {
       <>
       <h1 className='me-3'>Payment History</h1>
       <div className='d-flex justify-content-center align-items-center mt-5'>
-        <div className='card shadow-lg' style={{width: "80%"}}>
+        <div className='card shadow-lg' style={{width: "85%"}}>
             <div className='card-body'>
             <Table striped bordered hover responsive>
             <thead className="table-dark">
@@ -133,13 +135,15 @@ const PaymentHistory = () => {
                   </td>
                   <td className='payment-td'>
                     {appointment.appointments?.paymentImage ? (
-                      <a
-                        href={appointment.appointments.paymentImage}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        View Receipt
-                      </a>
+                      <Button
+                      variant="primary"
+                      onClick={() => {
+                        setSelectedImage(appointment.appointments.paymentImage);
+                        setShowImageModal(true);
+                      }}
+                    >
+                      View Receipt
+                    </Button>
                     ) : (
                       'N/A'
                     )}
@@ -156,6 +160,24 @@ const PaymentHistory = () => {
             </div>
         </div>
       </div>
+      {/* Modal for displaying receipt image */}
+      <Modal show={showImageModal} onHide={() => setShowImageModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Receipt Image</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="d-flex justify-content-center align-items-center">
+          {selectedImage ? (
+            <img
+              src={selectedImage}
+              alt="Receipt"
+              className="img-fluid"
+              style={{ maxHeight: "80vh", maxWidth: "100%" }}
+            />
+          ) : (
+            "No image available"
+          )}
+        </Modal.Body>
+      </Modal>
       </>
     );
   };

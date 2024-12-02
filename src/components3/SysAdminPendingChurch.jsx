@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button, Modal, Dropdown } from 'react-bootstrap';
+import { Button, Modal, Pagination} from 'react-bootstrap';
 import { db } from '/backend/firebase';
 import { getDocs, doc, collection, getDoc, updateDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -11,10 +11,11 @@ import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif'; // Import the
 export const SysAdminPendingChurch = () => {
   const [churches, setChurches] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state
-  const [selectedStatus, setSelectedStatus] = useState('All');
   const [showModal, setShowModal] = useState(false);
   const [selectedChurch, setSelectedChurch] = useState(null);
   const [modalContent, setModalContent] = useState('history'); // To track which modal content to show
+  const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
+  const itemsPerPage = 5; // Number of entries per page
 
   const navigate = useNavigate();
 
@@ -93,13 +94,9 @@ export const SysAdminPendingChurch = () => {
     fetchData();
   }, []);
 
-  const handleStatusChange = (status) => {
-    setSelectedStatus(status);
-  };
-
   const handleShowModal = (church, content) => {
     setSelectedChurch(church);
-    setModalContent(content); // 'history' or 'proof'
+    setModalContent(content); // 'refundPolicy' or 'proof'
     setShowModal(true);
   };
 
@@ -108,37 +105,7 @@ export const SysAdminPendingChurch = () => {
     setSelectedChurch(null);
   };
 
-  const renderProofOfAffiliation = (fileUrl) => {
-    if (!fileUrl) {
-      return <p>No proof of affiliation available.</p>;
-    }
-
-    const fileExtension = fileUrl.split('.').pop().toLowerCase();
-
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-      return <img src={fileUrl} alt="Church Proof" style={{ maxWidth: '100%', maxHeight: '500px' }} />;
-    } else if (fileExtension === 'pdf') {
-      return (
-        <iframe
-          src={fileUrl}
-          title="Church Proof"
-          style={{ width: '100%', height: '500px', border: 'none' }}
-        />
-      );
-    } else if (['doc', 'docx'].includes(fileExtension)) {
-      return (
-        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-          Download Proof of Affiliation
-        </a>
-      );
-    } else {
-      return (
-        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-          Download Proof of Affiliation
-        </a>
-      );
-    }
-  };
+  
 
   const sendEmail = async (email, subject, message) => {
     try {
@@ -248,12 +215,15 @@ const handleDeny = async (church) => {
   }
 };
 
-
-  const filteredChurches = selectedStatus === 'All' ? churches : churches.filter(church => church.churchStatus === selectedStatus);
+  const totalPages = Math.ceil(churches.length / itemsPerPage);
+  const paginatedChurches = churches.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className='pending-church-page'>
-      <h3>Pending Church Registrations</h3>
+      <h1 className="me-3">Pending Church Registrations</h1>
       
       {loading ? ( 
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -264,26 +234,26 @@ const handleDeny = async (church) => {
         <table className="pending-table table table-striped table-bordered table-hover">
           <thead>
             <tr>
-              <th colSpan="3" className='pndngchrch-th'>Coordinator Information</th>
-              <th colSpan="7" className='pndngchrch-th'>Church Information</th>
-              <th rowSpan="2" className='pndngchrch-th'>Proof of Affiliation</th>
-              <th rowSpan="2" className='pndngchrch-th'>Actions</th>
+              <th colSpan="3" className='pndngchrch-coor'>Coordinator Information</th>
+              <th colSpan="7" className='pndngchrch-chrch'>Church Information</th>
+              <th rowSpan="2" className='pndngchrch-act'>Proof of Affiliation</th>
+              <th rowSpan="2" className='pndngchrch-act'>Actions</th>
             </tr>
             <tr>
-              <th className='pndngchrch-th'>Full Name</th>
-              <th className='pndngchrch-th'>Email</th>
-              <th className='pndngchrch-th'>Contact Number</th>
-              <th className='pndngchrch-th'>Church Name</th>
-              <th className='pndngchrch-th'>Email</th>
-              <th className='pndngchrch-th'>Contact Number</th>
-              <th className='pndngchrch-th'>Address</th>
-              <th className='pndngchrch-th'>Registration Date</th>
-              <th className='pndngchrch-th'>Status</th>
-              <th className='pndngchrch-th'>History</th>
+              <th className='pndngchrch-coor2'>Full Name</th>
+              <th className='pndngchrch-coor2'>Email</th>
+              <th className='pndngchrch-coor2'>Contact Number</th>
+              <th className='pndngchrch-chrch2'>Church Name</th>
+              <th className='pndngchrch-chrch2'>Email</th>
+              <th className='pndngchrch-chrch2'>Contact Number</th>
+              <th className='pndngchrch-chrch2'>Address</th>
+              <th className='pndngchrch-chrch2'>Registration Date</th>
+              <th className='pndngchrch-chrch2'>Status</th>
+              <th className='pndngchrch-chrch2'>Refund Policy</th>
             </tr>
           </thead>
           <tbody>
-            {filteredChurches.map((church) => (
+            {paginatedChurches.map((church) => (
               <tr key={church.id}>
                 <td>{church.coordinatorName}</td>
                 <td>{church.coordinatorEmail}</td>
@@ -296,18 +266,18 @@ const handleDeny = async (church) => {
                 <td>{church.churchStatus}</td>
                 <td>
                   <Button
-                    variant="info"
-                    className="view-history"
-                    onClick={() => handleShowModal(church, 'history')}
+                    variant="primary"
+                    className="view-refund-policy"
+                    onClick={() => handleShowModal(church, 'refundPolicy')}
                   >
-                    View History
+                    View Policy
                   </Button>
                 </td>
                 <td>
                   <Button
-                    variant="info"
+                    variant="primary"
                     className="view-proof"
-                    onClick={() => handleShowModal(church, 'proof')}
+                    onClick={() => window.open(church.churchProof, '_blank')}
                   >
                     View Proof
                   </Button>
@@ -316,7 +286,7 @@ const handleDeny = async (church) => {
                   {church.churchStatus === 'For Renewal' ? (
                     <Button
                       variant="warning"
-                      className='renew mb-2'
+                      className="renew mb-2"
                       onClick={() => handleRenew(church)}
                     >
                       Renew
@@ -331,47 +301,50 @@ const handleDeny = async (church) => {
                     </Button>
                   ) : null}
                   <Button
-                   variant='danger'
-                   className='deny mb-2'
-                   onClick={() => handleDeny(church)}
+                    variant="danger"
+                    className="deny mb-2"
+                    onClick={() => handleDeny(church)}
                   >
                     Deny
                   </Button>
                 </td>
-
               </tr>
             ))}
           </tbody>
         </table>
+        <div className="d-flex justify-content-center mt-3">
+            <Pagination>
+              <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />
+              <Pagination.Prev onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} />
+              {[...Array(totalPages).keys()].map((page) => (
+                <Pagination.Item
+                  key={page + 1}
+                  active={page + 1 === currentPage}
+                  onClick={() => setCurrentPage(page + 1)}
+                >
+                  {page + 1}
+                </Pagination.Item>
+              ))}
+              <Pagination.Next onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} />
+              <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
+            </Pagination>
+          </div>
       </div>
-
       )}
 
-      {selectedChurch && modalContent === 'history' && (
+      {selectedChurch && modalContent === 'refundPolicy' && (
         <Modal show={showModal} onHide={handleCloseModal} centered>
           <Modal.Header closeButton>
-            <Modal.Title>Church History</Modal.Title>
+            <Modal.Title>Refund Policy</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <p style={{ textAlign: 'justify', textJustify: 'auto' }}>
-              {selectedChurch.churchHistory || 'No history available'}
+              {selectedChurch.refundPolicy || 'No refund policy available'}
             </p>
           </Modal.Body>
         </Modal>
       )}
 
-      {selectedChurch && modalContent === 'proof' && (
-        <Modal show={showModal} onHide={handleCloseModal} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>Proof of Affiliation</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              {renderProofOfAffiliation(selectedChurch.churchProof)}
-            </div>
-          </Modal.Body>
-        </Modal>
-      )}
     </div>
   );
 };

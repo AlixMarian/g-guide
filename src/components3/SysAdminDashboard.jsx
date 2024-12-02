@@ -87,17 +87,17 @@ export const SysAdminDashboard = () => {
 
   return (
     <div className='admin-dashboard'>
-      <h3>Admin Dashboard</h3>
+      <h1 className="me-3">Admin Dashboard</h1>
       <div className='dashboard-container'>
-        <div className="sysAdmincard">
+        <div className="sysAdmincard shadow-lg">
           <div className="sysAdmincard-header">Registered Church Count</div>
           <div className="sysAdmincard-number sysAdminchurch-count">{churchCount}</div>
         </div>
-        <div className="sysAdmincard">
+        <div className="sysAdmincard shadow-lg">
           <div className="sysAdmincard-header">User Count</div>
           <div className="sysAdmincard-number sysAdminuser-count">{usersCount}</div>
         </div>
-        <div className="sysAdmincard">
+        <div className="sysAdmincard shadow-lg">
           <div className="sysAdmincard-header">Churches in Cebu</div>
           <div className="sysAdmincard-number sysAdmincebu-church-count">{cebuChurchCount}</div>
         </div>

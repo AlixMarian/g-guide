@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react';
 import { getDocs, collection } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';  // Correctly imported loading GIF
+import { Pagination } from 'react-bootstrap';
 
 export const SysAdminChurchLocations = () => {
   const [churchLocations, setChurchLocations] = useState([]);
   const [loading, setLoading] = useState(true); // State to manage loading
+  const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
+  const itemsPerPage = 10; // Number of items per page
 
   useEffect(() => {
     const fetchChurchLocations = async () => {
@@ -27,27 +30,33 @@ export const SysAdminChurchLocations = () => {
     fetchChurchLocations();
   }, []);
 
+  const totalPages = Math.ceil(churchLocations.length / itemsPerPage);
+  const paginatedLocations = churchLocations.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div className="church-location-page">
-      <h3>Cebu Church List</h3>
+      <h1 className="me-3">Cebu Church List</h1>
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
           <img src={loadingGif} alt="Loading..." style={{ width: '100px' }} />
         </div>
       ) : (
-        <table className='admin-table'>
+        <table className='admin-table table table-striped table-bordered table-hover'>
           <thead>
             <tr>
-              <th>Church ID</th>
-              <th>Church Name</th>
-              <th>Church Location</th>
-              <th>Latitude</th>
-              <th>Longitude</th>
+              <th className='custom-th'>Church ID</th>
+              <th className='custom-th'>Church Name</th>
+              <th className='custom-th'>Church Location</th>
+              <th className='custom-th'>Latitude</th>
+              <th className='custom-th'>Longitude</th>
             </tr>
           </thead>
           <tbody>
-            {churchLocations.length > 0 ? (
-              churchLocations.map((church) => (
+            {paginatedLocations.length > 0 ? (
+              paginatedLocations.map((church) => (
                 <tr key={church.id}>
                   <td>{church.id}</td>
                   <td>{church.churchName || 'N/A'}</td>
@@ -64,6 +73,23 @@ export const SysAdminChurchLocations = () => {
           </tbody>
         </table>
       )}
+      <div className="d-flex justify-content-center mt-3">
+            <Pagination>
+              <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />
+              <Pagination.Prev onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} />
+              {[...Array(totalPages).keys()].map((page) => (
+                <Pagination.Item
+                  key={page + 1}
+                  active={page + 1 === currentPage}
+                  onClick={() => setCurrentPage(page + 1)}
+                >
+                  {page + 1}
+                </Pagination.Item>
+              ))}
+              <Pagination.Next onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} />
+              <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
+            </Pagination>
+          </div>
     </div>
   );
 };
