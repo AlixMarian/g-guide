@@ -249,15 +249,43 @@ th, td {
 }
 
 /* Header row styling */
-th {
-  background-color: #007BFF; /* Blue header background */
-  color: white; /* White text on blue */
+.custom-th {
+  background-color: #0068A2 !important;/* Blue header background */
+  color: white !important; /* White text on blue */
   font-weight: bold; /* Bold text */
   font-size: 14px; /* Slightly larger font size for the header */
 }
 
-.pndngchrch-th {
-  background-color: #007BFF !important; /* Blue header background */
+.pndngchrch-coor {
+  background-color: #004080 !important; /* Blue header background */
+  color: white !important; /* White text on blue */
+  font-weight: bold !important; /* Bold text */
+  font-size: 14px !important; /* Slightly larger font size for the header */
+}
+
+.pndngchrch-coor2 {
+  background-color: #005F99 !important; /* Blue header background */
+  color: white !important; /* White text on blue */
+  font-weight: bold !important; /* Bold text */
+  font-size: 14px !important; /* Slightly larger font size for the header */
+}
+
+.pndngchrch-chrch{
+  background-color: #006BB3 !important; /* Blue header background */
+  color: white !important; /* White text on blue */
+  font-weight: bold !important; /* Bold text */
+  font-size: 14px !important; /* Slightly larger font size for the header */
+}
+
+.pndngchrch-chrch2{
+  background-color: #2B91D1 !important; /* Blue header background */
+  color: white !important; /* White text on blue */
+  font-weight: bold !important; /* Bold text */
+  font-size: 14px !important; /* Slightly larger font size for the header */
+}
+
+.pndngchrch-act{
+  background-color: #014A86!important; /* Blue header background */
   color: white !important; /* White text on blue */
   font-weight: bold !important; /* Bold text */
   font-size: 14px !important; /* Slightly larger font size for the header */
@@ -279,7 +307,7 @@ td {
   width: auto;
 }
 
-.pending-church-button, .view-proof, .view-history, .approve, .deny, .renew,.view-payment {
+.pending-church-button, .view-proof, .view-history, .view-refund-policy, .approve, .deny, .renew,.view-payment {
   width: 70px; /* Adjust the width */
   height: 30px; /* Adjust the height */
   padding: 0.25rem 0.5rem; /* Adjust the padding */

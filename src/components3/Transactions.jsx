@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '/backend/firebase'; // Adjust path based on your project structure
-import { Button, Modal, Dropdown } from 'react-bootstrap';
+import { Button, Modal, Pagination } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css'; // Import styles for react-datepicker
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif'; 
@@ -15,6 +15,8 @@ export const Transactions = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedChurch, setSelectedChurch] = useState('All');
   const [selectedDate, setSelectedDate] = useState(null); // For react-datepicker
+  const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
+  const itemsPerPage = 10; // Number of entries per page
 
   // Fetch church list from Firestore
   useEffect(() => {
@@ -92,36 +94,6 @@ export const Transactions = () => {
     setSelectedChurch(churchId);
   };
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-  };
-
-  const renderPaymentImage = (fileUrl) => {
-    if (!fileUrl) {
-      return <p>No payment image available.</p>;
-    }
-
-    const fileExtension = fileUrl.split('.').pop().toLowerCase();
-
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-      return <img src={fileUrl} alt="Payment Proof" style={{ maxWidth: '100%', maxHeight: '500px' }} />;
-    } else if (fileExtension === 'pdf') {
-      return (
-        <iframe
-          src={fileUrl}
-          title="Payment Proof"
-          style={{ width: '100%', height: '500px', border: 'none' }}
-        />
-      );
-    } else {
-      return (
-        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-          Download Payment Proof
-        </a>
-      );
-    }
-  };
-
   const filteredPayments = payments.filter((payment) => {
     // Filter by church
     const churchMatch = selectedChurch === 'All' || payment.churchName === selectedChurch;
@@ -132,9 +104,16 @@ export const Transactions = () => {
     return churchMatch && dateMatch;
   });
 
+  
+  const totalPages = Math.ceil(filteredPayments.length / itemsPerPage);
+  const paginatedPayments = filteredPayments.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div className="transactions-page">
-      <h3>User Transactions</h3>
+      <h1 className="me-3">User Transactions</h1>
 
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
@@ -142,65 +121,72 @@ export const Transactions = () => {
         </div>
       ) : (
         <>
-        <div className='filter-container'>
-          {/* Dropdown to filter by church */}
-          <div className="mb-3">
-            <Dropdown>
-              <Dropdown.Toggle variant="primary" id="dropdown-church">
-                Filter by Church
-              </Dropdown.Toggle>
+        <div className="filtering mb-3">
+          <div className="d-flex align-items-start gap-4">
+            {/* Filter by Church */}
+            <div className="form-group">
+              <label className="form-label"><b>Filter by Church:</b></label>
+              <div className="dropdown">
+                <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  {selectedChurch === 'All' ? 'All Churches' : selectedChurch}
+                </button>
+                <ul className="dropdown-menu">
+                  <li>
+                    <a className="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); handleChurchChange('All'); }}>
+                      All Churches
+                    </a>
+                  </li>
+                  {churches.map((church) => (
+                    <li key={church.id}>
+                      <a
+                        className="dropdown-item"
+                        href="#"
+                        onClick={(e) => { e.preventDefault(); handleChurchChange(church.name); }}
+                      >
+                        {church.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
 
-              <Dropdown.Menu>
-                <Dropdown.Item onClick={() => handleChurchChange('All')}>All Churches</Dropdown.Item>
-                {churches.map((church) => (
-                  <Dropdown.Item key={church.id} onClick={() => handleChurchChange(church.name)}>
-                    {church.name}
-                  </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown>
-          </div>
-
-          {/* Date Picker styled like dropdown */}
-          <div className="mb-3">
-            <Dropdown>
-              <Dropdown.Toggle variant="primary" id="dropdown-date">
-                {selectedDate ? selectedDate.toLocaleDateString() : 'Filter by Date'}
-              </Dropdown.Toggle>
-
-              <Dropdown.Menu>
+            {/* Filter by Date */}
+            <div className="form-group">
+              <label className="form-label"><b>Filter by Date:</b></label>
+              <div className="input-group">
                 <DatePicker
+                  className="form-control"
                   selected={selectedDate}
-                  onChange={handleDateChange}
-                  inline
-                  customInput={
-                    <Button variant="primary">
-                      {selectedDate ? selectedDate.toLocaleDateString() : 'Select Date'}
-                    </Button>
-                  }
+                  onChange={(date) => setSelectedDate(date)}
+                  showYearDropdown
                 />
-              </Dropdown.Menu>
-            </Dropdown>
+                <button className="btn btn-danger" onClick={() => setSelectedDate(null)}>
+                  Clear
+                </button>
+              </div>
+            </div>
           </div>
-          </div>
+        </div>
+
 
           <h4 className="mb-3">
-            Now viewing transactions for: {selectedChurch} on {selectedDate ? selectedDate.toLocaleDateString() : 'All Dates'}
+            Now viewing transactions for: {selectedChurch} Entries on {selectedDate ? selectedDate.toLocaleDateString() : 'All Dates'}
           </h4>
 
-          <table className="admin-table">
+          <table className="admin-table table table-striped table-bordered table-hover">
             <thead>
               <tr>
-                <th>Payment ID</th>
-                <th>Date Created</th>
-                <th>Church Name</th>
-                <th>User ID</th>
-                <th>Amount Paid</th>
+                <th className='custom-th'>Payment ID</th>
+                <th className='custom-th'>Date of Transaction</th>
+                <th className='custom-th'>Church Name</th>
+                <th className='custom-th'>User ID</th>
+                <th className='custom-th'>Amount Paid</th>
               </tr>
             </thead>
             <tbody>
-              {filteredPayments.length > 0 ? (
-                filteredPayments.map((payment) => (
+              {paginatedPayments.length > 0 ? (
+                paginatedPayments.map((payment) => (
                   <tr key={payment.paymentId}>
                     <td>{payment.paymentId}</td>
                     <td>{payment.formattedDate}</td>
@@ -208,7 +194,7 @@ export const Transactions = () => {
                     <td>{payment.userId}</td>
                     <td>
                       {payment.amountPaid ? (
-                        <Button variant="info" className="view-payment" onClick={() => handleViewPaymentImage(payment.amountPaid)}>
+                        <Button variant="primary" className="view-payment" onClick={() => handleViewPaymentImage(payment.amountPaid)}>
                           View Payment
                         </Button>
                       ) : (
@@ -226,6 +212,23 @@ export const Transactions = () => {
               )}
             </tbody>
           </table>
+          <div className="d-flex justify-content-center mt-3">
+            <Pagination>
+              <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />
+              <Pagination.Prev onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1} />
+              {[...Array(totalPages).keys()].map((page) => (
+                <Pagination.Item
+                  key={page + 1}
+                  active={page + 1 === currentPage}
+                  onClick={() => setCurrentPage(page + 1)}
+                >
+                  {page + 1}
+                </Pagination.Item>
+              ))}
+              <Pagination.Next onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} />
+              <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
+            </Pagination>
+          </div>
         </>
       )}
 
@@ -236,7 +239,15 @@ export const Transactions = () => {
         </Modal.Header>
         <Modal.Body>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            {renderPaymentImage(selectedPaymentImage)}
+            {selectedPaymentImage ? (
+              <img
+                src={selectedPaymentImage}
+                alt="Payment Proof"
+                style={{ maxWidth: '100%', maxHeight: '500px' }}
+              />
+            ) : (
+              <p>No payment image available.</p>
+            )}
           </div>
         </Modal.Body>
       </Modal>
