@@ -130,7 +130,7 @@ const handleApprove = async (church) => {
 
     const coordinatorRef = doc(db, "coordinator", church.coordinatorID); // Ensure coordinatorID is available in the church object
     await updateDoc(coordinatorRef, {
-      status: "Approved"
+      status: "Active"
     });
 
     // Send approval email

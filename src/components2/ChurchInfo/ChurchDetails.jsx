@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getAuth,  onAuthStateChanged} from 'firebase/auth';
+import { doc, getDoc, updateDoc, query, where, getDocs, collection } from 'firebase/firestore';
 import { db} from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -11,6 +11,7 @@ import '../../churchCoordinator.css';
 export const ChurchDetails = () => {
   // eslint-disable-next-line no-unused-vars
   const [userData, setUserData] = useState(null);
+  const [churchId, setChurchId] = useState("");
   const [churchData, setChurchData] = useState({});
   const [newChurchInfo, setNewChurchInfo] = useState({});
   const [showBankModal, setShowBankModal] = useState(false);
@@ -21,38 +22,72 @@ export const ChurchDetails = () => {
   const handleViewBank = () => setShowBankModal(true);
   const handleCloseBankModal = () => setShowBankModal(false);
   const handleViewProof = () => {window.open(churchData.churchProof, '_blank', 'noopener,noreferrer');};
-    
+  
   useEffect(() => {
     const auth = getAuth();
-    onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         console.log("User signed in:", user);
-        console.log("User id signed in:", user.uid);
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserData(userData);
-
-
-            const churchDoc = await getDoc(doc(db, "church", user.uid));
-            if (churchDoc.exists()) {
-              setChurchData(churchDoc.data());
-            } else {
-              toast.error("Church data not found");
-            }
-          } else {
-            toast.error("User data not found");
-          }
-        } catch (error) {
-          toast.error("Error fetching user data");
-        }
+        await fetchChurchId(user.uid); // Fetch churchId
       } else {
         console.log("No user signed in.");
-        navigate('/login');
+        navigate("/login");
       }
     });
+  
+    return () => unsubscribe();
   }, [navigate]);
+
+  useEffect(() => {
+    if (churchId) {
+      fetchChurchData(churchId);
+    }
+  }, [churchId]);
+
+  const fetchChurchId = async (userId) => {
+    try {
+      const coordinatorQuery = query(
+        collection(db, 'coordinator'),
+        where('userId', '==', userId)
+      );
+      const coordinatorSnapshot = await getDocs(coordinatorQuery);
+  
+      if (!coordinatorSnapshot.empty) {
+        const churchQuery = query(
+          collection(db, 'church'),
+          where('coordinatorID', '==', coordinatorSnapshot.docs[0].id)
+        );
+        const churchSnapshot = await getDocs(churchQuery);
+  
+        if (!churchSnapshot.empty) {
+          const fetchedChurchId = churchSnapshot.docs[0].id;
+          setChurchId(fetchedChurchId);
+          console.log("Fetched churchId:", fetchedChurchId); // Debugging
+        } else {
+          toast.error("No associated church found for this coordinator.");
+        }
+      } else {
+        toast.error("No coordinator found for the logged-in user.");
+      }
+    } catch (error) {
+      console.error("Error fetching churchId:", error);
+      toast.error("Failed to fetch church details.");
+    }
+  };
+
+  const fetchChurchData = async (churchId) => {
+    try {
+      const churchDoc = await getDoc(doc(db, "church", churchId));
+      if (churchDoc.exists()) {
+        setChurchData(churchDoc.data());
+      } else {
+        toast.error("Church data not found");
+      }
+    } catch (error) {
+      console.error("Error fetching church data:", error);
+      toast.error("Failed to fetch church data.");
+    }
+  };
 
   const handleChange = (e, field) => {
     const { value } = e.target;
@@ -64,25 +99,32 @@ export const ChurchDetails = () => {
     
   const handleSubmitNewChurchInfo = async (e) => {
     e.preventDefault();
-    const auth = getAuth();
-    const user = auth.currentUser;
-
-    if (user) {
-      try {
-        const churchDocRef = doc(db, "church", user.uid);
-        const updatedChurchInfo = { ...newChurchInfo };
-
-        await updateDoc(churchDocRef, updatedChurchInfo);
-
-        toast.success("Church data updated successfully");
-      } catch (error) {
-        toast.error("Error updating church data");
+  
+    if (!churchId) {
+      toast.error("Church ID is missing");
+      return;
+    }
+  
+    try {
+      const churchDocRef = doc(db, "church", churchId);
+      const updatedChurchInfo = { ...newChurchInfo };
+  
+      
+      if (Object.keys(updatedChurchInfo).length === 0) {
+        toast.error("No changes detected to update");
+        return;
       }
-    } else {
-      toast.error("User data is missing");
-      console.log(user.uid);
+  
+      await updateDoc(churchDocRef, updatedChurchInfo);
+  
+      toast.success("Church data updated successfully");
+      fetchChurchData(churchId);
+    } catch (error) {
+      console.error("Error updating church data:", error);
+      toast.error("Error updating church data");
     }
   };
+  
 
   const convertTo12HourFormat = (time) => {
     if (!time || time === 'none') return 'none';
@@ -154,7 +196,7 @@ export const ChurchDetails = () => {
                   className="form-control"
                   name="churchName"
                   placeholder={churchData.churchName || ""}
-                  onChange={(e) => handleChange(e, 'churchName')}
+                  onChange={(e) => handleChange(e, 'churchName')} readOnly
                 />
               </div>
 
@@ -165,7 +207,7 @@ export const ChurchDetails = () => {
                   className="form-control"
                   id="churchAddress"
                   placeholder={churchData.churchAddress || ""}
-                  onChange={(e) => handleChange(e, 'churchAddress')}
+                  onChange={(e) => handleChange(e, 'churchAddress')} readOnly
                 />
               </div>
 

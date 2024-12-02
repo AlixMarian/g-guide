@@ -7,8 +7,11 @@ import { toast } from 'react-toastify';
 import { Table } from 'react-bootstrap';
 import '../../churchCoordinator.css';
 import Pagination from 'react-bootstrap/Pagination';
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from '/backend/firebase';
 
 export const Schedules = () =>{
+  const [churchId, setChurchId] = useState('');
   const [massList, setMassList] = useState([]);
   const [priestList, setPriestList] = useState([]);
   const [newMassDate, setNewMassDate] = useState("");
@@ -26,10 +29,10 @@ export const Schedules = () =>{
 
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUserId(user.uid);
-        fetchData(user.uid);
+        await fetchChurchId(user.uid);
       } else {
         setUserId('');
         toast.error('No user is logged in');
@@ -38,6 +41,36 @@ export const Schedules = () =>{
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (churchId) {
+      fetchData();
+    }
+  }, [churchId]);
+
+  const fetchChurchId = async (userId) => {
+    try {
+      const coordinatorQuery = query(collection(db, 'coordinator'), where('userId', '==', userId));
+      const coordinatorSnapshot = await getDocs(coordinatorQuery);
+
+      if (!coordinatorSnapshot.empty) {
+        const churchQuery = query(collection(db, 'church'), where('coordinatorID', '==', coordinatorSnapshot.docs[0].id));
+        const churchSnapshot = await getDocs(churchQuery);
+
+        if (!churchSnapshot.empty) {
+          setChurchId(churchSnapshot.docs[0].id);
+          console.log("Fetched churchId:", churchSnapshot.docs[0].id);
+        } else {
+          toast.error('No associated church found for this coordinator.');
+        }
+      } else {
+        toast.error('No coordinator found for the logged-in user.');
+      }
+    } catch (error) {
+      console.error("Error fetching churchId:", error);
+      toast.error('Failed to fetch church details.');
+    }
+  };
 
   const handleSubmit = (e, callback) => {
     e.preventDefault();
@@ -51,10 +84,11 @@ export const Schedules = () =>{
     }
   };
 
-  const fetchData = (creatorId) => {
-    getMassList(setMassList, creatorId);
-    getPriestList(setPriestList, creatorId);
+  const fetchData = () => {
+    getMassList(setMassList, churchId);
+    getPriestList(setPriestList, churchId);
   };
+  
 
   const onSubmitMass = () => {
     const massData = {
@@ -62,9 +96,10 @@ export const Schedules = () =>{
       massTime: newMassTime,
       massType: newMassType,
       massLanguage: newMassLanguage,
-      presidingPriest: newMassPriest
+      presidingPriest: newMassPriest,
+      churchId: churchId,
     };
-    addMassSchedule(massData, userId, () => getMassList(setMassList, userId));
+    addMassSchedule(massData, churchId, () => getMassList(setMassList, churchId));
     clearForm();
   };
 
@@ -74,10 +109,11 @@ export const Schedules = () =>{
       massTime: newMassTime,
       massType: newMassType,
       massLanguage: newMassLanguage,
-      presidingPriest: newMassPriest
+      presidingPriest: newMassPriest,
+      churchId: churchId,
     };
     updateMassSchedule(editingMass.id, massData, () => {
-      getMassList(setMassList, userId);
+      getMassList(setMassList, churchId);
       setEditingMass(null);
       clearForm();
     });
@@ -197,7 +233,6 @@ export const Schedules = () =>{
                   <label htmlFor="typeSelect" className="form-label"><b>Type</b></label>
                   <select className="form-select" required id="typeSelect" value={newMassType} onChange={(e) => setNewMassType(e.target.value)}>
                     <option value="" disabled>Select a mass type</option>
-                    <option value="Concelebrated">Normal Mass</option>
                     <option value="Concelebrated">Concelebrated</option>
                     <option value="Ordinary Mass">Ordinary Mass</option>
                   </select>
