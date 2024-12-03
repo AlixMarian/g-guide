@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from '/backend/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { toast } from 'react-toastify';
 import { CheckCircle2, XCircle } from 'lucide-react';
@@ -8,6 +8,7 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 export const ExploreServices = () => {
     const [servicesState, setServicesState] = useState({});
     const [userID, setUserId] = useState(null);
+    const [churchID, setChurchId] = useState(null);
     const [isModified, setIsModified] = useState(false);
 
     useEffect(() => {
@@ -15,29 +16,80 @@ export const ExploreServices = () => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setUserId(user.uid);
-                fetchData(user.uid);
+                fetchChurchId(user.uid);
             } else {
-                setUserId('');
+                setUserId(null);
+                setChurchId(null);
             }
         });
         return () => unsubscribe();
     }, []);
 
-    const fetchData = async (uid) => {
+    const fetchChurchId = async (uid) => {
         try {
-            const userDoc = await getDoc(doc(db, "services", uid));
+            // Step 1: Fetch the user's document
+            const userDoc = await getDoc(doc(db, "users", uid));
             if (userDoc.exists()) {
-                setServicesState(userDoc.data());
+                const userData = userDoc.data();
+                if (userData.role === "churchCoor") {
+                    // Step 2: Query the coordinator collection for coordinatorID
+                    const coordinatorQuery = query(
+                        collection(db, "coordinator"),
+                        where("userId", "==", uid)
+                    );
+                    const coordinatorSnapshot = await getDocs(coordinatorQuery);
+    
+                    if (!coordinatorSnapshot.empty) {
+                        const coordinatorID = coordinatorSnapshot.docs[0].id; // Coordinator document ID
+                        
+                        // Step 3: Query the church collection for the matching coordinatorID
+                        const churchQuery = query(
+                            collection(db, "church"),
+                            where("coordinatorID", "==", coordinatorID)
+                        );
+                        const churchSnapshot = await getDocs(churchQuery);
+    
+                        if (!churchSnapshot.empty) {
+                            const churchDoc = churchSnapshot.docs[0];
+                            setChurchId(churchDoc.id); // Set churchId in state
+                            fetchServices(churchDoc.id); // Fetch services using churchId
+                        } else {
+                            console.error("No church document found for the coordinator.");
+                            toast.error("Unable to find a church associated with this coordinator.");
+                        }
+                    } else {
+                        console.error("No coordinator document found for the user.");
+                        toast.error("Unable to find coordinator information for this user.");
+                    }
+                } else {
+                    console.error("User is not a church coordinator.");
+                    toast.error("This user is not a church coordinator.");
+                }
             } else {
-                console.log("No data found for the user");
+                console.error("No user document found.");
+                toast.error("No user data found.");
             }
         } catch (error) {
-            toast.error("Error fetching services data");
+            toast.error("Error fetching churchId.");
+            console.error("Error fetching churchId:", error);
+        }
+    };
+    
+    const fetchServices = async (churchId) => {
+        try {
+            const servicesDoc = await getDoc(doc(db, "services", churchId));
+            if (servicesDoc.exists()) {
+                setServicesState(servicesDoc.data());
+            } else {
+                console.log("No services document found for the churchId. A new one can be created.");
+            }
+        } catch (error) {
+            toast.error("Error fetching services data.");
             console.error("Error fetching services data:", error);
         }
     };
 
-    const handleToggle = async (event) => {
+    const handleToggle = (event) => {
         const serviceName = event.target.name;
         const isChecked = event.target.checked;
 
@@ -61,12 +113,18 @@ export const ExploreServices = () => {
     };
 
     const handleSubmit = async () => {
+        if (!churchID) {
+            toast.error("Church ID is missing. Cannot update services.");
+            return;
+        }
+
         try {
-            await setDoc(doc(db, "services", userID), servicesState, { merge: true });
+            // Use the churchId as the document ID in the services collection
+            await setDoc(doc(db, "services", churchID), servicesState, { merge: true });
             toast.success("Services updated successfully!");
             setIsModified(false);
         } catch (error) {
-            toast.error("Error updating services");
+            toast.error("Error updating services.");
             console.error("Error updating services:", error);
         }
     };
@@ -144,7 +202,7 @@ export const ExploreServices = () => {
                 <button 
                     className="submit-button" 
                     onClick={handleSubmit}
-                    disabled={!isModified}
+                    disabled={!isModified || !churchID}
                 >
                     {isModified ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
                     Save Changes

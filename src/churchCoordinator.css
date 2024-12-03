@@ -94,15 +94,15 @@ body .second-sidebar {
 }
 
 .second-sidebar-mass-schedule-content {
-  margin-top: 13.56rem;
+  margin-top: 14.05rem;
 }
 
 .second-sidebar-services-offered-content {
-  margin-top: 18.6rem;
+  margin-top: 19.10rem;
 }
 
 .second-sidebar-church-info-content {
-  margin-top: 23.6rem;
+  margin-top: 29.15rem;
 }
 
 .numbers {
@@ -347,13 +347,7 @@ body .second-sidebar {
   background-color: var(--background-color);
 }
 
-.page-title {
-  text-align: left;
-  color: var(--primary-color);
-  margin-bottom: 30px;
-  font-weight: 600;
-  font-size: 2rem;
-}
+
 
 .services-grid {
   display: flex;
@@ -372,7 +366,7 @@ body .second-sidebar {
 }
 
 .section-header {
-  background-color: var(--primary-color);
+  background-color: #212429;
   color: var(--white);
   padding: 15px;
   text-align: center;
