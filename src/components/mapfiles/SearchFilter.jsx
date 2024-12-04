@@ -1,10 +1,10 @@
+//SearchFilter.jsx
+
 import PropTypes from 'prop-types'; 
-import { useState } from 'react';
-import { Offcanvas } from 'react-bootstrap';
+import { Offcanvas, Alert, Spinner, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import AutocompleteSearch from './AutocompleteSearch';
 import logo from '/src/assets/G-Guide LOGO.png';
-import loadingGif from '/src/assets/Ripple@1x-1.0s-200px-200px.gif';
 import { handleMarkerClick } from './churchDataUtils';
 
 const SearchFilter = ({
@@ -17,13 +17,16 @@ const SearchFilter = ({
   loading,
   filteredChurches,
   handleCancel,
+  selectedLanguage,
+  handleLanguageChange,
+  drawerInfo, 
+  setDrawerInfo,
+  churchPhoto, 
+  setChurchPhoto,
 }) => {
-  const [drawerInfo, setDrawerInfo] = useState({ show: false, title: '', description: '', telephone: '', serviceHours: '' });
-  const [churchPhoto, setChurchPhoto] = useState(logo);
 
   return (
     <>
-      {/* Main Offcanvas for Search */}
       <Offcanvas show={showMenu} onHide={handleCloseMenu} placement="start">
         <Offcanvas.Title>
           <div className="map-search-container">
@@ -63,15 +66,26 @@ const SearchFilter = ({
               </button>
             </div>
           </div>
-          <div style={{ marginTop: '10px' }}>
-            <select value={selectedService} onChange={handleServiceChange} className="filter-form-select form-select">
-              <option value="">Filter by Services</option>
-              {servicesList.map((service) => (
-                <option key={service} value={service}>
-                  {service}
-                </option>
-              ))}
-            </select>
+          <div className='mt-3 d-flex mb-1 justify-content-end' >
+          {/* <p className='small'>Filter by:</p> */}
+            <div>
+              <select value={selectedService} onChange={handleServiceChange} className="filter-form-select form-select p-1 me-1 ms-2" style={{width:'5.8rem', fontSize: '14px'}}>
+                <option value="">Services</option>
+                {servicesList.map((service) => (
+                  <option key={service} value={service}>
+                    {service}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* **Language Filter Dropdown** */}
+            <div>
+              <select value={selectedLanguage} onChange={handleLanguageChange} className="filter-form-select form-select p-1 me-1" style={{width:'6.4rem', fontSize: '14px'}}>
+                <option value="">Language</option>
+                <option value="English">English</option>
+                <option value="Cebuano">Cebuano</option>
+              </select>
+            </div>
           </div>
 
           {loading ? (
@@ -84,44 +98,52 @@ const SearchFilter = ({
                 marginTop: '30px',
               }}
             >
-              <img src={loadingGif} alt="Loading..." style={{ width: '100px', height: '100px' }} />
+              <Spinner animation="border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
             </div>
           ) : filteredChurches.length > 0 ? (
-              <div style={{ marginTop: '30px' }}>
-                <h6 style={{ marginBottom: '20px' }}>
-                  {selectedService ? `Churches offering ${selectedService}:` : 'Nearby Churches:'}
-                </h6>
-                <div className="scrollable-section">
-                  {filteredChurches.map((church) => (
-                    <div
-                      className="filtered-church-card"
-                      key={church.id}
-                      onClick={() => handleMarkerClick(church, setDrawerInfo, setChurchPhoto)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <h6>{church.churchName}</h6>
-                      <div className="drawer-icon-text">
-                        <i className="bi bi-geo-alt-fill"></i>
-                        <span>{church.churchLocation || 'Location not available'}</span>
-                      </div>
-                      <div className="drawer-icon-text">
-                        <i className="bi bi-pin-map-fill"></i>
-                        <span>{`${church.distance.toFixed(2)} km away`}</span>
-                      </div>
+            <div style={{ marginTop: '20px' }}>
+              <h6 style={{ marginBottom: '20px' }}>
+              {selectedService || selectedLanguage ? `Churches offering ${selectedService || ''}${selectedService && selectedLanguage ? ' and ' : ''}${selectedLanguage || ''}:` : 'Nearby Churches:'}
+              </h6>
+              <div className="scrollable-section">
+                {filteredChurches.map((church, index) => (
+                  <div
+                    className="filtered-church-card"
+                    key={`${church.churchName}-${index}`}
+                    onClick={() => handleMarkerClick(church, setDrawerInfo, setChurchPhoto)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <h6>{church.churchName}</h6>
+                    <div className="drawer-icon-text">
+                      <i className="bi bi-geo-alt-fill"></i>
+                      <span>{church.churchLocation || 'Location not available'}</span>
                     </div>
-                  ))}
-                </div>
+                    <div className="drawer-icon-text">
+                      <i className="bi bi-pin-map-fill"></i>
+                      <span>{church.massDate && church.massTime ? `${church.massDate} at ${church.massTime} (${church.massType || 'No Mass Type'})` : 'No Mass Schedule'}</span>
+                      </div>
+                    <div className="drawer-icon-text">
+                      <i className="bi bi-person-fill"></i>
+                      <span>{church.presidingPriest || 'No Presiding Priest'}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ) : (
-              selectedService && (
-                <div>
-                  <p style={{ marginTop: '10px' }}>No churches found offering {selectedService}.</p>
-                  <button className="view-church-btn" onClick={handleCancel}>
-                    Cancel
-                  </button>
-                </div>
-              )
-            )}
+            </div>
+          ) : (
+            selectedLanguage && (
+              <div style={{ marginTop: '30px' }}>
+                <Alert variant="warning">
+                  No churches found for the selected language.
+                </Alert>
+                <Button variant="outline-danger" onClick={handleCancel}>
+                  Cancel
+                </Button>
+              </div>
+            )
+          )}
         </Offcanvas.Body>
       </Offcanvas>
 
@@ -163,7 +185,6 @@ const SearchFilter = ({
   );
 };
 
-// PropTypes
 SearchFilter.propTypes = {
   showMenu: PropTypes.bool.isRequired,
   handleCloseMenu: PropTypes.func.isRequired,
@@ -174,12 +195,22 @@ SearchFilter.propTypes = {
   loading: PropTypes.bool.isRequired,
   filteredChurches: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string.isRequired,
+      id: PropTypes.string,
       churchName: PropTypes.string.isRequired,
       churchLocation: PropTypes.string,
+      massDate: PropTypes.string,
+      massTime: PropTypes.string,
+      massType: PropTypes.string,
+      presidingPriest: PropTypes.string,
     })
   ).isRequired,
   handleCancel: PropTypes.func.isRequired,
+  selectedLanguage: PropTypes.string.isRequired,
+  handleLanguageChange: PropTypes.func.isRequired,
+  drawerInfo: PropTypes.object.isRequired,
+  setDrawerInfo: PropTypes.func.isRequired,
+  churchPhoto: PropTypes.string.isRequired,
+  setChurchPhoto: PropTypes.func.isRequired,
 };
 
 export default SearchFilter;

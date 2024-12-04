@@ -1,16 +1,18 @@
+//MapComponent.jsx
+
 import { useState, useEffect } from 'react';
 import { GoogleMap, LoadScript, Marker, useLoadScript } from '@react-google-maps/api';
 import { query, where, collection, getDocs } from 'firebase/firestore';
-import { db } from '/backend/firebase';
-import { Offcanvas } from 'react-bootstrap';
+// import { db } from '/backend/firebase';
+import { Alert} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import loadingGif from '/src/assets/Ripple@1x-1.0s-200px-200px.gif';
 import coverLogo from '/src/assets/logo cover.png';
 import logo from '/src/assets/G-Guide LOGO.png';
+import visLogo from '/src/assets/visLogo.png';
 import AutocompleteSearch from './AutocompleteSearch';
 import SearchFilter from './SearchFilter';
-import { Link } from 'react-router-dom';
-import { fetchChurchData, handleMapLoad, handleMarkerClick, onZoomChanged } from '/src/components/mapfiles/churchDataUtils';
+import { useNavigate } from 'react-router-dom';
+import { fetchChurchData, handleMapLoad, handleMarkerClick, onZoomChanged, fetchChurchesByLanguage, fetchChurchesByService } from '/src/components/mapfiles/churchDataUtils';
 
 const libraries = ['places', 'geometry']; 
 const servicesList = ['Marriages', 'Baptism', 'Burials', 'Confirmation', 'Mass Intentions'];
@@ -31,6 +33,12 @@ const MapComponent = () => {
   const [customIcon, setCustomIcon] = useState(null);  
   const [showMenu, setShowMenu] = useState(false); 
   const [selectedService, setSelectedService] = useState('');  
+  const navigate = useNavigate();
+
+  const [selectedLanguage, setSelectedLanguage] = useState(''); 
+  const [error, setError] = useState(null);
+  const [filteredChurchesByLanguage, setFilteredChurchesByLanguage] = useState([]);
+
 
   useEffect(() => {
     const success = (position) => {
@@ -52,108 +60,92 @@ const MapComponent = () => {
     }
   }, []);
 
-  const fetchChurchesByService = async (selectedService) => {
-    try {
-      console.log(`Selected Service: ${selectedService}`);
-  
-      const servicesQuery = query(
-        collection(db, 'services'),
-        where('activeSchedules', 'array-contains', selectedService)
-      );
-      const servicesSnapshot = await getDocs(servicesQuery);
-  
-      if (servicesSnapshot.empty) {
-        console.log("No services found for the selected service.");
-        return;
-      }
-  
-      console.log(`Services Found: ${servicesSnapshot.docs.length}`);
-  
-      const userIds = servicesSnapshot.docs.map(serviceDoc => serviceDoc.id);
-      console.log(`Collected userIds from services: ${userIds}`);
-  
-      const churchesList = [];
-  
-      for (const userId of userIds) {
-        const coordinatorQuery = query(
-          collection(db, 'coordinator'),
-          where('userId', '==', userId)
-        );
-        const coordinatorSnapshot = await getDocs(coordinatorQuery);
-  
-        if (!coordinatorSnapshot.empty) {
-          console.log(`Coordinator found for userId: ${userId}`);
-          const coordinatorID = coordinatorSnapshot.docs[0].id;
-  
-          const churchQuery = query(
-            collection(db, 'church'),
-            where('coordinatorID', '==', coordinatorID)
-          );
-          const churchSnapshot = await getDocs(churchQuery);
-  
-          if (!churchSnapshot.empty) {
-            for (const churchDoc of churchSnapshot.docs) {
-              const churchData = churchDoc.data();
-              const churchName = churchData.churchName;
-  
-              const churchLocationQuery = query(
-                collection(db, 'churchLocation'),
-                where('churchName', '==', churchName)
-              );
-  
-              const churchLocationSnapshot = await getDocs(churchLocationQuery);
-  
-              if (!churchLocationSnapshot.empty) {
-                const churchLocationDoc = churchLocationSnapshot.docs[0];
-                const churchLocationData = churchLocationDoc.data();
-                const churchLocation = churchLocationData.churchLocation; 
-                const latitude = churchLocationData.latitude;
-                const longitude = churchLocationData.longitude;
-  
-                console.log(`Church Name Found: ${churchName}`);
-                console.log(`Church Location: ${churchLocation}`);
-
-                if (latitude && longitude) { 
-                  churchesList.push({
-                      id: churchDoc.id,
-                      churchName: churchName,
-                      churchLocation: churchLocation || "Location not available", 
-                      latitude: parseFloat(latitude),
-                      longitude: parseFloat(longitude)
-                  });
-                } else {
-                  console.warn(`Missing latitude/longitude for church: ${churchName}`);
-                }
-              } else {
-                console.log(`No location found for churchName: ${churchName}`);
-                churchesList.push({
-                  id: churchDoc.id,
-                  churchName: churchName,
-                  churchLocation: "Location not available",
-                });
-              }
-            }
-          } else {
-            console.log(`No church found for coordinatorID: ${coordinatorID}`);
-          }
-        } else {
-          console.log(`No coordinator found for userId: ${userId}`);
+  // **Fetch Churches by Language**
+  useEffect(() => {
+    if (selectedLanguage) {
+      setLoading(true);
+      const fetchData = async () => {
+        try {
+          const churches = await fetchChurchesByLanguage(selectedLanguage);
+          setChurches(churches);
+          setFilteredChurches(churches);
+          sortAndSetTopChurches(churches, currentPosition, setFilteredChurches);
+        } catch (error) {
+          console.error('Error fetching churches by language:', error);
+          setError('Failed to fetch churches by language.');
+          setChurches([]);
+          setFilteredChurches([]);
+        } finally {
+          setLoading(false);
         }
-      }
-      setFilteredChurches(churchesList);
-      setChurches(churchesList);
-      sortAndSetTopChurches(churchesList);
+      };
+      fetchData();
+    }
+  }, [selectedLanguage, currentPosition]);
 
+  useEffect(() => {
+    if (selectedService) {
+      setLoading(true);
+      const fetchData = async () => {
+        try {
+          const churches = await fetchChurchesByService(selectedService);
+          setChurches(churches);
+          setFilteredChurches(churches);
+          sortAndSetTopChurches(churches);
+        } catch (error) {
+          console.error('Error fetching churches by service:', error);
+          setError('Failed to fetch churches by service.');
+          setChurches([]);
+          setFilteredChurches([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
+    }
+  }, [selectedService, currentPosition]);
   
-      if (churchesList.length === 0) {
-        console.log("No churches available for the selected service.");
-      } else {
-        console.log(`Filtered Churches: ${churchesList}`);
-      }
+
+  const handleServiceChange = (e) => {
+    setSelectedService(e.target.value);
+  };
+
+  const handleLanguageChange = async (e) => {
+    const language = e.target.value;
+    setSelectedLanguage(language);
+    setLoading(true);
+  
+    try {
+      const churches = await fetchChurchesByLanguage(language);
+      console.log('Fetched Churches:', churches);
+      setFilteredChurchesByLanguage(churches);
     } catch (error) {
-      console.error('Error fetching churches by service:', error);
+      console.error('Error fetching churches by language:', error);
+    } finally {
+      setLoading(false);
     }
   };
+  
+   // **Initial Data Fetch**
+   useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchChurchData();
+        setChurches(data);
+        setFilteredChurches(data);
+        sortAndSetTopChurches(data, currentPosition, setFilteredChurches);
+      } catch (error) {
+        console.error('Error fetching initial church data:', error);
+        setError('Failed to fetch church data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, [currentPosition]);
 
   const sortAndSetTopChurches = (churchesList) => {
     if (currentPosition && window.google) {
@@ -190,17 +182,6 @@ const MapComponent = () => {
     sortAndSetTopChurches(churches);
   };
 
-  useEffect(() => {
-    if (selectedService) {
-      setLoading(true);
-      fetchChurchesByService(selectedService);
-    }
-  }, [selectedService]);
-
-  const handleServiceChange = (e) => {
-    setSelectedService(e.target.value);
-  };
-
   const handlePlaceSelected = (location) => {
     if (map) {
       map.panTo(location);
@@ -209,18 +190,6 @@ const MapComponent = () => {
       console.error('Map is not loaded yet!');
     }
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const data = await fetchChurchData();
-      setChurches(data);
-      setLoading(false);
-    };
-  
-    fetchData();
-  }, []);
-
   
   const handleCloseDrawer = () => {
     setDrawerInfo({ show: false, title: '', description: '', telephone: '', serviceHours: '' });
@@ -234,18 +203,36 @@ const MapComponent = () => {
     window.location.reload();
   }
 
+  const uniqueChurches = Array.from(
+    new Map(
+      (filteredChurches || churches).map((church) => [church.id, church])
+    ).values()
+  );
+
+  const handleMarkerClick = (church) => {
+    setDrawerInfo({
+      show: true,
+      title: church.churchName || 'Church Name Not Available',
+      description: church.churchLocation || 'Location not available',
+      telephone: church.telephone || 'No contact information available',
+      serviceHours: church.serviceHours || 'No service hours available',
+    });
+  
+    setChurchPhoto(church.churchPhoto || coverLogo);
+  };
+  
+
   return (
     <>
       <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={libraries}>
         <div className="map-search-container">
-          <div className="logo-container">
-            <img src={logo} alt="Logo" style={{boxShadow: '2px 6px 6px rgba(0, 0, 0, 0.3)', borderRadius: '30px', marginTop: '-0.5rem'}}/>
+        <div className="logo-container">
+        <img src={logo} alt="Logo" onClick={() => navigate('/home')} style={{boxShadow: '2px 6px 6px rgba(0, 0, 0, 0.3)', borderRadius: '30px', marginTop: '-0.5rem', cursor:'pointer'}}/>
             <h3 style={{ fontFamily: 'Roboto, sans-serif' }}>G! Guide</h3>
             <i className="fas fa-bars" onClick={handleMenuOpen}></i>
             <div className='visita-iglesia'>
-            {/* <VisitaIglesia fetchChurchData={fetchChurchData} /> */}
-
-              <Link to='/visita-iglesia'> <h5>Visita Iglesia</h5> </Link>
+            <img src={visLogo} alt="Visita Iglesia" className="visita-iglesia-icon" />
+            <h5 onClick={() => navigate('/visita-iglesia')} style={{ fontFamily: 'Roboto, sans-serif' }}>Visita Iglesia</h5>
             </div>
           </div>
         </div>
@@ -268,12 +255,33 @@ const MapComponent = () => {
                   key={church.id}
                   position={{ lat, lng }}
                   icon={customIcon}
-                  onClick={() => handleMarkerClick(church, setDrawerInfo, setChurchPhoto)}
+                  onClick={() => {
+                    console.log('Clicked on Marker for:', church);
+                    handleMarkerClick(church, setDrawerInfo, setChurchPhoto);
+                  }}
+                  />
+              );
+            }
+            return null;
+          })}
+          {uniqueChurches.map((church) => {
+            const lat = parseFloat(church.latitude);
+            const lng = parseFloat(church.longitude);
+            if (!isNaN(lat) && !isNaN(lng)) {
+              return (
+                <Marker
+                  key={church.id}
+                  position={{ lat, lng }}
+                  icon={customIcon}
+                  onClick={() =>
+                    handleMarkerClick(church, setDrawerInfo, setChurchPhoto)
+                  }
                 />
               );
             }
             return null;
           })}
+          
         </GoogleMap>
       </LoadScript>
 
@@ -288,7 +296,20 @@ const MapComponent = () => {
         filteredChurches={filteredChurches}
         handleMarkerClick={handleMarkerClick}
         handleCancel={handleCancel}
+        selectedLanguage={selectedLanguage} 
+        handleLanguageChange={handleLanguageChange}
+        filteredChurchesByLanguage={filteredChurchesByLanguage}
+        drawerInfo={drawerInfo}
+        setDrawerInfo={setDrawerInfo} 
+        churchPhoto={churchPhoto} 
+        setChurchPhoto={setChurchPhoto} 
       />
+
+      {error && (
+        <Alert variant="danger" onClose={() => setError(null)} dismissible style={{ position: 'absolute', top: '10px', right: '10px', zIndex: '1000' }}>
+          {error}
+        </Alert>
+      )}
     </>
   );
 };

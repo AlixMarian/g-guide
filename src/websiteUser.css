@@ -563,29 +563,43 @@
 }
 
 .visita-iglesia {
-  padding: 5px;
-  margin-left: 3rem;
-  transition: color 0.5s ease, font-weight 0.2s ease, font-size 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: 
+    background-color 0.3s ease,
+    transform 0.2s ease,
+    box-shadow 0.3s ease;
   cursor: pointer;
-  font-weight: bold;
-  text-decoration: none;
+  font-family: Arial, sans-serif;
+  margin-top: -.3rem;
+  gap: 2px;
+}
+
+.visita-iglesia-icon {
+  width: 20px !important;
+  height: 20px !important;
+  object-fit: contain;
 }
 
 .visita-iglesia h5 {
-  font-size: 20px;
-  margin: 0; 
-  text-decoration: none; 
-  color: inherit; 
+  font-size: 1.2rem;
+  margin: 0;
+  color: black;
+  transition: color 0.3s ease;
+  font-weight: bold;
 }
 
-.visita-iglesia a {
-  text-decoration: none; 
-  color: inherit; 
+.visita-iglesia:hover {
+  background-color: rgba(16, 37, 227, 0.05);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 6px rgba(21, 8, 160, 0.1);
 }
 
 .visita-iglesia:hover h5 {
-  font-size: 21px;
-  font-weight: bold;
+  color: black;
 }
 
 .draggable-destination {
