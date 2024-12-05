@@ -1,20 +1,50 @@
-//churchDataUtils.jsx
+// churchDataUtils.jsx
 
 import { collection, getDocs, query, where, getDoc, doc } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import coverLogo from '/src/assets/logo cover.png';
 
-export const onZoomChanged = (map, setCustomIcon) => {
-  if (map) {
-    const zoom = map.getZoom();
-    const newSize = zoom > 15 ? 40 : zoom > 12 ? 30 : 20;
-    setCustomIcon((prevIcon) => ({
-      ...prevIcon,
-      scaledSize: new window.google.maps.Size(newSize, newSize),
-    }));
+/**
+ * Handles map load event by setting the map instance and customizing marker icons.
+ */
+export const handleMapLoad = (mapInstance, setMap, setCustomIcon, setLoading) => {
+  setMap(mapInstance);
+  if (window.google) {
+    setCustomIcon({
+      url: '/src/assets/location.png', // Ensure the path is correct
+      scaledSize: new window.google.maps.Size(40, 40),
+      anchor: new window.google.maps.Point(20, 40),
+    });
   }
+  setLoading(false);
 };
 
+/**
+ * Handles marker click by setting the drawer information and church photo.
+ */
+export const handleMarkerClick = (church, setDrawerInfo, setChurchPhoto) => {
+  console.log('Clicked church ID:', church.id); // Debugging line
+
+  setDrawerInfo({
+    show: true,
+    id: church.id || '', // Ensure id is included
+    title: church.churchName || 'Church Name Not Available',
+    description: church.churchAddress || church.churchLocation || 'Address not available',
+    telephone: church.telephone || 'No contact information available',
+    churchStartTime: church.churchStartTime || 'Start time not available',
+    churchEndTime: church.churchEndTime || 'End time not available',
+    massDate: church.massDate || '',
+    massTime: church.massTime || '',
+    massType: church.massType || '',
+    presidingPriest: church.presidingPriest || '',
+  });
+
+  setChurchPhoto(church.churchPhoto || coverLogo);
+};
+
+/**
+ * Fetches all church data by combining data from 'church', 'churchLocation', and 'churchPhotos' collections.
+ */
 export const fetchChurchData = async () => {
   try {
     const churchLocationCollection = collection(db, 'churchLocation');
@@ -40,102 +70,36 @@ export const fetchChurchData = async () => {
 
     const combinedChurchData = churchLocationList.map((location) => {
       const matchedChurch = churchList.find(
-        (church) => church.churchName === location.churchName
+        (church) => church.churchLocationID === location.id
       );
       const matchedPhoto = churchPhotosList.find(
-        (photo) =>
-          photo.uploader === (matchedChurch ? matchedChurch.coordinatorID : null)
+        (photo) => photo.uploader === (matchedChurch ? matchedChurch.coordinatorID : null)
       );
 
       return {
         ...location,
         ...(matchedChurch || {}),
         churchPhoto: matchedPhoto ? matchedPhoto.photoLink : coverLogo,
+        telephone: matchedChurch ? matchedChurch.churchContactNum : 'No contact information available',
+        // Ensure churchStartTime and churchEndTime are fetched from matchedChurch
+        churchStartTime: matchedChurch ? matchedChurch.churchStartTime : 'Start time not available',
+        churchEndTime: matchedChurch ? matchedChurch.churchEndTime : 'End time not available',
       };
     });
 
     return combinedChurchData;
   } catch (error) {
     console.error('Error fetching church data:', error);
-    return []; 
+    return [];
   }
 };
 
-export const handleMapLoad = (mapInstance, setMap, setCustomIcon, setLoading) => {
-    setMap(mapInstance);
-    if (window.google) {
-      setCustomIcon({
-        url: 'src/assets/location.png', 
-        scaledSize: new window.google.maps.Size(40, 40),
-        anchor: new window.google.maps.Point(20, 40),
-      });
-    }
-    if (setLoading) {
-      setLoading(false);
-    }
-  };
-
-export const handleMarkerClick = (church, setDrawerInfo, setChurchPhoto) => {
-  const telephone = church.churchContactNum ? church.churchContactNum : 'No data added yet.';
-  
-  const serviceHours = (!church.churchStartTime || !church.churchEndTime || 
-      church.churchStartTime === "none" || church.churchEndTime === "none")
-    ? 'No data added yet.' 
-    : `${convertTo12HourFormat(church.churchStartTime)} - ${convertTo12HourFormat(church.churchEndTime)}`;
-
-  const photo = church.churchPhoto ? church.churchPhoto : coverLogo;
-
-  setDrawerInfo({
-    show: true,
-    title: church.churchName || 'Church Name Not Available',
-    description: church.churchLocation || 'Location not available',  
-    telephone: telephone,
-    serviceHours: serviceHours,
-  });
-
-  setChurchPhoto(photo);
-};
-
-export const convertTo12HourFormat = (time) => {
-  const [hours, minutes] = time.split(':');
-  const period = hours >= 12 ? 'PM' : 'AM';
-  const adjustedHours = hours % 12 || 12;
-  return `${adjustedHours}:${minutes} ${period}`;
-};
-
-// export const sortAndSetTopChurches = (churchesList, currentPosition, setFilteredChurches) => { 
-//   if (currentPosition && window.google) {
-//       const { lat, lng } = currentPosition;
-//       const currentLatLng = new window.google.maps.LatLng(lat, lng);
-
-//       const sortedChurches = churchesList.map((church) => {
-//           const latitude = parseFloat(church.latitude);
-//           const longitude = parseFloat(church.longitude);
-
-//           if (!isNaN(latitude) && !isNaN(longitude)) {
-//               const churchLatLng = new window.google.maps.LatLng(latitude, longitude);
-//               const distance = window.google.maps.geometry.spherical.computeDistanceBetween(churchLatLng, currentLatLng) / 1000; // Convert to km
-//               return {
-//                   ...church,
-//                   distance,
-//               };
-//           } else {
-//               console.warn(`Invalid latitude or longitude for church: ${church.churchName}`);
-//               return {
-//                   ...church,
-//                   distance: Infinity,
-//               };
-//           }
-//       });
-//       sortedChurches.sort((a, b) => a.distance - b.distance);
-//       console.log("Sorted Churches:", sortedChurches);
-//       setFilteredChurches(sortedChurches.slice(0, 10));
-//   }
-// };
-
+/**
+ * Fetches churches by language from 'massSchedules' and related collections.
+ */
 export const fetchChurchesByLanguage = async (selectedLanguage) => {
   try {
-    // Step 1: Query massSchedules for the selected language
+    // Query massSchedules for the selected language
     const massSchedulesQuery = query(
       collection(db, 'massSchedules'),
       where('massLanguage', '==', selectedLanguage)
@@ -147,7 +111,7 @@ export const fetchChurchesByLanguage = async (selectedLanguage) => {
       return [];
     }
 
-    // Step 2: Process massSchedules and fetch related church data
+    // Fetch related church data
     const churchesList = await Promise.all(
       massSchedulesSnapshot.docs.map(async (massDoc) => {
         const massData = massDoc.data();
@@ -160,23 +124,27 @@ export const fetchChurchesByLanguage = async (selectedLanguage) => {
         const churchData = churchDoc.data();
         const churchLocationID = churchData.churchLocationID;
 
-        // Fetch the church location document
-        const locationQuery = query(
-          collection(db, 'churchLocation'),
-          where('__name__', '==', churchLocationID)
-        );
-        const locationSnapshot = await getDocs(locationQuery);
-
-        const locationData = locationSnapshot.empty
-          ? { churchLocation: 'Location not available' }
-          : locationSnapshot.docs[0].data();
+        // Fetch church location data
+        const locationDoc = await getDoc(doc(db, 'churchLocation', churchLocationID));
+        const locationData = locationDoc.exists()
+          ? locationDoc.data()
+          : { churchLocation: 'Location not available', churchStartTime: '', churchEndTime: '' };
 
         return {
-          ...massData,
-          churchName: churchData.churchName,
-          churchLocation: locationData.churchLocation,
-          latitude: locationData.latitude,
-          longitude: locationData.longitude,
+          id: churchDoc.id,
+          churchName: churchData.churchName || 'Name not available',
+          churchAddress: locationData.churchLocation || 'Address not available',
+          churchLocation: locationData.churchLocation || 'Location not available',
+          latitude: locationData.latitude || 0,
+          longitude: locationData.longitude || 0,
+          churchStartTime: churchData.churchStartTime || 'Start time not available',
+          churchEndTime: churchData.churchEndTime || 'End time not available',
+          telephone: churchData.telephone || 'No contact information available',
+          churchPhoto: churchData.churchPhoto || coverLogo,
+          massDate: massData.massDate || '',
+          massTime: massData.massTime || '',
+          massType: massData.massType || '',
+          presidingPriest: massData.presidingPriest || '',
         };
       })
     );
@@ -188,97 +156,120 @@ export const fetchChurchesByLanguage = async (selectedLanguage) => {
   }
 };
 
+/**
+ * Fetches churches by service from 'services' and related collections.
+ */
 export const fetchChurchesByService = async (selectedService) => {
   try {
-    console.log(`Selected Service: ${selectedService}`);
+    if (!selectedService) {
+      console.log('No service selected.');
+      return [];
+    }
 
-    // **Step 1: Query services where activeSchedules includes selectedService**
+    console.log(`Fetching churches offering: ${selectedService}`);
+
+    // Query 'services' collection where [selectedService].active == true
     const servicesQuery = query(
       collection(db, 'services'),
-      where('activeSchedules', 'array-contains', selectedService)
+      where(`${selectedService}.active`, '==', true)
     );
     const servicesSnapshot = await getDocs(servicesQuery);
 
     if (servicesSnapshot.empty) {
-      console.log("No services found for the selected service.");
+      console.log(`No active services found for the selected service: ${selectedService}.`);
       return [];
     }
 
-    console.log(`Services Found: ${servicesSnapshot.docs.length}`);
+    // Extract church IDs
+    const churchIds = servicesSnapshot.docs.map((doc) => doc.id);
+    console.log(`Found ${churchIds.length} churches offering ${selectedService}.`);
 
-    // **Step 2: Extract unique coordinatorIDs from services**
-    const coordinatorIds = servicesSnapshot.docs.map(serviceDoc => serviceDoc.data().coordinatorID);
-    const uniqueCoordinatorIds = [...new Set(coordinatorIds)]; // Remove duplicates
-    console.log(`Collected coordinatorIDs from services: ${uniqueCoordinatorIds}`);
-
-    const churchesList = [];
-
-    // **Step 3: Batch the coordinatorIds for Firestore 'in' queries (max 10 per batch)**
-    const batches = [];
-    while (uniqueCoordinatorIds.length) {
-      batches.push(uniqueCoordinatorIds.splice(0, 10));
+    if (churchIds.length === 0) {
+      console.log('No church IDs found with active service.');
+      return [];
     }
 
-    for (const batch of batches) {
-      const churchQuery = query(
-        collection(db, 'church'),
-        where('coordinatorID', 'in', batch)
-      );
-      const churchSnapshot = await getDocs(churchQuery);
+    // Fetch church details
+    const churchDetailsPromises = churchIds.map(async (churchID) => {
+      const churchRef = doc(db, 'church', churchID);
+      const churchSnap = await getDoc(churchRef);
 
-      if (!churchSnapshot.empty) {
-        for (const churchDoc of churchSnapshot.docs) {
-          const churchData = churchDoc.data();
-          const churchName = churchData.churchName;
-          const churchLocationID = churchData.churchLocationID;
+      if (churchSnap.exists()) {
+        const churchData = churchSnap.data();
+        const churchLocationID = churchData.churchLocationID;
 
-          // **Step 4: Fetch churchLocation**
-          const churchLocationDoc = await getDoc(doc(db, 'churchLocation', churchLocationID));
-          let churchLocation = "Location not available";
-          let latitude = null;
-          let longitude = null;
-
-          if (churchLocationDoc.exists()) {
-            const locationData = churchLocationDoc.data();
-            churchLocation = locationData.churchLocation;
-            latitude = parseFloat(locationData.latitude);
-            longitude = parseFloat(locationData.longitude);
-          } else {
-            console.log(`No location found for churchName: ${churchName}`);
-          }
-
-          // **Step 5: Combine data**
-          churchesList.push({
-            id: churchDoc.id,
-            churchName: churchName,
-            churchLocation: churchLocation,
+        if (!churchLocationID) {
+          console.log(`No churchLocationID found for church ID: ${churchID}`);
+          return {
+            id: churchSnap.id,
+            churchName: churchData.churchName || 'Name not available',
+            churchAddress: 'Address not available',
+            churchStartTime: churchData.churchStartTime || 'Start time not available',
+            churchEndTime: churchData.churchEndTime || 'End time not available',
+            latitude: churchData.latitude || 0,
+            longitude: churchData.longitude || 0,
             telephone: churchData.telephone || 'No contact information available',
-            serviceHours: churchData.serviceHours || 'No service hours available',
-            latitude: latitude,
-            longitude: longitude,
-            churchPhoto: churchData.churchPhoto || coverLogo, // Ensure churchPhoto is included
-          });
+            churchPhoto: churchData.churchPhoto || coverLogo,
+          };
         }
+
+        // Fetch church location data
+        const locationDoc = await getDoc(doc(db, 'churchLocation', churchLocationID));
+        const locationData = locationDoc.exists()
+          ? locationDoc.data()
+          : { churchLocation: 'Location not available', churchStartTime: '', churchEndTime: '' };
+
+        return {
+          id: churchSnap.id,
+          churchName: churchData.churchName || 'Name not available',
+          churchAddress: locationData.churchLocation || 'Address not available',
+          churchLocation: locationData.churchLocation || 'Location not available',
+          latitude: locationData.latitude || 0,
+          longitude: locationData.longitude || 0,
+          churchStartTime: churchData.churchStartTime || 'Start time not available',
+          churchEndTime: churchData.churchEndTime || 'End time not available',
+          telephone: churchData.telephone || 'No contact information available',
+          churchPhoto: churchData.churchPhoto || coverLogo,
+        };
       } else {
-        console.log(`No churches found for coordinatorIDs: ${batch}`);
+        console.log(`No church found with ID: ${churchID}`);
+        return null;
       }
-    }
+    });
 
-    // **Step 6: Remove duplicate churches based on 'id'**
-    const uniqueChurches = [];
-    const seenChurchIds = new Set();
-    for (const church of churchesList) {
-      if (!seenChurchIds.has(church.id)) {
-        uniqueChurches.push(church);
-        seenChurchIds.add(church.id);
-      }
-    }
+    const churchDetailsResults = await Promise.all(churchDetailsPromises);
+    const churchDetails = churchDetailsResults.filter((church) => church !== null);
 
-    console.log(`Total Churches Found: ${uniqueChurches.length}`);
-    return uniqueChurches;
+    console.log(`Fetched details for ${churchDetails.length} churches.`);
+
+    return churchDetails;
   } catch (error) {
     console.error('Error fetching churches by service:', error);
     return [];
   }
 };
 
+/**
+ * Converts 24-hour time format to 12-hour format.
+ */
+export const convertTo12HourFormat = (time) => {
+  if (!time) return '';
+  const [hours, minutes] = time.split(':');
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const adjustedHours = hours % 12 || 12;
+  return `${adjustedHours}:${minutes} ${period}`;
+};
+
+/**
+ * Handles zoom changes on the map by adjusting marker icon sizes.
+ */
+export const onZoomChanged = (map, setCustomIcon) => {
+  if (map) {
+    const zoom = map.getZoom();
+    const newSize = zoom > 15 ? 40 : zoom > 12 ? 30 : 20;
+    setCustomIcon((prevIcon) => ({
+      ...prevIcon,
+      scaledSize: new window.google.maps.Size(newSize, newSize),
+    }));
+  }
+};
