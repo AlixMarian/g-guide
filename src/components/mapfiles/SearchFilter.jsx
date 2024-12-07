@@ -25,6 +25,8 @@ const SearchFilter = ({
   setDrawerInfo,
   churchPhoto,
   setChurchPhoto,
+  showOtherDatesButton,
+  handleShowAllDates,
 }) => {
   const navigate = useNavigate(); // Initialize navigate
 
@@ -220,6 +222,13 @@ const SearchFilter = ({
                   : selectedLanguage
                   ? 'for the selected language.'
                   : 'nearby.'}
+                {showOtherDatesButton && (
+                  <div style={{ marginTop: '10px', textAlign: 'center' }}>
+                    <Button variant="outline-primary" onClick={handleShowAllDates}>
+                      Display Other Dates
+                    </Button>
+                  </div>
+                )}
               </Alert>
               <Button variant="outline-danger" onClick={handleCancel}>
                 Cancel
@@ -267,20 +276,6 @@ const SearchFilter = ({
                   <span>{`${drawerInfo.churchStartTime} - ${drawerInfo.churchEndTime}`}</span>
                 </div>
               )}
-
-              {drawerInfo.massDate && drawerInfo.massTime && (
-                <div className="drawer-icon-text" style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                  <i className="bi bi-calendar-event-fill" style={{ marginRight: '5px' }}></i>
-                  <span>{`${drawerInfo.massDate} at ${drawerInfo.massTime} (${drawerInfo.massType || 'No Mass Type'})`}</span>
-                </div>
-              )}
-
-              {drawerInfo.presidingPriest && (
-                <div className="drawer-icon-text" style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                  <i className="bi bi-person-fill" style={{ marginRight: '5px' }}></i>
-                  <span>{drawerInfo.presidingPriest}</span>
-                </div>
-              )}
             </div>
           </div>
 
@@ -292,7 +287,7 @@ const SearchFilter = ({
               backgroundColor: '#007bff',
               color: '#fff',
               border: 'none',
-              borderRadius: '5px',
+              borderRadius: '15px',
               cursor: 'pointer',
             }}
             onClick={() => {
@@ -354,6 +349,8 @@ SearchFilter.propTypes = {
   setDrawerInfo: PropTypes.func.isRequired,
   churchPhoto: PropTypes.string.isRequired,
   setChurchPhoto: PropTypes.func.isRequired,
+  showOtherDatesButton: PropTypes.func.isRequired,
+  handleShowAllDates: PropTypes.func.isRequired,
 };
 
 export default SearchFilter;

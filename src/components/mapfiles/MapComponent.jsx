@@ -17,6 +17,7 @@ import {
   onZoomChanged,
   fetchChurchesByLanguage,
   fetchChurchesByService,
+  fetchChurchesByLanguageToday,
 } from './churchDataUtils'; // Ensure the path is correct
 
 const libraries = ['places', 'geometry'];
@@ -54,6 +55,8 @@ const MapComponent = () => {
 
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [error, setError] = useState(null);
+  const [showOtherDatesButton, setShowOtherDatesButton] = useState(false); // Define state
+
 
   useEffect(() => {
     const success = (position) => {
@@ -76,31 +79,57 @@ const MapComponent = () => {
       setError('Geolocation is not supported by your browser.');
     }
   }, []);
-
-  // Fetch Churches by Language
-  useEffect(() => {
-    const fetchData = async () => {
-      if (selectedLanguage) {
-        if (selectedService) {
-          handleCancel();
-        }
-        setLoading(true);
-        try {
-          const churches = await fetchChurchesByLanguage(selectedLanguage);
-          setChurches(churches);
-          sortAndSetTopChurches(churches);
-        } catch (error) {
-          console.error('Error fetching churches by language:', error);
-          setError('Failed to fetch churches by language.');
+  
+useEffect(() => {
+  const fetchData = async () => {
+    if (selectedLanguage) {
+      if (selectedService) {
+        handleCancel();
+      }
+      setLoading(true);
+      try {
+        const churches = await fetchChurchesByLanguageToday(selectedLanguage);
+        if (churches.length === 0) {
+          // Add a state to track if we should show "Display other dates" button
+          setShowOtherDatesButton(true);
           setChurches([]);
           setFilteredChurches([]);
-        } finally {
-          setLoading(false);
+        } else {
+          setChurches(churches);
+          setShowOtherDatesButton(false);
+          sortAndSetTopChurches(churches);
         }
+      } catch (error) {
+        console.error('Error fetching churches by language:', error);
+        setError('Failed to fetch churches by language.');
+        setChurches([]);
+        setFilteredChurches([]);
+      } finally {
+        setLoading(false);
       }
-    };
-    fetchData();
-  }, [selectedLanguage, currentPosition]);
+    }
+  };
+  fetchData();
+}, [selectedLanguage, currentPosition]);
+
+// Add new state in the component
+// const [showOtherDatesButton, setShowOtherDatesButton] = useState(false);
+
+// Add method to handle showing all dates
+const handleShowAllDates = async () => {
+  setLoading(true);
+  try {
+    const churches = await fetchChurchesByLanguage(selectedLanguage);
+    setChurches(churches);
+    setShowOtherDatesButton(false);
+    sortAndSetTopChurches(churches);
+  } catch (error) {
+    console.error('Error fetching all churches:', error);
+    setError('Failed to fetch all churches.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Fetch Churches by Service
   useEffect(() => {
@@ -321,6 +350,8 @@ const MapComponent = () => {
         setDrawerInfo={setDrawerInfo}
         churchPhoto={churchPhoto}
         setChurchPhoto={setChurchPhoto}
+        showOtherDatesButton={showOtherDatesButton}
+        handleShowAllDates={handleShowAllDates}
       />
 
       {error && (

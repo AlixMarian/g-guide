@@ -4,14 +4,11 @@ import { collection, getDocs, query, where, getDoc, doc } from 'firebase/firesto
 import { db } from '/backend/firebase';
 import coverLogo from '/src/assets/logo cover.png';
 
-/**
- * Handles map load event by setting the map instance and customizing marker icons.
- */
 export const handleMapLoad = (mapInstance, setMap, setCustomIcon, setLoading) => {
   setMap(mapInstance);
   if (window.google) {
     setCustomIcon({
-      url: '/src/assets/location.png', // Ensure the path is correct
+      url: '/src/assets/location.png',
       scaledSize: new window.google.maps.Size(40, 40),
       anchor: new window.google.maps.Point(20, 40),
     });
@@ -19,15 +16,13 @@ export const handleMapLoad = (mapInstance, setMap, setCustomIcon, setLoading) =>
   setLoading(false);
 };
 
-/**
- * Handles marker click by setting the drawer information and church photo.
- */
-export const handleMarkerClick = (church, setDrawerInfo, setChurchPhoto) => {
-  console.log('Clicked church ID:', church.id); // Debugging line
+export const handleMarkerClick = async (church, setDrawerInfo, setChurchPhoto) => {
+  console.log('Clicked church ID:', church.id); 
 
+  // Set drawer information
   setDrawerInfo({
     show: true,
-    id: church.id || '', // Ensure id is included
+    id: church.id || '', 
     title: church.churchName || 'Church Name Not Available',
     description: church.churchAddress || church.churchLocation || 'Address not available',
     telephone: church.telephone || 'No contact information available',
@@ -39,12 +34,14 @@ export const handleMarkerClick = (church, setDrawerInfo, setChurchPhoto) => {
     presidingPriest: church.presidingPriest || '',
   });
 
+  // Set initial church photo
   setChurchPhoto(church.churchPhoto || coverLogo);
+
+  // Fetch and update church photoLink
+  const photoLink = await fetchPhotoLink(church.id);
+  setChurchPhoto(photoLink);
 };
 
-/**
- * Fetches all church data by combining data from 'church', 'churchLocation', and 'churchPhotos' collections.
- */
 export const fetchChurchData = async () => {
   try {
     const churchLocationCollection = collection(db, 'churchLocation');
@@ -81,7 +78,6 @@ export const fetchChurchData = async () => {
         ...(matchedChurch || {}),
         churchPhoto: matchedPhoto ? matchedPhoto.photoLink : coverLogo,
         telephone: matchedChurch ? matchedChurch.churchContactNum : 'No contact information available',
-        // Ensure churchStartTime and churchEndTime are fetched from matchedChurch
         churchStartTime: matchedChurch ? matchedChurch.churchStartTime : 'Start time not available',
         churchEndTime: matchedChurch ? matchedChurch.churchEndTime : 'End time not available',
       };
@@ -139,7 +135,7 @@ export const fetchChurchesByLanguage = async (selectedLanguage) => {
           longitude: locationData.longitude || 0,
           churchStartTime: churchData.churchStartTime || 'Start time not available',
           churchEndTime: churchData.churchEndTime || 'End time not available',
-          telephone: churchData.telephone || 'No contact information available',
+          telephone: churchData.churchContactNum || 'No contact information available',
           churchPhoto: churchData.churchPhoto || coverLogo,
           massDate: massData.massDate || '',
           massTime: massData.massTime || '',
@@ -156,6 +152,71 @@ export const fetchChurchesByLanguage = async (selectedLanguage) => {
   }
 };
 
+
+export const fetchChurchesByLanguageToday = async (selectedLanguage) => {
+  try {
+    // Get today's day name, e.g., 'Friday'
+    const today = new Date();
+    const options = { weekday: 'long' };
+    const todayDay = today.toLocaleDateString('en-US', options);
+
+    // Query massSchedules for the selected language and today's day
+    const massSchedulesQuery = query(
+      collection(db, 'massSchedules'),
+      where('massLanguage', '==', selectedLanguage),
+      where('massDate', '==', todayDay)
+    );
+    const massSchedulesSnapshot = await getDocs(massSchedulesQuery);
+
+    if (massSchedulesSnapshot.empty) {
+      console.log(`No mass schedules found for language: ${selectedLanguage} on ${todayDay}`);
+      return [];
+    }
+
+    // Fetch related church data
+    const churchesList = await Promise.all(
+      massSchedulesSnapshot.docs.map(async (massDoc) => {
+        const massData = massDoc.data();
+        const churchId = massData.churchId;
+
+        // Fetch church data
+        const churchDoc = await getDoc(doc(db, 'church', churchId));
+        if (!churchDoc.exists()) return null;
+
+        const churchData = churchDoc.data();
+        const churchLocationID = churchData.churchLocationID;
+
+        // Fetch church location data
+        const locationDoc = await getDoc(doc(db, 'churchLocation', churchLocationID));
+        const locationData = locationDoc.exists()
+          ? locationDoc.data()
+          : { churchLocation: 'Location not available', churchStartTime: '', churchEndTime: '' };
+
+        return {
+          id: churchDoc.id,
+          churchName: churchData.churchName || 'Name not available',
+          churchAddress: locationData.churchLocation || 'Address not available',
+          churchLocation: locationData.churchLocation || 'Location not available',
+          latitude: locationData.latitude || 0,
+          longitude: locationData.longitude || 0,
+          churchStartTime: churchData.churchStartTime || 'Start time not available',
+          churchEndTime: churchData.churchEndTime || 'End time not available',
+          telephone: churchData.churchContactNum || 'No contact information available',
+          churchPhoto: churchData.churchPhoto || coverLogo,
+          massDate: massData.massDate || '',
+          massTime: massData.massTime || '',
+          massType: massData.massType || '',
+          presidingPriest: massData.presidingPriest || '',
+        };
+      })
+    );
+
+    return churchesList.filter((church) => church !== null); // Remove null results
+  } catch (error) {
+    console.error('Error fetching churches by language:', error);
+    return [];
+  }
+};
 /**
  * Fetches churches by service from 'services' and related collections.
  */
@@ -208,7 +269,7 @@ export const fetchChurchesByService = async (selectedService) => {
             churchEndTime: churchData.churchEndTime || 'End time not available',
             latitude: churchData.latitude || 0,
             longitude: churchData.longitude || 0,
-            telephone: churchData.telephone || 'No contact information available',
+            telephone: churchData.churchContactNum || 'No contact information available',
             churchPhoto: churchData.churchPhoto || coverLogo,
           };
         }
@@ -228,7 +289,7 @@ export const fetchChurchesByService = async (selectedService) => {
           longitude: locationData.longitude || 0,
           churchStartTime: churchData.churchStartTime || 'Start time not available',
           churchEndTime: churchData.churchEndTime || 'End time not available',
-          telephone: churchData.telephone || 'No contact information available',
+          telephone: churchData.churchContactNum || 'No contact information available',
           churchPhoto: churchData.churchPhoto || coverLogo,
         };
       } else {
@@ -271,5 +332,58 @@ export const onZoomChanged = (map, setCustomIcon) => {
       ...prevIcon,
       scaledSize: new window.google.maps.Size(newSize, newSize),
     }));
+  }
+};
+
+export const fetchPhotoLink = async (churchId) => {
+  try {
+    // Step 1: Fetch church document
+    const churchRef = doc(db, 'church', churchId);
+    const churchSnap = await getDoc(churchRef);
+    if (!churchSnap.exists()) {
+      console.error(`No church found with ID: ${churchId}`);
+      return coverLogo;
+    }
+    const churchData = churchSnap.data();
+    const coordinatorID = churchData.coordinatorID;
+    if (!coordinatorID) {
+      console.error(`No coordinatorID found for church ID: ${churchId}`);
+      return coverLogo;
+    }
+    
+    // Step 2: Fetch coordinator document
+    const coordinatorRef = doc(db, 'coordinator', coordinatorID);
+    const coordinatorSnap = await getDoc(coordinatorRef);
+    if (!coordinatorSnap.exists()) {
+      console.error(`No coordinator found with ID: ${coordinatorID}`);
+      return coverLogo;
+    }
+    const coordinatorData = coordinatorSnap.data();
+    const userId = coordinatorData.userId;
+    if (!userId) {
+      console.error(`No userId found for coordinator ID: ${coordinatorID}`);
+      return coverLogo;
+    }
+    
+    // Step 3: Query churchPhotos
+    const churchPhotosQuery = query(
+      collection(db, 'churchPhotos'),
+      where('userId', '==', userId),
+      where('uploader', '==', userId)
+    );
+    const churchPhotosSnapshot = await getDocs(churchPhotosQuery);
+    if (!churchPhotosSnapshot.empty) {
+      const photoDoc = churchPhotosSnapshot.docs[0];
+      const photoLink = photoDoc.data().photoLink;
+      if (photoLink) {
+        return photoLink;
+      }
+    }
+    
+    // Step 4: Return default photo if not found
+    return coverLogo;
+  } catch (error) {
+    console.error('Error fetching photoLink:', error);
+    return coverLogo;
   }
 };
