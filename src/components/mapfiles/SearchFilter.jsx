@@ -252,7 +252,7 @@ const SearchFilter = ({
       >
         <Offcanvas.Header>
           <div className="drawer-img-container">
-            <img src={churchPhoto} alt="Church Cover" style={{ width: '100%', height: 'auto' }} />
+            <img src={drawerInfo.photoLink || churchPhoto} alt="Church Cover" style={{ width: '100%', height: 'auto' }} />
           </div>
         </Offcanvas.Header>
         <Offcanvas.Body className="d-flex flex-column">

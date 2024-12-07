@@ -17,9 +17,13 @@ export const handleMapLoad = (mapInstance, setMap, setCustomIcon, setLoading) =>
 };
 
 export const handleMarkerClick = async (church, setDrawerInfo, setChurchPhoto) => {
-  console.log('Clicked church ID:', church.id); 
+  console.log('Clicked church ID:', church.id);
 
-  // Set drawer information
+  // Fetch and update church photoLink
+  const photoLink = await fetchPhotoLink(church.id);
+  setChurchPhoto(photoLink);
+
+  // Set drawer information including photoLink
   setDrawerInfo({
     show: true,
     id: church.id || '', 
@@ -32,15 +36,10 @@ export const handleMarkerClick = async (church, setDrawerInfo, setChurchPhoto) =
     massTime: church.massTime || '',
     massType: church.massType || '',
     presidingPriest: church.presidingPriest || '',
+    photoLink: photoLink || coverLogo, // Add this line
   });
-
-  // Set initial church photo
-  setChurchPhoto(church.churchPhoto || coverLogo);
-
-  // Fetch and update church photoLink
-  const photoLink = await fetchPhotoLink(church.id);
-  setChurchPhoto(photoLink);
 };
+
 
 export const fetchChurchData = async () => {
   try {
@@ -77,7 +76,7 @@ export const fetchChurchData = async () => {
         ...location,
         ...(matchedChurch || {}),
         churchPhoto: matchedPhoto ? matchedPhoto.photoLink : coverLogo,
-        telephone: matchedChurch ? matchedChurch.churchContactNum : 'No contact information available',
+        telephone: matchedChurch ? matchedChurch.churchContactNum : 'No contact available',
         churchStartTime: matchedChurch ? matchedChurch.churchStartTime : 'Start time not available',
         churchEndTime: matchedChurch ? matchedChurch.churchEndTime : 'End time not available',
       };
@@ -346,12 +345,8 @@ export const fetchPhotoLink = async (churchId) => {
     }
     const churchData = churchSnap.data();
     const coordinatorID = churchData.coordinatorID;
-    if (!coordinatorID) {
-      console.error(`No coordinatorID found for church ID: ${churchId}`);
-      return coverLogo;
-    }
-    
-    // Step 2: Fetch coordinator document
+
+    // Step 2: Fetch coordinator document by its ID
     const coordinatorRef = doc(db, 'coordinator', coordinatorID);
     const coordinatorSnap = await getDoc(coordinatorRef);
     if (!coordinatorSnap.exists()) {
@@ -360,18 +355,15 @@ export const fetchPhotoLink = async (churchId) => {
     }
     const coordinatorData = coordinatorSnap.data();
     const userId = coordinatorData.userId;
-    if (!userId) {
-      console.error(`No userId found for coordinator ID: ${coordinatorID}`);
-      return coverLogo;
-    }
-    
-    // Step 3: Query churchPhotos
+
+    // Step 3: Query churchPhotos collection where uploader matches userId
     const churchPhotosQuery = query(
       collection(db, 'churchPhotos'),
-      where('userId', '==', userId),
       where('uploader', '==', userId)
     );
     const churchPhotosSnapshot = await getDocs(churchPhotosQuery);
+
+    // Step 4: If a match is found, return the photoLink field
     if (!churchPhotosSnapshot.empty) {
       const photoDoc = churchPhotosSnapshot.docs[0];
       const photoLink = photoDoc.data().photoLink;
@@ -379,8 +371,8 @@ export const fetchPhotoLink = async (churchId) => {
         return photoLink;
       }
     }
-    
-    // Step 4: Return default photo if not found
+
+    // Step 5: Return default photo if no match is found
     return coverLogo;
   } catch (error) {
     console.error('Error fetching photoLink:', error);
