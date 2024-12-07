@@ -55,7 +55,6 @@ const MapComponent = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [error, setError] = useState(null);
 
-  // Get current position
   useEffect(() => {
     const success = (position) => {
       const positionObj = {
@@ -124,7 +123,6 @@ const MapComponent = () => {
           setLoading(false);
         }
       } else {
-        // Optionally handle when no service is selected
         setChurches([]);
         setFilteredChurches([]);
       }
@@ -194,9 +192,9 @@ const MapComponent = () => {
 
       sortedChurches.sort((a, b) => a.distance - b.distance);
       console.log('Sorted Churches:', sortedChurches);
-      setFilteredChurches(sortedChurches); // Display all churches
+      setFilteredChurches(sortedChurches.splice(0,10)); 
     } else {
-      setFilteredChurches(churchesList); // Display all churches
+      setFilteredChurches(churchesList);
     }
   };
 
@@ -252,7 +250,6 @@ const MapComponent = () => {
       massType: '',
       presidingPriest: '',
     });
-    // Removed window.location.reload();
   };
 
   const uniqueChurches = Array.from(
