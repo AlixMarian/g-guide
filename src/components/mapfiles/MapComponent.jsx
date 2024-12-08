@@ -79,7 +79,7 @@ const MapComponent = () => {
       setError('Geolocation is not supported by your browser.');
     }
   }, []);
-  
+
 useEffect(() => {
   const fetchData = async () => {
     if (selectedLanguage) {
@@ -295,7 +295,7 @@ const handleShowAllDates = async () => {
         <div className="map-search-container">
           <div className="logo-container">
         <img src={logo} alt="Logo" onClick={() => navigate('/home')} style={{boxShadow: '2px 6px 6px rgba(0, 0, 0, 0.3)', borderRadius: '30px', marginTop: '-0.5rem', cursor:'pointer'}}/>
-            <h3 style={{ fontFamily: 'Roboto, sans-serif' }}>G! Guide</h3>
+            <h3 style={{ fontFamily: 'Roboto, sans-serif', cursor:'pointer' }} onClick={() => navigate('/home')}>G! Guide</h3>
             <i className="fas fa-bars" onClick={handleMenuOpen}></i>
             <div className='visita-iglesia'>
             <img src={visLogo} alt="Visita Iglesia" className="visita-iglesia-icon" />

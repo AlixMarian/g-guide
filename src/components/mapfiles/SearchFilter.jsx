@@ -44,27 +44,30 @@ const SearchFilter = ({
       <Offcanvas show={showMenu} onHide={handleCloseMenu} placement="start">
         <Offcanvas.Header>
           <div className="map-search-container">
-            <div className="logo-container-center">
-              <img
-                src={logo}
-                alt="Logo"
-                style={{
-                  width: '60px',
-                  height: '60px',
-                  justifyContent: 'center',
-                  boxShadow: '2px 6px 6px rgba(0, 0, 0, 0.3)',
-                  borderRadius: '30px',
-                }}
-              />
-              <h3
-                style={{
-                  fontFamily: 'Roboto, sans-serif',
-                  marginTop: '0.8rem',
-                  fontWeight: 'bold',
-                }}
-              >
-                G! Guide
-              </h3>
+            <div className="logo-container-center" onClick={() => navigate('/home')} style={{cursor: 'pointer'}}>
+              <div className='logo-container-center animation'>
+                <img 
+                  src={logo}
+                  alt="Logo"
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    justifyContent: 'center',
+                    boxShadow: '2px 6px 6px rgba(0, 0, 0, 0.3)',
+                    borderRadius: '30px',
+                  }}
+                />
+                <h3
+                  style={{
+                    fontFamily: 'Roboto, sans-serif',
+                    marginTop: '1rem',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  G! Guide
+                </h3>
+              </div>
+              
               <button onClick={handleCloseMenu} className="back-button">
                 <i className="bi bi-arrow-return-left"></i>
               </button>
@@ -81,6 +84,11 @@ const SearchFilter = ({
             </div>
           </div>
           <div className="mt-3 d-flex mb-1 justify-content-end">
+            {(selectedService || selectedLanguage) && (
+              <Button className="badge rounded-pill bg-danger fw-normal border-0" onClick={handleCancel}>
+                Clear Filters
+              </Button>
+            )}            
             <div>
               <select
                 value={selectedService}
@@ -158,7 +166,7 @@ const SearchFilter = ({
                           <span>
                             {church.churchStartTime && church.churchEndTime
                               ? `${church.churchStartTime} - ${church.churchEndTime}`
-                              : 'Service times not available'}
+                              : 'Information unavailable'}
                           </span>
                         </div>
                       </>
@@ -204,7 +212,7 @@ const SearchFilter = ({
                           <span>
                             {church.churchStartTime && church.churchEndTime
                               ? `${church.churchStartTime} - ${church.churchEndTime}`
-                              : 'Service times not available'}
+                              : 'Information unavailable'}
                           </span>
                         </div>
                       </>
@@ -270,12 +278,15 @@ const SearchFilter = ({
                 <span>{drawerInfo.telephone}</span>
               </div>
 
-              {drawerInfo.churchStartTime && drawerInfo.churchEndTime && (
-                <div className="drawer-icon-text" style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                  <i className="bi bi-clock-fill" style={{ marginRight: '5px' }}></i>
-                  <span>{`${drawerInfo.churchStartTime} - ${drawerInfo.churchEndTime}`}</span>
-                </div>
-              )}
+              <div className="drawer-icon-text" style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                <i className="bi bi-clock-fill" style={{ marginRight: '5px' }}></i>
+                <span>
+                  {drawerInfo.churchStartTime && drawerInfo.churchEndTime
+                    ? `${drawerInfo.churchStartTime} - ${drawerInfo.churchEndTime}`
+                    : 'Information unavailable'}
+                </span>
+              </div>
+
             </div>
           </div>
 

@@ -462,8 +462,8 @@
 .logo-container-center {
   justify-content: center;
   display: flex;
-  margin: 20px;
-  gap: 5px;
+  /* margin: 20px; */
+  gap: 10px;
 }
 
 .back-button {
@@ -684,4 +684,17 @@ html, body, #root {
     background-color: rgba(16, 37, 227, 0.05);
     transform: translateY(-6px);
     box-shadow: 0 4px 6px rgba(21, 8, 160, 0.1);
+}
+
+.animation:hover {
+  animation: slide-up 0.1s ease-out forwards;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-5px); /* Slide up slightly */
+  }
 }

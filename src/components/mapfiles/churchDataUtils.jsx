@@ -27,11 +27,11 @@ export const handleMarkerClick = async (church, setDrawerInfo, setChurchPhoto) =
   setDrawerInfo({
     show: true,
     id: church.id || '', 
-    title: church.churchName || 'Church Name Not Available',
+    title: church.churchName || 'Church name not available',
     description: church.churchAddress || church.churchLocation || 'Address not available',
-    telephone: church.telephone || 'No contact information available',
-    churchStartTime: church.churchStartTime || 'Start time not available',
-    churchEndTime: church.churchEndTime || 'End time not available',
+    telephone: church.telephone || 'Information unavailable',
+    churchStartTime: church.churchStartTime,
+    churchEndTime: church.churchEndTime,
     massDate: church.massDate || '',
     massTime: church.massTime || '',
     massType: church.massType || '',
@@ -76,9 +76,9 @@ export const fetchChurchData = async () => {
         ...location,
         ...(matchedChurch || {}),
         churchPhoto: matchedPhoto ? matchedPhoto.photoLink : coverLogo,
-        telephone: matchedChurch ? matchedChurch.churchContactNum : 'No contact available',
-        churchStartTime: matchedChurch ? matchedChurch.churchStartTime : 'Start time not available',
-        churchEndTime: matchedChurch ? matchedChurch.churchEndTime : 'End time not available',
+        telephone: matchedChurch ? matchedChurch.churchContactNum : 'Information unavailable',
+        churchStartTime: matchedChurch?.churchStartTime || null,
+        churchEndTime: matchedChurch?.churchEndTime || null,
       };
     });
 
@@ -127,7 +127,7 @@ export const fetchChurchesByLanguage = async (selectedLanguage) => {
 
         return {
           id: churchDoc.id,
-          churchName: churchData.churchName || 'Name not available',
+          churchName: churchData.churchName || 'Church name not available',
           churchAddress: locationData.churchLocation || 'Address not available',
           churchLocation: locationData.churchLocation || 'Location not available',
           latitude: locationData.latitude || 0,
@@ -264,8 +264,8 @@ export const fetchChurchesByService = async (selectedService) => {
             id: churchSnap.id,
             churchName: churchData.churchName || 'Name not available',
             churchAddress: 'Address not available',
-            churchStartTime: churchData.churchStartTime || 'Start time not available',
-            churchEndTime: churchData.churchEndTime || 'End time not available',
+            churchStartTime: churchData.churchStartTime,
+            churchEndTime: churchData.churchEndTime,
             latitude: churchData.latitude || 0,
             longitude: churchData.longitude || 0,
             telephone: churchData.churchContactNum || 'No contact information available',
@@ -286,8 +286,8 @@ export const fetchChurchesByService = async (selectedService) => {
           churchLocation: locationData.churchLocation || 'Location not available',
           latitude: locationData.latitude || 0,
           longitude: locationData.longitude || 0,
-          churchStartTime: churchData.churchStartTime || 'Start time not available',
-          churchEndTime: churchData.churchEndTime || 'End time not available',
+          churchStartTime: churchData.churchStartTime || 'Information Unavailable',
+          churchEndTime: churchData.churchEndTime || 'Information Unavailable',
           telephone: churchData.churchContactNum || 'No contact information available',
           churchPhoto: churchData.churchPhoto || coverLogo,
         };
