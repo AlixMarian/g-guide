@@ -58,9 +58,29 @@ import RefundPolicy from './components2/ServiceOffered/RefundPolicy';
 import ChurchDetails from './components2/ChurchInfo/ChurchDetails'
 import ChurchUploads from './components2/ChurchInfo/ChurchUploads';
 
+// Import for user authentication state management
+import { AuthProvider, useAuth } from './auth/AuthContext'; // New additions for AuthContext
+import PropTypes from 'prop-types';
+
+// Dynamic Navbar Component
+const NavbarSelector = ({ children }) => {
+  const { user } = useAuth(); // Determine if the user is logged in
+  return (
+    <>
+      {user ? <WebUserNavBar /> : <NavBar />} {/* Show WebUserNavBar for logged-in users, otherwise NavBar */}
+      {children}
+    </>
+  );
+};
+
+// Add propTypes for NavbarSelector
+NavbarSelector.propTypes = {
+  children: PropTypes.node.isRequired, // Ensure `children` is a React node and is required
+};
 const App = () => {
   return (
-    <Router>
+    <AuthProvider>
+      <Router>
       <Routes>
         
         <Route path="/" element={<Navigate to="/map" />} />
@@ -364,10 +384,40 @@ const App = () => {
 
 
         <Route path="/church-options" element={<><WebUserNavBar /><ChurchOptions/></>}/>
-        <Route path="/church-homepage/:churchId" element={<><WebUserNavBar /><ChurchHomepage/></>}/>
+        {/* Church Pages with Dynamic Navbar */}
+        <Route
+            path="/church-homepage/:churchId"
+            element={<NavbarSelector><ChurchHomepage /></NavbarSelector>}
+          />
+          <Route
+            path="/church-homepage/:churchId/announcements"
+            element={<NavbarSelector><Announcements /></NavbarSelector>}
+          />
+          <Route
+            path="/church-homepage/:churchId/info"
+            element={<NavbarSelector><ChurchOptions /></NavbarSelector>}
+          />
+          <Route
+            path="/church-homepage/:churchId/mass-schedules"
+            element={<NavbarSelector><Schedules /></NavbarSelector>}
+          />
+          <Route
+            path="/church-homepage/:churchId/req-vol"
+            element={<NavbarSelector><ReqVol /></NavbarSelector>}
+          />
+
+          {/* Restricted Route for Booking */}
+          <Route
+            path="/church-homepage/:churchId/book"
+            element={<>
+              <WebUserNavBar />
+              <ChurchHomepage />
+            </>}
+          />
       </Routes>
       <ToastContainer />
     </Router>
+    </AuthProvider>
   );
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, collection, getDocs, addDoc, deleteDoc, query, where, getDocsFromServer } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import { Carousel } from 'react-bootstrap';
@@ -12,6 +12,7 @@ import ChurchHomepageBook from './ChurchHomepageBook';
 import ChurchHomepageReqVol from './ChurchHomepageReqVol';
 import '../websiteUser.css';
 import { toast } from 'react-toastify';
+import { Modal, Button} from 'react-bootstrap';
 
 const ChurchHomepage = () => {
   const { churchId } = useParams();
@@ -20,8 +21,10 @@ const ChurchHomepage = () => {
   const [activeComponent, setActiveComponent] = useState('info');
   const [bookmarkFilled, setBookmarkFilled] = useState(false);
   const [bookmarkId, setBookmarkId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const auth = getAuth();
   const user = auth.currentUser;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchChurch = async () => {
@@ -150,23 +153,41 @@ const ChurchHomepage = () => {
       </div>
       
       <div className='bookmark d-flex align-items-center justify-content-center mb-3'>
-          <i 
-            className={`bi ${bookmarkFilled ? 'bi-bookmark-heart-fill' : 'bi-bookmark-heart'}`} 
-            style={{ fontSize: '2rem', cursor: 'pointer' }} 
-            onClick={toggleBookmark}
-          ></i>
-          <p 
-            className='mb-0 ms-2'
-            style={{ fontSize: '1rem', cursor: 'pointer' }} 
-          ><b>{bookmarkFilled ? 'Remove from Bookmarks' : 'Add to Bookmarks'}</b></p>
+        <i 
+          className={`bi ${bookmarkFilled ? 'bi-bookmark-heart-fill' : 'bi-bookmark-heart'}`} 
+          style={{ fontSize: '2rem', cursor: 'pointer' }} 
+          onClick={user ? toggleBookmark : null} // Only call toggleBookmark if user is logged in
+        ></i>
+        <p 
+          className='mb-0 ms-2'
+          style={{ fontSize: '1rem', cursor: 'pointer' }} 
+        >
+          <b>
+            {user 
+              ? (bookmarkFilled ? 'Remove from Bookmarks' : 'Add to Bookmarks') 
+              : 'Sign In or Create an account to bookmark this church'}
+          </b>
+        </p>
       </div>
+
+      {church.churchStatus === 'Archived' && (
+          <div className="alert alert-warning text-center col-10">
+            The church you are viewing is currently archived and the information might not be up to date. To ensure your safety, we have disabled the book services button.
+          </div>
+      )}
 
         <div className='pageNavigation col-md-12 d-flex justify-content-center'>
           <p className="d-inline-flex gap-1">
             <button className="btn btn-primary" onClick={() => setActiveComponent('info')}>Information</button>
             <button className="btn btn-primary" onClick={() => setActiveComponent('announcements')}>Announcements</button>
             <button className="btn btn-primary" onClick={() => setActiveComponent('massSchedule')}>Mass Schedules</button>
-            <button className="btn btn-primary" onClick={() => setActiveComponent('book')}>Book a Church Service</button>
+            <button
+              className="btn btn-primary"
+              onClick={() => user ? setActiveComponent('book') : setShowModal(true)} // Show modal if no user
+              disabled={!user || church.churchStatus === 'Archived'} // Disable if no user or church is Archived
+            >
+              Book a Church Service
+            </button>
             <button className="btn btn-primary" onClick={() => setActiveComponent('reqVol')}>Request for Volunteers</button>
           </p>
         </div>
@@ -178,8 +199,20 @@ const ChurchHomepage = () => {
             </div>
           </div>
         </div>
-
       </div>
+    {/* Bootstrap Modal */}
+    <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Create an Account</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Want to book a church service? Create an account.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => navigate('/login')}>Sign In</Button>
+          <Button variant="secondary" onClick={() => navigate('/signup')}>Sign Up</Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
