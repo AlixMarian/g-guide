@@ -12,14 +12,22 @@ export const ChurchHomepageMassSchedule = () => {
 
   useEffect(() => {
     const fetchMassSchedules = async () => {
-      const q = query(collection(db, 'massSchedules'), where('creatorId', '==', churchId));
-      const querySnapshot = await getDocs(q);
-      const schedules = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setMassSchedules(schedules);
-      setFilteredMassSchedules(schedules);
+      try {
+        // Fetch mass schedules using the churchId field
+        const massQuery = query(
+          collection(db, 'massSchedules'),
+          where('churchId', '==', churchId)
+        );
+        const querySnapshot = await getDocs(massQuery);
+        const schedules = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setMassSchedules(schedules);
+        setFilteredMassSchedules(schedules); // Initialize the filtered list
+      } catch (error) {
+        console.error('Error fetching mass schedules:', error);
+      }
     };
 
     fetchMassSchedules();

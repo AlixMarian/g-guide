@@ -12,9 +12,13 @@ export const ChurchHomepageAnnouncements = () => {
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const q = query(collection(db, 'announcements'), where('creatorId', '==', churchId));
+        const q = query(collection(db, 'announcements'), where('churchId', '==', churchId));
         const querySnapshot = await getDocs(q);
-        const announcementsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        const announcementsList = querySnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .sort((a, b) => b.uploadDate.toMillis() - a.uploadDate.toMillis());
+
         setAnnouncements(announcementsList);
       } catch (error) {
         console.error('Error fetching announcements:', error);

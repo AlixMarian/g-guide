@@ -19,13 +19,24 @@ export const ChurchHomepageInfo = () => {
     };
 
     const fetchServices = async () => {
-      const servicesDoc = await getDoc(doc(db, 'services', churchId));
-      if (servicesDoc.exists()) {
-        const data = servicesDoc.data();
-        setServices({
-          activeSchedules: data.activeSchedules || [],
-          activeRequests: data.activeRequests || [],
-        });
+      try {
+        const servicesDoc = await getDoc(doc(db, 'services', churchId));
+        if (servicesDoc.exists()) {
+          const data = servicesDoc.data();
+          const activeServices = Object.entries(data)
+            // eslint-disable-next-line no-unused-vars
+            .filter(([key, value]) => value.active) // Only services marked as active
+            .map(([key, value]) => ({
+              name: key,
+              fee: value.fee,
+              instructions: value.instructions,
+            }));
+          setServices(activeServices);
+        } else {
+          console.error('Services data not found');
+        }
+      } catch (error) {
+        console.error('Error fetching services:', error);
       }
     };
 
@@ -78,37 +89,18 @@ export const ChurchHomepageInfo = () => {
       <br/>
   
       <div className="churchServices card">
-        <div className='card-body'>
-          <h3 className='card-title'>Services We Offer</h3>
-  
-          <h5>Events / Activities</h5>
-          {services.activeSchedules.length > 0 ? (
-            services.activeSchedules.map((schedule, index) => (
-              <div key={index}>
-                <p>● {schedule}</p>
+        <div className="card-body">
+          <h3 className="card-title">Services We Offer</h3>
+          {services.length > 0 ? (
+            services.map((service, index) => (
+              <div key={index} className="service-item">
+                <h5>{service.name}</h5>
+                <p><strong>Fee:</strong> {service.fee ? `₱${service.fee}` : 'Free'}</p>
+                <p><strong>Instructions:</strong> {service.instructions || 'No instructions provided'}</p>
               </div>
             ))
           ) : (
-            <div className="card mb-3">
-              <div className="card-body">
-                <h5 className="card-title">No Active Schedules Available</h5>
-              </div>
-            </div>
-          )}
-  
-          <h5>Request for Documents</h5>
-          {services.activeRequests.length > 0 ? (
-            services.activeRequests.map((request, index) => (
-              <div key={index}>
-                <p>● {request}</p>
-              </div>
-            ))
-          ) : (
-            <div className="card mb-3">
-              <div className="card-body">
-                <h5 className="card-title">No Active Requests Available</h5>
-              </div>
-            </div>
+            <p>No active services available at the moment.</p>
           )}
         </div>
       </div>
