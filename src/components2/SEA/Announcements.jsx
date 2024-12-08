@@ -1,7 +1,8 @@
 import  { useEffect, useState } from 'react';
 import {getAnnouncementList,addAnnouncement, deleteAnnouncement,updateAnnouncement} from '../Services/seaServices';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp,} from 'firebase/firestore';
+import { db } from '/backend/firebase';
 import { toast } from 'react-toastify';
 import DatePicker from 'react-datepicker';
 import '../../churchCoordinator.css';
@@ -13,27 +14,63 @@ export const Announcements = () => {
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [userId, setUserId] = useState('');
+  const [churchId, setChurchId] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 
+  const getChurchId = async (userId) => {
+    try {
+      const coordinatorQuery = query(
+        collection(db, 'coordinator'),
+        where('userId', '==', userId)
+      );
+      const coordinatorSnapshot = await getDocs(coordinatorQuery);
+
+      if (!coordinatorSnapshot.empty) {
+        const coordinatorDoc = coordinatorSnapshot.docs[0];
+        const churchQuery = query(
+          collection(db, 'church'),
+          where('coordinatorID', '==', coordinatorDoc.id)
+        );
+        const churchSnapshot = await getDocs(churchQuery);
+
+        if (!churchSnapshot.empty) {
+          const fetchedChurchId = churchSnapshot.docs[0].id;
+          return fetchedChurchId;
+        } else {
+          toast.error('No associated church found for this coordinator.');
+        }
+      } else {
+        toast.error('No coordinator found for the logged-in user.');
+      }
+    } catch (error) {
+      console.error('Error fetching churchId:', error);
+      toast.error('Failed to fetch church details.');
+    }
+    return null;
+  };
+
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUserId(user.uid);
-        fetchData(user.uid);
+        const fetchedChurchId = await getChurchId(user.uid);
+        if (fetchedChurchId) {
+          setChurchId(fetchedChurchId);
+          fetchData(fetchedChurchId);
+        }
       } else {
-        setUserId('');
-        toast.error('No user is logged in');
+        toast.error('No user is logged in.');
       }
     });
-  
+
     return () => unsubscribe();
   }, []);
   
-  const fetchData = (creatorId) => {
-    getAnnouncementList(setAnnouncementList, creatorId);
+  const fetchData = (churchId) => {
+    getAnnouncementList(setAnnouncementList, churchId);
   };
   
   const handleSubmit = (e, callback) => {
@@ -52,10 +89,18 @@ export const Announcements = () => {
     const announcementData = {
       announcement: newAnnouncement,
       uploadDate: Timestamp.now(),
+      churchId: churchId,
     };
-    addAnnouncement(announcementData, userId, () => getAnnouncementList(setAnnouncementList, userId));
+
+    if (!churchId) {
+      toast.error('Failed to add announcement: Church ID is missing.');
+      return;
+    }
+
+    addAnnouncement(announcementData, churchId, () => getAnnouncementList(setAnnouncementList, churchId));
     setNewAnnouncement('');
   };
+
   
   const handleEditAnnouncement = (announcement) => {
     setEditingAnnouncement(announcement);
@@ -70,8 +115,14 @@ export const Announcements = () => {
     const announcementData = {
       announcement: newAnnouncement,
     };
+
+    if (!churchId) {
+      toast.error('Failed to update announcement: Church ID is missing.');
+      return;
+    }
+
     updateAnnouncement(editingAnnouncement.id, announcementData, () => {
-      getAnnouncementList(setAnnouncementList, userId);
+      getAnnouncementList(setAnnouncementList, churchId);
       setEditingAnnouncement(null);
       clearForm();
     });
@@ -178,7 +229,7 @@ export const Announcements = () => {
                   ))
                 ) : (
                   <div className="text-center py-5">
-                    <h4 className="text-muted">No events found</h4>
+                    <h4 className="text-muted">No annoucements found</h4>
                   </div>
                 )}
                   <div className="d-flex justify-content-center mt-4">

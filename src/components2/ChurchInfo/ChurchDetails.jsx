@@ -137,8 +137,8 @@ export const ChurchDetails = () => {
   return (
       <>
       <h1 className="me-3">Church Details</h1>
-      <div className="d-flex justify-content-center align-items-center mt-5">
-        <div className="card shadow-lg" style={{ width: "89%" }}>
+      <div className="d-flex justify-content-center align-items-center mt-5 mb-5">
+        <div className="card shadow-lg" style={{ width: "89%", marginRight: "4%" }}>
           <div className="card-body">
             <div className="churchHistory">
               <form className="row g-3" onSubmit={handleSubmitNewChurchInfo}>
@@ -201,17 +201,6 @@ export const ChurchDetails = () => {
               </div>
 
               <div className="col-12 col-lg-6">
-                <label htmlFor="churchAddress" className="form-label"><b>Church Address</b></label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="churchAddress"
-                  placeholder={churchData.churchAddress || ""}
-                  onChange={(e) => handleChange(e, 'churchAddress')} readOnly
-                />
-              </div>
-
-              <div className="col-12 col-lg-6">
                 <label htmlFor="churchEmail" className="form-label"><b>Church Email</b></label>
                 <input
                   type="text"
@@ -219,6 +208,17 @@ export const ChurchDetails = () => {
                   id="churchEmail"
                   placeholder={churchData.churchEmail || ""}
                   onChange={(e) => handleChange(e, 'churchEmail')}
+                />
+              </div>
+
+              <div className="col-12 col-lg-6">
+                <label htmlFor="churchAddress" className="form-label"><b>Church Address</b></label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="churchAddress"
+                  placeholder={churchData.churchAddress || ""}
+                  onChange={(e) => handleChange(e, 'churchAddress')} readOnly
                 />
               </div>
 
@@ -246,7 +246,7 @@ export const ChurchDetails = () => {
 
               <div className="col-12 col-lg-6">
                 <label htmlFor="churchProof" className="form-label"><b>Church Proof</b></label> <br />
-                <button className="btn btn-info" onClick={handleViewProof}>
+                <button type="button" className="btn btn-info" onClick={handleViewProof}>
                   View Submitted Proof
                 </button>
               </div>

@@ -10,7 +10,8 @@ import '../../churchCoordinator.css';
 
 export const ChurchUploads = () => {
 
-    const [userData, setUserData] = useState(null);
+    const [churchId, setChurchId] = useState("");
+    // eslint-disable-next-line no-unused-vars
     const [churchData, setChurchData] = useState({});
     const [churchPhotos, setChurchPhotos] = useState([]);
     const [bankProofFile, setBankProofFile] = useState(null);
@@ -20,46 +21,90 @@ export const ChurchUploads = () => {
     const churchProofRef = useRef(null);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const auth = getAuth();
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                console.log("User signed in:", user);
-                try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        setUserData(userData);
+    // Step 1: Fetch the coordinator's church ID
+    const fetchChurchId = async (userId) => {
+        try {
+            const coordinatorQuery = query(
+                collection(db, 'coordinator'),
+                where('userId', '==', userId)
+            );
+            const coordinatorSnapshot = await getDocs(coordinatorQuery);
 
-                        const churchDoc = await getDoc(doc(db, "church", user.uid));
-                        if (churchDoc.exists()) {
-                            setChurchData(churchDoc.data());
-                            fetchChurchPhotos(user.uid); 
-                        } else {
-                            toast.error("Church data not found");
-                        }
-                    } else {
-                        toast.error("User data not found");
-                    }
-                } catch (error) {
-                    toast.error("Error fetching user data");
+            if (!coordinatorSnapshot.empty) {
+                const coordinatorDoc = coordinatorSnapshot.docs[0];
+                const churchQuery = query(
+                    collection(db, 'church'),
+                    where('coordinatorID', '==', coordinatorDoc.id)
+                );
+                const churchSnapshot = await getDocs(churchQuery);
+
+                if (!churchSnapshot.empty) {
+                    const fetchedChurchId = churchSnapshot.docs[0].id;
+                    setChurchId(fetchedChurchId);
+                    console.log("Fetched churchId:", fetchedChurchId);
+                } else {
+                    toast.error("No associated church found for this coordinator.");
                 }
             } else {
-                console.log("No user signed in.");
+                toast.error("No coordinator found for the logged-in user.");
             }
-        });
-    }, [navigate]);
+        } catch (error) {
+            console.error("Error fetching churchId:", error);
+            toast.error("Failed to fetch church details.");
+        }
+    };
 
-    const fetchChurchPhotos = async (userId) => {
+    // Step 2: Fetch church data using the churchId
+    const fetchChurchData = async (id) => {
         try {
-            const q = query(collection(db, "churchPhotos"), where("uploader", "==", userId));
-            const querySnapshot = await getDocs(q);
+            const churchDoc = await getDoc(doc(db, "church", id));
+            if (churchDoc.exists()) {
+                setChurchData(churchDoc.data());
+            } else {
+                toast.error("Church data not found");
+            }
+        } catch (error) {
+            console.error("Error fetching church data:", error);
+            toast.error("Failed to fetch church data.");
+        }
+    };
+
+    // Step 3: Fetch church photos from Firestore
+    const fetchChurchPhotos = async (id) => {
+        try {
+            const photosQuery = query(
+                collection(db, "churchPhotos"),
+                where("uploader", "==", id)
+            );
+            const querySnapshot = await getDocs(photosQuery);
             const photos = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setChurchPhotos(photos); 
+            setChurchPhotos(photos);
         } catch (error) {
             toast.error("Error fetching church photos");
         }
     };
+
+    useEffect(() => {
+        const auth = getAuth();
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                console.log("User signed in:", user);
+                await fetchChurchId(user.uid); // Step 1
+            } else {
+                console.log("No user signed in.");
+                navigate("/login");
+            }
+        });
+
+        return () => unsubscribe();
+    }, [navigate]);
+
+    useEffect(() => {
+        if (churchId) {
+            fetchChurchData(churchId); // Step 2
+            fetchChurchPhotos(churchId); // Step 3
+        }
+    }, [churchId]);
 
     const handleBankProofChange = (e) => {
         const { id, files } = e.target;
@@ -70,28 +115,35 @@ export const ChurchUploads = () => {
 
     const handleBankProofUpload = async (e) => {
         e.preventDefault();
-        const auth = getAuth();
-        const user = auth.currentUser;
-        if (user && bankProofFile) {
-            try {
-                const storageRef = ref(storage, `churchQRs/${user.uid}`);
-                await uploadBytes(storageRef, bankProofFile);
-                const bankProofUrl = await getDownloadURL(storageRef);
-
-                await updateDoc(doc(db, 'church', user.uid), {
-                    churchQRDetail: bankProofUrl,
-                });
-
-                toast.success('Bank proof updated successfully');
-                setBankProofFile(null);
-            } catch (error) {
-                toast.error('Error updating bank proof');
-            }
+    
+        if (!churchId) {
+            toast.error("Church ID is missing");
+            return;
+        }
+    
+        if (!bankProofFile) {
+            toast.error('No file selected');
+            return;
+        }
+    
+        try {
+            const storageRef = ref(storage, `churchQRs/${churchId}`); // Use churchId
+            await uploadBytes(storageRef, bankProofFile);
+            const bankProofUrl = await getDownloadURL(storageRef);
+    
+            await updateDoc(doc(db, 'church', churchId), {
+                churchQRDetail: bankProofUrl, // Update church document using churchId
+            });
+    
+            toast.success('Bank proof updated successfully');
+            setBankProofFile(null);
             bankProofRef.current.value = '';
-        } else {
-            toast.error('No file selected or user not authenticated');
+        } catch (error) {
+            console.error("Error updating bank proof:", error);
+            toast.error('Error updating bank proof');
         }
     };
+    
 
     const handleChurchProofChange = (e) => {
         const { id, files } = e.target;
@@ -102,26 +154,32 @@ export const ChurchUploads = () => {
 
     const handleChurchProofUpload = async (e) => {
         e.preventDefault();
-        const auth = getAuth();
-        const user = auth.currentUser;
-        if (user && churchProofFile) {
-            try {
-                const storageRef = ref(storage, `churchVerification/${user.uid}`);
-                await uploadBytes(storageRef, churchProofFile);
-                const churchProofUrl = await getDownloadURL(storageRef);
-
-                await updateDoc(doc(db, 'church', user.uid), {
-                    churchProof: churchProofUrl,
-                });
-
-                toast.success('Church proof updated successfully');
-                setChurchProofFile(null);
-            } catch (error) {
-                toast.error('Error updating church proof');
-            }
+    
+        if (!churchId) {
+            toast.error("Church ID is missing");
+            return;
+        }
+    
+        if (!churchProofFile) {
+            toast.error('No file selected');
+            return;
+        }
+    
+        try {
+            const storageRef = ref(storage, `churchVerification/${churchId}`); // Use churchId
+            await uploadBytes(storageRef, churchProofFile);
+            const churchProofUrl = await getDownloadURL(storageRef);
+    
+            await updateDoc(doc(db, 'church', churchId), {
+                churchProof: churchProofUrl, // Update church document using churchId
+            });
+    
+            toast.success('Church proof updated successfully');
+            setChurchProofFile(null);
             churchProofRef.current.value = '';
-        } else {
-            toast.error('No file selected or user not authenticated');
+        } catch (error) {
+            console.error("Error updating church proof:", error);
+            toast.error('Error updating church proof');
         }
     };
 
@@ -132,11 +190,9 @@ export const ChurchUploads = () => {
 
     const handleChurchPhotosUpload = async (e) => {
         e.preventDefault();
-        const auth = getAuth();
-        const user = auth.currentUser;
     
-        if (!user) {
-            toast.error('User not authenticated');
+        if (!churchId) {
+            toast.error("Church ID is missing");
             return;
         }
     
@@ -146,7 +202,8 @@ export const ChurchUploads = () => {
         }
     
         try {
-            const q = query(collection(db, "churchPhotos"), where("uploader", "==", user.uid));
+            // Fetch current photos for this church to check count
+            const q = query(collection(db, "churchPhotos"), where("uploader", "==", churchId));
             const querySnapshot = await getDocs(q);
             const currentPhotoCount = querySnapshot.size;
     
@@ -155,26 +212,29 @@ export const ChurchUploads = () => {
                 return;
             }
     
+            // Upload each photo and save the link in Firestore
             const uploadPromises = churchPhotos.map(async (photo) => {
-                const storageRef = ref(storage, `churchPhotos/${user.uid}/${photo.name}`);
+                const storageRef = ref(storage, `churchPhotos/${churchId}/${photo.name}`); // Save photos under churchId
                 await uploadBytes(storageRef, photo);
                 const photoUrl = await getDownloadURL(storageRef);
     
                 await addDoc(collection(db, 'churchPhotos'), {
                     photoLink: photoUrl,
-                    uploader: user.uid,
+                    uploader: churchId, // Use churchId instead of user.uid
                 });
             });
     
             await Promise.all(uploadPromises);
-            fetchChurchPhotos(user.uid);  
+            fetchChurchPhotos(churchId); // Fetch updated list of photos for this church
     
             toast.success('Church photos uploaded successfully');
             setChurchPhotos([]);
         } catch (error) {
+            console.error("Error uploading church photos:", error);
             toast.error('Error uploading church photos');
         }
     };
+    
     
     
 
@@ -198,6 +258,7 @@ export const ChurchUploads = () => {
             toast.error('Error deleting photo');
         }
     };
+    
     
     const handleClear = () => {
         setChurchPhotos([]);
@@ -296,9 +357,9 @@ export const ChurchUploads = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="text-center py-5">
-                                        <h4 className="text-muted">No volunteer requests found</h4>
-                                    </div>
+                                <div className="text-center d-flex justify-content-center align-items-center py-5" style={{ height: "100%" }}>
+                                    <h4 className="text-muted text-center">No uploads found</h4>
+                                </div>    
                                 )}
                             </div>
                         </div>
