@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { getDoc, doc } from 'firebase/firestore';
 import { db } from '/backend/firebase'; // Adjust path based on your project structure
+import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 // Inline styles
 const styles = {
@@ -89,9 +91,9 @@ const SysAdminNavbar = () => {
     try {
       await signOut(auth); 
       navigate('/login'); 
-      console.log('User logged out successfully');
+      toast.success('User logged out successfully');
     } catch (error) {
-      console.error('Error logging out:', error);
+      toast.error('Error logging out:', error);
     }
   };
 

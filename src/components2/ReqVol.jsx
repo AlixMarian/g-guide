@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { collection, addDoc, query, where, getDocs,onSnapshot, updateDoc, Timestamp, doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs,onSnapshot, updateDoc, Timestamp, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '/backend/firebase';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -24,6 +24,7 @@ export const ReqVol = () => {
   const [editing, setEditing] = useState(false);
   const [currentPostId, setCurrentPostId] = useState(null);
   const [filterStatus, setFilterStatus] = useState('All');
+  const [loading, setLoading] = useState(true);
 
   const handleTitleChange = (e) => setReqVolunteerTitleInput(e.target.value);
   const handleBodyChange = (e) => setReqVolunteerBodyInput(e.target.value);
@@ -35,147 +36,85 @@ export const ReqVol = () => {
   const auth = getAuth();
   const user = auth.currentUser;
 
-
-  const fetchEvents = async (user) => {
-    const q = query(collection(db, 'events'), where('creatorId', '==', user.uid));
-    const eventsSnapshot = await getDocs(q);
-    const eventsList = eventsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    setEvents(eventsList);
-  };
-
-  useEffect(() => {
-  const auth = getAuth();
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        console.log("User signed in:", user);
-        console.log("User id signed in:", user.uid);
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserData(userData);
-
-            const churchDoc = await getDoc(doc(db, "church", user.uid));
-            if (churchDoc.exists()) {
-              setChurchData(churchDoc.data());
-            } else {
-              toast.error("Church data not found");
-            }
-          } else {
-            toast.error("User data not found");
-          }
-        } catch (error) {
-          toast.error("Error fetching user data");
+  const fetchChurchId = async (userId) => {
+    try {
+      const coordinatorQuery = query(
+        collection(db, 'coordinator'),
+        where('userId', '==', userId)
+      );
+      const coordinatorSnapshot = await getDocs(coordinatorQuery);
+  
+      if (!coordinatorSnapshot.empty) {
+        const coordinatorDoc = coordinatorSnapshot.docs[0];
+        const churchQuery = query(
+          collection(db, 'church'),
+          where('coordinatorID', '==', coordinatorDoc.id)
+        );
+        const churchSnapshot = await getDocs(churchQuery);
+  
+        if (!churchSnapshot.empty) {
+          const fetchedChurchId = churchSnapshot.docs[0].id;
+          setChurchData({ id: fetchedChurchId, ...churchSnapshot.docs[0].data() });
+          console.log('Fetched churchId:', fetchedChurchId);
+          return fetchedChurchId; // Return the fetched churchId
+        } else {
+          toast.error('No associated church found for this coordinator.');
         }
       } else {
-        console.log("No user signed in.");
+        toast.error('No coordinator found for the logged-in user.');
+      }
+    } catch (error) {
+      console.error('Error fetching churchId:', error);
+      toast.error('Failed to fetch church details.');
+    }
+    return null;
+  };
+
+  const fetchEvents = async (churchId) => {
+    if (!churchId) {
+      console.error('Church ID is missing. Cannot fetch events.');
+      return;
+    }
+  
+    try {
+      const q = query(
+        collection(db, 'events'),
+        where('churchId', '==', churchId) // Use the churchId, which is a string
+      );
+      const eventsSnapshot = await getDocs(q);
+  
+      if (eventsSnapshot.empty) {
+        console.warn('No events found for the specified church.');
+        setEvents([]); // Clear the events list if no events are found
+      } else {
+        const eventsList = eventsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        console.log('Fetched events:', eventsList); // Debugging logs
+        setEvents(eventsList);
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+  
+  
+  useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        console.log('User signed in:', user);
+        const fetchedChurchId = await fetchChurchId(user.uid); // Fetch the churchId
+        if (fetchedChurchId) {
+          await fetchEvents(fetchedChurchId); // Fetch events using churchId
+        }
+      } else {
+        console.log('No user signed in.');
         navigate('/login');
       }
     });
   }, [navigate]);
-
-  const handlePostSubmit = async (e) => {
-    e.preventDefault();
-    
-    const startDate = new Date(startDateInput);
-    const endDate = new Date(endDateInput);
-    
-    const startDateTimestamp = Timestamp.fromDate(startDate);
-    const endDateTimestamp = Timestamp.fromDate(endDate);
-    
-    if (editing) {
-      try {
-        await updateDoc(doc(db, 'requestVolunteers', currentPostId), {
-          title: reqVolunteerTitleInput,
-          content: reqVolunteerBodyInput,
-          event: selectedEvent,
-          startDate: startDateTimestamp,
-          endDate: endDateTimestamp,
-          
-        });
-        toast.success('Post updated successfully');
-      } catch (error) {
-        toast.error('Error updating post: ' + error.message);
-      }
-    } else {
-      
-      if (user) {
-        try {
-          await addDoc(collection(db, 'requestVolunteers'), {
-            title: reqVolunteerTitleInput,
-            content: reqVolunteerBodyInput,
-            uploader: user.uid,
-            uploadDate: Timestamp.now(),
-            startDate: Timestamp.fromDate(new Date(startDateInput)),
-            endDate: Timestamp.fromDate(new Date(endDateInput)),
-            event: selectedEvent,
-            status: 'ongoing',
-          });
-          toast.success('Volunteer request posted successfully');
-        } catch (error) {
-          toast.error('Error posting volunteer request: ' + error.message);
-        }
-      } else {
-        toast.error('No user signed in.');
-      }
-    }
-    resetForm();
-    fetchPosts();
-  };
-  
-   
-  const filterPosts = (posts) => {
-    if (filterStatus === 'All') return posts;
-    return posts.filter(post => post.status === filterStatus.toLowerCase());
-  };
-  
-  const fetchPosts = async () => {
-    const auth = getAuth();
-    const user = auth.currentUser;
-  
-    if (user) {
-      try {
-        const q = query(collection(db, 'requestVolunteers'), where('uploader', '==', user.uid));
-        const querySnapshot = await getDocs(q);
-        
-        const userPosts = querySnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .sort((a, b) => b.uploadDate.toDate() - a.uploadDate.toDate());
-  
-        setPosts(userPosts);
-      } catch (error) {
-        toast.error('Error fetching posts: ' + error.message);
-      }
-    }
-  };
-  
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const handleDeletePost = async (postId) => {
-    try {
-      await deleteDoc(doc(db, 'requestVolunteers', postId));
-      toast.success('Post deleted successfully');
-      setPosts(posts.filter(post => post.id !== postId));
-    } catch (error) {
-      toast.error('Error deleting post: ' + error.message);
-    }
-  };
-
-  useEffect(() => {
-    const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        fetchPosts(user);
-        fetchEvents(user);
-      } else {
-        console.log("No user signed in.");
-      }
-    });
-  }, []);
-  
 
   useEffect(() => {
     if (!user) return;
@@ -200,6 +139,127 @@ export const ReqVol = () => {
     });
     return () => unsubscribe(); 
   }, [user]);
+
+  const fetchPosts = async () => {
+    if (!churchData.id) {
+      console.error('Church ID is missing. Cannot fetch posts.');
+      return;
+    }
+    setLoading(true); // Set loading to true before fetching
+    try {
+      const q = query(
+        collection(db, 'requestVolunteers'),
+        where('churchId', '==', churchData.id)
+      );
+      const querySnapshot = await getDocs(q);
+
+      const churchPosts = querySnapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => b.uploadDate.toDate() - a.uploadDate.toDate());
+
+      setPosts(churchPosts);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      toast.error('Error fetching posts: ' + error.message);
+    } finally {
+      setLoading(false); // Set loading to false after fetching
+    }
+  };
+
+  useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        console.log('User signed in:', user);
+        const fetchedChurchId = await fetchChurchId(user.uid);
+        if (fetchedChurchId) {
+          fetchPosts(); // Fetch posts after fetching church ID
+        }
+      } else {
+        console.log('No user signed in.');
+        navigate('/login');
+      }
+    });
+  }, [navigate]);
+
+  useEffect(() => {
+    if (churchData.id) {
+      fetchPosts();
+    }
+  }, [churchData.id]);
+  
+  
+
+  const handlePostSubmit = async (e) => {
+    e.preventDefault();
+  
+    const startDate = new Date(startDateInput);
+    const endDate = new Date(endDateInput);
+  
+    const startDateTimestamp = Timestamp.fromDate(startDate);
+    const endDateTimestamp = Timestamp.fromDate(endDate);
+  
+    if (!churchData.id) {
+      toast.error('Church ID is missing. Cannot submit post.');
+      return;
+    }
+  
+    if (editing) {
+      try {
+        await updateDoc(doc(db, 'requestVolunteers', currentPostId), {
+          title: reqVolunteerTitleInput,
+          content: reqVolunteerBodyInput,
+          event: selectedEvent,
+          startDate: startDateTimestamp,
+          endDate: endDateTimestamp,
+          churchId: churchData.id, // Use the churchId for the updated post
+        });
+        toast.success('Post updated successfully');
+      } catch (error) {
+        toast.error('Error updating post: ' + error.message);
+      }
+    } else {
+      try {
+        await addDoc(collection(db, 'requestVolunteers'), {
+          title: reqVolunteerTitleInput,
+          content: reqVolunteerBodyInput,
+          churchId: churchData.id, // Use the churchId for the new post
+          uploadDate: Timestamp.now(),
+          startDate: startDateTimestamp,
+          endDate: endDateTimestamp,
+          event: selectedEvent,
+          status: 'ongoing',
+        });
+        toast.success('Volunteer request posted successfully');
+      } catch (error) {
+        toast.error('Error posting volunteer request: ' + error.message);
+      }
+    }
+    
+    resetForm();
+    fetchPosts(); // Refresh posts after submission
+  };
+  
+  
+   
+  const filterPosts = (posts) => {
+    if (filterStatus === 'All') return posts;
+    return posts.filter(post => post.status === filterStatus.toLowerCase());
+  };
+  
+  
+  
+  const handleDeletePost = async (postId) => {
+    try {
+      await deleteDoc(doc(db, 'requestVolunteers', postId));
+      toast.success('Post deleted successfully');
+      setPosts(posts.filter(post => post.id !== postId));
+    } catch (error) {
+      toast.error('Error deleting post: ' + error.message);
+    }
+  };
+
+  
 
   const handleArchivePost = async (postId) => {
     try {
@@ -350,71 +410,79 @@ export const ReqVol = () => {
                   </DropdownButton>
                 </div>
                 
-                  {currentPosts.length > 0 ? (
-                    currentPosts.map((post) => (
-                    <div className="card mb-3" key={post.id}>
-                      <div className="card-body">
-                        <h5 className="card-title">{post.title}</h5>
-                        <small className="text-muted">
-                          {`Posted on ${post.uploadDate.toDate().toLocaleDateString()} at ${post.uploadDate.toDate().toLocaleTimeString()}`}
-                        </small>
-                        <br />
-                        <small className="text-muted">
-                          {`Duration: ${post.startDate.toDate().toLocaleDateString()} - ${post.endDate.toDate().toLocaleDateString()}`}
-                        </small>
-                        <br />
-                        <small className="text-muted">
-                          Status: {post.status}
-                        </small>
-                        <br />
-                        <p>-----------------</p>
-                        <p className="card-text">
-                          {`Event: ${post.event}`}
-                        </p>
-                        <p className="card-text">{post.content}</p>
-
-                        <button className="btn btn-danger" onClick={() => handleDeletePost(post.id)}>
-                          Delete Post
-                        </button>
-                        <button className="btn btn-primary ms-2" onClick={() => handleEditPost(post)}>
-                          Edit Post
-                        </button>
-
-                        {post.status === 'ongoing' && (
-                          <button className="btn btn-warning ms-2" onClick={() => handleArchivePost(post.id)}>
-                            Archive Post
-                          </button>
-                        )}
-                        {post.status === 'archived' && (
-                          <button className="btn btn-success ms-2" onClick={() => handleUnarchivePost(post.id)}>
-                            Unarchive Post
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-5">
-                    <h4 className="text-muted">No volunteer requests found</h4>
+                {loading?(
+                  <div className='text-center my-4'>
+                    <p>Loading posts...</p>
                   </div>
-                )}
-                <div className="d-flex justify-content-center mt-4">
-                      <Pagination>
-                        <Pagination.First onClick={() => handlePageChange(1)} disabled={currentPage === 1} />
-                        <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
-                        {[...Array(totalPages).keys()].map((number) => (
-                          <Pagination.Item
-                            key={number + 1}
-                            active={number + 1 === currentPage}
-                            onClick={() => handlePageChange(number + 1)}
-                          >
-                            {number + 1}
-                          </Pagination.Item>
-                        ))}
-                        <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
-                        <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} />
-                      </Pagination>
+                ) : (
+                  <div>
+                  {currentPosts.length > 0 ? (
+                      currentPosts.map((post) => (
+                      <div className="card mb-3" key={post.id}>
+                        <div className="card-body">
+                          <h5 className="card-title">{post.title}</h5>
+                          <small className="text-muted">
+                            {`Posted on ${post.uploadDate.toDate().toLocaleDateString()} at ${post.uploadDate.toDate().toLocaleTimeString()}`}
+                          </small>
+                          <br />
+                          <small className="text-muted">
+                            {`Duration: ${post.startDate.toDate().toLocaleDateString()} - ${post.endDate.toDate().toLocaleDateString()}`}
+                          </small>
+                          <br />
+                          <small className="text-muted">
+                            Status: {post.status}
+                          </small>
+                          <br />
+                          <p>-----------------</p>
+                          <p className="card-text">
+                            {`Event: ${post.event}`}
+                          </p>
+                          <p className="card-text">{post.content}</p>
+
+                          <button className="btn btn-danger" onClick={() => handleDeletePost(post.id)}>
+                            Delete Post
+                          </button>
+                          <button className="btn btn-primary ms-2" onClick={() => handleEditPost(post)}>
+                            Edit Post
+                          </button>
+
+                          {post.status === 'ongoing' && (
+                            <button className="btn btn-warning ms-2" onClick={() => handleArchivePost(post.id)}>
+                              Archive Post
+                            </button>
+                          )}
+                          {post.status === 'archived' && (
+                            <button className="btn btn-success ms-2" onClick={() => handleUnarchivePost(post.id)}>
+                              Unarchive Post
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-5">
+                      <h4 className="text-muted">No volunteer requests found</h4>
+                    </div>
+                  )}
+                  <div className="d-flex justify-content-center mt-4">
+                        <Pagination>
+                          <Pagination.First onClick={() => handlePageChange(1)} disabled={currentPage === 1} />
+                          <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+                          {[...Array(totalPages).keys()].map((number) => (
+                            <Pagination.Item
+                              key={number + 1}
+                              active={number + 1 === currentPage}
+                              onClick={() => handlePageChange(number + 1)}
+                            >
+                              {number + 1}
+                            </Pagination.Item>
+                          ))}
+                          <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
+                          <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} />
+                        </Pagination>
+                  </div>
                 </div>
+                )}
               </div>
             </div>
           </div>      

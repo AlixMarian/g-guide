@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { getEventList, addEventSchedule, updateEventSchedule, deleteEventSchedule } from '../Services/seaServices';
+import { getEventList, deleteEventSchedule } from '../Services/seaServices';
+import { collection, addDoc, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { db } from '/backend/firebase';
 import { toast } from 'react-toastify';
 import DatePicker from 'react-datepicker';
 import { Table } from 'react-bootstrap';
@@ -8,30 +10,99 @@ import Pagination from 'react-bootstrap/Pagination';
 import '../../churchCoordinator.css';
 
 export const ChurchEvents = () => {
+  const [churchId, setChurchId] = useState('');
   const [eventList, setEventList] = useState([]);
   const [newEventDate, setNewEventDate] = useState("");
   const [newEventName, setNewEventName] = useState("");
   const [newEventTime, setNewEventTime] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line no-unused-vars
   const [userId, setUserId] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
 
+    // Step 1: Fetch the church ID associated with the logged-in coordinator
+  const fetchChurchId = async (userId) => {
+    try {
+      const coordinatorQuery = query(
+        collection(db, 'coordinator'),
+        where('userId', '==', userId)
+      );
+      const coordinatorSnapshot = await getDocs(coordinatorQuery);
+
+      if (!coordinatorSnapshot.empty) {
+        const coordinatorDoc = coordinatorSnapshot.docs[0];
+        const churchQuery = query(
+          collection(db, 'church'),
+          where('coordinatorID', '==', coordinatorDoc.id)
+        );
+        const churchSnapshot = await getDocs(churchQuery);
+
+        if (!churchSnapshot.empty) {
+          const fetchedChurchId = churchSnapshot.docs[0].id;
+          setChurchId(fetchedChurchId);
+          return fetchedChurchId; // Return the fetched churchId
+        } else {
+          toast.error('No associated church found for this coordinator.');
+        }
+      } else {
+        toast.error('No coordinator found for the logged-in user.');
+      }
+    } catch (error) {
+      console.error('Error fetching churchId:', error);
+      toast.error('Failed to fetch church details.');
+    }
+    return null;
+  };
+
+    // Step 2: Fetch events for the given church ID
+    const fetchEvents = async (churchId) => {
+      if (!churchId) {
+        console.error('Church ID is missing. Cannot fetch events.');
+        toast.error('Failed to fetch events: Church ID is missing.');
+        return;
+      }
+  
+      try {
+        setLoading(true); // Show loading state
+        const eventsQuery = query(collection(db, 'events'), where('churchId', '==', churchId));
+        const eventsSnapshot = await getDocs(eventsQuery);
+  
+        if (!eventsSnapshot.empty) {
+          const events = eventsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          setEventList(events);
+        } else {
+          console.log('No events found for the church.');
+          setEventList([]);
+        }
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        toast.error('Failed to fetch events.');
+      } finally {
+        setLoading(false); // Hide loading state
+      }
+    };
+
+  // Step 3: Update useEffect to ensure proper flow
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUserId(user.uid);
-        fetchData(user.uid);
+        console.log('User signed in:', user);
+        const fetchedChurchId = await fetchChurchId(user.uid); // Fetch the churchId
+        if (fetchedChurchId) {
+          await fetchEvents(fetchedChurchId); // Fetch events for the church
+        }
       } else {
-        setUserId('');
-        toast.error('No user is logged in');
+        console.log('No user signed in.');
+        toast.error('Please log in to view events.');
       }
     });
-
-    return () => unsubscribe();
   }, []);
+
+    
 
   const handleSubmit = (e, callback) => {
     e.preventDefault();
@@ -45,36 +116,61 @@ export const ChurchEvents = () => {
     }
   };
 
-  const fetchData = (creatorId) => {
-    getEventList(setEventList, creatorId);
+  // Step 3: Submit a new event
+  const onSubmitEvent = async () => {
+    if (!churchId) {
+      toast.error('Church ID is missing.');
+      return;
+    }
+
+    const eventData = {
+      eventDate: newEventDate,
+      eventName: newEventName,
+      eventTime: newEventTime,
+      churchId, // Save churchId instead of creatorId
+    };
+
+    try {
+      await addDoc(collection(db, 'events'), eventData);
+      toast.success('Event added successfully.');
+      fetchEvents(churchId); // Refresh events list
+      clearForm();
+    } catch (error) {
+      console.error('Error adding event:', error);
+      toast.error('Failed to add event.');
+    }
   };
 
-  const onSubmitEvent = () => {
+  // Step 4: Update an existing event
+  const onUpdateEvent = async () => {
+    if (!editingEvent) {
+      toast.error('No event selected for editing.');
+      return;
+    }
+
     const eventData = {
       eventDate: newEventDate,
       eventName: newEventName,
       eventTime: newEventTime,
     };
-    addEventSchedule(eventData, userId, () => getEventList(setEventList, userId));
-  };
 
-  const onUpdateEvent = () => {
-    const eventData = {
-      eventDate: newEventDate,
-      eventName: newEventName,
-      eventTime: newEventTime,
-    };
-    updateEventSchedule(editingEvent.id, eventData, () => {
-      getEventList(setEventList, userId);
+    try {
+      await updateDoc(doc(db, 'events', editingEvent.id), eventData);
+      toast.success('Event updated successfully.');
+      fetchEvents(churchId); // Refresh events list
       setEditingEvent(null);
       clearForm();
-    });
+    } catch (error) {
+      console.error('Error updating event:', error);
+      toast.error('Failed to update event.');
+    }
   };
 
   const handleDeleteEventSchedule = async (id) => {
     await deleteEventSchedule(id, () => getEventList(setEventList, userId));
   };
 
+  // Step 6: Edit an event
   const handleEditEventSchedule = (event) => {
     setEditingEvent(event);
     setNewEventDate(event.eventDate);
@@ -227,60 +323,66 @@ export const ChurchEvents = () => {
                     </button>
                   </div>
                 </div>
-
-                {currentItems.length > 0 ? (
-                  <Table striped bordered hover responsive style={{ borderRadius: "12px", overflow: "hidden", borderCollapse: "hidden" }}>
-                    <thead className="table-dark">
-                      <tr>
-                        <th className="events-th">Date</th>
-                        <th className="events-th">Name</th>
-                        <th className="events-th">Time</th>
-                        <th className="events-th">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentItems.map((events) => (
-                        <tr key={events.id}>
-                          <td className="events-td">{formatDate(events.eventDate)}</td>
-                          <td className="events-td">{events.eventName}</td>
-                          <td className="events-td">
-                            {convertTo12HourFormat(events.eventTime)}
-                          </td>
-                          <td className="events-td">
-                            <div className="btn-group" role="group">
-                              <button type="button" className="btn btn-primary" onClick={() => handleEditEventSchedule(events)}>Edit</button>
-                              <button type="button" className="btn btn-danger" onClick={() => handleDeleteEventSchedule(events.id)}>Delete</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                ) : (
-                  <div className="text-center py-5">
-                    <h4 className="text-muted">No events found</h4>
+                {loading ? (
+                  <div className="text-center my-4">
+                    <p>Loading events...</p>
                   </div>
-                )}
-                <Pagination className="d-flex justify-content-center mt-3">
-                  <Pagination.Prev
-                    disabled={currentPage === 1}
-                    onClick={() => handlePageChange(currentPage - 1)}
-                  />
-                  {Array.from({ length: totalPages }, (_, index) => (
-                    <Pagination.Item
-                      key={index + 1}
-                      active={index + 1 === currentPage}
-                      onClick={() => handlePageChange(index + 1)}
-                    >
-                      {index + 1}
-                    </Pagination.Item>
-                  ))}
-                  <Pagination.Next
-                    disabled={currentPage === totalPages}
-                    onClick={() => handlePageChange(currentPage + 1)}
-                  />
-                </Pagination>
-
+                ) : (
+                  <div>
+                    {currentItems.length > 0 ? (
+                      <Table striped bordered hover responsive style={{ borderRadius: "12px", overflow: "hidden", borderCollapse: "hidden" }}>
+                        <thead className="table-dark">
+                          <tr>
+                            <th className="events-th">Date</th>
+                            <th className="events-th">Name</th>
+                            <th className="events-th">Time</th>
+                            <th className="events-th">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {currentItems.map((events) => (
+                            <tr key={events.id}>
+                              <td className="events-td">{formatDate(events.eventDate)}</td>
+                              <td className="events-td">{events.eventName}</td>
+                              <td className="events-td">
+                                {convertTo12HourFormat(events.eventTime)}
+                              </td>
+                              <td className="events-td">
+                                <div className="btn-group" role="group">
+                                  <button type="button" className="btn btn-primary" onClick={() => handleEditEventSchedule(events)}>Edit</button>
+                                  <button type="button" className="btn btn-danger" onClick={() => handleDeleteEventSchedule(events.id)}>Delete</button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    ) : (
+                      <div className="text-center py-5">
+                        <h4 className="text-muted">No events found</h4>
+                      </div>
+                    )}
+                    <Pagination className="d-flex justify-content-center mt-3">
+                      <Pagination.Prev
+                        disabled={currentPage === 1}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                      />
+                      {Array.from({ length: totalPages }, (_, index) => (
+                        <Pagination.Item
+                          key={index + 1}
+                          active={index + 1 === currentPage}
+                          onClick={() => handlePageChange(index + 1)}
+                        >
+                          {index + 1}
+                        </Pagination.Item>
+                      ))}
+                      <Pagination.Next
+                        disabled={currentPage === totalPages}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                      />
+                    </Pagination>
+                  </div>
+              )}
               </div>
             </div>
           </div>
