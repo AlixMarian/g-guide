@@ -331,6 +331,21 @@ const handleShowAllDates = async () => {
             }
             return null;
           })}
+          {churches.map((church) => {
+            const lat = parseFloat(church.latitude);
+            const lng = parseFloat(church.longitude);
+            if (!isNaN(lat) && !isNaN(lng)) {
+              return (
+                <Marker
+                  key={church.id}
+                  position={{ lat, lng }}
+                  icon={customIcon}
+                  onClick={() => handleMarkerClick(church, setDrawerInfo, setChurchPhoto)}
+                />
+              );
+            }
+            return null;
+          })}
         </GoogleMap>
       </LoadScript>
 

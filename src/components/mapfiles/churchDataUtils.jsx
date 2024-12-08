@@ -323,16 +323,28 @@ export const convertTo12HourFormat = (time) => {
 /**
  * Handles zoom changes on the map by adjusting marker icon sizes.
  */
+// export const onZoomChanged = (map, setCustomIcon) => {
+//   if (map) {
+//     const zoom = map.getZoom();
+//     const newSize = zoom > 15 ? 40 : zoom > 12 ? 30 : 20;
+//     setCustomIcon((prevIcon) => ({
+//       ...prevIcon,
+//       scaledSize: new window.google.maps.Size(newSize, newSize),
+//     }));
+//   }
+// };
+
 export const onZoomChanged = (map, setCustomIcon) => {
-  if (map) {
-    const zoom = map.getZoom();
-    const newSize = zoom > 15 ? 40 : zoom > 12 ? 30 : 20;
-    setCustomIcon((prevIcon) => ({
-      ...prevIcon,
-      scaledSize: new window.google.maps.Size(newSize, newSize),
-    }));
-  }
+  if (!map) return; // Avoid calling getZoom if map is null
+  const zoom = map.getZoom(); // Safely get zoom level
+  const newSize = zoom > 15 ? 40 : zoom > 12 ? 30 : 20; // Adjust size based on zoom level
+  setCustomIcon({
+    url: '/src/assets/location.png',
+    scaledSize: new window.google.maps.Size(newSize, newSize),
+    anchor: new window.google.maps.Point(newSize / 2, newSize),
+  });
 };
+
 
 export const fetchPhotoLink = async (churchId) => {
   try {
