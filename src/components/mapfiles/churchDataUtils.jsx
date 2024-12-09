@@ -31,12 +31,14 @@ export const handleMarkerClick = async (church, setDrawerInfo, setChurchPhoto) =
     description: church.churchAddress || church.churchLocation || 'Address not available',
     telephone: church.telephone || 'Information unavailable',
     churchStartTime: church.churchStartTime,
+    status: church.status || null,
+    churchStatus: church.churchStatus || null,
     churchEndTime: church.churchEndTime,
     massDate: church.massDate || '',
     massTime: church.massTime || '',
     massType: church.massType || '',
     presidingPriest: church.presidingPriest || '',
-    photoLink: photoLink || coverLogo, // Add this line
+    photoLink: photoLink || coverLogo,
   });
 };
 
@@ -77,6 +79,7 @@ export const fetchChurchData = async () => {
         ...(matchedChurch || {}),
         churchPhoto: matchedPhoto ? matchedPhoto.photoLink : coverLogo,
         telephone: matchedChurch ? matchedChurch.churchContactNum : 'Information unavailable',
+        status: matchedChurch?.churchStatus || null,
         churchStartTime: matchedChurch?.churchStartTime || null,
         churchEndTime: matchedChurch?.churchEndTime || null,
       };
@@ -94,21 +97,15 @@ export const fetchChurchData = async () => {
  */
 export const fetchChurchesByLanguage = async (selectedLanguage) => {
   try {
-    // Query massSchedules for the selected language
-    const massSchedulesQuery = query(
-      collection(db, 'massSchedules'),
+    const massSchedulesRef = collection(db, 'massSchedules');
+    const q = query(
+      massSchedulesRef,
       where('massLanguage', '==', selectedLanguage)
     );
-    const massSchedulesSnapshot = await getDocs(massSchedulesQuery);
 
-    if (massSchedulesSnapshot.empty) {
-      console.log(`No mass schedules found for language: ${selectedLanguage}`);
-      return [];
-    }
-
-    // Fetch related church data
-    const churchesList = await Promise.all(
-      massSchedulesSnapshot.docs.map(async (massDoc) => {
+    const querySnapshot = await getDocs(q);
+    const churches = await Promise.all(
+      querySnapshot.docs.map(async (massDoc) => {
         const massData = massDoc.data();
         const churchId = massData.churchId;
 
@@ -123,7 +120,7 @@ export const fetchChurchesByLanguage = async (selectedLanguage) => {
         const locationDoc = await getDoc(doc(db, 'churchLocation', churchLocationID));
         const locationData = locationDoc.exists()
           ? locationDoc.data()
-          : { churchLocation: 'Location not available', churchStartTime: '', churchEndTime: '' };
+          : { churchLocation: 'Location not available', churchAddress: 'Address not available' };
 
         return {
           id: churchDoc.id,
@@ -136,6 +133,7 @@ export const fetchChurchesByLanguage = async (selectedLanguage) => {
           churchEndTime: churchData.churchEndTime || 'End time not available',
           telephone: churchData.churchContactNum || 'No contact information available',
           churchPhoto: churchData.churchPhoto || coverLogo,
+          status: churchData.churchStatus || null,
           massDate: massData.massDate || '',
           massTime: massData.massTime || '',
           massType: massData.massType || '',
@@ -144,7 +142,7 @@ export const fetchChurchesByLanguage = async (selectedLanguage) => {
       })
     );
 
-    return churchesList.filter((church) => church !== null); // Remove null results
+    return churches.filter((church) => church !== null);
   } catch (error) {
     console.error('Error fetching churches by language:', error);
     return [];
@@ -154,18 +152,21 @@ export const fetchChurchesByLanguage = async (selectedLanguage) => {
 
 export const fetchChurchesByLanguageToday = async (selectedLanguage) => {
   try {
-    // Get today's day name, e.g., 'Friday'
+    // Get today's day name, e.g., 'Monday'
     const today = new Date();
     const options = { weekday: 'long' };
     const todayDay = today.toLocaleDateString('en-US', options);
+    console.log(`Fetching churches for language: ${selectedLanguage} on day: ${todayDay}`);
 
-    // Query massSchedules for the selected language and today's day
+    // Query `massSchedules` for the selected language and today's day
     const massSchedulesQuery = query(
       collection(db, 'massSchedules'),
       where('massLanguage', '==', selectedLanguage),
       where('massDate', '==', todayDay)
     );
     const massSchedulesSnapshot = await getDocs(massSchedulesQuery);
+
+    console.log(`Mass schedules found: ${massSchedulesSnapshot.docs.length}`);
 
     if (massSchedulesSnapshot.empty) {
       console.log(`No mass schedules found for language: ${selectedLanguage} on ${todayDay}`);
@@ -180,7 +181,10 @@ export const fetchChurchesByLanguageToday = async (selectedLanguage) => {
 
         // Fetch church data
         const churchDoc = await getDoc(doc(db, 'church', churchId));
-        if (!churchDoc.exists()) return null;
+        if (!churchDoc.exists()) {
+          console.log(`No church found with ID: ${churchId}`);
+          return null;
+        }
 
         const churchData = churchDoc.data();
         const churchLocationID = churchData.churchLocationID;
@@ -189,11 +193,13 @@ export const fetchChurchesByLanguageToday = async (selectedLanguage) => {
         const locationDoc = await getDoc(doc(db, 'churchLocation', churchLocationID));
         const locationData = locationDoc.exists()
           ? locationDoc.data()
-          : { churchLocation: 'Location not available', churchStartTime: '', churchEndTime: '' };
+          : { churchLocation: 'Location not available', churchAddress: 'Address not available' };
+
+        console.log(`Fetched church: ${churchData.churchName} with location: ${locationData.churchLocation}`);
 
         return {
           id: churchDoc.id,
-          churchName: churchData.churchName || 'Name not available',
+          churchName: churchData.churchName || 'Church name not available',
           churchAddress: locationData.churchLocation || 'Address not available',
           churchLocation: locationData.churchLocation || 'Location not available',
           latitude: locationData.latitude || 0,
@@ -202,6 +208,7 @@ export const fetchChurchesByLanguageToday = async (selectedLanguage) => {
           churchEndTime: churchData.churchEndTime || 'End time not available',
           telephone: churchData.churchContactNum || 'No contact information available',
           churchPhoto: churchData.churchPhoto || coverLogo,
+          status: churchData.churchStatus || null,
           massDate: massData.massDate || '',
           massTime: massData.massTime || '',
           massType: massData.massType || '',
@@ -210,12 +217,15 @@ export const fetchChurchesByLanguageToday = async (selectedLanguage) => {
       })
     );
 
-    return churchesList.filter((church) => church !== null); // Remove null results
+    console.log(`Churches fetched: ${churchesList.filter(church => church !== null).length}`);
+    return churchesList.filter((church) => church !== null);
   } catch (error) {
-    console.error('Error fetching churches by language:', error);
+    console.error('Error fetching churches by language for today:', error);
     return [];
   }
 };
+
+
 /**
  * Fetches churches by service from 'services' and related collections.
  */
@@ -266,6 +276,8 @@ export const fetchChurchesByService = async (selectedService) => {
             churchAddress: 'Address not available',
             churchStartTime: churchData.churchStartTime,
             churchEndTime: churchData.churchEndTime,
+            churchStatus: churchData.churchStatus || null,
+            status: churchData.status || null,
             latitude: churchData.latitude || 0,
             longitude: churchData.longitude || 0,
             telephone: churchData.churchContactNum || 'No contact information available',
@@ -290,6 +302,8 @@ export const fetchChurchesByService = async (selectedService) => {
           churchEndTime: churchData.churchEndTime || 'Information Unavailable',
           telephone: churchData.churchContactNum || 'No contact information available',
           churchPhoto: churchData.churchPhoto || coverLogo,
+          status: churchData.churchStatus || null,
+          churchStatus: churchData.churchStatus || null,
         };
       } else {
         console.log(`No church found with ID: ${churchID}`);
@@ -335,47 +349,36 @@ export const convertTo12HourFormat = (time) => {
 // };
 
 export const onZoomChanged = (map, setCustomIcon) => {
-  if (!map) return; // Avoid calling getZoom if map is null
-  const zoom = map.getZoom(); // Safely get zoom level
-  const newSize = zoom > 15 ? 40 : zoom > 12 ? 30 : 20; // Adjust size based on zoom level
-  setCustomIcon({
-    url: '/src/assets/location.png',
-    scaledSize: new window.google.maps.Size(newSize, newSize),
-    anchor: new window.google.maps.Point(newSize / 2, newSize),
+  if (!map) return;
+  const zoom = map.getZoom();
+  setCustomIcon((prevIcon) => {
+    const newSize = zoom > 15 ? 40 : zoom > 12 ? 30 : 20;
+    if (prevIcon?.scaledSize?.width !== newSize) {
+      return {
+        url: '/src/assets/location.png',
+        scaledSize: new window.google.maps.Size(newSize, newSize),
+        anchor: new window.google.maps.Point(newSize / 2, newSize),
+      };
+    }
+    return prevIcon;
   });
 };
 
-
 export const fetchPhotoLink = async (churchId) => {
   try {
-    // Step 1: Fetch church document
-    const churchRef = doc(db, 'church', churchId);
-    const churchSnap = await getDoc(churchRef);
-    if (!churchSnap.exists()) {
-      console.error(`No church found with ID: ${churchId}`);
+    if (!churchId) {
+      console.error("Church ID is required to fetch photo link.");
       return coverLogo;
     }
-    const churchData = churchSnap.data();
-    const coordinatorID = churchData.coordinatorID;
 
-    // Step 2: Fetch coordinator document by its ID
-    const coordinatorRef = doc(db, 'coordinator', coordinatorID);
-    const coordinatorSnap = await getDoc(coordinatorRef);
-    if (!coordinatorSnap.exists()) {
-      console.error(`No coordinator found with ID: ${coordinatorID}`);
-      return coverLogo;
-    }
-    const coordinatorData = coordinatorSnap.data();
-    const userId = coordinatorData.userId;
-
-    // Step 3: Query churchPhotos collection where uploader matches userId
+    // Query the churchPhotos collection for photos uploaded by this churchId
     const churchPhotosQuery = query(
       collection(db, 'churchPhotos'),
-      where('uploader', '==', userId)
+      where('uploader', '==', churchId)
     );
     const churchPhotosSnapshot = await getDocs(churchPhotosQuery);
 
-    // Step 4: If a match is found, return the photoLink field
+    // If photos exist, return the photoLink of the first photo
     if (!churchPhotosSnapshot.empty) {
       const photoDoc = churchPhotosSnapshot.docs[0];
       const photoLink = photoDoc.data().photoLink;
@@ -384,10 +387,10 @@ export const fetchPhotoLink = async (churchId) => {
       }
     }
 
-    // Step 5: Return default photo if no match is found
+    // Return default photo if no match is found
     return coverLogo;
   } catch (error) {
-    console.error('Error fetching photoLink:', error);
+    console.error('Error fetching photo link:', error);
     return coverLogo;
   }
 };

@@ -80,6 +80,7 @@ const MapComponent = () => {
     }
   }, []);
 
+
 useEffect(() => {
   const fetchData = async () => {
     if (selectedLanguage) {
