@@ -20,6 +20,7 @@ export const MarriageCertificate = () => {
     const [authorizationImageUrl, setAuthorizationImageUrl] = useState('');
     const [showAuthorization, setShowAuthorization] = useState(false);
     const [appointmentPurpose, setAppointmentPurpose] = useState('personal');
+    const [refundPolicy, setRefundPolicy] = useState('');
     const [formData, setFormData] = useState({
         brideFirstName: '',
         brideLastName: '',
@@ -36,8 +37,27 @@ export const MarriageCertificate = () => {
           setChurchData(docSnap.data());
         }
       };
+      fetchRefundPolicy();
       fetchChurchData();
     }, [churchId]);
+
+    const fetchRefundPolicy = async () => {
+      try {
+          const churchDocRef = doc(db, 'church', churchId);
+          const churchDocSnap = await getDoc(churchDocRef);
+  
+          if (churchDocSnap.exists()) {
+              const data = churchDocSnap.data();
+              setRefundPolicy(data.refundPolicy || "No refund policy available."); // Set refund policy or default message
+          } else {
+              console.log("No church data found for refund policy.");
+              setRefundPolicy("No refund policy available.");
+          }
+      } catch (error) {
+          console.error("Error fetching refund policy:", error);
+          toast.error("Failed to fetch refund policy.");
+      }
+  };
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -154,15 +174,19 @@ export const MarriageCertificate = () => {
     return (
         <div>
         <form id="marriageCert" onSubmit={handleCreateAppointment}>
-            <div className='purpose card mb-4'>
-              <div className='card-body'>
-                <h5 className='card-title'>Who is the Appointment For?</h5>
+          <div className="purpose card mb-4">
+            <div className="card-body">
+              <h5 className="card-title">Who is the Appointment For?</h5>
                 <div className="d-grid gap-2 d-md-flex justify-content-md-center">
-                  <button type='button' className='personal btn btn-primary' onClick={handlePersonalClick}>Personal</button>
-                  <button type='button' className='others btn btn-primary' onClick={handleOthersClick}>Others</button>
+                  <button type="button" className={appointmentPurpose === 'personal' ? 'btn btn-primary' : 'btn btn-outline-primary'} onClick={handlePersonalClick}>
+                    Personal
+                  </button>
+                  <button type="button" className={appointmentPurpose === 'others' ? 'btn btn-primary' : 'btn btn-outline-primary'} onClick={handleOthersClick}>
+                    Others
+                  </button>
                 </div>
-              </div>
-            </div>
+             </div>
+          </div>
 
             {showAuthorization && (
             <div className='authorization card mb-4'>
@@ -216,7 +240,7 @@ export const MarriageCertificate = () => {
             <div className="userDetails card mb-4">
               <div className="card-body">
                 <h5 className="card-title">Refund Policy</h5>
-                
+                <p>{refundPolicy}</p>
               </div>
             </div>
                   
@@ -250,7 +274,7 @@ export const MarriageCertificate = () => {
                     
                     <div className="mb-3">
                         <label htmlFor="marriageDate" className="form-label">Date of Marriage</label>
-                        <input type="date" className="form-control" id="marriageDate" name="marriageDate" onChange={handleChange} required/>
+                        <input type="date" className="form-control" id="marriageDate" name="marriageDate" max={new Date().toISOString().split('T')[0]} onChange={handleChange} required/>
                     </div>
 
                     <div className="d-grid gap-2 d-md-flex justify-content-md-end">

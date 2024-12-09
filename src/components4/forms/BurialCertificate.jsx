@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 
 export const BurialCertificate = () => {
     const { churchId } = useParams();
+    // eslint-disable-next-line no-unused-vars
     const [churchData, setChurchData] = useState(null);
     const [userData, setUserData] = useState(null); 
     const auth = getAuth();
@@ -125,6 +126,7 @@ export const BurialCertificate = () => {
                 await addDoc(collection(db, 'appointments'), appointmentData);
                 toast.success("Request submitted to Church Coordinator. Please wait for approval");
                 resetForm();
+                
               } catch (error) {
                 console.error("Error submitting request: ", error);
                 toast.error(`Error submitting request: ${error.message}`);
@@ -162,15 +164,19 @@ export const BurialCertificate = () => {
     <div>
         <form id="burialCertificate" onSubmit={handleCreateAppointment}>
 
-            <div className='purpose card mb-4'>
-              <div className='card-body'>
-                <h5 className='card-title'>Who is the Appointment For?</h5>
+        <div className="purpose card mb-4">
+            <div className="card-body">
+              <h5 className="card-title">Who is the Appointment For?</h5>
                 <div className="d-grid gap-2 d-md-flex justify-content-md-center">
-                  <button type='button' className='personal btn btn-primary' onClick={handlePersonalClick}>Personal</button>
-                  <button type='button' className='others btn btn-primary' onClick={handleOthersClick}>Others</button>
+                  <button type="button" className={appointmentPurpose === 'personal' ? 'btn btn-primary' : 'btn btn-outline-primary'} onClick={handlePersonalClick}>
+                    Personal
+                  </button>
+                  <button type="button" className={appointmentPurpose === 'others' ? 'btn btn-primary' : 'btn btn-outline-primary'} onClick={handleOthersClick}>
+                    Others
+                  </button>
                 </div>
-              </div>
-            </div>
+             </div>
+          </div>
 
             {showAuthorization && (
             <div className='authorization card mb-4'>

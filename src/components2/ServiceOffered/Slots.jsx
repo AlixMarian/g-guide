@@ -121,7 +121,7 @@ export const Slots = () => {
           fetchSlots(); // Fetch slots once churchId is fetched
         }
       } else {
-        toast.error('No user is signed in.');
+        console.log('No user is signed in.');
       }
     });
   }, [auth]);

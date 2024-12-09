@@ -11,6 +11,7 @@ export const Baptism = () => {
     const [dateToday, setdateToday] = useState(new Date());
     const [matchedDates, setMatchedDates] = useState([]);
     const { churchId } = useParams();
+    // eslint-disable-next-line no-unused-vars
     const [churchData, setChurchData] = useState(null);
     const [slots, setSlots] = useState([]);
     const [userData, setUserData] = useState(null);
@@ -81,12 +82,30 @@ export const Baptism = () => {
 
         const fetchPriests = async () => {
             try {
-                const priestsQuery = query(collection(db, 'priest'), where('creatorId', '==', churchId));
+                if (!churchId) {
+                    toast.error("Church ID is missing.");
+                    return;
+                }
+
+                const priestsQuery = query(
+                    collection(db, 'priest'), 
+                    where('churchId', '==', churchId) // Match current churchId
+                );
                 const querySnapshot = await getDocs(priestsQuery);
-                const priestsData = querySnapshot.docs.map(doc => doc.data());
-                setPriests(priestsData);
+
+                if (!querySnapshot.empty) {
+                    const priestsData = querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    }));
+                    setPriests(priestsData); // Set the fetched priests
+                } else {
+                    setPriests([]);
+                    toast.info("No priests found for this church.");
+                }
             } catch (error) {
                 console.error("Error fetching priests:", error.message);
+                toast.error("Failed to fetch priests. Please try again later.");
             }
         };
 
@@ -306,36 +325,54 @@ export const Baptism = () => {
                 </div>
 
                 {/* Calendar and Slots */}
-                <div className="calendar card mb-4">
-                    <div className="card-body">
-                        <h5 className="card-title">Select date of Baptism</h5>
+                <div className="card mb-4">
+                <div className="card-body">
+                    <h5 className="card-title">Select Schedule for Marriage Seminar</h5>
+                    <p>Please visit the church&apos;s office on the selected date for further instructions regarding the marriage seminar.</p>
+                    <div className="row g-3 align-items-start justify-content-center">
+                    <div className="col-lg-4 col-md-6 me-3">
                         <DatePicker
-                            inline
-                            selected={dateToday}
-                            onChange={handleDateChange}
-                            dateFormat="MMMM d, yyyy"
-                            minDate={new Date()}
-                            className="w-100"
-                            maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 2))}
-                            excludeDates={disabledDates}
-                            highlightDates={activeDates} 
+                        inline
+                        selected={dateToday}
+                        onChange={handleDateChange}
+                        dateFormat="MMMM d, yyyy"
+                        minDate={new Date()}
+                        className="w-100"
+                        maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 2))}
+                        excludeDates={disabledDates}
+                        highlightDates={activeDates}
                         />
-                        <div className="mt-3">
-                            <h6>Available Slots:</h6>
+                    </div>
+                    <div className="col-lg-6 col-md-6">
+                        <div className="d-flex flex-column h-100">
+                        <div className="mb-3">
+                            <p className="fw-bold mb-1">Slots available for:</p>
+                            <p className="text-muted">
+                            {dateToday && dateToday.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                            </p>
+                        </div>
+                        <div className="flex-grow-1">
                             {matchedDates.length > 0 ? (
-                                sortSlotsByTime(matchedDates).map((slot) => (
-                                    <div key={slot.id} className="mb-2">
-                                        <label className="form-check-label">
-                                            <input type="radio" name="slotTime" value={slot.id} className="form-check-input me-2" onChange={handleSlotChange} required/>
-                                            {renderTime(slot)}
-                                        </label>
-                                    </div>
-                                ))
+                            sortSlotsByTime(matchedDates).map((slot, index) => (
+                                <div key={index} className="mb-2">
+                                <label className="form-check-label">
+                                    <input type="radio" name="slotTime" value={slot.id} className="form-check-input me-2" onChange={handleSlotChange} required />
+                                    {renderTime(slot)}
+                                </label>
+                                </div>
+                            ))
                             ) : (
-                                <p>No slots available for the selected date.</p>
+                            <p className="text-muted">No slots available for the selected date.</p>
                             )}
                         </div>
+                        </div>
                     </div>
+                    </div>
+        
+                    <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="reset" className="btn btn-danger">Clear</button>
+                    </div>
+                </div>
                 </div>
 
                 {/* Form for submitting baptism requirements */}
@@ -412,12 +449,11 @@ export const Baptism = () => {
                             <label htmlFor="godParents" className="form-label">Name of Godparents</label>
                             <input type="text" className="form-control" id="godParents" name="godParents" required onChange={handleChange} value={formData.godParents} placeholder="e.g., John Doe, Jane Doe"/>
                         </div>
+                        <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" className="btn btn-success me-md-2">Submit Requirements</button>
+                            <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
+                        </div>
                     </div>
-                </div>
-
-                <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button type="submit" className="btn btn-success me-md-2">Submit Requirements</button>
-                    <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
                 </div>
             </form>
         </div>

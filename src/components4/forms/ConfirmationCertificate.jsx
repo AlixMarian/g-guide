@@ -171,15 +171,19 @@ export const ConfirmationCertificate = () => {
       return (
         <div>
           <form id="confirmationCert" onSubmit={handleCreateAppointment}>
-          <div className='purpose card mb-4'>
-              <div className='card-body'>
-                <h5 className='card-title'>Who is the Appointment For?</h5>
+          <div className="purpose card mb-4">
+            <div className="card-body">
+              <h5 className="card-title">Who is the Appointment For?</h5>
                 <div className="d-grid gap-2 d-md-flex justify-content-md-center">
-                  <button type='button' className='personal btn btn-primary' onClick={handlePersonalClick}>Personal</button>
-                  <button type='button' className='others btn btn-primary' onClick={handleOthersClick}>Others</button>
+                  <button type="button" className={appointmentPurpose === 'personal' ? 'btn btn-primary' : 'btn btn-outline-primary'} onClick={handlePersonalClick}>
+                    Personal
+                  </button>
+                  <button type="button" className={appointmentPurpose === 'others' ? 'btn btn-primary' : 'btn btn-outline-primary'} onClick={handleOthersClick}>
+                    Others
+                  </button>
                 </div>
-              </div>
-            </div>
+             </div>
+          </div>
 
             {showAuthorization && (
             <div className='authorization card mb-4'>
@@ -253,7 +257,7 @@ export const ConfirmationCertificate = () => {
                 </div>
                 <div className="mb-3">
                   <label htmlFor="birthdayDate" className="form-label">Date of Birth</label>
-                  <input type="date" className="form-control" id="birthdayDate" name="birthdayDate" onChange={handleChange} required/>
+                  <input type="date" className="form-control" id="birthdayDate" name="birthdayDate" max={new Date().toISOString().split('T')[0]} onChange={handleChange} required/>
                 </div>
                 
                 <div className="d-grid gap-2 d-md-flex justify-content-md-end">
