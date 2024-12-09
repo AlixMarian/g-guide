@@ -10,14 +10,18 @@ import BurialCertificate from './forms/BurialCertificate';
 import Marriage from './forms/Marriage';
 import MassIntention from './forms/MassIntention';
 import Baptism from './forms/Baptism';
-import Burial  from './forms/Burial';
+import Burial from './forms/Burial';
 import Confirmation from './forms/Confirmation';
 
 export const ChurchHomepageBook = () => {
   const { churchId } = useParams();
   // eslint-disable-next-line no-unused-vars
   const [churchData, setChurchData] = useState(null);
-  const [services, setServices] = useState({ activeSchedules: [], activeRequests: [] });
+  const [services, setServices] = useState({
+    appointments: [],
+    documentRequests: [],
+    massIntentions: false,
+  });
   const [selectedServiceType, setSelectedServiceType] = useState('');
   const [selectedService, setSelectedService] = useState('');
 
@@ -34,12 +38,22 @@ export const ChurchHomepageBook = () => {
       const servicesDoc = await getDoc(doc(db, 'services', churchId));
       if (servicesDoc.exists()) {
         const data = servicesDoc.data();
+        const appointments = Object.entries(data)
+          .filter(([key, value]) => value.active && ["Marriages", "Baptism", "Confirmation", "Burials"].includes(key))
+          .map(([key]) => key);
+        const documentRequests = Object.entries(data)
+          .filter(([key, value]) => value.active && ["Baptismal Certificate", "Confirmation Certificate", "Marriage Certificate", "Burial Certificate"].includes(key))
+          .map(([key]) => key);
+        const massIntentions = data["Mass Intentions"]?.active || false;
+
         setServices({
-          activeSchedules: data.activeSchedules || [],
-          activeRequests: data.activeRequests || [],
+          appointments,
+          documentRequests,
+          massIntentions,
         });
       }
     };
+
     fetchChurchData();
     fetchServices();
   }, [churchId]);
@@ -48,6 +62,10 @@ export const ChurchHomepageBook = () => {
     setSelectedServiceType(serviceType);
     setSelectedService('');
   };
+
+  if (!services) {
+    return <div>Loading services...</div>;
+  }
 
   return (
     <div className="container mt-5">
@@ -69,16 +87,53 @@ export const ChurchHomepageBook = () => {
                   {selectedServiceType || "Select Service Type"}
                 </button>
                 <ul className="dropdown-menu" aria-labelledby="servicesTypeDropdown">
-                  <li>
-                    <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault();handleServiceTypeChange("Book an Appointment");}}>Book an Appointment</a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault(); handleServiceTypeChange("Request Document");}}>Request Document</a>
-                  </li>
+                  {services.appointments.length > 0 && (
+                    <li>
+                      <a
+                        className="dropdown-item"
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleServiceTypeChange("Book an Appointment");
+                        }}
+                      >
+                        Book an Appointment
+                      </a>
+                    </li>
+                  )}
+                  {services.documentRequests.length > 0 && (
+                    <li>
+                      <a
+                        className="dropdown-item"
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleServiceTypeChange("Request Document");
+                        }}
+                      >
+                        Request Document
+                      </a>
+                    </li>
+                  )}
+                  {services.massIntentions && (
+                    <li>
+                      <a
+                        className="dropdown-item"
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setSelectedServiceType("Mass Intentions");
+                          setSelectedService("Mass Intentions");
+                        }}
+                      >
+                        Mass Intentions
+                      </a>
+                    </li>
+                  )}
                 </ul>
               </div>
             </div>
-            {selectedServiceType && (
+            {selectedServiceType && selectedServiceType !== "Mass Intentions" && (
               <div className="col-12 col-md-auto">
                 <div className="dropdown">
                   <button
@@ -92,15 +147,33 @@ export const ChurchHomepageBook = () => {
                   </button>
                   <ul className="dropdown-menu" aria-labelledby="servicesDropdown">
                     {selectedServiceType === "Book an Appointment" &&
-                      services.activeSchedules.map((service, index) => (
+                      services.appointments.map((service, index) => (
                         <li key={index}>
-                          <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault();setSelectedService(service);}}>{service}</a>
+                          <a
+                            className="dropdown-item"
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setSelectedService(service);
+                            }}
+                          >
+                            {service}
+                          </a>
                         </li>
                       ))}
                     {selectedServiceType === "Request Document" &&
-                      services.activeRequests.map((service, index) => (
+                      services.documentRequests.map((service, index) => (
                         <li key={index}>
-                          <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault();setSelectedService(service);}}>{service}</a>
+                          <a
+                            className="dropdown-item"
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setSelectedService(service);
+                            }}
+                          >
+                            {service}
+                          </a>
                         </li>
                       ))}
                   </ul>
@@ -111,15 +184,14 @@ export const ChurchHomepageBook = () => {
         </div>
       </div>
 
+      {selectedServiceType === "Mass Intentions" && <MassIntention />}
 
-      
       {selectedServiceType === "Book an Appointment" && (
         <div>
           {selectedService === "Marriages" && <Marriage />}
-          {selectedService === "Mass Intentions" && <MassIntention />}
-          {selectedService === "Baptism" && <Baptism/>}
-          {selectedService === "Burials" && <Burial/>}
-          {selectedService === "Confirmation" && <Confirmation/>}
+          {selectedService === "Baptism" && <Baptism />}
+          {selectedService === "Burials" && <Burial />}
+          {selectedService === "Confirmation" && <Confirmation />}
         </div>
       )}
       {selectedServiceType === "Request Document" && (
@@ -128,7 +200,6 @@ export const ChurchHomepageBook = () => {
           {selectedService === "Confirmation Certificate" && <ConfirmationCertificate />}
           {selectedService === "Marriage Certificate" && <MarriageCertificate />}
           {selectedService === "Burial Certificate" && <BurialCertificate />}
-
         </div>
       )}
     </div>

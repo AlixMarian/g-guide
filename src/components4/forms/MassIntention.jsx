@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc, Timestamp, collection, addDoc, query, where, getDocs, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, Timestamp, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from '/backend/firebase';
@@ -23,7 +23,9 @@ export const MassIntention = () => {
   });
   const [massSchedules, setMassSchedules] = useState([]);
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
-  const [filteredMassSchedules, setFilteredMassSchedules] = useState([]);
+  // const [filteredMassSchedules, setFilteredMassSchedules] = useState([]);
+  const [weekdays, setWeekdays] = useState([]);
+  const [weekends, setWeekends] = useState([]);
 
   useEffect(() => {
     const fetchChurchData = async () => {
@@ -52,33 +54,54 @@ export const MassIntention = () => {
 
   useEffect(() => {
     const fetchMassSchedules = async () => {
-      const q = query(collection(db, 'massSchedules'), where('creatorId', '==', churchId));
-      const querySnapshot = await getDocs(q);
-      const schedules = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setMassSchedules(schedules);
-      setFilteredMassSchedules(schedules);
+      try {
+        const q = query(
+          collection(db, 'massSchedules'),
+          where('churchId', '==', churchId) // Fetch schedules related to this church
+        );
+
+        const querySnapshot = await getDocs(q);
+        const schedules = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        // Separate into weekdays and weekends for easier display
+        const weekdayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        const weekendOrder = ['Saturday', 'Sunday'];
+
+        const weekdaySchedules = schedules.filter((schedule) =>
+          weekdayOrder.includes(schedule.massDate)
+        );
+        const weekendSchedules = schedules.filter((schedule) =>
+          weekendOrder.includes(schedule.massDate)
+        );
+
+        // Sort weekdays and weekends separately
+        weekdaySchedules.sort(
+          (a, b) =>
+            weekdayOrder.indexOf(a.massDate) - weekdayOrder.indexOf(b.massDate) ||
+            new Date(`1970-01-01T${a.massTime}:00`) - new Date(`1970-01-01T${b.massTime}:00`)
+        );
+
+        weekendSchedules.sort(
+          (a, b) =>
+            weekendOrder.indexOf(a.massDate) - weekendOrder.indexOf(b.massDate) ||
+            new Date(`1970-01-01T${a.massTime}:00`) - new Date(`1970-01-01T${b.massTime}:00`)
+        );
+
+        setMassSchedules(schedules);
+        setWeekdays(weekdaySchedules);
+        setWeekends(weekendSchedules);
+      } catch (error) {
+        console.error('Error fetching mass schedules:', error);
+        toast.error('Failed to load mass schedules. Please try again.');
+      }
     };
 
     fetchMassSchedules();
   }, [churchId]);
 
-  const getSortedSchedules = (schedules) => {
-    const weekdayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    const weekendOrder = ['Sunday', 'Saturday'];
-    
-    const weekdays = schedules.filter(schedule => weekdayOrder.includes(schedule.massDate));
-    const weekends = schedules.filter(schedule => weekendOrder.includes(schedule.massDate));
-    
-    weekdays.sort((a, b) => weekdayOrder.indexOf(a.massDate) - weekdayOrder.indexOf(b.massDate));
-    weekends.sort((a, b) => weekendOrder.indexOf(a.massDate) - weekendOrder.indexOf(b.massDate));
-
-    return { weekdays, weekends };
-  };
-
-  const { weekdays, weekends } = getSortedSchedules(filteredMassSchedules);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -336,12 +359,6 @@ export const MassIntention = () => {
               <input type="file" className="form-control" id="paymentReceiptImage" accept="image/*" onChange={handleChoosePayment} ref={fileInputRef} />
               <button type="button" className="btn btn-primary mt-2" onClick={handleSubmitPayment}>Upload Receipt</button>
             </div>
-            {receiptImageUrl && (
-              <div className="mb-3">
-                <label htmlFor="receiptImagePreview" className="form-label">Receipt Preview:</label>
-                <img src={receiptImageUrl} alt="Receipt" className="img-fluid" />
-              </div>
-            )}
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">
               <button type="submit" className="btn btn-success me-md-2">Submit Request</button>
               <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>
