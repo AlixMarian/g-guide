@@ -203,6 +203,19 @@ export const OngoingAppointments = () => {
       return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Birth Certificate</a>;
     }
   };
+
+  const renderAuthorizationLetter = (fileUrl) => {
+    const fileExtension = fileUrl.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+      return <img src={fileUrl} alt="Authorization Letter" style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain' }} />;
+    } else if (fileExtension === 'pdf') {
+      return <iframe src={fileUrl} title="Authorization Letter" style={{ width: '100%', height: '500px' }} />;
+    } else if (['doc', 'docx'].includes(fileExtension)) {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">Download Authorization Letter</a>;
+    } else {
+      return <a href={fileUrl} target="_blank" rel="noopener noreferrer">View Authorization Letter</a>;
+    }
+  };
   
   const handleChoosePayment = (e) => {
     const { files } = e.target;
@@ -402,6 +415,12 @@ export const OngoingAppointments = () => {
                         <div>
                           <br />
                           <h4>Submitted Requirements</h4>
+                          <p>
+                            <b>Authorization Letter:</b>{' '}
+                            {selectedAppointment.appointmentPurpose === 'others' 
+                              ? renderAuthorizationLetter(selectedAppointment.authorizationLetter) 
+                              : 'none'}
+                          </p>
                           <p><b>Bride&apos;s First Name:</b> {selectedAppointment.marriageCertificate.brideFirstName}</p>
                           <p><b>Bride&apos;s Last Name:</b> {selectedAppointment.marriageCertificate.brideLastName}</p>
                           <br />
@@ -415,6 +434,12 @@ export const OngoingAppointments = () => {
                         <div>
                           <br />
                           <h4>Submitted Requirements</h4>
+                          <p>
+                            <b>Authorization Letter:</b>{' '}
+                            {selectedAppointment.appointmentPurpose === 'others' 
+                              ? renderAuthorizationLetter(selectedAppointment.authorizationLetter) 
+                              : 'none'}
+                          </p>
                           <p><b>First Name:</b> {selectedAppointment.confirmationCertificate.firstName}</p>
                           <p><b>Last Name:</b> {selectedAppointment.confirmationCertificate.lastName}</p>
                           <p><b>Date of Birth:</b> {selectedAppointment.confirmationCertificate.birthdayDate}</p>
@@ -424,6 +449,13 @@ export const OngoingAppointments = () => {
                         <div>
                           <br />
                           <h4>Submitted Requirements</h4>
+                          <p>
+                            <b>Authorization Letter:</b>{' '}
+                            {selectedAppointment.appointmentPurpose === 'others' 
+                              ? renderAuthorizationLetter(selectedAppointment.authorizationLetter) 
+                              : 'none'}
+                          </p>
+                          <br/>
                           <p><b>First Name:</b> {selectedAppointment.baptismalCertificate.firstName}</p>
                           <p><b>Last Name:</b> {selectedAppointment.baptismalCertificate.lastName}</p>
                           <p><b>Birthday:</b> {selectedAppointment.baptismalCertificate.birthday}</p>
@@ -438,7 +470,13 @@ export const OngoingAppointments = () => {
                         <div>
                           <br />
                           <h4>Submitted Requirements</h4>
-                          <p><b>View Death Certificate: </b>{renderDeathCertificate(selectedAppointment.burialCertificate.deathCertificate)}</p>
+                          <p>
+                            <b>Authorization Letter:</b>{' '}
+                            {selectedAppointment.appointmentPurpose === 'others' 
+                              ? renderAuthorizationLetter(selectedAppointment.authorizationLetter) 
+                              : 'none'}
+                          </p>
+                          <p><b>Death Certificate: </b>{renderDeathCertificate(selectedAppointment.burialCertificate.deathCertificate)}</p>
                         </div>
                       )}
                       {selectedAppointment.appointmentType === 'baptism' && (
@@ -482,7 +520,7 @@ export const OngoingAppointments = () => {
                             const endTime = convertTo12HourFormat(slotData.endTime);
                             return startTime && endTime ? `${startTime} - ${endTime}` : 'N/A';
                           })() : 'N/A'}</p>
-                          <p><b>View Death Certificate: </b>{renderDeathCertificate(selectedAppointment.burial.deathCertificate)}</p>
+                          <p><b>Death Certificate: </b>{renderDeathCertificate(selectedAppointment.burial.deathCertificate)}</p>
                         </div>
                       )}
                       {selectedAppointment.appointmentType === 'marriage' && (

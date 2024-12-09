@@ -19,6 +19,7 @@ export const Marriage = () => {
     const [disabledDates, setDisabledDates] = useState([]);
     const [activeDates, setActiveDates] = useState([]);
     const [selectedSlotId, setSelectedSlotId] = useState(null);
+    const [refundPolicy, setRefundPolicy] = useState('');
     const [formData, setFormData] = useState({
         brideFirstName: '',
         brideLastName: '',
@@ -83,6 +84,7 @@ export const Marriage = () => {
                 }
             }
         };
+        fetchRefundPolicy();
         fetchUserData();
     }, [user]);
 
@@ -209,6 +211,24 @@ export const Marriage = () => {
         });
     };
 
+    const fetchRefundPolicy = async () => {
+      try {
+          const churchDocRef = doc(db, 'church', churchId);
+          const churchDocSnap = await getDoc(churchDocRef);
+
+          if (churchDocSnap.exists()) {
+              const data = churchDocSnap.data();
+              setRefundPolicy(data.refundPolicy || "No refund policy available."); // Set refund policy or default message
+          } else {
+              console.log("No church data found for refund policy.");
+              setRefundPolicy("No refund policy available.");
+          }
+      } catch (error) {
+          console.error("Error fetching refund policy:", error);
+          toast.error("Failed to fetch refund policy.");
+      }
+  };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -255,7 +275,7 @@ export const Marriage = () => {
             <div className="userDetails card mb-4">
               <div className="card-body">
                 <h5 className="card-title">Refund Policy</h5>
-                
+                <p>{refundPolicy}</p>
               </div>
             </div>
       

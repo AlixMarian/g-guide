@@ -35,7 +35,7 @@ export const Schedules = () =>{
         await fetchChurchId(user.uid);
       } else {
         setUserId('');
-        toast.error('No user is logged in');
+        console.log('No user is logged in');
       }
     });
 

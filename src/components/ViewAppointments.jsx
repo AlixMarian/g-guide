@@ -18,6 +18,7 @@ export const ViewAppointments = () => {
   const [churches, setChurches] = useState({});
   const [massIntentions,setMassIntentions] = useState({});
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [showMassIntentionModal, setShowMassIntentionModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [selectedMassIntention, setSelectedMassIntention] = useState(null);
@@ -232,32 +233,43 @@ export const ViewAppointments = () => {
                 <h5 className="card-title">Appointment History</h5>
                 <div className="row">
                   {appointments.length > 0 ? (
-                    appointments
-                      .filter(appointment => appointment.appointmentStatus === "Approved" || appointment.appointmentStatus === "Denied")
-                      .map(appointment => {
-                        const church = churches[appointment.churchId];
-                        return (
-                          <div key={appointment.id} className="col-12 mb-3">
-                            <div className="card">
-                              <div className="card-body d-flex align-items-center justify-content-between">
-                                <div>
-                                  <h5 className="card-title mb-0">
-                                    {appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}
-                                  </h5>
-                                  <p className="card-text mb-0"><b>Status: {appointment.appointmentStatus}</b></p>
-                                  {church && (
-                                    <div>
-                                      <p className='mb-0'>Church Name: {church.churchName}</p>
-                                      <p className='mb-0'>Church Location: {church.churchAddress}</p>
-                                    </div>
-                                  )}
+                    appointments.some(appointment => 
+                      appointment.appointmentStatus === "Approved" || appointment.appointmentStatus === "Denied"
+                    ) ? (
+                      appointments
+                        .filter(appointment => appointment.appointmentStatus === "Approved" || appointment.appointmentStatus === "Denied")
+                        .map(appointment => {
+                          const church = churches[appointment.churchId];
+                          return (
+                            <div key={appointment.id} className="col-12 mb-3">
+                              <div className="card">
+                                <div className="card-body d-flex align-items-center justify-content-between">
+                                  <div>
+                                    <h5 className="card-title mb-0">
+                                      {appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}
+                                    </h5>
+                                    <p className="card-text mb-0"><b>Status: {appointment.appointmentStatus}</b></p>
+                                    {church && (
+                                      <div>
+                                        <p className='mb-0'>Church Name: {church.churchName}</p>
+                                        <p className='mb-0'>Church Location: {church.churchAddress}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <button 
+                                    className='btn btn-custom-primary' 
+                                    onClick={() => handleShowAppointmentModal(appointment)}
+                                  >
+                                    View Information
+                                  </button>
                                 </div>
-                                <button className='btn btn-custom-primary' onClick={() => handleShowAppointmentModal(appointment)}>View Information</button>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })
+                          );
+                        })
+                    ) : (
+                      <p>All appointments and documents requested are still in review</p>
+                    )
                   ) : (
                     <p>No appointments found.</p>
                   )}
@@ -474,22 +486,55 @@ export const ViewAppointments = () => {
                       <p><strong>Requester Name:</strong> {selectedMassIntention.userFields?.requesterName}</p>
                                   
                       <br/>
-                      <p><strong>Petition:</strong> {selectedMassIntention.petition}</p>
-                      <p><strong>Thanksgiving Mass:</strong> {selectedMassIntention.thanksgivingMass}</p>
-                      <p><strong>For the Souls of:</strong> {selectedMassIntention.forTheSoulOf}</p>
+                      <p><strong>Petition:</strong> {selectedMassIntention.petition || 'none'}</p>
+                      <p><strong>Thanksgiving Mass:</strong> {selectedMassIntention.thanksgivingMass || 'none'}</p>
+                      <p><strong>For the Souls of:</strong> {selectedMassIntention.forTheSoulOf || 'none'}</p>
                       <br/>
 
                       <h4>Payment Details</h4>
                       {selectedMassIntention.receiptImage && selectedMassIntention.receiptImage !== 'none' ? (
-                        renderPaymentImage(selectedMassIntention.receiptImage)
+                        <button
+                          className="btn btn-custom-primary"
+                          onClick={() => {
+                            setShowMassIntentionModal(false);
+                            setShowReceiptModal(true);
+                          }}
+                        >
+                          View Receipt
+                        </button>
                       ) : (
-                      <p>Not yet paid</p>
+                        <p>Not yet paid</p>
                       )}
                   </div>
               )}
           </Modal.Body>
       </Modal>
 
+      <Modal show={showReceiptModal} onHide={() => setShowReceiptModal(false)} centered backdrop="static" keyboard={false}>
+        <Modal.Header>
+          <div className="d-flex justify-content-between w-100 align-items-center">
+            <Modal.Title>Receipt Image</Modal.Title>
+            <button
+              className="btn btn-custom-primary"
+              onClick={() => {
+                setShowReceiptModal(false);
+                setShowMassIntentionModal(true);
+              }}
+            >
+              Back
+            </button>
+          </div>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedMassIntention?.receiptImage && (
+            <img
+              src={selectedMassIntention.receiptImage}
+              alt="Receipt"
+              style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain' }}
+            />
+          )}
+        </Modal.Body>
+      </Modal>
         </div>
       </div>
     </div>

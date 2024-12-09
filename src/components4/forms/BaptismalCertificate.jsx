@@ -10,6 +10,7 @@ export const BaptismalCertificate = () => {
     const { churchId } = useParams();
     const auth = getAuth();
     const user = auth.currentUser;
+    // eslint-disable-next-line no-unused-vars
     const [churchData, setChurchData] = useState(null);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -178,6 +179,7 @@ export const BaptismalCertificate = () => {
         setAppointmentPurpose('personal');
     };
 
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -186,17 +188,27 @@ export const BaptismalCertificate = () => {
         <div>
             <form className="baptismalCert" onSubmit={handleCreateAppointment}>
 
-                {/* Appointment Purpose Section */}
-                <div className='purpose card mb-4'>
-                    <div className='card-body'>
-                        <h5 className='card-title'>Who is the Appointment For?</h5>
+                <div className="purpose card mb-4">
+                    <div className="card-body">
+                        <h5 className="card-title">Who is the Appointment For?</h5>
                         <div className="d-grid gap-2 d-md-flex justify-content-md-center">
-                            <button type='button' className='btn btn-primary' onClick={handlePersonalClick}>Personal</button>
-                            <button type='button' className='btn btn-primary' onClick={handleOthersClick}>Others</button>
+                            <button
+                                type="button"
+                                className={appointmentPurpose === 'personal' ? 'btn btn-primary' : 'btn btn-outline-primary'}
+                                onClick={handlePersonalClick}
+                            >
+                                Personal
+                            </button>
+                            <button
+                                type="button"
+                                className={appointmentPurpose === 'others' ? 'btn btn-primary' : 'btn btn-outline-primary'}
+                                onClick={handleOthersClick}
+                            >
+                                Others
+                            </button>
                         </div>
                     </div>
                 </div>
-
                 {/* Authorization Upload Section */}
                 {showAuthorization && (
                     <div className='authorization card mb-4'>
@@ -257,11 +269,11 @@ export const BaptismalCertificate = () => {
                         </div>
                         <div className="mb-3">
                             <label htmlFor="birthday" className="form-label">Birthday</label>
-                            <input type="date" className="form-control" name="birthday" onChange={handleChange} value={formData.birthday} required/>
+                            <input type="date" className="form-control" name="birthday" max={new Date().toISOString().split('T')[0]} onChange={handleChange} value={formData.birthday} required/>
                         </div>
 
                         {/* Father's Details */}
-                        <div><b>Father's Details</b></div>
+                        <div><b>Father&apos;s Details</b></div>
                         <div className="row mb-3">
                             <div className="col">
                                 <label htmlFor="fatherFirstName" className="form-label">First Name</label>
@@ -274,7 +286,7 @@ export const BaptismalCertificate = () => {
                         </div>
 
                         {/* Mother's Details */}
-                        <div><b>Mother's Details</b></div>
+                        <div><b>Mother&apos;s Details</b></div>
                         <div className="row mb-3">
                             <div className="col">
                                 <label htmlFor="motherFirstName" className="form-label">First Name</label>

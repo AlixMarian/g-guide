@@ -62,7 +62,7 @@ export const Announcements = () => {
           fetchData(fetchedChurchId);
         }
       } else {
-        toast.error('No user is logged in.');
+        console.log('No user is logged in.');
       }
     });
 
