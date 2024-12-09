@@ -331,7 +331,7 @@ const VisitaIglesia = () => {
               {
                 origin: allLocations[i],
                 destination: allLocations[i + 1],
-                travelMode: window.google.maps.TravelMode[travelMode],
+                travelMode: window.google.maps.TravelMode[travelMode]
               },
               (result, status) => {
                 if (status === window.google.maps.DirectionsStatus.OK) {
@@ -352,22 +352,39 @@ const VisitaIglesia = () => {
         setDirectionsResponse(newDirections);
         setMarkers(newMarkers);
 
+        // Fit bounds but maintain zoom control
+        if (map) {
+          const bounds = new window.google.maps.LatLngBounds();
+          allLocations.forEach(location => bounds.extend(location));
+          map.fitBounds(bounds);
+          
+          // Add a slight delay before allowing zoom changes
+          setTimeout(() => {
+            // Get the current zoom after bounds fit
+            const currentZoom = map.getZoom();
+            // Set maximum zoom level if too zoomed in
+            if (currentZoom > 15) {
+              map.setZoom(15);
+            }
+          }, 100);
+        }
+
       } catch (error) {
         console.error(error);
         alert('Failed to calculate route. Please check your inputs.');
       }
     };
 
-    const onZoomChangedHandler = () => {
-      if (map) {
-        // Remove the zoom level setting logic
-        setCustomIcon({
-          url: '/src/assets/location.png',
-          scaledSize: new window.google.maps.Size(40, 40),
-          anchor: new window.google.maps.Point(20, 40),
-        });
-      }
-    };
+    // const onZoomChangedHandler = () => {
+    //   if (map) {
+    //     // Remove the zoom level setting logic
+    //     setCustomIcon({
+    //       url: '/src/assets/location.png',
+    //       scaledSize: new window.google.maps.Size(40, 40),
+    //       anchor: new window.google.maps.Point(20, 40),
+    //     });
+    //   }
+    // };
     
     
 
@@ -544,6 +561,7 @@ const VisitaIglesia = () => {
               strokeWeight: 5,
             },
             suppressMarkers: true,
+            preserveViewport: true  // This is valid for DirectionsRenderer
           }}
         />
       ))}

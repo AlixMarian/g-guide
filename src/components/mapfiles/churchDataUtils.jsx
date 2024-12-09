@@ -337,23 +337,16 @@ export const convertTo12HourFormat = (time) => {
 /**
  * Handles zoom changes on the map by adjusting marker icon sizes.
  */
-// export const onZoomChanged = (map, setCustomIcon) => {
-//   if (map) {
-//     const zoom = map.getZoom();
-//     const newSize = zoom > 15 ? 40 : zoom > 12 ? 30 : 20;
-//     setCustomIcon((prevIcon) => ({
-//       ...prevIcon,
-//       scaledSize: new window.google.maps.Size(newSize, newSize),
-//     }));
-//   }
-// };
-
 export const onZoomChanged = (map, setCustomIcon) => {
   if (!map) return;
   const zoom = map.getZoom();
+  
+  // Only update the icon if the zoom level is significantly different
   setCustomIcon((prevIcon) => {
     const newSize = zoom > 15 ? 40 : zoom > 12 ? 30 : 20;
-    if (prevIcon?.scaledSize?.width !== newSize) {
+    
+    // Check if we actually need to update the icon size
+    if (!prevIcon || !prevIcon.scaledSize || Math.abs(prevIcon.scaledSize.width - newSize) >= 5) {
       return {
         url: '/src/assets/location.png',
         scaledSize: new window.google.maps.Size(newSize, newSize),

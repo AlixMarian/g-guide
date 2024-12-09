@@ -220,6 +220,13 @@ const SearchFilter = ({
                   </div>
                 ))}
               </div>
+              {(selectedLanguage || showOtherDatesButton) && (
+                <div className="text-center mt-3">
+                  <Button variant="outline-primary" onClick={handleShowAllDates}>
+                    Display Other Dates
+                  </Button>
+                </div>
+              )}
             </div>
           ) : (
             <div style={{ marginTop: '30px' }}>
@@ -254,7 +261,6 @@ const SearchFilter = ({
             ...drawerInfo,
             show: false,
           })
-          
         }
         placement="end"
         className="custom-offcanvas"
