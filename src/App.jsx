@@ -32,8 +32,11 @@ import Transactions from './components3/Transactions';
 import RenewChurch from './components/RenewChurch';
 import VisitaIglesia from './components/VisitaIglesia';
 import AutoGen from './components/mapfiles/AutoGen';
-
-
+import ChurchHomepageInfo from './components4/ChurchHomepageInfo';
+import WebsiteUserInbox from './components/WebsiteUserInbox';
+import ChurchHomepageMassSchedule from './components4/ChurchHomepageMassSchedule';
+import ChurchHomepageReqVol from './components4/ChurchHomepageReqVol';
+import ChurchHomepageAnnouncements from './components4/ChurchHomepageAnnouncements';
 //Appointments
 import PendingAppointments from './components2/Appointments/PendingAppointments'
 import ForPaymentAppointments from './components2/Appointments/ForPaymentAppointments'
@@ -73,6 +76,8 @@ const NavbarSelector = ({ children }) => {
   );
 };
 
+
+
 // Add propTypes for NavbarSelector
 NavbarSelector.propTypes = {
   children: PropTypes.node.isRequired, // Ensure `children` is a React node and is required
@@ -86,7 +91,7 @@ const App = () => {
         <Route path="/" element={<Navigate to="/map" />} />
 
         <Route path="/map" element={<MapComponent />} />
-        <Route path="/church-options" element={<NavbarSelector><ChurchOptions /></NavbarSelector>} />
+        
 
         <Route path="/sidebar" element={<Sidebar />} />
         
@@ -96,17 +101,21 @@ const App = () => {
 
         <Route path="/autogen" element={<AutoGen />} />
 
-        
-        <Route path="/home" element={<><NavBar /><Home /></>} />
-        <Route path="/login" element={<><NavBar/><Login /></>} />
-        <Route path="/signup" element={<><NavBar/><SignUp /></>} />
-        <Route path="/homepage" element={<><WebUserNavBar /><Homepage /></>} />
-        <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} /> 
-        <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
         <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
+
         <Route path="/renew-church" element={<><NavBar/><RenewChurch /></>} />
-      
         
+       
+          <Route path="/church-options" element={<NavbarSelector><ChurchOptions /></NavbarSelector>} />
+          <Route path="/webUser-inbox" element={<><WebUserNavBar/><WebsiteUserInbox /></>} />
+          <Route path="/home" element={<><NavBar /><Home /></>} />
+          <Route path="/login" element={<><NavBar/><Login /></>} />
+          <Route path="/signup" element={<><NavBar/><SignUp /></>} />
+          <Route path="/homepage" element={<><WebUserNavBar /><Homepage /></>} />
+          <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} /> 
+          <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
+        
+  
         {/* church coordinator routessss */}
 
         {/* OLD VERSION WITHOUT NAVBAR */}
@@ -385,35 +394,37 @@ const App = () => {
 
 
         {/* Church Pages with Dynamic Navbar */}
-        <Route
-            path="/church-homepage/:churchId"
-            element={<NavbarSelector><ChurchHomepage /></NavbarSelector>}
-          />
-          <Route
-            path="/church-homepage/:churchId/announcements"
-            element={<NavbarSelector><Announcements /></NavbarSelector>}
-          />
-          <Route
-            path="/church-homepage/:churchId/info"
-            element={<NavbarSelector><ChurchOptions /></NavbarSelector>}
-          />
-          <Route
-            path="/church-homepage/:churchId/mass-schedules"
-            element={<NavbarSelector><Schedules /></NavbarSelector>}
-          />
-          <Route
-            path="/church-homepage/:churchId/req-vol"
-            element={<NavbarSelector><ReqVol /></NavbarSelector>}
-          />
+          
+            <Route
+              path="/church-homepage/:churchId"
+              element={<NavbarSelector><ChurchHomepage /></NavbarSelector>}
+            />
+            <Route
+              path="/church-homepage/:churchId/announcements"
+              element={<NavbarSelector><ChurchHomepageAnnouncements /></NavbarSelector>}
+            />
+            <Route
+              path="/church-homepage/:churchId/info"
+              element={<NavbarSelector><ChurchHomepageInfo /></NavbarSelector>}
+            />
+            <Route
+              path="/church-homepage/:churchId/mass-schedules"
+              element={<NavbarSelector><ChurchHomepageMassSchedule /></NavbarSelector>}
+            />
+            <Route
+              path="/church-homepage/:churchId/req-vol"
+              element={<NavbarSelector><ChurchHomepageReqVol /></NavbarSelector>}
+            />
 
-          {/* Restricted Route for Booking */}
-          <Route
-            path="/church-homepage/:churchId/book"
-            element={<>
-              <WebUserNavBar />
-              <ChurchHomepage />
-            </>}
-          />
+            {/* Restricted Route for Booking */}
+            <Route
+              path="/church-homepage/:churchId/book"
+              element={<>
+                <WebUserNavBar />
+                <ChurchHomepage />
+              </>}
+            />
+          
       </Routes>
       <ToastContainer />
     </Router>

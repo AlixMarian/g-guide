@@ -48,7 +48,6 @@ import { useNavigate } from 'react-router-dom';
     <div>
     <Container>
     <h3>Our Partnered Church List</h3>
-    <p>This page is temporary and for demonstration purposes only since our mapping feature is still on the way</p>
       <Row>
         {churches.map((church) => (
           <Col key={church.id} md={4} className="mb-4">

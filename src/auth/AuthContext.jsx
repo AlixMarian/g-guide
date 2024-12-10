@@ -1,20 +1,19 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import PropTypes from 'prop-types'; // Import PropTypes for prop validation
+import PropTypes from 'prop-types';
 
-// Create a context for authentication
 const AuthContext = createContext();
 
-// Provide authentication state to the application
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Tracks the logged-in user
-  const auth = getAuth(); // Initialize Firebase Auth
+  const [user, setUser] = useState(null);
+  const auth = getAuth();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user); // Update user state when auth state changes
+      setUser(user);
     });
-    return () => unsubscribe(); // Cleanup the listener on unmount
+    return () => unsubscribe();
   }, [auth]);
 
   return (
@@ -24,10 +23,8 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Define propTypes for AuthProvider
 AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired, // Validate that children is a React node
+  children: PropTypes.node.isRequired,
 };
 
-// Hook to access authentication state
 export const useAuth = () => useContext(AuthContext);
