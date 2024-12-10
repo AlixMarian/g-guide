@@ -105,24 +105,42 @@ const VisitaIglesia = () => {
       },
       (initialResult, status) => {
         if (status === window.google.maps.DirectionsStatus.OK) {
-          // Extract the route's polyline points
           const routePolyline = initialResult.routes[0].overview_path;
 
-          // Now, find churches along the route within a specified radius
+          // Find churches along the route
           let nearbyChurches = [];
           let radiusKm = 1;
-          // const maxRadiusKm = 10;
+          const maxRadiusKm = 20; // Increase max radius to ensure we find enough churches
           const incrementKm = 1;
 
-          while (nearbyChurches.length < 5 && radiusKm) {
+          // Keep increasing radius until we find at least 7 churches
+          while (nearbyChurches.length < 7 && radiusKm <= maxRadiusKm) {
             nearbyChurches = findChurchesAlongRoute(churches, routePolyline, radiusKm);
             radiusKm += incrementKm;
           }
 
-          const limitedChurches = nearbyChurches.slice(0, 7);
+          // If we still don't have enough churches, add the closest remaining churches
+          if (nearbyChurches.length < 7) {
+            const remainingChurches = churches.filter(
+              church => !nearbyChurches.some(nc => nc.id === church.id)
+            );
+            
+            // Sort remaining churches by distance to route
+            const sortedRemaining = remainingChurches.sort((a, b) => {
+              const aDistance = getMinDistanceToRoute(a, routePolyline);
+              const bDistance = getMinDistanceToRoute(b, routePolyline);
+              return aDistance - bDistance;
+            });
 
-          // Prepare waypoints
-          const waypoints = limitedChurches.map((church) => ({
+            // Add closest churches until we have 7
+            nearbyChurches = [...nearbyChurches, ...sortedRemaining.slice(0, 7 - nearbyChurches.length)];
+          }
+
+          // Take exactly 7 churches
+          const selectedChurches = nearbyChurches.slice(0, 7);
+
+          // Continue with the existing waypoints and routing logic...
+          const waypoints = selectedChurches.map((church) => ({
             location: {
               lat: parseFloat(church.latitude),
               lng: parseFloat(church.longitude),
@@ -157,7 +175,7 @@ const VisitaIglesia = () => {
                 // The waypoint_order gives the optimized order of the waypoints
                 const waypointOrder = result.routes[0].waypoint_order;
 
-                const orderedChurches = waypointOrder.map((index) => limitedChurches[index]);
+                const orderedChurches = waypointOrder.map((index) => selectedChurches[index]);
 
                 // Assign labels to markers dynamically
                 const markers = [
