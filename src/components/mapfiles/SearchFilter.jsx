@@ -44,9 +44,9 @@ const SearchFilter = ({
       <Offcanvas show={showMenu} onHide={handleCloseMenu} placement="start">
         <Offcanvas.Header>
           <div className="map-search-container">
-            <div className="logo-container-center" onClick={() => navigate('/home')} style={{cursor: 'pointer'}}>
+            <div className="logo-container-center"  style={{cursor: 'pointer'}}>
               <div className='logo-container-center animation'>
-                <img 
+                <img onClick={() => navigate('/home')}
                   src={logo}
                   alt="Logo"
                   style={{
@@ -57,7 +57,7 @@ const SearchFilter = ({
                     borderRadius: '30px',
                   }}
                 />
-                <h3
+                <h3 onClick={() => navigate('/home')}
                   style={{
                     fontFamily: 'Roboto, sans-serif',
                     marginTop: '1rem',
@@ -138,7 +138,7 @@ const SearchFilter = ({
                 {selectedService
                   ? `Churches offering ${selectedService}:`
                   : selectedLanguage
-                  ? `Churches with services in ${selectedLanguage}:`
+                  ? `Mass languages in ${selectedLanguage} today: `
                   : 'Nearby Churches:'}
               </h6>
               <div className="scrollable-section">
@@ -220,6 +220,13 @@ const SearchFilter = ({
                   </div>
                 ))}
               </div>
+              {(selectedLanguage || showOtherDatesButton) && (
+                <div className="text-center mt-3">
+                  <Button variant="outline-primary" onClick={handleShowAllDates}>
+                    Display Other Dates
+                  </Button>
+                </div>
+              )}
             </div>
           ) : (
             <div style={{ marginTop: '30px' }}>
@@ -290,28 +297,31 @@ const SearchFilter = ({
             </div>
           </div>
 
-          <button
-            className="view-church-btn"
-            style={{
-              marginTop: 'auto',
-              padding: '10px 20px',
-              backgroundColor: '#007bff',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '15px',
-              cursor: 'pointer',
-            }}
-            onClick={() => {
-              if (drawerInfo.id) {
-                navigate(`/church-homepage/${drawerInfo.id}`);
-                console.log('Church ID:', drawerInfo.id);
-              } else {
-                console.error('No church ID available for navigation.');
-              }
-            }}
-          >
-            View Church Information
-          </button>
+          {(drawerInfo.status === "Approved" || drawerInfo.status === "Archived" || drawerInfo.churchStatus === "Approved" || drawerInfo.churchStatus === "Archived") && (
+            <button
+              className="view-church-btn"
+              style={{
+                marginTop: 'auto',
+                padding: '10px 20px',
+                backgroundColor: '#007bff',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '15px',
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                if (drawerInfo.id) {
+                  navigate(`/church-homepage/${drawerInfo.id}`);
+                  console.log('Church ID:', drawerInfo.id);
+                  console.log('Church status:', drawerInfo.status);
+                } else {
+                  console.error('No church ID available for navigation.');
+                }
+              }}
+            >
+              View Church Information
+            </button>
+          )}
         </Offcanvas.Body>
       </Offcanvas>
     </>
@@ -331,6 +341,8 @@ SearchFilter.propTypes = {
       id: PropTypes.string,
       churchName: PropTypes.string.isRequired,
       churchLocation: PropTypes.string,
+      status: PropTypes.string,
+      churchStatus: PropTypes.string,
       massDate: PropTypes.string,
       massTime: PropTypes.string,
       massType: PropTypes.string,
@@ -348,6 +360,8 @@ SearchFilter.propTypes = {
     show: PropTypes.bool,
     id: PropTypes.string, // Ensure id is included
     title: PropTypes.string,
+    churchStatus: PropTypes.string, // Add this line
+    status: PropTypes.string,
     description: PropTypes.string,
     telephone: PropTypes.string,
     churchStartTime: PropTypes.string,
@@ -359,6 +373,7 @@ SearchFilter.propTypes = {
   }).isRequired,
   setDrawerInfo: PropTypes.func.isRequired,
   churchPhoto: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
   setChurchPhoto: PropTypes.func.isRequired,
   showOtherDatesButton: PropTypes.func.isRequired,
   handleShowAllDates: PropTypes.func.isRequired,

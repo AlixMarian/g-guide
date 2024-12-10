@@ -1,3 +1,5 @@
+//VisitaIglesia.jsx
+
 import '../websiteUser.css';
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useRef } from 'react';
@@ -6,7 +8,7 @@ import { Offcanvas, Button, Form } from 'react-bootstrap';
 import { fetchChurchData } from './mapfiles/churchDataUtils';
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
 import { handleMarkerClick, handleMapLoad, onZoomChanged } from './mapfiles/churchDataUtils';
-import AutocompleteSearch from '@components/mapfiles/AutocompleteSearch';
+// import AutocompleteSearch from '@components/mapfiles/AutocompleteSearch';
 import AutoGen from './mapfiles/AutoGen';
 import coverLogo from '/src/assets/logo cover.png';
 import ChurchAutocomplete from './mapfiles/ChurchAutocomplete'; // Adjust the path as needed
@@ -36,14 +38,18 @@ const VisitaIglesia = () => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const [endLocation, setEndLocation] = useState(null); 
-  const [currentZoom, setCurrentZoom] = useState(14); // Initial zoom level
+  const currentZoomRef = useRef(14); // Default zoom level
   const [sortedChurches, setSortedChurches] = useState([]);
   const [churchPhoto, setChurchPhoto] = useState(coverLogo);  
   const [markers, setMarkers] = useState([]);
+  const [zoomLevel, setZoomLevel] = useState(14); // Default zoom level
+
 
   const sortedChurchOptions = [...churches].sort((a, b) => 
     a.churchName.localeCompare(b.churchName)
   );
+
+  
 
   // const formattedChurchOptions = sortedChurchOptions.map((church) => (
   //   <option
@@ -53,6 +59,13 @@ const VisitaIglesia = () => {
   //     {church.churchName} - {church.churchAddress}
   //   </option>
   // ));
+
+  useEffect(() => {
+    if (map && mapKey) {
+      // map.setZoom(14); // Remove or comment this out
+    }
+  }, [mapKey]);
+  
 
   const [drawerInfo, setDrawerInfo] = useState({
     show: false,
@@ -318,7 +331,7 @@ const VisitaIglesia = () => {
               {
                 origin: allLocations[i],
                 destination: allLocations[i + 1],
-                travelMode: window.google.maps.TravelMode[travelMode],
+                travelMode: window.google.maps.TravelMode[travelMode]
               },
               (result, status) => {
                 if (status === window.google.maps.DirectionsStatus.OK) {
@@ -339,11 +352,40 @@ const VisitaIglesia = () => {
         setDirectionsResponse(newDirections);
         setMarkers(newMarkers);
 
+        // Fit bounds but maintain zoom control
+        if (map) {
+          const bounds = new window.google.maps.LatLngBounds();
+          allLocations.forEach(location => bounds.extend(location));
+          map.fitBounds(bounds);
+          
+          // Add a slight delay before allowing zoom changes
+          setTimeout(() => {
+            // Get the current zoom after bounds fit
+            const currentZoom = map.getZoom();
+            // Set maximum zoom level if too zoomed in
+            if (currentZoom > 15) {
+              map.setZoom(15);
+            }
+          }, 100);
+        }
+
       } catch (error) {
         console.error(error);
         alert('Failed to calculate route. Please check your inputs.');
       }
     };
+
+    // const onZoomChangedHandler = () => {
+    //   if (map) {
+    //     // Remove the zoom level setting logic
+    //     setCustomIcon({
+    //       url: '/src/assets/location.png',
+    //       scaledSize: new window.google.maps.Size(40, 40),
+    //       anchor: new window.google.maps.Point(20, 40),
+    //     });
+    //   }
+    // };
+    
     
 
   const resetRoutes = () => {
@@ -474,22 +516,24 @@ const VisitaIglesia = () => {
           key={mapKey}
           mapContainerStyle={containerStyle}
           center={currentPosition || { lat: 0, lng: 0 }}
-          zoom={currentZoom}
+          zoom={zoomLevel} // Dynamic zoom state
           onLoad={(mapInstance) => {
             handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading);
-            setMap(mapInstance); // Ensure map instance is saved to state
+            setMap(mapInstance);
           }}
           onZoomChanged={() => {
             if (map) {
-              const zoomLevel = map.getZoom(); // Safely get zoom level
-              setCurrentZoom(zoomLevel); // Update currentZoom state
-              onZoomChanged(map, setCustomIcon); // Adjust marker sizes
+              const currentZoom = map.getZoom();
+              setZoomLevel(currentZoom); // Dynamically update zoom level
+              console.log('Zoom Level:', currentZoom);
+              // onZoomChangedHandler(); // Handle resizing
             }
           }}
         >
 
-        {currentPosition && <Marker position={currentPosition} />} 
-        {churches.map((church) => {
+
+      {currentPosition && <Marker position={currentPosition} />} 
+      {churches.map((church) => {
         const lat = parseFloat(church.latitude);
         const lng = parseFloat(church.longitude);
         if (!isNaN(lat) && !isNaN(lng)) {
@@ -517,6 +561,7 @@ const VisitaIglesia = () => {
               strokeWeight: 5,
             },
             suppressMarkers: true,
+            preserveViewport: true  // This is valid for DirectionsRenderer
           }}
         />
       ))}

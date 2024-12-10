@@ -7,6 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import coverLogo from '/src/assets/logo cover.png'; // Ensure the path is correct
 import logo from '/src/assets/G-Guide LOGO.png'; // Ensure the path is correct
 import visLogo from '/src/assets/visLogo.png'; // Ensure the path is correct
+import churchPartnerLogo from '/src/assets/partnerLogo.png';
 import AutocompleteSearch from './AutocompleteSearch'; // Ensure this component exists
 import SearchFilter from './SearchFilter'; // Ensure this component exists
 import { useNavigate } from 'react-router-dom';
@@ -79,6 +80,7 @@ const MapComponent = () => {
       setError('Geolocation is not supported by your browser.');
     }
   }, []);
+
 
 useEffect(() => {
   const fetchData = async () => {
@@ -298,8 +300,12 @@ const handleShowAllDates = async () => {
             <h3 style={{ fontFamily: 'Roboto, sans-serif', cursor:'pointer' }} onClick={() => navigate('/home')}>G! Guide</h3>
             <i className="fas fa-bars" onClick={handleMenuOpen}></i>
             <div className='visita-iglesia'>
-            <img src={visLogo} alt="Visita Iglesia" className="visita-iglesia-icon" />
-            <h5 onClick={() => navigate('/visita-iglesia')} style={{ fontFamily: 'Roboto, sans-serif' }}>Visita Iglesia</h5>
+              <img src={visLogo} alt="Visita Iglesia" className="visita-iglesia-icon" />
+              <h5 onClick={() => navigate('/visita-iglesia')} style={{ fontFamily: 'Roboto, sans-serif' }}>Visita Iglesia</h5>
+            </div>
+            <div className='visita-iglesia'>
+              <img src={churchPartnerLogo} alt="Visita Iglesia" className="visita-iglesia-icon" />
+              <h5 onClick={() => navigate('/church-options')} className="px-1" style={{ fontFamily: 'Roboto, sans-serif', fontSize: '17.5px' }}>Partnered Church List</h5>
             </div>
           </div>
         </div>

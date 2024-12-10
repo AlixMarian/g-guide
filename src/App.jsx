@@ -86,6 +86,7 @@ const App = () => {
         <Route path="/" element={<Navigate to="/map" />} />
 
         <Route path="/map" element={<MapComponent />} />
+        <Route path="/church-options" element={<NavbarSelector><ChurchOptions /></NavbarSelector>} />
 
         <Route path="/sidebar" element={<Sidebar />} />
         
@@ -383,7 +384,6 @@ const App = () => {
         } />
 
 
-        <Route path="/church-options" element={<><WebUserNavBar /><ChurchOptions/></>}/>
         {/* Church Pages with Dynamic Navbar */}
         <Route
             path="/church-homepage/:churchId"
