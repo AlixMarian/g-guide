@@ -148,6 +148,7 @@ export const PendingAppointments = () => {
                 appointmentId: selectedAppointment.id, // Adding appointmentId
                 message,
                 dateSent: Timestamp.fromDate(new Date()),
+                status: "new",
             };
     
             await addDoc(collection(db, "inboxMessage"), inboxMessageData);
