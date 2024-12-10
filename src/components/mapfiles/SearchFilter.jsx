@@ -1,13 +1,14 @@
 // SearchFilter.jsx
 
 import PropTypes from 'prop-types';
-import { Offcanvas, Alert, Spinner, Button } from 'react-bootstrap';
+import { Offcanvas, Alert, Spinner, Button, OffcanvasHeader, OffcanvasBody } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import AutocompleteSearch from './AutocompleteSearch';
 import logo from '/src/assets/G-Guide LOGO.png';
 import { handleMarkerClick as utilHandleMarkerClick } from './churchDataUtils';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react'; // Import useEffect for debugging
+
 
 const SearchFilter = ({
   showMenu,
