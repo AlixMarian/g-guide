@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Modal, Button, Form} from 'react-bootstrap';
-import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import { Modal, Button, Form, Pagination} from 'react-bootstrap';
+import { collection, query, where, getDocs, doc, updateDoc, addDoc, Timestamp, getDoc } from "firebase/firestore";
 import { db } from "/backend/firebase"; 
 import { toast } from 'react-toastify';
 import { getAuth } from 'firebase/auth';
@@ -11,12 +11,15 @@ export const PendingAppointments = () => {
     const [pendingAppointments, setPendingAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [showSendMessageModal, setShowSendMessageModal] = useState(false);
+    const [message, setMessage] = useState('');
     const [slots, setSlots] = useState([]);
     const [showDenyModal, setShowDenyModal] = useState(false);
     const [denialReason, setDenialReason] = useState('');
-
+    const [currentPage, setCurrentPage] = useState(1);
     const auth = getAuth();
     const user = auth.currentUser;
+    const appointmentsPerPage = 7; 
 
     const appointmentTypeMapping = {
         marriageCertificate: "Marriage Certificate",
@@ -34,7 +37,6 @@ export const PendingAppointments = () => {
         const fetchPendingAppointments = async () => {
             if (!user ) return;
             try {
-                // Step 1: Query the coordinator collection to get the coordinatorID based on the userId
                 const coordinatorQuery = query(
                     collection(db, "coordinator"),
                     where("userId", "==", user.uid)
@@ -46,15 +48,13 @@ export const PendingAppointments = () => {
                     return;
                 }
     
-                const coordinatorData = coordinatorSnapshot.docs[0].data(); // Assuming only one coordinator per user
-                const coordinatorID = coordinatorSnapshot.docs[0].id; // Get the document ID as the coordinatorID
+                const coordinatorID = coordinatorSnapshot.docs[0].id; 
     
                 if (!coordinatorID) {
                     console.error("Coordinator ID is undefined.");
                     return;
                 }
     
-                // Step 2: Query the church collection to get the churchID based on the coordinatorID
                 const churchQuery = query(
                     collection(db, "church"),
                     where("coordinatorID", "==", coordinatorID)
@@ -66,15 +66,13 @@ export const PendingAppointments = () => {
                     return;
                 }
     
-                const churchData = churchSnapshot.docs[0].data(); // Assuming only one church per coordinator
-                const churchID = churchSnapshot.docs[0].id; // Get the document ID as the churchID
+                const churchID = churchSnapshot.docs[0].id;
     
                 if (!churchID) {
                     console.error("Church ID is undefined.");
                     return;
                 }
     
-                // Step 3: Query the appointments collection to get all pending appointments for the churchID
                 const pendingAppointmentsQuery = query(
                     collection(db, "appointments"),
                     where("appointmentStatus", "==", "Pending"),
@@ -85,9 +83,15 @@ export const PendingAppointments = () => {
                     id: doc.id,
                     ...doc.data()
                 }));
+
+                const sortedAppointments = pendingAppointmentsData.sort((a, b) => {
+                    const dateA = a.userFields?.dateOfRequest.seconds || 0;
+                    const dateB = b.userFields?.dateOfRequest.seconds || 0; 
+                    return dateB - dateA; // Most recent first
+                });
                 
                 console.log("Fetched Pending Appointments: ", pendingAppointmentsData);
-                setPendingAppointments(pendingAppointmentsData);
+                setPendingAppointments(sortedAppointments);
             } catch (error) {
                 console.error("Error fetching appointments: ", error);
             }
@@ -95,6 +99,24 @@ export const PendingAppointments = () => {
     
         fetchPendingAppointments();
     }, [user]);
+
+    const fetchChurchName = async (churchId) => {
+        try {
+            const churchRef = doc(db, "church", churchId); // Reference the church document
+            const churchSnap = await getDoc(churchRef); // Fetch the document
+    
+            if (churchSnap.exists()) {
+                return churchSnap.data().churchName || "Unknown Church"; // Return churchName or fallback
+            } else {
+                console.warn(`Church with ID ${churchId} does not exist.`);
+                return "Unknown Church";
+            }
+        } catch (error) {
+            console.error(`Error fetching church name for ID ${churchId}:`, error);
+            return "Unknown Church"; // Fallback on error
+        }
+    };
+    
 
     const sendEmail = async (email, subject, message) => {
         try {
@@ -107,6 +129,65 @@ export const PendingAppointments = () => {
         } catch (error) {
             console.error('Error sending email:', error);
         }
+    };
+
+    const handleSendMessage = async () => {
+        if (!selectedAppointment || !message) {
+            toast.error("Message cannot be empty.");
+            return;
+        }
+    
+        try {
+            // Fetch the church name using the churchId
+            const churchName = await fetchChurchName(selectedAppointment.churchId);
+    
+            // Save message to inboxMessage collection with appointmentId
+            const inboxMessageData = {
+                churchId: selectedAppointment.churchId,
+                userId: selectedAppointment.userFields?.requesterId,
+                appointmentId: selectedAppointment.id, // Adding appointmentId
+                message,
+                dateSent: Timestamp.fromDate(new Date()),
+                status: "new",
+            };
+    
+            await addDoc(collection(db, "inboxMessage"), inboxMessageData);
+    
+            // Prepare email content with church name and appointment type
+            const appointmentType = appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType;
+            const emailContent = `
+                You got a message from ${churchName} regarding your appointment ${appointmentType}:
+                "${message}"
+                
+               
+            `;
+    
+            // Send email
+            await sendEmail(
+                selectedAppointment.userFields?.requesterEmail,
+                "Message from Church Coordinator",
+                emailContent // Trim unnecessary spaces
+            );
+    
+            toast.success("Message sent successfully!");
+            setMessage(''); // Clear textarea
+            setShowSendMessageModal(false); // Close modal
+        } catch (error) {
+            console.error("Error sending message: ", error);
+            toast.error("Failed to send message.");
+        }
+    };
+    
+    
+
+    const handleShowSendMessageModal = (appointment) => {
+        setSelectedAppointment(appointment);
+        setShowSendMessageModal(true);
+    };
+
+    const handleCloseSendMessageModal = () => {
+        setShowSendMessageModal(false);
+        setMessage('');
     };
     
     
@@ -132,42 +213,68 @@ export const PendingAppointments = () => {
 
     const handleForPayment = async () => {
         if (!selectedAppointment) return;
-
+    
+        const message = "Your appointment is now pending for payment. <br>Please follow the instructions to complete the payment process.<br>";
+    
         try {
             const appointmentRef = doc(db, "appointments", selectedAppointment.id);
             await updateDoc(appointmentRef, {
                 appointmentStatus: "For Payment"
             });
-
+    
+            // Save message to inboxMessage collection
+            const inboxMessageData = {
+                churchId: selectedAppointment.churchId,
+                userId: selectedAppointment.userFields?.requesterId,
+                appointmentId: selectedAppointment.id, // Adding appointmentId
+                message,
+                dateSent: Timestamp.fromDate(new Date())
+            };
+            await addDoc(collection(db, "inboxMessage"), inboxMessageData);
+    
+            // Send email
             await sendEmail(
                 selectedAppointment.userFields?.requesterEmail,
                 "Appointment Pending for Payment",
-                "Your appointment is now pending for payment. <br>Please follow the instructions to complete the payment process.<br>"
+                message
             );
-
+    
             toast.success('Appointment pending for payment.');
             handleCloseModal();
         } catch (error) {
             console.error("Error updating document: ", error);
         }
     };
-
+    
     const handleSubmitDenial = async () => {
         if (!selectedAppointment) return;
-
+    
+        const message = `We regret to inform you that your appointment has been denied. <br><span style="color: red;">Reason: ${denialReason}</span><br>`;
+    
         try {
             const appointmentRef = doc(db, "appointments", selectedAppointment.id);
             await updateDoc(appointmentRef, {
                 appointmentStatus: "Denied",
                 denialReason: denialReason
             });
-
+    
+            // Save message to inboxMessage collection
+            const inboxMessageData = {
+                churchId: selectedAppointment.churchId,
+                userId: selectedAppointment.userFields?.requesterId,
+                appointmentId: selectedAppointment.id, // Adding appointmentId
+                message,
+                dateSent: Timestamp.fromDate(new Date())
+            };
+            await addDoc(collection(db, "inboxMessage"), inboxMessageData);
+    
+            // Send email
             await sendEmail(
                 selectedAppointment.userFields?.requesterEmail,
                 "Appointment Denied",
-                `We regret to inform you that your appointment has been denied. <br><span style="color: red;">Reason: ${denialReason}</span><br>`
+                message
             );
-
+    
             toast.success('Appointment denied successfully!');
             setShowDenyModal(false);
             setDenialReason('');
@@ -176,6 +283,7 @@ export const PendingAppointments = () => {
             console.error("Error updating document: ", error);
         }
     };
+    
 
     useEffect(() => {
         const fetchSlots = async () => {
@@ -208,6 +316,16 @@ export const PendingAppointments = () => {
         return `${hours12}:${minutes} ${ampm}`;
     };
 
+    const totalPages = Math.ceil(pendingAppointments.length / appointmentsPerPage);
+    const paginatedAppointments = pendingAppointments.slice(
+        (currentPage - 1) * appointmentsPerPage,
+        currentPage * appointmentsPerPage
+    );
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
     return (
         <>
         
@@ -228,30 +346,75 @@ export const PendingAppointments = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {pendingAppointments.map((appointment, index) => (
-                    <tr key={index}>
-                    <td className="pending-td">{formatDate(appointment.userFields?.dateOfRequest)}</td>
-                    <td className="pending-td">{appointment.appointmentPurpose}</td>
-                    <td className="pending-td">{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
-                    <td className="pending-td">{appointment.userFields?.requesterName}</td>
-                    <td className="pending-td">{appointment.userFields?.requesterContact}</td>
-                    <td>
-                        <Button variant="info" onClick={() => handleShowModal(appointment)}>
-                        <i className="bi bi-info-circle-fill"></i>
-                        </Button>
-                    </td>
-                    <td>
-                        <Button>
-                        <i className="bi bi-chat-text"></i>
-                        </Button>
-                    </td>
-                    </tr>
-                ))}
+                {paginatedAppointments.length > 0 ?(
+                    paginatedAppointments.map((appointment, index) => (
+                        <tr key={index}>
+                        <td className="pending-td">{formatDate(appointment.userFields?.dateOfRequest)}</td>
+                        <td className="pending-td">{appointment.appointmentPurpose}</td>
+                        <td className="pending-td">{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
+                        <td className="pending-td">{appointment.userFields?.requesterName}</td>
+                        <td className="pending-td">{appointment.userFields?.requesterContact}</td>
+                        <td>
+                            <Button variant="info" onClick={() => handleShowModal(appointment)}>
+                            <i className="bi bi-info-circle-fill"></i>
+                            </Button>
+                        </td>
+                        <td>
+                            <Button variant="primary" onClick={() => handleShowSendMessageModal(appointment)}>
+                                <i className="bi bi-chat-text"></i>
+                            </Button>
+                        </td>
+                        </tr>
+                    ))
+                    ): (
+                        <tr>
+                            <td colSpan="7" className="text-center py-5">
+                                <h4 className="text-muted">No pending appointments found</h4>
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
+            <Pagination className="justify-content-center">
+                {[...Array(totalPages).keys()].map(page => (
+                    <Pagination.Item
+                        key={page + 1}
+                        active={page + 1 === currentPage}
+                        onClick={() => handlePageChange(page + 1)}
+                    >
+                        {page + 1}
+                    </Pagination.Item>
+                ))}
+            </Pagination>
             </div>
         </div>
         </div>
+
+        <Modal show={showSendMessageModal} onHide={handleCloseSendMessageModal}>
+                <Modal.Header>
+                    <Modal.Title>Send Message</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form.Group controlId="message">
+                        <Form.Label>This message will be sent to the receiver&apos;s email and in-app inbox:</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={5}
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder="Write your message here..."
+                        />
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseSendMessageModal}>
+                        Cancel
+                    </Button>
+                    <Button variant="success" onClick={handleSendMessage}>
+                        Send
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
 
         <Modal show={showModal} onHide={handleCloseModal}>
@@ -440,7 +603,7 @@ export const PendingAppointments = () => {
                 <Modal.Footer>
                     <Button variant="danger" onClick={() => setShowDenyModal(false)}>Cancel</Button>
                     <Button variant="success" onClick={handleSubmitDenial}>Submit</Button>
-                    <p style={{ fontSize: '12px', textAlign: 'center', margin: '0 auto', marginTop: '1rem' }}>Note: This message will send to both Email and SMS</p>
+                    <p style={{ fontSize: '12px', textAlign: 'center', margin: '0 auto', marginTop: '1rem' }}>Note: This message will send to both Email and In-app Inbox</p>
                 </Modal.Footer>
             </Modal>
         </>

@@ -1,14 +1,21 @@
 import { useNavigate} from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '/backend/firebase';
 import { toast } from 'react-toastify';
 import logo from '../assets/gGuideLogo.svg';
 
 const WebsiteUserNavBar = () => {
   const navigate = useNavigate();
+  const [hasNewMessages, setHasNewMessages] = useState(false);
 
   const handleUserAccSttngs = () => {
     navigate('/user-accSettings');
+  };
+
+  const handleWebUserInbox = () => {
+    navigate('/webUser-inbox');
   };
 
   useEffect(() => {
@@ -35,6 +42,35 @@ const WebsiteUserNavBar = () => {
       });
   };
 
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Listen for changes in the inboxMessages collection
+        const inboxQuery = query(
+          collection(db, 'inboxMessage'),
+          where('userId', '==', user.uid),
+          where('status', '==', 'new') // Fetch only messages with status "new"
+        );
+
+        const unsubscribeSnapshot = onSnapshot(inboxQuery, (snapshot) => {
+          setHasNewMessages(!snapshot.empty); // Set true if there are any "new" messages
+        });
+
+        return () => {
+          unsubscribeSnapshot();
+        };
+      } else {
+        console.log("No user signed in.");
+        navigate('/login');
+      }
+    });
+
+    return () => {
+      unsubscribeAuth();
+    };
+  }, [navigate]);
+
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light sticky-top">
       <div className="container-fluid">
@@ -52,11 +88,23 @@ const WebsiteUserNavBar = () => {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className='nav-item'>
+            <a className="nav-link active" aria-current="page" href="/map">Church Finder</a>
+            </li>
+            <li className='nav-item'>
             <a className="nav-link active" aria-current="page" href="/church-options">Partnered Church List</a>
             </li>
           </ul>
 
           <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+          <button type="button" className="btn btn-outline-secondary position-relative" onClick={handleWebUserInbox}>
+              <i className="bi bi-inbox-fill"></i> My Inbox
+              {hasNewMessages && (
+                <span
+                  className="position-absolute top-0 start-100 translate-middle p-1 bg-success border border-light rounded-circle"
+                  style={{ width: '10px', height: '10px' }}
+                ></span>
+              )}
+            </button>
             <button type="button" className="btn btn-custom-outline" onClick={handleUserAccSttngs}>Account Settings</button>
             <button type="button" className="btn btn-custom-primary" onClick={handleLogout}>Logout</button>
           </div>
