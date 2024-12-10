@@ -12,12 +12,12 @@ export const Layout = () => {
   const [activeSection, setActiveSection] = useState(null); 
 
   const handleClick = (number) => {
-    setActiveNumber(number); // Set the clicked number as active
+    setActiveNumber(number); 
   };
 
   const handleAppointment = () => {
-    setSecondSidebarOpen(!secondSidebarOpen); // Toggle the second sidebar
-    setActiveSection('appointments'); // Set the active section
+    setSecondSidebarOpen(!secondSidebarOpen); 
+    setActiveSection('appointments'); 
   };
 
   const handleSEA = () => {
@@ -26,7 +26,9 @@ export const Layout = () => {
   };
 
   const handleRequestforVolunteer = () => {
-    navigate('/RequestforVolunteer');
+    setActiveSection('volunteer-call'); 
+    setSecondSidebarOpen(false); 
+    navigate('/RequestforVolunteer')
   };
 
   const handleServiceOffered = () => {
@@ -40,70 +42,104 @@ export const Layout = () => {
   };
 
   const handleListofPriest = () => {
-    navigate('/ListofPriest');
+    setActiveSection('priest-list'); 
+    setSecondSidebarOpen(false); 
+    navigate('/ListofPriest')
   };
 
   //
   const handlePending = () => {
-    navigate('/PendingAppointments');
+    if (secondSidebarOpen) {
+      navigate('/PendingAppointments');
+    }
   };
 
   const handleForPayment = () => {
-    navigate('/ForPaymentAppointments');
+    if (secondSidebarOpen){
+      navigate('/ForPaymentAppointments');
+    }
   };
 
   const handleApprovedAppointments = () => {
-    navigate('/ApprovedAppointments');
+    if (secondSidebarOpen){
+      navigate('/ApprovedAppointments');
+    }
   };
 
   const handleDeniedAppointments = () => {
-    navigate('/DeniedAppointments');
+    if (secondSidebarOpen){
+      navigate('/DeniedAppointments');
+    }
   };
 
   const handleMassIntentions = () => {
-    navigate('/MassIntentions');
+    if (secondSidebarOpen){
+      navigate('/MassIntentions');
+    }
   };
 
   const handlePaymentHistory = () => {
-    navigate('/PaymentHistory');
+    setActiveSection('payment-history'); // Set the active section
+    setSecondSidebarOpen(false); // Close the second sidebar
+    navigate('/PaymentHistory')
   };
 
   //
   const handleSchedules = () => {
-    navigate('/Schedules')
+    if (secondSidebarOpen){
+      navigate('/Schedules')
+    }
   }
 
   const handleChurchEvents = () => {
-    navigate('/ChurchEvents')
+    if (secondSidebarOpen){
+      navigate('/ChurchEvents')
+    }  
   }
 
   const handleAnnouncements = () => {
-    navigate('/Announcements')
+    if (secondSidebarOpen){
+      navigate('/Announcements')
+    }
   }
 
 //
   const handleExploreServices = () => {
-    navigate('/ExploreServices')
+    if (secondSidebarOpen){
+      navigate('/ExploreServices')
+    }
   }
 
   const handleSlots = () => {
-    navigate('/Slots')
+    if (secondSidebarOpen){
+      navigate('/Slots')
+    }
   }
 
   const handleRefundPolicy = () => {
-    navigate('/RefundPolicy')
+    if (secondSidebarOpen){
+      navigate('/RefundPolicy')
+    }  
   }
 
 
   //
   const handleChurchDetails = () => {
-    navigate('/ChurchDetails')
+    if (secondSidebarOpen){
+      navigate('/ChurchDetails')
+    }
   }
 
   const handleChurchUploads = () => {
-    navigate('/ChurchUploads')
+    if (secondSidebarOpen){
+      navigate('/ChurchUploads')
+    }
   }
-
+  
+  const handleSidebarItemClick = (section) => {
+    setActiveSection(section); // Highlight the clicked section
+    setSecondSidebarOpen(false); // Close the second sidebar for items without one
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -122,6 +158,7 @@ export const Layout = () => {
   }, [secondSidebarRef]);
 
   const renderSecondSidebarContent = () => {
+    if (!secondSidebarOpen) return null;
     switch (activeSection) {
       case 'appointments':
         return (
@@ -243,7 +280,7 @@ export const Layout = () => {
             </div>
             <div 
               className={`payment-history ${activeSection === 'payment-history' ? 'coord-active' : ''}`} 
-              onClick={handlePaymentHistory}
+              onClick={() => {handlePaymentHistory('payment-history');}}
             >
               <input type="image" src="../src/assets/payment-history.png" className='image-size' />
               <h3 className='button-name'>Payment History</h3>
@@ -286,7 +323,11 @@ export const Layout = () => {
           </div>
         </div>
         
-        <div className={`second-sidebar ${secondSidebarOpen ? 'open' : 'close'}`} ref={secondSidebarRef}>
+        <div className={`second-sidebar ${secondSidebarOpen ? 'open' : 'close'}`} ref={secondSidebarRef}
+           style={{
+             pointerEvents: secondSidebarOpen ? 'auto' : 'none', // Disable interactions when hidden
+           }}
+        >
           <div className="second-sidebar-content">
             {renderSecondSidebarContent()}
           </div>
