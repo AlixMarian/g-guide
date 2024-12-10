@@ -176,10 +176,13 @@ const renderTime = (slot) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    const regex = /^[A-Za-z ]*$/;
+    if (regex.test(value)) {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
   };
   
 
@@ -292,7 +295,7 @@ const renderTime = (slot) => {
                 <div className="col-md-6">
                     <div className="mb-3">
                     <label className="form-label">User Name</label>
-                    <input type="text" className="form-control" id="userName" readOnly defaultValue={`${userData?.firstName || ""} ${userData?.lastName || ""}`} />
+                    <input type="text" className="form-control" id="userName" readOnly defaultValue={`${userData?.firstName || ""} ${userData?.lastName || ""}`}/>
                     </div>
                 </div>
                 <div className="col-md-6">
@@ -323,7 +326,7 @@ const renderTime = (slot) => {
   
         <div className="card mb-4">
               <div className="card-body">
-                <h5 className="card-title">Select the Burial Date</h5>
+                <h5 className="card-title">Select the Confirmation Date</h5>
                 <div className="row g-3 align-items-start justify-content-center">
                   <div className="col-lg-4 col-md-6 me-3">
                     <DatePicker
@@ -383,11 +386,11 @@ const renderTime = (slot) => {
                 <div className="row mb-3">
                   <div className="col mb-3">
                     <label htmlFor="firstName" className="form-label">First Name</label>
-                    <input type="text" className="form-control" id="firstName" name="firstName" onChange={handleChange} value={formData.firstName || ''} required/>
+                    <input type="text" className="form-control" id="firstName" name="firstName" onChange={handleChange} value={formData.firstName || ''} required readOnly/>
                   </div>
                   <div className="col mb-3">
                     <label htmlFor="lastName" className="form-label">Last Name</label>
-                    <input type="text" className="form-control" id="lastName" name="lastName" onChange={handleChange} value={formData.lastName || ''} required/>
+                    <input type="text" className="form-control" id="lastName" name="lastName" onChange={handleChange} value={formData.lastName || ''} required readOnly/>
                   </div>
                 </div>
                 <div className="mb-3">

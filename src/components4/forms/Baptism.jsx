@@ -327,8 +327,7 @@ export const Baptism = () => {
                 {/* Calendar and Slots */}
                 <div className="card mb-4">
                 <div className="card-body">
-                    <h5 className="card-title">Select Schedule for Marriage Seminar</h5>
-                    <p>Please visit the church&apos;s office on the selected date for further instructions regarding the marriage seminar.</p>
+                    <h5 className="card-title">Select Schedule for Baptism</h5>
                     <div className="row g-3 align-items-start justify-content-center">
                     <div className="col-lg-4 col-md-6 me-3">
                         <DatePicker
@@ -383,11 +382,11 @@ export const Baptism = () => {
                         <div className="row mb-3">
                             <div className="col">
                                 <label htmlFor="fatherFirstName" className="form-label">First Name</label>
-                                <input type="text" className="form-control" id="fatherFirstName" name="fatherFirstName" required onChange={handleChange} value={formData.fatherFirstName}/>
+                                <input type="text" className="form-control" id="fatherFirstName" name="fatherFirstName" required onChange={handleChange} value={formData.fatherFirstName} onKeyDown={(e) => !/^[A-Za-z ]$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.preventDefault()}/>
                             </div>
                             <div className="col">
                                 <label htmlFor="fatherLastName" className="form-label">Last Name</label>
-                                <input type="text" className="form-control" id="fatherLastName" name="fatherLastName" required onChange={handleChange} value={formData.fatherLastName}/>
+                                <input type="text" className="form-control" id="fatherLastName" name="fatherLastName" required onChange={handleChange} value={formData.fatherLastName} onKeyDown={(e) => !/^[A-Za-z ]$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.preventDefault()}/>
                             </div>
                         </div>
 
@@ -395,11 +394,11 @@ export const Baptism = () => {
                         <div className="row mb-3">
                             <div className="col">
                                 <label htmlFor="motherFirstName" className="form-label">First Name</label>
-                                <input type="text" className="form-control" id="motherFirstName" name="motherFirstName" required onChange={handleChange} value={formData.motherFirstName}/>
+                                <input type="text" className="form-control" id="motherFirstName" name="motherFirstName" required onChange={handleChange} value={formData.motherFirstName} onKeyDown={(e) => !/^[A-Za-z ]$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.preventDefault()}/>
                             </div>
                             <div className="col">
                                 <label htmlFor="motherLastName" className="form-label">Last Name</label>
-                                <input type="text" className="form-control" id="motherLastName" name="motherLastName" required onChange={handleChange} value={formData.motherLastName}/>
+                                <input type="text" className="form-control" id="motherLastName" name="motherLastName" required onChange={handleChange} value={formData.motherLastName} onKeyDown={(e) => !/^[A-Za-z ]$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.preventDefault()}/>
                             </div>
                         </div>
                         
@@ -407,11 +406,11 @@ export const Baptism = () => {
                         <div className="row mb-3">
                             <div className="col">
                                 <label htmlFor="childFirstName" className="form-label">First Name</label>
-                                <input type="text" className="form-control" id="childFirstName" name="childFirstName" required onChange={handleChange} value={formData.childFirstName}/>
+                                <input type="text" className="form-control" id="childFirstName" name="childFirstName" required onChange={handleChange} value={formData.childFirstName} onKeyDown={(e) => !/^[A-Za-z ]$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.preventDefault()}/>
                             </div>
                             <div className="col">
                                 <label htmlFor="childLastName" className="form-label">Last Name</label>
-                                <input type="text" className="form-control" id="childLastName" name="childLastName" required onChange={handleChange} value={formData.childLastName}/>
+                                <input type="text" className="form-control" id="childLastName" name="childLastName" required onChange={handleChange} value={formData.childLastName} onKeyDown={(e) => !/^[A-Za-z ]$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.preventDefault()}/>
                             </div>
                         </div>
 
@@ -447,7 +446,7 @@ export const Baptism = () => {
                         </div>
                         <div className="mb-3">
                             <label htmlFor="godParents" className="form-label">Name of Godparents</label>
-                            <input type="text" className="form-control" id="godParents" name="godParents" required onChange={handleChange} value={formData.godParents} placeholder="e.g., John Doe, Jane Doe"/>
+                            <input type="text" className="form-control" id="godParents" name="godParents" required onChange={handleChange} value={formData.godParents} placeholder="e.g., John Doe, Jane Doe" onKeyDown={(e) => !/^[A-Za-z ]$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.preventDefault()}/>
                         </div>
                         <div className="d-grid gap-2 d-md-flex justify-content-md-end">
                             <button type="submit" className="btn btn-success me-md-2">Submit Requirements</button>

@@ -176,10 +176,10 @@ export const ExploreServices = () => {
                     <div className="section-header">Appointments</div>
                     <div className="service-list">
                         {renderServiceFields([
-                            "Marriages",
+                            "Marriage",
                             "Baptism",
                             "Confirmation",
-                            "Burials",
+                            "Burial",
                             "Mass Intentions",
                         ])}
                     </div>

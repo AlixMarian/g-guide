@@ -6,7 +6,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from '/backend/firebase';
 import '../websiteUser.css';
 import useChatbot from './Chatbot';
-import { Modal} from 'react-bootstrap'; 
+import { Modal, Badge } from 'react-bootstrap'; 
 import { toast } from 'react-toastify';
 import Pagination from 'react-bootstrap/Pagination';
 
@@ -18,19 +18,19 @@ export const OngoingAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [churches, setChurches] = useState({});
   const [churchQRDetail, setChurchQRDetail] = useState(null);
-  const [churchInstruction, setChurchInstruction] = useState(null);
   const [slots, setSlots] = useState([]);
   const [events, setEvents] = useState({});
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
+  const [refundPolicyAcknowledged, setRefundPolicyAcknowledged] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [paymentImageUrl, setPaymentImageUrl] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [currentAppointmentPage, setCurrentAppointmentPage] = useState(1);
   const [refundPolicy, setRefundPolicy] = useState(null);
-  
+  const [servicesData, setServicesData] = useState({});
   const appointmentsPerPage = 2;
   
   const auth = getAuth();
@@ -50,6 +50,23 @@ export const OngoingAppointments = () => {
       }
     });
   }, [navigate]);
+
+  const fetchServicesData = async (churchId) => {
+    try {
+        const servicesDoc = await getDoc(doc(db, "services", churchId));
+        if (servicesDoc.exists()) {
+            const services = servicesDoc.data();
+            console.log("Services data found:", services);
+            setServicesData(services); // Store all services in state
+        } else {
+            console.warn("No services document found for Church ID:", churchId);
+        }
+    } catch (error) {
+        console.error("Error fetching services data:", error);
+        toast.error("Error fetching services data.");
+    }
+};
+
   
   useEffect(() => {
     const fetchAppointmentsAndSlots = async () => {
@@ -132,33 +149,38 @@ export const OngoingAppointments = () => {
   };
   
   const handlePayment = async (appointmentId) => {
-    try {
-      setSelectedAppointmentId(appointmentId);
-  
-      const appointmentDoc = await getDoc(doc(db, 'appointments', appointmentId));
-      if (appointmentDoc.exists()) {
-        const appointmentData = appointmentDoc.data();
-        setPaymentImageUrl(appointmentData.userFields.paymentImage || null);
-  
-        const churchId = appointmentData.churchId;
-        const churchDoc = await getDoc(doc(db, 'church', churchId));
-  
-        if (churchDoc.exists()) {
-          const churchData = churchDoc.data();
-          setChurchQRDetail(churchData.churchQRDetail || null);
-          setChurchInstruction(churchData.churchInstruction || null);
-          setRefundPolicy(churchData.refundPolicy || null);
-        } else {
-          console.error('No such church document!');
-        }
-      } else {
-        console.error('No such appointment document!');
+      try {
+          setSelectedAppointmentId(appointmentId);
+
+          const appointmentDoc = await getDoc(doc(db, 'appointments', appointmentId));
+          if (appointmentDoc.exists()) {
+              const appointmentData = appointmentDoc.data();
+              setSelectedAppointment(appointmentData);
+              setPaymentImageUrl(appointmentData.userFields.paymentImage || null);
+              
+
+              const churchId = appointmentData.churchId;
+              const churchDoc = await getDoc(doc(db, 'church', churchId));
+
+              if (churchDoc.exists()) {
+                  const churchData = churchDoc.data();
+                  setChurchQRDetail(churchData.churchQRDetail || null);
+                  setRefundPolicy(churchData.refundPolicy || null);
+
+                  // Fetch services data
+                  console.log("Fetching services data for Church ID:", churchId);
+                  await fetchServicesData(churchId);
+              } else {
+                  console.error("No such church document!");
+              }
+          } else {
+              console.error("No such appointment document!");
+          }
+      } catch (error) {
+          console.error("Error fetching payment image or church details:", error);
       }
-    } catch (error) {
-      console.error('Error fetching payment image or church details:', error);
-    }
-    setShowPaymentModal(true);
-    console.log(`Initiating payment for appointment ID: ${appointmentId}`);
+      setShowPaymentModal(true);
+      console.log(`Initiating payment for appointment ID: ${appointmentId}`);
   };
   
   const handleClosePaymentModal = () => {
@@ -358,12 +380,34 @@ export const OngoingAppointments = () => {
                   <Modal.Title>Submit Payment Receipt</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  {churchInstruction && (
+                {selectedAppointment ? (
+                  servicesData ? (
                     <>
-                      <h5>Instructions:</h5>
-                      <p>{churchInstruction}</p>
+                      <h5>Service Fee:</h5>
+                      {(() => {
+                        const normalizedType = appointmentTypeMapping[selectedAppointment.appointmentType];
+                        const serviceDetails = servicesData[normalizedType]; // Access the specific service
+
+                        if (serviceDetails) {
+                          return (
+                            <>
+                              <p>{`PHP ${serviceDetails.fee}`}</p>
+                              <h5>Instructions:</h5>
+                              <p>{serviceDetails.instructions || "No instructions provided for this service."}</p>
+                            </>
+                          );
+                        } else {
+                          console.warn("No matching service found for:", selectedAppointment.appointmentType);
+                          return <p>Service details are unavailable.</p>;
+                        }
+                      })()}
                     </>
-                  )}  
+                  ) : (
+                    <p>Loading service data...</p>
+                  )
+                ) : (
+                  <p>No appointment selected.</p>
+                )}
                   {refundPolicy && (
                     <>
                       <h5>Refund Policy:</h5>
@@ -381,8 +425,21 @@ export const OngoingAppointments = () => {
                   <form className="submitPayment d-flex flex-column" onSubmit={handleSubmitPayment}>
                     <h5>Submit Receipt</h5>
                     <input type="file" className="form-control" id="paymentReceiptImage" accept="image/*" onChange={handleChoosePayment} ref={fileInputRef} readOnly />
+                    <div className="form-check mt-3">
+                        <input
+                            type="checkbox"
+                            className="form-check-input"
+                            id="refundPolicyCheckbox"
+                            onChange={(e) => setRefundPolicyAcknowledged(e.target.checked)}
+                        />
+                        <label className="form-check-label" htmlFor="refundPolicyCheckbox">
+                            I have read and understood the church&apos;s refund policy
+                        </label>
+                    </div>
                     <div className="mt-2 d-flex justify-content-end">
-                      <button type="submit" className="btn btn-custom-primary">Upload Receipt</button>
+                    <button type="submit" className="btn btn-custom-primary" disabled={!refundPolicyAcknowledged}>
+                        Upload Receipt
+                    </button>
                     </div>
                   </form>
                 </Modal.Body>
@@ -397,7 +454,19 @@ export const OngoingAppointments = () => {
                     <div>
                       <h4>Appointment Details</h4>
                       <p><b>Type:</b> {appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType}</p>
-                      <p><b>Status:</b> {selectedAppointment.appointmentStatus}</p>
+                      <p>
+                        <b>Status:</b>{' '}
+                        {selectedAppointment.appointmentStatus === 'For Payment' && (
+                          <Badge bg="warning" pill>● For Payment</Badge>
+                        )}
+                        {selectedAppointment.appointmentStatus === 'Pending' && (
+                          <Badge bg="secondary" pill>● Pending</Badge>
+                        )}
+                        {selectedAppointment.appointmentStatus !== 'For Payment' &&
+                          selectedAppointment.appointmentStatus !== 'Pending' && (
+                            <Badge bg="light" pill>● {selectedAppointment.appointmentStatus}</Badge>
+                          )}
+                      </p>
                       <p><b>Requester Contact:</b> {selectedAppointment.userFields.requesterContact}</p>
                       <p><b>Requester Email:</b> {selectedAppointment.userFields.requesterEmail}</p>
                       <p><b>Date of Request:</b> {new Date(selectedAppointment.userFields.dateOfRequest.seconds * 1000).toLocaleString()}</p>
@@ -551,8 +620,16 @@ export const OngoingAppointments = () => {
                         <div>
                           <br />
                           <h4>Submitted Requirements</h4>
-                          <p><b>Date of Confirmation: </b>{events[selectedAppointment.eventId]?.eventDate?.toLocaleDateString() || 'N/A'}</p>
-                          <p><b>Time of Confirmation: </b>{convertTo12HourFormat(events[selectedAppointment.eventId]?.eventTime) || 'N/A'}</p>
+                          <p><b>Selected Date for Confirmation: </b>{selectedAppointment.slotId ? (() => {
+                            const slotData = getSlotData(selectedAppointment.slotId);
+                            return slotData.startDate || 'N/A';
+                          })() : 'N/A'}</p>
+                          <p><b>Selected Time for Confirmation: </b>{selectedAppointment.slotId ? (() => {
+                            const slotData = getSlotData(selectedAppointment.slotId);
+                            const startTime = convertTo12HourFormat(slotData.startTime);
+                            const endTime = convertTo12HourFormat(slotData.endTime);
+                            return startTime && endTime ? `${startTime} - ${endTime}` : 'N/A';
+                          })() : 'N/A'}</p>
                           <p><b>First Name:</b> {selectedAppointment.confirmation.firstName}</p>
                           <p><b>Last Name:</b> {selectedAppointment.confirmation.lastName}</p>
                           <br/>
@@ -565,7 +642,7 @@ export const OngoingAppointments = () => {
                       {selectedAppointment.appointments?.paymentImage && selectedAppointment.appointments.paymentImage !== 'none' ? (
                         renderPaymentImage(selectedAppointment.appointments.paymentImage)
                       ) : (
-                        <p>Not yet paid</p>
+                        <Badge bg="danger" pill>Not yet paid</Badge>
                       )}
                     </div>
                   )}

@@ -91,11 +91,14 @@ export const Marriage = () => {
     const fullName = userData ? `${userData.firstName || ''} ${userData.lastName || ''}` : '';
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+      const { name, value } = e.target;
+      const regex = /^[A-Za-z ]*$/;
+      if (regex.test(value)) {
         setFormData({
           ...formData,
           [name]: value
         });
+      }
       };
 
     const handleDateChange = (date) => {
@@ -337,11 +340,11 @@ export const Marriage = () => {
                 <div className="row mb-3">
                   <div className="col mb-3">
                     <label htmlFor="brideFirstName" className="form-label">First Name</label>
-                    <input type="text" className="form-control" id="brideFirstName" name="brideFirstName" onChange={handleChange} required />
+                    <input type="text" className="form-control" id="brideFirstName" name="brideFirstName" onChange={handleChange} onKeyDown={(e) => !/^[A-Za-z ]$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.preventDefault()} required />
                   </div>
                   <div className="col mb-3">
                     <label htmlFor="brideLastName" className="form-label">Last Name</label>
-                    <input type="text" className="form-control" id="brideLastName" name="brideLastName" onChange={handleChange} required />
+                    <input type="text" className="form-control" id="brideLastName" name="brideLastName" onChange={handleChange} onKeyDown={(e) => !/^[A-Za-z ]$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.preventDefault()} required />
                   </div>
                 </div>
       
@@ -349,17 +352,27 @@ export const Marriage = () => {
                 <div className="row mb-3">
                   <div className="col mb-3">
                     <label htmlFor="groomFirstName" className="form-label">First Name</label>
-                    <input type="text" className="form-control" id="groomFirstName" name="groomFirstName" onChange={handleChange} required />
+                    <input type="text" className="form-control" id="groomFirstName" name="groomFirstName" onChange={handleChange} onKeyDown={(e) => !/^[A-Za-z ]$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.preventDefault()} required />
                   </div>
                   <div className="col mb-3">
                     <label htmlFor="groomLastName" className="form-label">Last Name</label>
-                    <input type="text" className="form-control" id="groomLastName" name="groomLastName" onChange={handleChange} required />
+                    <input type="text" className="form-control" id="groomLastName" name="groomLastName" onChange={handleChange} onKeyDown={(e) => !/^[A-Za-z ]$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.preventDefault()} required />
                   </div>
                 </div>
       
                 <div className="mb-3">
-                  <label htmlFor="marriageDate" className="form-label">Planned Wedding Date</label>
-                  <input type="date" className="form-control" id="marriageDate" name="marriageDate" onChange={handleChange} required />
+                  <label htmlFor="marriageDate" className="form-label">Planned Wedding Date <i>(Planned date should be 3 months ahead from the current date)</i></label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    id="marriageDate"
+                    name="marriageDate"
+                    onChange={handleChange}
+                    required
+                    min={new Date(new Date().setMonth(new Date().getMonth() + 3))
+                      .toISOString()
+                      .split('T')[0]}
+                  />
                 </div>
       
                 <div className="d-grid gap-2 d-md-flex justify-content-md-end">
