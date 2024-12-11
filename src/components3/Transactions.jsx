@@ -36,49 +36,57 @@ export const Transactions = () => {
     fetchChurches();
   }, []);
 
-  // Fetch payments from Firestore
-  useEffect(() => {
-    const fetchPayments = async () => {
-      try {
-        const appointmentsSnapshot = await getDocs(collection(db, 'appointments'));
-        const appointmentsList = await Promise.all(
-          appointmentsSnapshot.docs.map(async (appointmentDoc) => {
-            const appointmentData = appointmentDoc.data();
-
-            // Fetch the church name using the churchId from the 'church' collection
-            let churchName = 'Unknown';
-            if (appointmentData.churchId) {
-              const churchDocRef = doc(db, 'church', appointmentData.churchId);
-              const churchDoc = await getDoc(churchDocRef);
-              if (churchDoc.exists()) {
-                churchName = churchDoc.data().churchName;
+    // Fetch payments from Firestore
+    useEffect(() => {
+      const fetchPayments = async () => {
+        try {
+          const appointmentsSnapshot = await getDocs(collection(db, 'appointments'));
+          const appointmentsList = await Promise.all(
+            appointmentsSnapshot.docs.map(async (appointmentDoc) => {
+              const appointmentData = appointmentDoc.data();
+  
+              // Fetch the church name using the churchId from the 'church' collection
+              let churchName = 'Unknown';
+              if (appointmentData.churchId) {
+                const churchDocRef = doc(db, 'church', appointmentData.churchId);
+                const churchDoc = await getDoc(churchDocRef);
+                if (churchDoc.exists()) {
+                  churchName = churchDoc.data().churchName;
+                }
               }
-            }
-
-            // Convert Firestore timestamp to a JavaScript Date object
-            const dateCreated = appointmentData.userFields?.dateOfRequest?.toDate?.() || new Date();
-
-            return {
-              paymentId: appointmentDoc.id,
-              dateCreated: dateCreated,
-              formattedDate: dateCreated.toLocaleDateString(), // For displaying
-              churchName,
-              userId: appointmentData.userFields?.requesterId || 'Unknown User',
-              amountPaid: appointmentData.appointments?.paymentImage || null, // Check if the payment image exists
-            };
-          })
-        );
-
-        setPayments(appointmentsList);
-      } catch (error) {
-        console.error('Error fetching payments:', error);
-      } finally {
-        setLoading(false); // Ensure loading is set to false in the finally block
-      }
-    };
-
-    fetchPayments();
-  }, []);
+  
+              // Convert Firestore timestamp to a JavaScript Date object
+              const dateCreated = appointmentData.userFields?.dateOfRequest?.toDate?.() || new Date();
+  
+              // Only return the payment if amountPaid exists (i.e., it's not null)
+              if (appointmentData.appointments?.paymentImage) {
+                return {
+                  paymentId: appointmentDoc.id,
+                  dateCreated: dateCreated,
+                  formattedDate: dateCreated.toLocaleDateString(), // For displaying
+                  churchName,
+                  userId: appointmentData.userFields?.requesterId || 'Unknown User',
+                  amountPaid: appointmentData.appointments?.paymentImage || null, // Check if the payment image exists
+                };
+              } else {
+                return null; // Skip payments without an amountPaid
+              }
+            })
+          );
+  
+          // Filter out any null values (appointments without payment image)
+          const filteredAppointments = appointmentsList.filter(appointment => appointment !== null);
+  
+          setPayments(filteredAppointments);
+        } catch (error) {
+          console.error('Error fetching payments:', error);
+        } finally {
+          setLoading(false); // Ensure loading is set to false in the finally block
+        }
+      };
+  
+      fetchPayments();
+    }, []);
 
   const handleViewPaymentImage = (imageUrl) => {
     setSelectedPaymentImage(imageUrl);
@@ -206,7 +214,7 @@ export const Transactions = () => {
               ) : (
                 <tr>
                   <td colSpan="5" style={{ textAlign: 'center' }}>
-                    No payment data available
+                    No transactions available
                   </td>
                 </tr>
               )}
