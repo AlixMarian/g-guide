@@ -80,7 +80,7 @@ export const Login = () => {
                     
                     if (churchData.churchStatus === 'Approved') {
                         toast.success('Welcome to G! Guide');
-                        navigate('/SEA');
+                        navigate('/PendingAppointments');
                         return;
                     } else if (churchData.churchStatus === 'Pending') {
                         toast.error('Your church registration is not yet approved. Please wait for admin approval.');
