@@ -291,6 +291,14 @@ const handleShowAllDates = async () => {
     utilHandleMarkerClick(church, setDrawerInfo, setChurchPhoto);
   };
 
+//   const handleMarkerClick = (church) => {
+//     // Import the utility function with a different name to avoid naming conflict
+//     import { handleMarkerClick as handleMarkerClickUtil } from './churchDataUtils';
+    
+//     // Use the utility function
+//     handleMarkerClickUtil(church, setDrawerInfo, setChurchPhoto);
+// };
+
   return (
     <>
       <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={libraries}>
@@ -328,10 +336,8 @@ const handleShowAllDates = async () => {
                   key={church.id}
                   position={{ lat, lng }}
                   icon={customIcon}
-                  onClick={() => {
-                    console.log('Clicked on Marker for:', church);
-                    handleMarkerClick(church);
-                  }}
+                  onClick={() => handleMarkerClick(church, setDrawerInfo, setChurchPhoto)}
+
                 />
               );
             }

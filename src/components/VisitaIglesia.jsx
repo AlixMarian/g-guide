@@ -13,14 +13,6 @@ import AutoGen from './mapfiles/AutoGen';
 import coverLogo from '/src/assets/logo cover.png';
 import ChurchAutocomplete from './mapfiles/ChurchAutocomplete'; // Adjust the path as needed
 
- 
-const containerStyle = {
-  width: '100vw', 
-  height: '100vh', 
-}; 
-const libraries = ['places', 'geometry'];
-const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"];
-
 const VisitaIglesia = () => {
   const navigate = useNavigate();
   const [churches, setChurches] = useState([]);
@@ -43,7 +35,18 @@ const VisitaIglesia = () => {
   const [churchPhoto, setChurchPhoto] = useState(coverLogo);  
   const [markers, setMarkers] = useState([]);
   const [zoomLevel, setZoomLevel] = useState(14); // Default zoom level
+  const [showDirectionsOffcanvas, setShowDirectionsOffcanvas] = useState(false);
 
+  const handleOffcanvasClose = () => {
+    setShowDirectionsOffcanvas(false);
+  };
+ 
+  const containerStyle = {
+    width: '100vw', 
+    height: '100vh', 
+  }; 
+  const libraries = ['places', 'geometry'];
+  const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"];
 
   const sortedChurchOptions = [...churches].sort((a, b) => 
     a.churchName.localeCompare(b.churchName)
@@ -102,24 +105,42 @@ const VisitaIglesia = () => {
       },
       (initialResult, status) => {
         if (status === window.google.maps.DirectionsStatus.OK) {
-          // Extract the route's polyline points
           const routePolyline = initialResult.routes[0].overview_path;
 
-          // Now, find churches along the route within a specified radius
+          // Find churches along the route
           let nearbyChurches = [];
           let radiusKm = 1;
-          const maxRadiusKm = 10;
+          const maxRadiusKm = 20; // Increase max radius to ensure we find enough churches
           const incrementKm = 1;
 
-          while (nearbyChurches.length < 5 && radiusKm <= maxRadiusKm) {
+          // Keep increasing radius until we find at least 7 churches
+          while (nearbyChurches.length < 7 && radiusKm <= maxRadiusKm) {
             nearbyChurches = findChurchesAlongRoute(churches, routePolyline, radiusKm);
             radiusKm += incrementKm;
           }
 
-          const limitedChurches = nearbyChurches.slice(0, 7);
+          // If we still don't have enough churches, add the closest remaining churches
+          if (nearbyChurches.length < 7) {
+            const remainingChurches = churches.filter(
+              church => !nearbyChurches.some(nc => nc.id === church.id)
+            );
+            
+            // Sort remaining churches by distance to route
+            const sortedRemaining = remainingChurches.sort((a, b) => {
+              const aDistance = getMinDistanceToRoute(a, routePolyline);
+              const bDistance = getMinDistanceToRoute(b, routePolyline);
+              return aDistance - bDistance;
+            });
 
-          // Prepare waypoints
-          const waypoints = limitedChurches.map((church) => ({
+            // Add closest churches until we have 7
+            nearbyChurches = [...nearbyChurches, ...sortedRemaining.slice(0, 7 - nearbyChurches.length)];
+          }
+
+          // Take exactly 7 churches
+          const selectedChurches = nearbyChurches.slice(0, 7);
+
+          // Continue with the existing waypoints and routing logic...
+          const waypoints = selectedChurches.map((church) => ({
             location: {
               lat: parseFloat(church.latitude),
               lng: parseFloat(church.longitude),
@@ -154,7 +175,7 @@ const VisitaIglesia = () => {
                 // The waypoint_order gives the optimized order of the waypoints
                 const waypointOrder = result.routes[0].waypoint_order;
 
-                const orderedChurches = waypointOrder.map((index) => limitedChurches[index]);
+                const orderedChurches = waypointOrder.map((index) => selectedChurches[index]);
 
                 // Assign labels to markers dynamically
                 const markers = [
@@ -173,6 +194,7 @@ const VisitaIglesia = () => {
                 setStartLocation(origin);
                 setEndLocation(endLocation);
                 setShowOffcanvas(false); // Close Offcanvas
+                console.log('Ordered Churches:', orderedChurches);
               } else {
                 console.error('Error fetching directions:', status);
               }
@@ -572,9 +594,13 @@ const VisitaIglesia = () => {
           position={marker.position}
           label={{
             text: marker.label,
-            color: 'black',
+            color: 'white',
             fontWeight: 'bold',
             fontSize: '16px',
+          }}
+          onClick={() => {
+            // Show the directions offcanvas when clicking route markers
+            setShowDirectionsOffcanvas(true);
           }}
           // icon={
           //   typeof customIcon === 'string'
@@ -597,7 +623,7 @@ const VisitaIglesia = () => {
             position={dest}
             label={{
               text: String.fromCharCode('B'.charCodeAt(0) + index),
-              color: 'black',
+              color: 'white',
               fontWeight: 'bold',
               fontSize: '16px',
             }}
@@ -609,12 +635,98 @@ const VisitaIglesia = () => {
             //       }
             //     : undefined
             // }
-            onClick={() => handleMarkerClick(dest)}
+            onClick={() => {
+              // Show the directions offcanvas when clicking route markers
+              setShowDirectionsOffcanvas(true);
+            }}
           />
         ))}
      </GoogleMap>
+    {/* List View Destinations */}
+     <Offcanvas 
+        show={showDirectionsOffcanvas}
+        onHide={handleOffcanvasClose}
+        placement="end"
+        className="custom-offcanvas"
+        style={{ maxHeight: 'fit-content', top: '3rem' }}
+      >
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>Church Destinations</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+           {/* Add a scrollable container */}
+          {/* <div style={{ 
+            maxHeight: '50vh', 
+            overflowY: 'auto',
+            paddingRight: '10px'
+          }}></div> */}
+          {startLocation && !sortedChurches.length && (
+            <div className="py-2 border-bottom">
+              <h6 className="mb-1 d-flex align-items-center">
+              <span className="badge rounded-circle bg-white d-flex align-items-center justify-content-center me-2"
+                style={{ width: '25px', height: '25px', background: 'linear-gradient(to right, #ff0000, #ff8000)' }}>
+                  A
+                </span>
+                {churches.find(c => 
+                  parseFloat(c.latitude) === startLocation.lat && 
+                  parseFloat(c.longitude) === startLocation.lng
+                )?.churchName || 'Custom Location'}
+              </h6>
+              <p className="ms-4 mb-0 text-muted">
+              {churches.find(c => 
+                parseFloat(c.latitude) === startLocation.lat && 
+                parseFloat(c.longitude) === startLocation.lng
+              )?.churchLocation || 'Custom Location'}
+            </p>
+            </div>
+          )}
 
+          {/* Destinations */}
+          {uniqueDestinations.map((dest, index) => {
+            const church = churches.find(c => 
+              parseFloat(c.latitude) === dest.lat && 
+              parseFloat(c.longitude) === dest.lng
+            );
+            
+            return (
+              <div key={index} className="py-2 border-bottom">
+                <h6 className="mb-1 d-flex align-items-center">
+                <span className="badge rounded-circle bg-white d-flex align-items-center justify-content-center me-2"
+                  style={{ width: '25px', height: '25px', background: 'linear-gradient(to right, #ff0000, #ff8000)' }}>
+                    {String.fromCharCode('B'.charCodeAt(0) + index)}
+                  </span>
+                  {church?.churchName || 'Custom Location'}
+                </h6>
+                <p className="ms-4 mb-0 text-muted">
+                  {church?.churchLocation || 'Custom Address'}
+                </p>
+                {church?.churchLocationID && (
+                  <p className="ms-4 mb-0 text-muted">
+                    Location ID: {church.churchLocationID}
+                  </p>
+                )}
+              </div>
+            );
+          })}
 
+      {sortedChurches.map((church, idx) => (
+      <div key={idx} className="py-2 border-bottom">
+        <h6 className="mb-1 d-flex align-items-center">
+          <span className="badge rounded-circle bg-white d-flex align-items-center justify-content-center me-2"
+                style={{ width: '25px', height: '25px', background: 'linear-gradient(to right, #ff0000, #ff8000)' }}>
+            {String.fromCharCode('A'.charCodeAt(0) + idx)}
+          </span>
+          {church.churchName || 'Church Name Not Available'}
+        </h6>
+        <p className="ms-4 mb-0 text-muted">
+          {church.churchLocation || 'Location Not Available'}
+        </p>
+      </div>
+    ))}
+
+          
+        </Offcanvas.Body>
+      </Offcanvas>
       </div>
     </LoadScript>
   );
