@@ -10,7 +10,6 @@ import SignUpCoord from './components/SignUpCoord';
 import ViewAppointments from './components/ViewAppointments';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import SEA from './components2/SEA';
 import Appointments from './components2/Appointments';
 import Listpriest from './components2/Listpriest';
 import ReqVol from './components2/ReqVol';
@@ -127,15 +126,7 @@ const App = () => {
               </div>
             </>
         } /> */}
-        <Route path="/SEA" element={
-          <div>
-            <Sidebar />
-            <div>
-              <AdminNavbar />
-              <div className='main-content'><SEA /></div>
-            </div>
-          </div>
-        } />
+        
 
         <Route path="/Appointments" element={
           <div>

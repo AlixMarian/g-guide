@@ -201,7 +201,7 @@ export const Layout = () => {
             <div onClick={handleSchedules}>
             <div className={`numbers ${activeNumber === 'schedules' ? 'active' : ''}`} onClick={() => handleClick('schedules')}>
               <input type="image" src="../src/assets/number-1.png" className="image-size" />
-              <h3 className="second-button-name">Schedules</h3>
+              <h3 className="second-button-name">Mass Schedules</h3>
             </div>
             </div>
             <div onClick={handleChurchEvents}>
@@ -290,7 +290,7 @@ export const Layout = () => {
               onClick={handleSEA}
             >
               <input type="image" src="../src/assets/mass schedule.png" className='image-size' />
-              <h3 className='button-name'>Mass Schedule</h3>
+              <h3 className='button-name'>Schedules</h3>
             </div>
             <div 
               className={`volunteer-call ${activeSection === 'volunteer-call' ? 'coord-active' : ''}`} 
