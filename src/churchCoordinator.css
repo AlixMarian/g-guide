@@ -86,7 +86,7 @@ body .second-sidebar {
 }
 
 .second-sidebar-appointments-content, .second-sidebar-mass-schedule-content, .second-sidebar-services-offered-content, .second-sidebar-church-info-content {
-  margin-top: 3.53rem;
+  margin-top: 9rem;
   display: flex;
   flex-direction: column; /* Stacks elements vertically */
   justify-content: center; /* Centers the content vertically */
