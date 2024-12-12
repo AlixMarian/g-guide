@@ -291,17 +291,13 @@ const handleShowAllDates = async () => {
     utilHandleMarkerClick(church, setDrawerInfo, setChurchPhoto);
   };
 
-//   const handleMarkerClick = (church) => {
-//     // Import the utility function with a different name to avoid naming conflict
-//     import { handleMarkerClick as handleMarkerClickUtil } from './churchDataUtils';
-    
-//     // Use the utility function
-//     handleMarkerClickUtil(church, setDrawerInfo, setChurchPhoto);
-// };
-
   return (
     <>
+
+    
       <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={libraries}>
+
+
         <div className="map-search-container">
           <div className="logo-container">
         <img src={logo} alt="Logo" onClick={() => navigate('/home')} style={{boxShadow: '2px 6px 6px rgba(0, 0, 0, 0.3)', borderRadius: '30px', marginTop: '-0.5rem', cursor:'pointer'}}/>
@@ -343,6 +339,7 @@ const handleShowAllDates = async () => {
             }
             return null;
           })}
+          
           {churches.map((church) => {
             const lat = parseFloat(church.latitude);
             const lng = parseFloat(church.longitude);

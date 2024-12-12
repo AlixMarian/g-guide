@@ -33,6 +33,13 @@ export const SysAdminSidebar = () => {
     setActiveChild(null);        // Clear any active child items
   };
 
+  const handleAddChurch = () => {
+    navigate('/addChurch');
+    setActiveSection('add-church');
+    setSecondSidebarOpen(false); 
+    setActiveChild(null); 
+  };
+
   // User Directory handler
   const handleUsers = () => {
     navigate('/userDB');
@@ -92,6 +99,10 @@ export const SysAdminSidebar = () => {
           <div className={`transactions ${activeSection === 'transactions' ? 'admin-active' : ''}`} onClick={handleTransactions}>
             <input type="image" src="../src/assets/transactions.png" className='admin-image-size' />
             <h3 className='button-name'>Transactions</h3>
+          </div>
+          <div className={`add-church ${activeSection === 'add-church' ? 'admin-active' : ''}`} onClick={handleAddChurch}>
+            <input type="image" src="../src/assets/addChurch.png" className='admin-image-size' />
+            <h3 className='button-name'>Add Church</h3>
           </div>
         </div>
 

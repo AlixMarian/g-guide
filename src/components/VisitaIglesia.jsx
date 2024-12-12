@@ -5,7 +5,7 @@ import visLogo from '/src/assets/visLogo.png';
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleMap, LoadScript, DirectionsRenderer, Marker } from '@react-google-maps/api';
-import { Offcanvas, Button, Form } from 'react-bootstrap';
+import { Offcanvas, Button, Form, Modal } from 'react-bootstrap';
 import { fetchChurchData } from './mapfiles/churchDataUtils';
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
 import { handleMarkerClick as utilHandleMarkerClick, handleMapLoad, onZoomChanged } from './mapfiles/churchDataUtils';
@@ -39,6 +39,7 @@ const VisitaIglesia = () => {
   const [showDirectionsOffcanvas, setShowDirectionsOffcanvas] = useState(false);
   const [isRouteCalculated, setIsRouteCalculated] = useState(false);
   const [isAutoGenRoute, setIsAutoGenRoute] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
 
 
   const handleOffcanvasClose = () => {
@@ -92,7 +93,7 @@ const VisitaIglesia = () => {
     }
 
     setIsAutoGenRoute(true);
-    
+
     const directionsService = new window.google.maps.DirectionsService();
 
     // First, compute the initial route between origin and endLocation
@@ -169,7 +170,11 @@ const VisitaIglesia = () => {
                   color: colors[index % colors.length],
                 }));
 
-                setDirectionsResponse(directionsWithColors);
+                setDirectionsResponse(directionsWithColors); 
+
+                
+                setDirectionsResponse([]); // comment if u wanna use the lines
+
 
                 // The waypoint_order gives the optimized order of the waypoints
                 const waypointOrder = result.routes[0].waypoint_order;
@@ -548,8 +553,38 @@ const VisitaIglesia = () => {
             </Button>
           )}
         </div>
+        <div className="d-flex align-items-start text-muted small ms-1" style={{marginTop: '-1rem'}}>
+          <i 
+            className="bi bi-info-circle me-1 text-danger" 
+            style={{fontSize: '20px', cursor: 'pointer', marginTop: '13rem'}}
+            onClick={() => setShowInstructions(true)}
+          ></i>
+          <span className='fst-italic' style={{fontSize: '12px', marginTop: '13.38rem'}}>
+            How to use?
+          </span>
+        </div>
       </Form> 
-        )}
+      )}
+      <Modal
+        show={showInstructions}
+        onHide={() => setShowInstructions(false)}
+        container={document.querySelector('.offcanvas-body')}
+        style={{ position: 'absolute', marginTop: '22.5rem', width: '20rem', marginLeft: '2rem'}}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="fs-6">How to Use Visita Iglesia?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ol className="small mb-0 ps-3">
+            <li>Select your starting church location</li>
+            <li>Add more church destinations as needed</li>
+            <li>Select churches from the dropdown list</li>
+            <li>Remove destinations using X button</li>
+            <li>Click "Get Route" to generate path</li>
+            <li>Use "Reset" to start over</li>
+          </ol>
+        </Modal.Body>
+      </Modal>
       </Offcanvas.Body>
         </Offcanvas>
         <div className="google-map-container">

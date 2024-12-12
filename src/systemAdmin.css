@@ -23,7 +23,7 @@ body .admin-sidebar {
   align-items: center; /* Centers the content vertically */
 }
 
-.dashboard, .pending-church, .user-directory, .church-directory, .transactions {
+.dashboard, .pending-church, .user-directory, .church-directory, .transactions, .add-church {
   display: flex;
   flex-direction: column; /* Stacks elements vertically */
   justify-content: center; /* Centers the content vertically */
@@ -33,7 +33,7 @@ body .admin-sidebar {
   gap: 0.2rem;
 }
 
-.dashboard:hover, .pending-church:hover, .user-directory:hover, .church-directory:hover, .transaction:hover {
+.dashboard:hover, .pending-church:hover, .user-directory:hover, .church-directory:hover, .transaction:hover, .add-church:hover {
   transition: 0.5s ease;
   cursor: pointer;
   background-color: #0068A2; /* Only change the background color */

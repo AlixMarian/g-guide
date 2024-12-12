@@ -19,11 +19,9 @@ export const handleMapLoad = (mapInstance, setMap, setCustomIcon, setLoading) =>
 export const handleMarkerClick = async (church, setDrawerInfo, setChurchPhoto) => {
   console.log('Clicked church ID:', church.id);
 
-  // Fetch and update church photoLink
   const photoLink = await fetchPhotoLink(church.id);
   setChurchPhoto(photoLink);
 
-  // Set drawer information including photoLink
   setDrawerInfo({
     show: true,
     id: church.id || '', 
@@ -92,9 +90,8 @@ export const fetchChurchData = async () => {
   }
 };
 
-/**
- * Fetches churches by language from 'massSchedules' and related collections.
- */
+
+
 export const fetchChurchesByLanguage = async (selectedLanguage) => {
   try {
     const massSchedulesRef = collection(db, 'massSchedules');
@@ -334,18 +331,13 @@ export const convertTo12HourFormat = (time) => {
   return `${adjustedHours}:${minutes} ${period}`;
 };
 
-/**
- * Handles zoom changes on the map by adjusting marker icon sizes.
- */
 export const onZoomChanged = (map, setCustomIcon) => {
   if (!map) return;
   const zoom = map.getZoom();
   
-  // Only update the icon if the zoom level is significantly different
   setCustomIcon((prevIcon) => {
     const newSize = zoom > 15 ? 40 : zoom > 12 ? 30 : 20;
     
-    // Check if we actually need to update the icon size
     if (!prevIcon || !prevIcon.scaledSize || Math.abs(prevIcon.scaledSize.width - newSize) >= 5) {
       return {
         url: '/src/assets/location.png',

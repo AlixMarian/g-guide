@@ -28,6 +28,7 @@ import ChurchHomepage from './components4/ChurchHomepage';
 import ChurchLocations from './components3/SysAdminChurchLocations';
 import AdminNavbar from './components3/SysAdminNavbar';
 import Transactions from './components3/Transactions';
+import AddChurch from './components3/AddChurch';
 import RenewChurch from './components/RenewChurch';
 import VisitaIglesia from './components/VisitaIglesia';
 import AutoGen from './components/mapfiles/AutoGen';
@@ -379,6 +380,15 @@ const App = () => {
             <div>
               <AdminNavbar />
               <div className='sys-main-content'><Transactions /></div>
+            </div>
+          </div>
+        } />
+        <Route path="/addChurch" element={
+          <div>
+            <SysAdminSidebar />
+            <div>
+              <AdminNavbar />
+              <div className='sys-main-content'><AddChurch /></div>
             </div>
           </div>
         } />
