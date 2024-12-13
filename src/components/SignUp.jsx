@@ -12,7 +12,7 @@ import { Modal} from 'react-bootstrap';
 export const SignUp = () => {
   useChatbot();
   const [showDataConsentModal, setShowDataConsentModal] = useState(false);
-
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -21,6 +21,7 @@ export const SignUp = () => {
     firstName: '',
     contactNum: '',
     dataConsent: false,
+    termsCondition: false,
   });
 
   const navigate = useNavigate();
@@ -43,6 +44,10 @@ export const SignUp = () => {
       toast.error('Agree to data consent to proceed');
       return;
     }
+    if (!formData.termsCondition) {
+      toast.error('Agree to terms and condition to proceed');
+      return;
+    }
     const auth = getAuth();
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
@@ -56,6 +61,7 @@ export const SignUp = () => {
           contactNum: formData.contactNum,
           email: formData.email,
           dataConsent: formData.dataConsent,
+          termsCondition:formData.termsCondition,
           role: 'websiteUser',
           profileImage: 'https://firebasestorage.googleapis.com/v0/b/g-guide-1368b.appspot.com/o/default%2FuserIcon.png?alt=media&token=11e94d91-bf29-4e3e-ab98-a723fead69bc',
           dateOfRegistration: Timestamp.now(),
@@ -103,6 +109,9 @@ export const SignUp = () => {
 
   const handleShowDataConsentModal = () => setShowDataConsentModal(true);
   const handleCloseDataConsentModal = () => setShowDataConsentModal(false);
+
+  const handleShowTermsModal = () => setShowTermsModal(true);
+  const handleCloseTermsModal = () => setShowTermsModal(false);
 
   return (
     <div className="signup-container">
@@ -217,6 +226,23 @@ export const SignUp = () => {
                 </div>
               </div>
 
+            <div className="col-12">
+              <div className="form-check">
+              <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id="termsCondition"
+                      checked={formData.termsCondition}
+                      onChange={handleChange}
+                    />
+                <label className="form-check-label" htmlFor="termsCondition" >
+                    <b>I agree to the 
+                      <label className='form-check-label ms-1'onClick={handleShowTermsModal} style={{ color: 'blue' }}> G! Guide Terms and Conditions</label> 
+                    </b>
+                </label>
+              </div>
+            </div>
+
               <div className="col-12 d-flex justify-content-center gap-5">
                 <button type="reset" className="btn btn-outline-primary">
                   Clear Form
@@ -225,6 +251,10 @@ export const SignUp = () => {
                   Sign Up
                 </button>
               </div>
+
+              <p style={{ textAlign: 'center' }}>
+              <span style={{ borderBottom: '1px solid black', padding: '0 10px' }}><b>Or</b></span>
+            </p>
 
               <div className="col-12 d-flex justify-content-center mt-3">
                 <button type="button" className="btn btn-primary" onClick={handleSignUpAsCoord}>
@@ -265,6 +295,81 @@ export const SignUp = () => {
           <p>We may update this privacy policy from time to time. Any changes will be posted on this page, and we will notify you via email or through our app.</p>
           <h5>Contact Us</h5>
           <p>If you have any questions or concerns about this privacy policy or our data practices, please contact us at <b>g!guide@gmail.com</b>.</p>
+        </Modal.Body>
+      </Modal>
+
+      <Modal show={showTermsModal} onHide={handleCloseTermsModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>G! Guide Terms and Conditions</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Welcome to G! Guide! By signing up as a website user, you agree to the
+            terms and conditions outlined below. These terms define your
+            responsibilities as a user of the platform, as well as the grounds upon
+            which your account may be made inactive.
+          </p>
+          <h5>1. Acceptance of Terms</h5>
+          <p>By registering as a user, you confirm that:</p>
+          <ul className="ms-5">
+            <li>All information you provide during registration is accurate and up-to-date.</li>
+            <li>You will use the platform responsibly and in compliance with applicable laws and these terms.</li>
+            <li>
+              You will maintain the confidentiality of your account credentials and
+              ensure only authorized use of your account.
+            </li>
+          </ul>
+          <h5>2. Responsibilities of Website Users</h5>
+          <p>As a website user, your responsibilities include:</p>
+          <ul className="ms-5">
+            <li>
+              Adhering to respectful and ethical behavior in interactions with the
+              platform, church coordinators, and other users.
+            </li>
+            <li>
+              Respecting church guidelines and policies when booking services or
+              appointments.
+            </li>
+            <li>
+              Promptly notifying the platform or church coordinators of any changes
+              or cancellations regarding your bookings.
+            </li>
+          </ul>
+          <h5>3. Grounds for Account Inactivation</h5>
+          <p>
+            G! Guide reserves the right to inactivate a user account under specific
+            circumstances:
+          </p>
+          <ul className="ms-5">
+            <li>
+              <b>Provision of False Information:</b> Providing false or misleading
+              information during registration or while using the platform.
+            </li>
+            <li>
+              <b>Inappropriate Behavior:</b> Engaging in harassment, fraudulent
+              activities, or behavior deemed inappropriate by the system administrator.
+            </li>
+            <li>
+              <b>Failure to Adhere to Policies:</b> Consistently missing
+              appointments or failing to follow church or booking policies.
+            </li>
+          </ul>
+          <p>
+            Should your account be made inactive, you will receive a notification via
+            email outlining the reason for the inactivation. Appeals or inquiries can
+            be directed to{" "}
+            <a href="mailto:g!guide@gmail.com">g!guide@gmail.com</a>.
+          </p>
+          <h5>4. Contact Us</h5>
+          <p>
+            If you have any questions, concerns, or require assistance, please
+            contact us at: <a href="mailto:g!guide@gmail.com">g!guide@gmail.com</a>.
+          </p>
+          <h5>5. Acknowledgment and Agreement</h5>
+          <p>
+            By proceeding with the sign-up, you acknowledge that you have read,
+            understood, and agree to the terms and conditions outlined above.
+          </p>
         </Modal.Body>
       </Modal>
     </div>

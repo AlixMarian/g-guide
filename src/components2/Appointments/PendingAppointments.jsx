@@ -414,7 +414,7 @@ export const PendingAppointments = () => {
                         Send
                     </Button>
                 </Modal.Footer>
-            </Modal>
+        </Modal>
 
 
         <Modal show={showModal} onHide={handleCloseModal}>

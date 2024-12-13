@@ -182,7 +182,7 @@ export const WebsiteUserInbox = () => {
           <div className='card'>
             <div className='card-body'>
               <h5 className='card-title'>No Messages</h5>
-              <p className='card-text'>You haven't received any messages yet.</p>
+              <p className='card-text'>You haven&apos;t received any messages yet.</p>
             </div>
           </div>
         ) : (

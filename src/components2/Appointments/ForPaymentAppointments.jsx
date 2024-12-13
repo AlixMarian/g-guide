@@ -549,7 +549,7 @@ export const ForPaymentAppointments = () => {
 
                             <p><strong>Payment Receipt Image: </strong> {selectedAppointment.appointments?.paymentImage ? (
                                 <a href={selectedAppointment.appointments.paymentImage} target="_blank" rel="noopener noreferrer">
-                                    View Document
+                                    View receipt
                                 </a>
                             ) : (
                                 <span style={{ color: 'red' }}>Pending Payment</span>
@@ -567,12 +567,21 @@ export const ForPaymentAppointments = () => {
                 </Modal.Body>
                 <Modal.Footer>
                         <>
-                            {!['Pending', 'Approved', 'Denied'].includes(selectedAppointment?.appointmentStatus) && (
-                            <Button variant="success" onClick={handleApprove}>
+                        {!['Pending', 'Approved', 'Denied'].includes(selectedAppointment?.appointmentStatus) && (
+                            <Button
+                                variant="success"
+                                onClick={() => {
+                                    if (selectedAppointment?.appointments?.paymentImage === 'none' || !selectedAppointment?.appointments?.paymentImage) {
+                                        toast.error("Requester still hasn't paid for the appointment.");
+                                        return;
+                                    }
+                                    handleApprove();
+                                }}
+                            >
                                 Approve
                             </Button>
-                            )}
-                            {!['Denied'].includes(selectedAppointment?.appointmentStatus) && (
+                        )}
+                        {!['Denied'].includes(selectedAppointment?.appointmentStatus) && (
                             <Button variant="danger" onClick={() => setShowDenyModal(true)}>
                                 Deny
                             </Button>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Modal, Button, } from 'react-bootstrap';
+import { Modal, Button, Pagination} from 'react-bootstrap';
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "/backend/firebase"; 
 import { getAuth } from 'firebase/auth';
@@ -10,9 +10,10 @@ export const MassIntentions = () => {
     const [massIntentions, setMassIntentions] = useState([]);
     const [showMassIntentionModal, setShowMassIntentionModal] = useState(false);
     const [selectedMassIntention, setSelectedMassIntention] = useState(null);
-    
+    const [currentPage, setCurrentPage] = useState(1);
     const auth = getAuth();
     const user = auth.currentUser;
+    const intentionsPerPage = 7; 
 
     useEffect(() => {
         const fetchMassIntentions = async () => {
@@ -28,8 +29,7 @@ export const MassIntentions = () => {
                     console.log("No coordinator found for this user.");
                     return;
                 }
-                const coordinatorData = coordinatorSnapshot.docs[0].data(); // Assuming only one coordinator per user
-                const coordinatorID = coordinatorSnapshot.docs[0].id; // Get the document ID as the coordinatorID
+                const coordinatorID = coordinatorSnapshot.docs[0].id;
 
                 if (!coordinatorID) {
                     console.error("Coordinator ID is undefined.");
@@ -46,9 +46,7 @@ export const MassIntentions = () => {
                     console.log("No church found for this coordinator.");
                     return;
                 }
-
-                const churchData = churchSnapshot.docs[0].data(); // Assuming only one church per coordinator
-                const churchID = churchSnapshot.docs[0].id; // Get the document ID as the churchID
+                const churchID = churchSnapshot.docs[0].id;
 
                 if (!churchID) {
                     console.error("Church ID is undefined.");
@@ -63,12 +61,17 @@ export const MassIntentions = () => {
                 const massIntentionsData = massIntentionsSnapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
-                }));
+                }))
+                .sort((a, b) => {
+                    const dateA = a.userFields?.dateOfRequest?.seconds || 0;
+                    const dateB = b.userFields?.dateOfRequest?.seconds || 0;
+                    return dateB - dateA; 
+                });
                 console.log("Fetched Data: ", massIntentionsData);
                 setMassIntentions(massIntentionsData);
             } catch (error){
                 console.error("Error fetching appointments: ", error);
-        };
+        }
     };
 
         fetchMassIntentions();
@@ -101,6 +104,12 @@ export const MassIntentions = () => {
         return `${hours12}:${minutes} ${ampm}`;
     };
 
+    const indexOfLastIntention = currentPage * intentionsPerPage;
+    const indexOfFirstIntention = indexOfLastIntention - intentionsPerPage;
+    const currentMassIntentions = massIntentions.slice(indexOfFirstIntention, indexOfLastIntention);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
     return (
         <>
         <h1 className="me-3">Mass Intentions</h1>
@@ -118,21 +127,42 @@ export const MassIntentions = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {massIntentions.map((intention, index) => (
-                    <tr key={index}>
-                    <td className="massIntention-td">{formatDate(intention.dateOfRequest)}</td>
-                    <td className="massIntention-td">{intention.massSchedule?.massDate}</td>
-                    <td className="massIntention-td">{convertTo12HourFormat(intention.massSchedule?.massTime)}</td>
-                    <td className="massIntention-td">{intention.userFields.requesterName}</td>
-                    <td className="massIntention-td">
-                        <Button variant="info" onClick={() => handleShowMassIntentionModal(intention)}>
-                        <i className="bi bi-info-circle-fill"></i>
-                        </Button>
-                    </td>
+                {currentMassIntentions.length > 0 ? (
+                    currentMassIntentions.map((intention, index) => (
+                        <tr key={index}>
+                            <td className="massIntention-td">{formatDate(intention.dateOfRequest)}</td>
+                            <td className="massIntention-td">{intention.massSchedule?.massDate}</td>
+                            <td className="massIntention-td">{convertTo12HourFormat(intention.massSchedule?.massTime)}</td>
+                            <td className="massIntention-td">{intention.userFields.requesterName}</td>
+                            <td className="massIntention-td">
+                                <Button variant="info" onClick={() => handleShowMassIntentionModal(intention)}>
+                                    <i className="bi bi-info-circle-fill"></i>
+                                </Button>
+                            </td>
+                        </tr>
+                    ))
+                ) : (
+                    <tr>
+                        <td colSpan="7" className="text-center py-5">
+                            <h4 className="text-muted">No mass intentions found</h4>
+                        </td>
                     </tr>
-                ))}
+                )}
                 </tbody>
             </table>
+            {massIntentions.length > 0 && (
+                <Pagination className="justify-content-center">
+                {[...Array(Math.ceil(massIntentions.length / intentionsPerPage)).keys()].map((number) => (
+                    <Pagination.Item
+                        key={number + 1}
+                        active={number + 1 === currentPage}
+                        onClick={() => paginate(number + 1)}
+                    >
+                        {number + 1}
+                    </Pagination.Item>
+                ))}
+            </Pagination>
+            )}
             </div>
         </div>
         </div>

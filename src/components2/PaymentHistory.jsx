@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '/backend/firebase';
-import { Table, Modal, Button } from 'react-bootstrap';
+import { Table, Modal, Button, Pagination} from 'react-bootstrap';
 import 'react-toastify/dist/ReactToastify.css';
 import '../churchCoordinator.css';
 
@@ -10,8 +10,10 @@ const PaymentHistory = () => {
     // eslint-disable-next-line no-unused-vars
     const [user, setUser] = useState(null);
     const [paymentHistory, setPaymentHistory] = useState([]);
-    const [selectedImage, setSelectedImage] = useState(null); // State for modal image
-    const [showImageModal, setShowImageModal] = useState(false); // State for modal visibility
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const entriesPerPage = 7;
   
     useEffect(() => {
         const fetchPaymentHistory = async () => {
@@ -26,7 +28,7 @@ const PaymentHistory = () => {
           console.log('Logged in user:', currentUser);
       
           try {
-            // Step 1: Fetch Coordinator info for the current user
+            
             const coordinatorQuery = query(
               collection(db, 'coordinator'),
               where('userId', '==', currentUser.uid)
@@ -38,12 +40,12 @@ const PaymentHistory = () => {
               return;
             }
       
-            const coordinatorData = coordinatorSnapshot.docs[0].data(); // Assuming only one coordinator per user
+            const coordinatorData = coordinatorSnapshot.docs[0].data();
             const coordinatorID = coordinatorSnapshot.docs[0].id;
             console.log('Coordinator Data:', coordinatorData);
             console.log('Coordinator ID:', coordinatorID);
       
-            // Step 2: Fetch Church info associated with this coordinator
+           
             const churchQuery = query(
               collection(db, 'church'),
               where('coordinatorID', '==', coordinatorID)
@@ -55,23 +57,31 @@ const PaymentHistory = () => {
               return;
             }
       
-            const churchData = churchSnapshot.docs[0].data(); // Assuming only one church per coordinator
+            const churchData = churchSnapshot.docs[0].data();
             const churchID = churchSnapshot.docs[0].id;
             console.log('Church Data:', churchData);
             console.log('Church ID:', churchID);
       
-            // Step 3: Fetch Appointments for the church with payment details
+            
             const paymentQuery = query(
               collection(db, 'appointments'),
               where('churchId', '==', churchID),
-              where('appointmentStatus', 'in', ['For Payment', 'Approved', 'Denied']) // Fetching appointments that are either "For Payment" or "Approved"
+              where('appointmentStatus', 'in', ['For Payment', 'Approved', 'Denied'])
             );
       
             const paymentSnapshot = await getDocs(paymentQuery);
-            const paymentData = paymentSnapshot.docs.map((doc) => ({
+            const paymentData = paymentSnapshot.docs
+            .map((doc) => ({
               id: doc.id,
               ...doc.data(),
-            }));
+            }))
+            .filter((appointment) => appointment.appointments?.paymentImage && appointment.appointments?.paymentImage !== 'none')
+            .sort((a, b) => {
+              const dateA = a.userFields?.paymentUploadDate?.seconds || 0;
+              const dateB = b.userFields?.paymentUploadDate?.seconds || 0;
+              return dateB - dateA; 
+          })
+            ;
       
             console.log('Fetched Payment Appointments:', paymentData);
             setPaymentHistory(paymentData);
@@ -99,6 +109,16 @@ const PaymentHistory = () => {
         marriage: "Marriage",
         confirmation: "Confirmation",
     };
+
+    const totalPages = Math.ceil(paymentHistory.length / entriesPerPage);
+    const paginatedEntries = paymentHistory.slice(
+        (currentPage - 1) * entriesPerPage,
+        currentPage * entriesPerPage
+    );
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
       
   
     return (
@@ -119,48 +139,63 @@ const PaymentHistory = () => {
             </tr>
           </thead>
           <tbody>
-            {paymentHistory.length > 0 ? (
-              paymentHistory.map((appointment) => (
+          {paginatedEntries.length > 0 ? (
+              paginatedEntries.map((appointment) => (
                 <tr key={appointment.id}>
-                  <td className='payment-td'>{appointment.id}</td>
-                  <td className='payment-td'>{appointment.userFields?.requesterId || 'N/A'}</td>
-                  <td className='payment-td'>{appointment.userFields?.requesterName || 'N/A'}</td>
-                  <td className='payment-td'>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
-                  <td className='payment-td'>
-                    {appointment.appointments?.paymentUploadDate
-                      ? new Date(
-                          appointment.appointments.paymentUploadDate.seconds * 1000
-                        ).toLocaleString()
-                      : 'N/A'}
-                  </td>
-                  <td className='payment-td'>
-                    {appointment.appointments?.paymentImage ? (
-                      <Button
-                      variant="primary"
-                      onClick={() => {
-                        setSelectedImage(appointment.appointments.paymentImage);
-                        setShowImageModal(true);
-                      }}
-                    >
-                      View Receipt
-                    </Button>
-                    ) : (
-                      'N/A'
-                    )}
-                  </td>
+                    <td className='payment-td'>{appointment.id}</td>
+                    <td className='payment-td'>{appointment.userFields?.requesterId || 'N/A'}</td>
+                    <td className='payment-td'>{appointment.userFields?.requesterName || 'N/A'}</td>
+                    <td className='payment-td'>{appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}</td>
+                    <td className='payment-td'>
+                        {appointment.appointments?.paymentUploadDate
+                            ? new Date(
+                                appointment.appointments.paymentUploadDate.seconds * 1000
+                            ).toLocaleString()
+                            : 'N/A'}
+                    </td>
+                    <td className='payment-td'>
+                        {appointment.appointments?.paymentImage ? (
+                            <Button
+                                variant="primary"
+                                onClick={() => {
+                                    setSelectedImage(appointment.appointments.paymentImage);
+                                    setShowImageModal(true);
+                                }}
+                            >
+                                View Receipt
+                            </Button>
+                        ) : (
+                            'N/A'
+                        )}
+                    </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5">No payment history available.</td>
-              </tr>
-            )}
+            ))
+        ) : (
+            <tr>
+                <td colSpan="6" className="text-center py-5">
+                    <h4 className="text-muted">No payment history found</h4>
+                </td>
+            </tr>
+        )}
           </tbody>
         </Table>
-            </div>
+        {totalPages > 1 && (
+          <Pagination className="justify-content-center">
+          {[...Array(totalPages).keys()].map((page) => (
+              <Pagination.Item
+                  key={page + 1}
+                  active={page + 1 === currentPage}
+                  onClick={() => handlePageChange(page + 1)}
+              >
+                  {page + 1}
+              </Pagination.Item>
+          ))}
+          </Pagination>
+        )}
+        </div>
         </div>
       </div>
-      {/* Modal for displaying receipt image */}
+      
       <Modal show={showImageModal} onHide={() => setShowImageModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Receipt Image</Modal.Title>

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Modal, Button} from 'react-bootstrap';
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { Modal, Button, Pagination, Form } from 'react-bootstrap';
+import { collection, query, where, getDocs, doc, addDoc, Timestamp, getDoc } from "firebase/firestore";
 import { db } from "/backend/firebase";
+import { toast } from 'react-toastify';
 import { getAuth } from 'firebase/auth';
+import axios from 'axios';
 import '../../churchCoordinator.css';
 
 
@@ -10,9 +12,13 @@ export const ApprovedAppointments = () => {
     const [approvedAppointments, setApprovedAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [showSendMessageModal, setShowSendMessageModal] = useState(false);
+    const [message, setMessage] = useState('');
     const [slots, setSlots] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const auth = getAuth();
     const user = auth.currentUser;
+    const appointmentsPerPage = 7; 
 
     const appointmentTypeMapping = {
         marriageCertificate: "Marriage Certificate",
@@ -40,7 +46,7 @@ export const ApprovedAppointments = () => {
                     console.log("No coordinator found for this user.");
                     return;
                 }
-                const coordinatorData = coordinatorSnapshot.docs[0].data();
+                
                 const coordinatorID = coordinatorSnapshot.docs[0].id;
 
                 if (!coordinatorID) {
@@ -59,7 +65,6 @@ export const ApprovedAppointments = () => {
                     return;
                 }
 
-                const churchData = churchSnapshot.docs[0].data();
                 const churchID = churchSnapshot.docs[0].id;
 
                 if (!churchID) {
@@ -73,10 +78,16 @@ export const ApprovedAppointments = () => {
                     where("churchId", "==", churchID)
                 );
                 const approvedSnapshot = await getDocs(approvedQueryChurch);
-                const approvedAppointmentsData = approvedSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
+                const approvedAppointmentsData = approvedSnapshot.docs
+                    .map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }))
+                    .sort((a, b) => {
+                        const dateA = a.userFields?.dateOfRequest?.seconds || 0;
+                        const dateB = b.userFields?.dateOfRequest?.seconds || 0;
+                        return dateB - dateA; 
+                    });
                 console.log("Fetched Data: ", approvedAppointmentsData);
                 setApprovedAppointments(approvedAppointmentsData);
             } catch (error){
@@ -87,6 +98,95 @@ export const ApprovedAppointments = () => {
 
         fetchApprovedAppointments();
     }, [user]);
+
+    const fetchChurchName = async (churchId) => {
+            try {
+                const churchRef = doc(db, "church", churchId); // Reference the church document
+                const churchSnap = await getDoc(churchRef); // Fetch the document
+        
+                if (churchSnap.exists()) {
+                    return churchSnap.data().churchName || "Unknown Church"; // Return churchName or fallback
+                } else {
+                    console.warn(`Church with ID ${churchId} does not exist.`);
+                    return "Unknown Church";
+                }
+            } catch (error) {
+                console.error(`Error fetching church name for ID ${churchId}:`, error);
+                return "Unknown Church"; // Fallback on error
+            }
+    };
+
+    const sendEmail = async (email, subject, message) => {
+        try {
+            const response = await axios.post('http://localhost:3006/send-email', {
+                email: email,
+                subject: subject,
+                text: message
+            });
+            console.log('Email sent successfully:', response.data);
+        } catch (error) {
+            console.error('Error sending email:', error);
+        }
+    };
+
+    const handleSendMessage = async () => {
+        if (!selectedAppointment || !message) {
+            toast.error("Message cannot be empty.");
+            return;
+        }
+    
+        try {
+            // Fetch the church name using the churchId
+            const churchName = await fetchChurchName(selectedAppointment.churchId);
+    
+            // Save message to inboxMessage collection with appointmentId
+            const inboxMessageData = {
+                churchId: selectedAppointment.churchId,
+                userId: selectedAppointment.userFields?.requesterId,
+                appointmentId: selectedAppointment.id, // Adding appointmentId
+                message,
+                dateSent: Timestamp.fromDate(new Date()),
+                status: "new",
+            };
+    
+            await addDoc(collection(db, "inboxMessage"), inboxMessageData);
+    
+            // Prepare email content with church name and appointment type
+            const appointmentType = appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType;
+            const emailContent = `
+                You got a message from ${churchName} regarding your appointment ${appointmentType}:
+                "${message}"
+                
+               
+            `;
+    
+            // Send email
+            await sendEmail(
+                selectedAppointment.userFields?.requesterEmail,
+                "Message from Church Coordinator",
+                emailContent // Trim unnecessary spaces
+            );
+    
+            toast.success("Message sent successfully!");
+            setMessage(''); // Clear textarea
+            setShowSendMessageModal(false); // Close modal
+        } catch (error) {
+            console.error("Error sending message: ", error);
+            toast.error("Failed to send message.");
+        }
+    };
+    
+    
+
+    const handleShowSendMessageModal = (appointment) => {
+        setSelectedAppointment(appointment);
+        setShowSendMessageModal(true);
+    };
+
+    const handleCloseSendMessageModal = () => {
+        setShowSendMessageModal(false);
+        setMessage('');
+    };
 
     const handleShowModal = (appointment) => {
         setSelectedAppointment(appointment);
@@ -138,6 +238,12 @@ export const ApprovedAppointments = () => {
         return slot || {};
     };
 
+    const indexOfLastAppointment = currentPage * appointmentsPerPage;
+    const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
+    const currentAppointments = approvedAppointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
     return (
         <>
         <h1 className="me-3">Approved Appointments</h1>
@@ -157,32 +263,79 @@ export const ApprovedAppointments = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {approvedAppointments.map((appointment, index) => (
-                    <tr key={index}>
-                    <td className="approved-td">{formatDate(appointment.userFields?.dateOfRequest)}</td>
-                    <td className="approved-td">{appointment.appointmentPurpose}</td>
-                    <td className="approved-td">
-                        {appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}
-                    </td>
-                    <td className="approved-td">{appointment.userFields?.requesterName}</td>
-                    <td className="approved-td">{appointment.userFields?.requesterContact}</td>
-                    <td className="approved-td">
-                        <Button variant="info" onClick={() => handleShowModal(appointment)}>
-                        <i className="bi bi-info-circle-fill"></i>
-                        </Button>
-                    </td>
-                    <td className="approved-td">
-                        <Button>
-                        <i className="bi bi-chat-text"></i>
-                        </Button>
-                    </td>
+                {currentAppointments.length > 0 ? (
+                    currentAppointments.map((appointment, index) => (
+                        <tr key={index}>
+                        <td className="approved-td">{formatDate(appointment.userFields?.dateOfRequest)}</td>
+                        <td className="approved-td">{appointment.appointmentPurpose}</td>
+                        <td className="approved-td">
+                            {appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType}
+                        </td>
+                        <td className="approved-td">{appointment.userFields?.requesterName}</td>
+                        <td className="approved-td">{appointment.userFields?.requesterContact}</td>
+                        <td className="approved-td">
+                            <Button variant="info" onClick={() => handleShowModal(appointment)}>
+                            <i className="bi bi-info-circle-fill"></i>
+                            </Button>
+                        </td>
+                        <td className="approved-td">
+                            <Button variant="primary" onClick={() => handleShowSendMessageModal(appointment)}>
+                                <i className="bi bi-chat-text"></i>
+                            </Button>
+                        </td>
+                        </tr>
+                    ))
+                ) : (
+                    <tr>
+                        <td colSpan="7" className="text-center py-5">
+                            <h4 className="text-muted">No approved appointments found</h4> 
+                        </td>
                     </tr>
-                ))}
+                )}
                 </tbody>
             </table>
+            {approvedAppointments.length > 0 && (
+                <Pagination className="justify-content-center">
+                    {[...Array(Math.ceil(approvedAppointments.length / appointmentsPerPage)).keys()].map((number) => (
+                        <Pagination.Item
+                            key={number + 1}
+                            active={number + 1 === currentPage}
+                            onClick={() => paginate(number + 1)}
+                        >
+                            {number + 1}
+                        </Pagination.Item>
+                    ))}
+                </Pagination>
+            )}
             </div>
         </div>
         </div>
+
+        <Modal show={showSendMessageModal} onHide={handleCloseSendMessageModal}>
+                <Modal.Header>
+                    <Modal.Title>Send Message</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form.Group controlId="message">
+                        <Form.Label>This message will be sent to the receiver&apos;s email and in-app inbox:</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={5}
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder="Write your message here..."
+                        />
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseSendMessageModal}>
+                        Cancel
+                    </Button>
+                    <Button variant="success" onClick={handleSendMessage}>
+                        Send
+                    </Button>
+                </Modal.Footer>
+        </Modal>
 
         <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
@@ -318,7 +471,7 @@ export const ApprovedAppointments = () => {
 
                             <p><strong>Payment Receipt Image: </strong> {selectedAppointment.appointments?.paymentImage ? (
                                 <a href={selectedAppointment.appointments.paymentImage} target="_blank" rel="noopener noreferrer">
-                                    View Document
+                                    View receipt
                                 </a>
                             ) : (
                                 <span style={{ color: 'red' }}>Pending Payment</span>
