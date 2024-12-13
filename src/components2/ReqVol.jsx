@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { collection, addDoc, query, where, getDocs,onSnapshot, updateDoc, Timestamp, doc, deleteDoc } from 'firebase/firestore';
@@ -56,7 +57,7 @@ export const ReqVol = () => {
           const fetchedChurchId = churchSnapshot.docs[0].id;
           setChurchData({ id: fetchedChurchId, ...churchSnapshot.docs[0].data() });
           console.log('Fetched churchId:', fetchedChurchId);
-          return fetchedChurchId; // Return the fetched churchId
+          return fetchedChurchId;
         } else {
           toast.error('No associated church found for this coordinator.');
         }
@@ -79,19 +80,18 @@ export const ReqVol = () => {
     try {
       const q = query(
         collection(db, 'events'),
-        where('churchId', '==', churchId) // Use the churchId, which is a string
+        where('churchId', '==', churchId)
       );
       const eventsSnapshot = await getDocs(q);
   
       if (eventsSnapshot.empty) {
         console.warn('No events found for the specified church.');
-        setEvents([]); // Clear the events list if no events are found
-      } else {
+        setEvents([]);
         const eventsList = eventsSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        console.log('Fetched events:', eventsList); // Debugging logs
+        console.log('Fetched events:', eventsList);
         setEvents(eventsList);
       }
     } catch (error) {
@@ -105,9 +105,9 @@ export const ReqVol = () => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         console.log('User signed in:', user);
-        const fetchedChurchId = await fetchChurchId(user.uid); // Fetch the churchId
+        const fetchedChurchId = await fetchChurchId(user.uid);
         if (fetchedChurchId) {
-          await fetchEvents(fetchedChurchId); // Fetch events using churchId
+          await fetchEvents(fetchedChurchId);
         }
       } else {
         console.log('No user signed in.');
@@ -145,7 +145,7 @@ export const ReqVol = () => {
       console.error('Church ID is missing. Cannot fetch posts.');
       return;
     }
-    setLoading(true); // Set loading to true before fetching
+    setLoading(true);
     try {
       const q = query(
         collection(db, 'requestVolunteers'),
@@ -162,7 +162,7 @@ export const ReqVol = () => {
       console.error('Error fetching posts:', error);
       toast.error('Error fetching posts: ' + error.message);
     } finally {
-      setLoading(false); // Set loading to false after fetching
+      setLoading(false);
     }
   };
 
@@ -173,7 +173,7 @@ export const ReqVol = () => {
         console.log('User signed in:', user);
         const fetchedChurchId = await fetchChurchId(user.uid);
         if (fetchedChurchId) {
-          fetchPosts(); // Fetch posts after fetching church ID
+          fetchPosts();
         }
       } else {
         console.log('No user signed in.');
@@ -212,7 +212,7 @@ export const ReqVol = () => {
           event: selectedEvent,
           startDate: startDateTimestamp,
           endDate: endDateTimestamp,
-          churchId: churchData.id, // Use the churchId for the updated post
+          churchId: churchData.id,
         });
         toast.success('Post updated successfully');
       } catch (error) {
@@ -223,7 +223,7 @@ export const ReqVol = () => {
         await addDoc(collection(db, 'requestVolunteers'), {
           title: reqVolunteerTitleInput,
           content: reqVolunteerBodyInput,
-          churchId: churchData.id, // Use the churchId for the new post
+          churchId: churchData.id,
           uploadDate: Timestamp.now(),
           startDate: startDateTimestamp,
           endDate: endDateTimestamp,
@@ -237,7 +237,7 @@ export const ReqVol = () => {
     }
     
     resetForm();
-    fetchPosts(); // Refresh posts after submission
+    fetchPosts();
   };
   
   
@@ -349,7 +349,10 @@ export const ReqVol = () => {
                       className="form-control" 
                       id="startDate" 
                       value={startDateInput} 
-                      onChange={handleStartDateChange} 
+                      onChange={(e) => {
+                        handleStartDateChange(e);
+                        setEndDateInput('');
+                      }} 
                       min={new Date().toISOString().split('T')[0]} 
                       max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
                       required 
@@ -364,7 +367,7 @@ export const ReqVol = () => {
                       id="endDate" 
                       value={endDateInput} 
                       onChange={handleEndDateChange} 
-                      min={new Date().toISOString().split('T')[0]} 
+                      min={startDateInput || new Date().toISOString().split('T')[0]} 
                       max={new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0]} 
                       required 
                     />
