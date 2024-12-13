@@ -43,6 +43,7 @@ import ForPaymentAppointments from './components2/Appointments/ForPaymentAppoint
 import ApprovedAppointments from './components2/Appointments/ApprovedAppointments';
 import DeniedAppointments from './components2/Appointments/DeniedAppointments';
 import MassIntentions from './components2/Appointments/MassIntentions';
+import Messages from './components2/Messeges';
 
 //paymenthistory
 import  PaymentHistory  from './components2/PaymentHistory';
@@ -185,6 +186,16 @@ const App = () => {
             <div>
               <AdminNavbar />
               <div className='main-content'><MassIntentions /></div>
+            </div>
+          </div>
+        } />
+
+        <Route path="/Messages" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><Messages /></div>
             </div>
           </div>
         } />

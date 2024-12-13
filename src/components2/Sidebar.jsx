@@ -78,6 +78,12 @@ export const Layout = () => {
     }
   };
 
+  const handleMessages = () => {
+    if (secondSidebarOpen){
+      navigate('/Messages');
+    }
+  };
+
   const handlePaymentHistory = () => {
     setActiveSection('payment-history'); // Set the active section
     setSecondSidebarOpen(false); // Close the second sidebar
@@ -191,6 +197,12 @@ export const Layout = () => {
             <div className={`numbers ${activeNumber === 'mass-intentions' ? 'active' : ''}`} onClick={() => handleClick('mass-intentions')}>
               <input type="image" src="../src/assets/number-5.png" className="image-size" />
               <h3 className="second-button-name">Mass Intentions</h3>
+            </div>
+            </div>
+            <div onClick={handleMessages}>
+            <div className={`numbers ${activeNumber === 'mass-intentions' ? 'active' : ''}`} onClick={() => handleClick('messeges')}>
+              <input type="image" src="../src/assets/number-5.png" className="image-size" />
+              <h3 className="second-button-name">Messages</h3>
             </div>
             </div>
           </div>
