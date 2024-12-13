@@ -321,6 +321,7 @@ export const SignUpCoord = () => {
                         </div>
                       )}
                     </div>
+                    <p>Cant find your church? Contact us at: <a href="mailto:g!guide@gmail.com">g!guide@gmail.com</a></p>
                   </div>
 
                   <div className="col-12">

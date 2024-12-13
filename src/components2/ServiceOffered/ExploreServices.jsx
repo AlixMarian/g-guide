@@ -118,6 +118,19 @@ export const ExploreServices = () => {
             return;
         }
 
+        for (const [serviceName, serviceDetails] of Object.entries(servicesState)) {
+            if (serviceDetails.active) {
+                if (!serviceDetails.fee || serviceDetails.fee <= 0) {
+                    toast.error(`Service "${serviceName}" requires a valid fee.`);
+                    return; // Exit if validation fails
+                }
+                if (!serviceDetails.instructions || serviceDetails.instructions.trim() === "") {
+                    toast.error(`Service "${serviceName}" requires instructions.`);
+                    return; // Exit if validation fails
+                }
+            }
+        }
+
         try {
             // Use the churchId as the document ID in the services collection
             await setDoc(doc(db, "services", churchID), servicesState, { merge: true });
@@ -156,6 +169,7 @@ export const ExploreServices = () => {
                         placeholder="Service Fee"
                         value={servicesState[service]?.fee || ''}
                         onChange={(e) => handleChange(service, 'fee', e.target.value)}
+                        required={servicesState[service]?.active}
                     />
                     <textarea
                         className="instructions-input"
@@ -163,6 +177,7 @@ export const ExploreServices = () => {
                         value={servicesState[service]?.instructions || ''}
                         onChange={(e) => handleChange(service, 'instructions', e.target.value)}
                         rows="2"
+                        required={servicesState[service]?.active}
                     />
                 </div>
             </div>
