@@ -214,7 +214,7 @@ export const PendingAppointments = () => {
     const handleForPayment = async () => {
         if (!selectedAppointment) return;
     
-        const message = "Your appointment is now pending for payment. <br>Please follow the instructions to complete the payment process.<br><br><small>Instructions:<br>1. Go to your homepage.<br> 2. In the 'Ongoing Appointments' section, locate your pending appointments.<br> 3. Click 'Pay here via QR Code'.<br> 4. Scan the displayed QR Code.<br> 5. Upload your official payment receipt.<br> 6. Check the box to confirm that you have read and understood the church's refund policy.<br> 7. Click 'Upload Receipt' to complete the process.<br></small>";
+        const message = "Your appointment is now pending for payment. <br>Please follow the instructions to complete the payment process.<br><br><small>Instructions:<br>1. Go to your homepage.<br> 2. In the 'Ongoing Transactions' section, locate your pending appointments.<br> 3. Click 'Pay here via QR Code'.<br> 4. Scan the displayed QR Code.<br> 5. Upload your official payment receipt.<br> 6. Check the box to confirm that you have read and understood the church's refund policy.<br> 7. Click 'Upload Receipt' to complete the process.<br></small>";
     
         try {
             const appointmentRef = doc(db, "appointments", selectedAppointment.id);
