@@ -19,6 +19,7 @@ export const OngoingAppointments = () => {
   const [churches, setChurches] = useState({});
   const [churchQRDetail, setChurchQRDetail] = useState(null);
   const [slots, setSlots] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [events, setEvents] = useState({});
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -57,7 +58,7 @@ export const OngoingAppointments = () => {
         if (servicesDoc.exists()) {
             const services = servicesDoc.data();
             console.log("Services data found:", services);
-            setServicesData(services); // Store all services in state
+            setServicesData(services);
         } else {
             console.warn("No services document found for Church ID:", churchId);
         }
@@ -339,8 +340,8 @@ export const OngoingAppointments = () => {
       <div className="col-12 mb-4">
         <div className="card">
           <div className="card-body d-flex align-items-center justify-content-between">
-            <h5 className="card-title mb-0"><b>Ongoing Appointments</b></h5>
-            <button type="button" className="btn btn-custom-primary ms-3" onClick={handleViewAppnts}>View Appointment History</button>
+            <h5 className="card-title mb-0"><b>Ongoing Transactions</b></h5>
+            <button type="button" className="btn btn-custom-primary ms-3" onClick={handleViewAppnts}>View History</button>
           </div>
           <div className="card-body">
             <div className="row">
@@ -386,8 +387,7 @@ export const OngoingAppointments = () => {
                       <h5>Service Fee:</h5>
                       {(() => {
                         const normalizedType = appointmentTypeMapping[selectedAppointment.appointmentType];
-                        const serviceDetails = servicesData[normalizedType]; // Access the specific service
-
+                        const serviceDetails = servicesData[normalizedType];
                         if (serviceDetails) {
                           return (
                             <>
