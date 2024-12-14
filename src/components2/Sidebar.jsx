@@ -4,7 +4,7 @@ import '../churchCoordinator.css';
 
 export const Layout = () => {
   const sidebarRef = useRef(null);
-  const secondSidebarRef = useRef(null); // Ref for the second sidebar
+  const secondSidebarRef = useRef(null);
   const navigate = useNavigate();
 
   const [activeNumber, setActiveNumber] = useState(null);
@@ -85,12 +85,11 @@ export const Layout = () => {
   };
 
   const handlePaymentHistory = () => {
-    setActiveSection('payment-history'); // Set the active section
-    setSecondSidebarOpen(false); // Close the second sidebar
+    setActiveSection('payment-history');
+    setSecondSidebarOpen(false);
     navigate('/PaymentHistory')
   };
 
-  //
   const handleSchedules = () => {
     if (secondSidebarOpen){
       navigate('/Schedules')
@@ -109,7 +108,6 @@ export const Layout = () => {
     }
   }
 
-//
   const handleExploreServices = () => {
     if (secondSidebarOpen){
       navigate('/ExploreServices')
@@ -128,8 +126,6 @@ export const Layout = () => {
     }  
   }
 
-
-  //
   const handleChurchDetails = () => {
     if (secondSidebarOpen){
       navigate('/ChurchDetails')
@@ -143,22 +139,21 @@ export const Layout = () => {
   }
   
   const handleSidebarItemClick = (section) => {
-    setActiveSection(section); // Highlight the clicked section
-    setSecondSidebarOpen(false); // Close the second sidebar for items without one
+    setActiveSection(section); 
+    setSecondSidebarOpen(false); 
   };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (secondSidebarRef.current && !secondSidebarRef.current.contains(event.target) && !sidebarRef.current.contains(event.target)) {
-        setSecondSidebarOpen(false); // Close the sidebar if click is outside
+        setSecondSidebarOpen(false); 
       }
     };
 
-    // Add event listener
+    
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      // Cleanup the event listener
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [secondSidebarRef]);
@@ -200,7 +195,7 @@ export const Layout = () => {
             </div>
             </div>
             <div onClick={handleMessages}>
-            <div className={`numbers ${activeNumber === 'mass-intentions' ? 'active' : ''}`} onClick={() => handleClick('messeges')}>
+            <div className={`numbers ${activeNumber === 'messages' ? 'active' : ''}`} onClick={() => handleClick('messages')}>
               <input type="image" src="../src/assets/number-5.png" className="image-size" />
               <h3 className="second-button-name">Messages</h3>
             </div>

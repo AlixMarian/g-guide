@@ -108,6 +108,7 @@ const App = () => {
 
           <Route path="/renew-church" element={<><NavBar/><RenewChurch /></>} />
         
+       
           <Route path="/church-options" element={<NavbarSelector><ChurchOptions /></NavbarSelector>} />
           <Route path="/webUser-inbox" element={<><WebUserNavBar/><WebsiteUserInbox /></>} />
           <Route path="/home" element={<><NavBar /><Home /></>} />
@@ -187,6 +188,15 @@ const App = () => {
             <div>
               <AdminNavbar />
               <div className='main-content'><MassIntentions /></div>
+            </div>
+          </div>
+        } />
+        <Route path="/Messages" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><Messages /></div>
             </div>
           </div>
         } />
