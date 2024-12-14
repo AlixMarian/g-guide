@@ -14,8 +14,8 @@ export const SignUpCoord = () => {
   const [showDataConsentModal, setShowDataConsentModal] = useState(false);
   const [churchList, setChurchList] = useState([]);
   const [filteredChurchList, setFilteredChurchList] = useState([]);
-  const [dropdownVisible, setDropdownVisible] = useState(false); // Dropdown visibility state
-  const [selectedChurchID, setSelectedChurchID] = useState(null); // Store the selected church ID
+  const [dropdownVisible, setDropdownVisible] = useState(false); 
+  const [selectedChurchID, setSelectedChurchID] = useState(null);
   const [searchInput, setSearchInput] = useState("");
   const [formData, setFormData] = useState({
     email: "",
@@ -39,28 +39,33 @@ export const SignUpCoord = () => {
     navigate('/renew-church');
   };
 
-    // Toggle dropdown visibility
     const toggleDropdown = () => {
       setDropdownVisible(!dropdownVisible);
     };
   
-    // Fetch church names and locations from the churchLocation collection
     useEffect(() => {
       const fetchChurchData = async () => {
         try {
-          const querySnapshot = await getDocs(collection(db, 'churchLocation'));
-          const churches = querySnapshot.docs.map(doc => ({
+          const churchLocationSnapshot = await getDocs(collection(db, 'churchLocation'));
+          const allChurchLocations = churchLocationSnapshot.docs.map(doc => ({
             id: doc.id,
-            ...doc.data()
+            ...doc.data(),
           }));
-          setChurchList(churches);
-          setFilteredChurchList(churches); // Initialize filtered list
+  
+          const churchSnapshot = await getDocs(collection(db, 'church'));
+          const registeredChurches = churchSnapshot.docs.map(doc => doc.data().churchLocationID);
+          const availableChurches = allChurchLocations.filter(
+            churchLocation => !registeredChurches.includes(churchLocation.id)
+          );
+  
+          setChurchList(availableChurches);
+          setFilteredChurchList(availableChurches);
         } catch (error) {
           toast.error("Failed to fetch church data");
-          console.error("Error fetching church locations:", error);
+          console.error("Error fetching church locations or registered churches:", error);
         }
       };
-
+  
       fetchChurchData();
     }, []);
 
@@ -71,7 +76,7 @@ export const SignUpCoord = () => {
         [id]: type === "checkbox" ? checked : type === "file" ? files[0] : value,
       }));
   
-      // If the user selects a church from the dropdown, automatically set the church address
+      
       if (id === "churchName") {
         const selectedChurch = churchList.find(church => church.churchName === value);
         if (selectedChurch) {
@@ -83,7 +88,7 @@ export const SignUpCoord = () => {
       }
     };
 
-    // Filter churches based on input
+    
     const filterFunction = (e) => {
       const searchValue = e.target.value.toLowerCase();
       setSearchInput(searchValue);
@@ -128,7 +133,6 @@ export const SignUpCoord = () => {
         churchQRDetailURL = await getDownloadURL(qrRef);
       }
 
-      // Save user information in the users collection
       await setDoc(doc(db, 'users', user.uid), {
         lastName: formData.lastName,
         firstName: formData.firstName,
@@ -141,7 +145,6 @@ export const SignUpCoord = () => {
         dateOfRegistration: Timestamp.now(),
       });
 
-      // Create a document in the 'coordinator' collection and get its ID
       const churchCoorDocRef = doc(collection(db, 'coordinator')); 
       const coordinatorID = churchCoorDocRef.id;
 
@@ -150,11 +153,8 @@ export const SignUpCoord = () => {
         status: 'Pending',
       });
 
-      // Generate a unique document ID for the church collection
       const churchDocRef = doc(collection(db, 'church'));
-      //const churchID = churchDocRef.id;
 
-      // Save church details in the church collection with unique churchID and linked coordinatorID
       await setDoc(churchDocRef, {
         churchName: formData.churchName,
         churchAddress: formData.churchAddress,
@@ -168,8 +168,8 @@ export const SignUpCoord = () => {
         churchQRDetail: churchQRDetailURL,
         refundPolicy:formData.churchRefundPolicy,
         churchStatus: 'Pending',
-        coordinatorID: coordinatorID,  // Linking the coordinator ID here
-        churchLocationID: selectedChurchID, // Save the selected churchLocation document ID
+        coordinatorID: coordinatorID, 
+        churchLocationID: selectedChurchID,
       });
 
       toast.success('Your registration is being processed by the admin');
@@ -306,13 +306,13 @@ export const SignUpCoord = () => {
                               onClick={() => {
                                 setFormData((prevState) => ({
                                   ...prevState,
-                                  churchName: church.churchName, // Set selected church name
-                                  churchAddress: church.churchLocation, // Set the corresponding church address
+                                  churchName: church.churchName, 
+                                  churchAddress: church.churchLocation, 
                                 }));
-                                setSearchInput(church.churchName); // Display the selected church name in the input
-                                setSelectedChurchID(church.id); // Set the selected church document ID
-                                setDropdownVisible(false); // Hide dropdown after selection
-                                console.log(`Selected Church ID: ${church.id}`); // Log the document ID
+                                setSearchInput(church.churchName);
+                                setSelectedChurchID(church.id); 
+                                setDropdownVisible(false); 
+                                console.log(`Selected Church ID: ${church.id}`);
                               }}
                             >
                               {church.churchName}
@@ -321,7 +321,7 @@ export const SignUpCoord = () => {
                         </div>
                       )}
                     </div>
-                    <p>Cant find your church? Contact us at: <a href="mailto:g!guide@gmail.com">g!guide@gmail.com</a></p>
+                    <p className='text-muted'><i>Cant find your church? Contact us at:</i> <a href="mailto:g!guide@gmail.com">g!guide@gmail.com</a></p>
                   </div>
 
                   <div className="col-12">
@@ -391,7 +391,7 @@ export const SignUpCoord = () => {
                     <textarea
                       className="form-control"
                       id="churchRefundPolicy"
-                      rows="6" // Adjust the number of rows as needed to provide a large enough space
+                      rows="6"
                       value={formData.churchRefundPolicy}
                       onChange={handleChange}
                       placeholder="Please enter refund policy here."
@@ -437,7 +437,7 @@ export const SignUpCoord = () => {
             </div>
 
             <div className="col-12 d-flex justify-content-center gap-5 mt-3">
-              <button type="reset" className="btn btn-outline-primary">Clear Form</button>
+              <button type="reset" className="btn btn-outline-danger">Clear Form</button>
               <button type="submit" className="btn btn-primary">Sign Up</button>
             </div>
             

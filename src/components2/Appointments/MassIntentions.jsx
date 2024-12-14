@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Modal, Button, Pagination} from 'react-bootstrap';
+import { Modal, Button, Pagination, Dropdown, DropdownButton} from 'react-bootstrap';
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "/backend/firebase"; 
 import { getAuth } from 'firebase/auth';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import '../../churchCoordinator.css'
 import loadingGif from '/src/assets/Ripple@1x-1.0s-200px-200px.gif';
 
@@ -12,6 +14,8 @@ export const MassIntentions = () => {
     const [showMassIntentionModal, setShowMassIntentionModal] = useState(false);
     const [selectedMassIntention, setSelectedMassIntention] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedMassDay, setSelectedMassDay] = useState("All");
     const auth = getAuth();
     const user = auth.currentUser;
     const intentionsPerPage = 7; 
@@ -108,9 +112,22 @@ export const MassIntentions = () => {
         return `${hours12}:${minutes} ${ampm}`;
     };
 
+    const filteredIntentions = massIntentions.filter((intention) => {
+        const matchesDateOfRequest = selectedDate
+            ? new Date(intention.dateOfRequest?.seconds * 1000).toDateString() === selectedDate.toDateString()
+            : true;
+    
+        const matchesMassDay = selectedMassDay === "All"
+            || (intention.massSchedule?.massDate && intention.massSchedule.massDate === selectedMassDay);
+    
+        return matchesDateOfRequest && matchesMassDay;
+    });
+    
+    
+
     const indexOfLastIntention = currentPage * intentionsPerPage;
     const indexOfFirstIntention = indexOfLastIntention - intentionsPerPage;
-    const currentMassIntentions = massIntentions.slice(indexOfFirstIntention, indexOfLastIntention);
+    const currentMassIntentions = filteredIntentions.slice(indexOfFirstIntention, indexOfLastIntention);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -128,6 +145,37 @@ export const MassIntentions = () => {
         <div className="d-flex justify-content-center align-items-center mt-5">
         <div className="card shadow-lg" style={{ width: "80%" }}>
             <div className="card-body">
+            <div className="row mb-4 align-items-center">
+            <div className="col-md-4">
+                <div className="form-group w-100">
+                    <label className="form-label"><b>Filter by Date of Request:</b></label>
+                    <div className="input-group">
+                        <DatePicker
+                        className="form-control"
+                        selected={selectedDate}
+                        onChange={(date) => setSelectedDate(date)}
+                        showYearDropdown
+                        />
+                    <button className="btn btn-danger" onClick={() => setSelectedDate(null)}>Clear</button>
+                    </div>
+                </div>
+            </div>
+            <div className="col-md-4">
+                <div className="form-group w-100">
+                    <label className="form-label"><b>Filter by Mass Day:</b></label>
+                        <DropdownButton id="dropdown-basic-button" title={`Mass Day: ${selectedMassDay}`} variant="secondary">
+                        <Dropdown.Item onClick={() => setSelectedMassDay("All")}>All</Dropdown.Item>
+                        <Dropdown.Item onClick={() => setSelectedMassDay("Sunday")}>Sunday</Dropdown.Item>
+                        <Dropdown.Item onClick={() => setSelectedMassDay("Monday")}>Monday</Dropdown.Item>
+                        <Dropdown.Item onClick={() => setSelectedMassDay("Tuesday")}>Tuesday</Dropdown.Item>
+                        <Dropdown.Item onClick={() => setSelectedMassDay("Wednesday")}>Wednesday</Dropdown.Item>
+                        <Dropdown.Item onClick={() => setSelectedMassDay("Thursday")}>Thursday</Dropdown.Item>
+                        <Dropdown.Item onClick={() => setSelectedMassDay("Friday")}>Friday</Dropdown.Item>
+                        <Dropdown.Item onClick={() => setSelectedMassDay("Saturday")}>Saturday</Dropdown.Item>
+                        </DropdownButton>
+                </div>
+            </div>
+            </div>
             <table className="table">
                 <thead className="table-dark">
                 <tr>
@@ -162,18 +210,18 @@ export const MassIntentions = () => {
                 )}
                 </tbody>
             </table>
-            {massIntentions.length > 0 && (
-                <Pagination className="justify-content-center">
-                {[...Array(Math.ceil(massIntentions.length / intentionsPerPage)).keys()].map((number) => (
-                    <Pagination.Item
-                        key={number + 1}
-                        active={number + 1 === currentPage}
-                        onClick={() => paginate(number + 1)}
-                    >
-                        {number + 1}
-                    </Pagination.Item>
-                ))}
-            </Pagination>
+            {filteredIntentions.length > 0 && (
+                    <Pagination className="justify-content-center">
+                        {[...Array(Math.ceil(filteredIntentions.length / intentionsPerPage)).keys()].map((number) => (
+                            <Pagination.Item
+                                key={number + 1}
+                                active={number + 1 === currentPage}
+                                onClick={() => paginate(number + 1)}
+                            >
+                                {number + 1}
+                            </Pagination.Item>
+                        ))}
+                    </Pagination>
             )}
             </div>
         </div>
@@ -195,16 +243,16 @@ export const MassIntentions = () => {
                             <p><strong>Requester Name:</strong> {selectedMassIntention.userFields?.requesterName}</p>
                             
                             <br/>
-                            <p><strong>Petition:</strong> {selectedMassIntention.petition}</p>
-                            <p><strong>Thanksgiving Mass:</strong> {selectedMassIntention.thanksgivingMass}</p>
-                            <p><strong>For the Souls of:</strong> {selectedMassIntention.forTheSoulOf}</p>
+                            <p><strong>Petition:</strong> {selectedMassIntention.petition || 'none'}</p>
+                            <p><strong>Thanksgiving Mass:</strong> {selectedMassIntention.thanksgivingMass || 'none'}</p>
+                            <p><strong>For the Souls of:</strong> {selectedMassIntention.forTheSoulOf || 'none'}</p>
                             <br/>
 
                             <p><strong>Mass Intention receipt:</strong> <a href={selectedMassIntention.receiptImage} target="_blank" rel="noopener noreferrer">View Document</a></p>
                         </>
                     )}
                 </Modal.Body>
-            </Modal>
+        </Modal>
         </>
     );
 };

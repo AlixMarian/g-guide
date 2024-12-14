@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { Modal, Button, Pagination, Form } from 'react-bootstrap';
+import { Modal, Button, Pagination, Form, Dropdown,DropdownButton } from 'react-bootstrap';
 import { collection, query, where, getDocs, doc, addDoc, Timestamp, getDoc } from "firebase/firestore";
 import { db } from "/backend/firebase";
 import { toast } from 'react-toastify';
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import '../../churchCoordinator.css';
 import loadingGif from '/src/assets/Ripple@1x-1.0s-200px-200px.gif';
-
 
 
 export const ApprovedAppointments = () => {
@@ -18,6 +19,8 @@ export const ApprovedAppointments = () => {
     const [message, setMessage] = useState('');
     const [slots, setSlots] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedAppointmentType, setSelectedAppointmentType] = useState('All');
     const auth = getAuth();
     const user = auth.currentUser;
     const appointmentsPerPage = 7; 
@@ -142,22 +145,17 @@ export const ApprovedAppointments = () => {
         }
     
         try {
-            // Fetch the church name using the churchId
             const churchName = await fetchChurchName(selectedAppointment.churchId);
-    
-            // Save message to inboxMessage collection with appointmentId
             const inboxMessageData = {
                 churchId: selectedAppointment.churchId,
                 userId: selectedAppointment.userFields?.requesterId,
-                appointmentId: selectedAppointment.id, // Adding appointmentId
+                appointmentId: selectedAppointment.id,
                 message,
                 dateSent: Timestamp.fromDate(new Date()),
                 status: "new",
             };
     
             await addDoc(collection(db, "inboxMessage"), inboxMessageData);
-    
-            // Prepare email content with church name and appointment type
             const appointmentType = appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType;
             const emailContent = `
                 You got a message from ${churchName} regarding your appointment ${appointmentType}:
@@ -165,17 +163,15 @@ export const ApprovedAppointments = () => {
                 
                
             `;
-    
-            // Send email
             await sendEmail(
                 selectedAppointment.userFields?.requesterEmail,
                 "Message from Church Coordinator",
-                emailContent // Trim unnecessary spaces
+                emailContent
             );
     
             toast.success("Message sent successfully!");
-            setMessage(''); // Clear textarea
-            setShowSendMessageModal(false); // Close modal
+            setMessage('');
+            setShowSendMessageModal(false); 
         } catch (error) {
             console.error("Error sending message: ", error);
             toast.error("Failed to send message.");
@@ -246,9 +242,19 @@ export const ApprovedAppointments = () => {
 
     const indexOfLastAppointment = currentPage * appointmentsPerPage;
     const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
-    const currentAppointments = approvedAppointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
-
-    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+    const filteredAppointments = approvedAppointments.filter((appointment) => {
+        const matchesDate = selectedDate
+          ? new Date(appointment.userFields?.dateOfRequest?.seconds * 1000).toDateString() === selectedDate.toDateString()
+          : true;
+      
+        const appointmentType = appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType;
+        const matchesType = selectedAppointmentType === 'All' || appointmentType === selectedAppointmentType;
+      
+        return matchesDate && matchesType;
+      });
+      
+      const currentAppointments = filteredAppointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
+      
 
     if (loading) {
         return (
@@ -264,6 +270,33 @@ export const ApprovedAppointments = () => {
         <div className="d-flex justify-content-center align-items-center mt-5">
         <div className="card shadow-lg" style={{ width: "85%" }}>
             <div className="card-body">
+            <div className="row mb-4 align-items-center">
+            <div className="col-md-4 d-flex align-items-center">
+                <div className="form-group w-100 me-3">
+                <label className="form-label"><b>Filter by Date:</b></label>
+                <div className="input-group">
+                    <DatePicker
+                    className="form-control"
+                    selected={selectedDate}
+                    onChange={(date) => setSelectedDate(date)}
+                    showYearDropdown
+                    />
+                    <button className="btn btn-danger" onClick={() => setSelectedDate(null)}>Clear</button>
+                </div>
+                </div>
+            </div>
+            <div className="col-md-6 d-flex justify-content-start">
+                <div>
+                <label className="form-label"><b>Filter by Type:</b></label>
+                <DropdownButton id="dropdown-basic-button" title={`Selected Type: ${selectedAppointmentType}`} variant="secondary">
+                    <Dropdown.Item onClick={() => setSelectedAppointmentType('All')}>All</Dropdown.Item>
+                    {Object.values(appointmentTypeMapping).map((type) => (
+                    <Dropdown.Item key={type} onClick={() => setSelectedAppointmentType(type)}>{type}</Dropdown.Item>
+                    ))}
+                </DropdownButton>
+                </div>
+            </div>
+            </div>
             <table className="table">
                 <thead className="table-dark">
                 <tr>
@@ -310,11 +343,11 @@ export const ApprovedAppointments = () => {
             </table>
             {approvedAppointments.length > 0 && (
                 <Pagination className="justify-content-center">
-                    {[...Array(Math.ceil(approvedAppointments.length / appointmentsPerPage)).keys()].map((number) => (
+                    {[...Array(Math.ceil(filteredAppointments.length / appointmentsPerPage)).keys()].map((number) => (
                         <Pagination.Item
                             key={number + 1}
                             active={number + 1 === currentPage}
-                            onClick={() => paginate(number + 1)}
+                            onClick={() => setCurrentPage(number + 1)}
                         >
                             {number + 1}
                         </Pagination.Item>
