@@ -107,14 +107,14 @@ const App = () => {
         <Route path="/renew-church" element={<><NavBar/><RenewChurch /></>} />
         
        
-          <Route path="/church-options" element={<NavbarSelector><ChurchOptions /></NavbarSelector>} />
-          <Route path="/webUser-inbox" element={<><WebUserNavBar/><WebsiteUserInbox /></>} />
-          <Route path="/home" element={<><NavBar /><Home /></>} />
-          <Route path="/login" element={<><NavBar/><Login /></>} />
-          <Route path="/signup" element={<><NavBar/><SignUp /></>} />
-          <Route path="/homepage" element={<><WebUserNavBar /><Homepage /></>} />
-          <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} /> 
-          <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
+        <Route path="/church-options" element={<NavbarSelector><ChurchOptions /></NavbarSelector>} />
+        <Route path="/webUser-inbox" element={<><WebUserNavBar/><WebsiteUserInbox /></>} />
+        <Route path="/home" element={<><NavBar /><Home /></>} />
+        <Route path="/login" element={<><NavBar/><Login /></>} />
+        <Route path="/signup" element={<><NavBar/><SignUp /></>} />
+        <Route path="/homepage" element={<><WebUserNavBar /><Homepage /></>} />
+        <Route path="/view-appointments" element={<><WebUserNavBar /><ViewAppointments /></>} /> 
+        <Route path="/user-accSettings" element={<><WebUserNavBar /><UserAccountSettings /></>} />
         
   
         {/* church coordinator routessss */}
@@ -186,6 +186,15 @@ const App = () => {
             <div>
               <AdminNavbar />
               <div className='main-content'><MassIntentions /></div>
+            </div>
+          </div>
+        } />
+        <Route path="/Messages" element={
+          <div>
+            <Sidebar />
+            <div>
+              <AdminNavbar />
+              <div className='main-content'><Messages /></div>
             </div>
           </div>
         } />
