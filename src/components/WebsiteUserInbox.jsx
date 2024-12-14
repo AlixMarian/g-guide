@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { collection, doc, getDoc, getDocs, query, where, updateDoc } from "firebase/firestore";
@@ -36,13 +37,12 @@ export const WebsiteUserInbox = () => {
   const handleModalOpen = (message) => {
     setSelectedMessage(message);
     setShowModal(true);
-    markAsRead(message.id); // Mark the message as read when opened
+    markAsRead(message.id); 
   };
 
   const markAsRead = async (messageId) => {
     try {
       const messageRef = doc(db, "inboxMessage", messageId);
-      // Update the `isRead` field and set the `status` field to "read"
       await updateDoc(messageRef, { isRead: true, status: "read" });
       setInboxMessages((prev) =>
         prev.map((msg) =>

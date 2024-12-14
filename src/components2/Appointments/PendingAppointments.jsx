@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Modal, Button, Form, Pagination} from 'react-bootstrap';
+import { Modal, Button, Form, Pagination, Dropdown, DropdownButton} from 'react-bootstrap';
 import { collection, query, where, getDocs, doc, updateDoc, addDoc, Timestamp, getDoc } from "firebase/firestore";
 import { db } from "/backend/firebase"; 
 import { toast } from 'react-toastify';
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import '../../churchCoordinator.css'
 
 export const PendingAppointments = () => {
@@ -17,6 +19,8 @@ export const PendingAppointments = () => {
     const [showDenyModal, setShowDenyModal] = useState(false);
     const [denialReason, setDenialReason] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedAppointmentType, setSelectedAppointmentType] = useState('All');
     const auth = getAuth();
     const user = auth.currentUser;
     const appointmentsPerPage = 7; 
@@ -87,7 +91,7 @@ export const PendingAppointments = () => {
                 const sortedAppointments = pendingAppointmentsData.sort((a, b) => {
                     const dateA = a.userFields?.dateOfRequest.seconds || 0;
                     const dateB = b.userFields?.dateOfRequest.seconds || 0; 
-                    return dateB - dateA; // Most recent first
+                    return dateB - dateA;
                 });
                 
                 console.log("Fetched Pending Appointments: ", pendingAppointmentsData);
@@ -102,18 +106,18 @@ export const PendingAppointments = () => {
 
     const fetchChurchName = async (churchId) => {
         try {
-            const churchRef = doc(db, "church", churchId); // Reference the church document
-            const churchSnap = await getDoc(churchRef); // Fetch the document
+            const churchRef = doc(db, "church", churchId);
+            const churchSnap = await getDoc(churchRef);
     
             if (churchSnap.exists()) {
-                return churchSnap.data().churchName || "Unknown Church"; // Return churchName or fallback
+                return churchSnap.data().churchName || "Unknown Church"; 
             } else {
                 console.warn(`Church with ID ${churchId} does not exist.`);
                 return "Unknown Church";
             }
         } catch (error) {
             console.error(`Error fetching church name for ID ${churchId}:`, error);
-            return "Unknown Church"; // Fallback on error
+            return "Unknown Church";
         }
     };
     
@@ -138,40 +142,31 @@ export const PendingAppointments = () => {
         }
     
         try {
-            // Fetch the church name using the churchId
+            
             const churchName = await fetchChurchName(selectedAppointment.churchId);
-    
-            // Save message to inboxMessage collection with appointmentId
             const inboxMessageData = {
                 churchId: selectedAppointment.churchId,
                 userId: selectedAppointment.userFields?.requesterId,
-                appointmentId: selectedAppointment.id, // Adding appointmentId
+                appointmentId: selectedAppointment.id, 
                 message,
                 dateSent: Timestamp.fromDate(new Date()),
                 status: "new",
             };
-    
-            await addDoc(collection(db, "inboxMessage"), inboxMessageData);
-    
-            // Prepare email content with church name and appointment type
+            await addDoc(collection(db, "inboxMessage"), inboxMessageData);        
             const appointmentType = appointmentTypeMapping[selectedAppointment.appointmentType] || selectedAppointment.appointmentType;
             const emailContent = `
                 You got a message from ${churchName} regarding your appointment ${appointmentType}:
                 "${message}"
-                
-               
             `;
-    
-            // Send email
             await sendEmail(
                 selectedAppointment.userFields?.requesterEmail,
                 "Message from Church Coordinator",
-                emailContent // Trim unnecessary spaces
+                emailContent 
             );
     
             toast.success("Message sent successfully!");
-            setMessage(''); // Clear textarea
-            setShowSendMessageModal(false); // Close modal
+            setMessage('');
+            setShowSendMessageModal(false);
         } catch (error) {
             console.error("Error sending message: ", error);
             toast.error("Failed to send message.");
@@ -222,17 +217,17 @@ export const PendingAppointments = () => {
                 appointmentStatus: "For Payment"
             });
     
-            // Save message to inboxMessage collection
+           
             const inboxMessageData = {
                 churchId: selectedAppointment.churchId,
                 userId: selectedAppointment.userFields?.requesterId,
-                appointmentId: selectedAppointment.id, // Adding appointmentId
+                appointmentId: selectedAppointment.id,
                 message,
                 dateSent: Timestamp.fromDate(new Date())
             };
             await addDoc(collection(db, "inboxMessage"), inboxMessageData);
     
-            // Send email
+            
             await sendEmail(
                 selectedAppointment.userFields?.requesterEmail,
                 "Appointment Pending for Payment",
@@ -258,17 +253,17 @@ export const PendingAppointments = () => {
                 denialReason: denialReason
             });
     
-            // Save message to inboxMessage collection
+           
             const inboxMessageData = {
                 churchId: selectedAppointment.churchId,
                 userId: selectedAppointment.userFields?.requesterId,
-                appointmentId: selectedAppointment.id, // Adding appointmentId
+                appointmentId: selectedAppointment.id,
                 message,
                 dateSent: Timestamp.fromDate(new Date())
             };
             await addDoc(collection(db, "inboxMessage"), inboxMessageData);
     
-            // Send email
+            
             await sendEmail(
                 selectedAppointment.userFields?.requesterEmail,
                 "Appointment Denied",
@@ -316,8 +311,18 @@ export const PendingAppointments = () => {
         return `${hours12}:${minutes} ${ampm}`;
     };
 
-    const totalPages = Math.ceil(pendingAppointments.length / appointmentsPerPage);
-    const paginatedAppointments = pendingAppointments.slice(
+    const filteredAppointments = pendingAppointments.filter((appointment) => {
+        const matchesDate = selectedDate
+            ? new Date(appointment.userFields?.dateOfRequest.seconds * 1000).toDateString() === selectedDate.toDateString()
+            : true;
+
+        const matchesType = selectedAppointmentType === 'All'
+            || (appointmentTypeMapping[appointment.appointmentType] || appointment.appointmentType) === selectedAppointmentType;
+
+        return matchesDate && matchesType;
+    });
+
+    const paginatedAppointments = filteredAppointments.slice(
         (currentPage - 1) * appointmentsPerPage,
         currentPage * appointmentsPerPage
     );
@@ -333,6 +338,33 @@ export const PendingAppointments = () => {
         <div className="d-flex justify-content-center align-items-center mt-5">
         <div className="card shadow-lg" style={{ width: "85%" }}>
             <div className="card-body">
+            <div className="row mb-4 align-items-center">
+            <div className="col-md-4 d-flex align-items-center">
+                <div className="form-group w-100 me-1">
+                    <label className="form-label"><b>Filter by Date:</b></label>
+                    <div className="input-group">
+                        <DatePicker
+                            className="form-control"
+                            selected={selectedDate}
+                            onChange={(date) => setSelectedDate(date)}
+                            showYearDropdown
+                        />
+                        <button className="btn btn-danger" onClick={() => setSelectedDate(null)}>Clear</button>
+                    </div>
+                </div>
+            </div>
+            <div className="col-md-6 d-flex justify-content-start">
+                <div>
+                    <label className="form-label"><b>Filter by Type:</b></label>
+                    <DropdownButton id="dropdown-basic-button" title={`Selected Type: ${selectedAppointmentType}`} variant="secondary">
+                        <Dropdown.Item onClick={() => setSelectedAppointmentType('All')}>All</Dropdown.Item>
+                        {Object.values(appointmentTypeMapping).map((type) => (
+                            <Dropdown.Item key={type} onClick={() => setSelectedAppointmentType(type)}>{type}</Dropdown.Item>
+                        ))}
+                    </DropdownButton>
+                </div>
+            </div>
+            </div>
             <table className="table">
                 <thead className="table-dark">
                 <tr>
@@ -376,15 +408,15 @@ export const PendingAppointments = () => {
                 </tbody>
             </table>
             <Pagination className="justify-content-center">
-                {[...Array(totalPages).keys()].map(page => (
-                    <Pagination.Item
-                        key={page + 1}
-                        active={page + 1 === currentPage}
-                        onClick={() => handlePageChange(page + 1)}
-                    >
-                        {page + 1}
-                    </Pagination.Item>
-                ))}
+            {[...Array(Math.ceil(filteredAppointments.length / appointmentsPerPage)).keys()].map((page) => (
+                <Pagination.Item
+                key={page + 1}
+                active={page + 1 === currentPage}
+                onClick={() => handlePageChange(page + 1)}
+                >
+                {page + 1}
+                </Pagination.Item>
+            ))}
             </Pagination>
             </div>
         </div>
