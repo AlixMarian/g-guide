@@ -3,8 +3,8 @@
 import '../websiteUser.css';
 import visLogo from '/src/assets/visLogo.png';
 import { useNavigate } from 'react-router-dom';
-import React, { useState, useEffect, useRef } from 'react';
-import { GoogleMap, LoadScript, DirectionsRenderer, Marker } from '@react-google-maps/api';
+import { useState, useEffect, useRef } from 'react';
+import { GoogleMap, DirectionsRenderer, Marker } from '@react-google-maps/api';
 import { Offcanvas, Button, Form, Modal } from 'react-bootstrap';
 import { fetchChurchData } from './mapfiles/churchDataUtils';
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
@@ -13,9 +13,11 @@ import AutoGen from './mapfiles/AutoGen';
 import coverLogo from '/src/assets/logo cover.png';
 import ChurchAutocomplete from './mapfiles/ChurchAutocomplete';
 import SearchFilter from './mapfiles/SearchFilter'; // Add this import
+import { useGoogleMaps } from '../context/GoogleMapsContext';
 
 
 const VisitaIglesia = () => {
+  const { isLoaded } = useGoogleMaps();
   const navigate = useNavigate();
   const [churches, setChurches] = useState([]);
   const [directionsResponse, setDirectionsResponse] = useState([]);
@@ -27,11 +29,9 @@ const VisitaIglesia = () => {
   const [customIcon, setCustomIcon] = useState(null);
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const [showAutoGen, setShowAutoGen] = useState(false);
-  const handleToggleOffcanvas = () => setShowOffcanvas(!showOffcanvas);
-  const [mapLoaded, setMapLoaded] = useState(false);
+  // const handleToggleOffcanvas = () => setShowOffcanvas(!showOffcanvas);
   const [mapKey, setMapKey] = useState(0);
   const [endLocation, setEndLocation] = useState(null); 
-  const currentZoomRef = useRef(14); // Default zoom level
   const [sortedChurches, setSortedChurches] = useState([]);
   const [churchPhoto, setChurchPhoto] = useState(coverLogo);  
   const [markers, setMarkers] = useState([]);
@@ -40,7 +40,6 @@ const VisitaIglesia = () => {
   const [isRouteCalculated, setIsRouteCalculated] = useState(false);
   const [isAutoGenRoute, setIsAutoGenRoute] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
-
 
   const handleOffcanvasClose = () => {
     setShowDirectionsOffcanvas(false);
@@ -54,14 +53,13 @@ const VisitaIglesia = () => {
     width: '100vw', 
     height: '100vh', 
   }; 
-  const libraries = ['places', 'geometry'];
   const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"];
 
   useEffect(() => {
     if (map && mapKey) {
       // map.setZoom(14); // Remove or comment this out
     }
-  }, [mapKey]);
+  }, [map, mapKey]);
   
 
   const [drawerInfo, setDrawerInfo] = useState({
@@ -80,8 +78,6 @@ const VisitaIglesia = () => {
     {
       id: 'dest-0',
       destination: null,
-      // usingCustomDestination: false,
-      // inputValue: '',
       selectedChurchId: '',
     },
   ]);
@@ -255,7 +251,7 @@ const VisitaIglesia = () => {
   };
   
   
-  const destinationRefs = useRef([React.createRef()]);
+  // const destinationRefs = useRef([React.createRef()]);
   const portal = useRef(document.createElement('div'));
 
   useEffect(() => {
@@ -270,47 +266,40 @@ const VisitaIglesia = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const loadGoogleMapsScript = () => {
-      if (window.google && window.google.maps) {
-        setMapLoaded(true);
-        setLoading(false);
-        return;
+  const handleMapInit = (mapInstance) => {
+    try {
+      if (mapInstance && window.google) {
+        handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading);
+        setMap(mapInstance);
       }
-
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries={libraries}`;
-      script.async = true;
-      script.defer = true;
-
-      script.onload = () => {
-        console.log('Google Maps script loaded successfully');
-        setMapLoaded(true);
-        setLoading(false);
-      };
-
-      script.onerror = (error) => {
-        console.error('Error loading Google Maps script:', error);
-        setLoading(false);
-      };
-
-      document.head.appendChild(script);
-    };
-
-  loadGoogleMapsScript();
-  },
-)
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const data = await fetchChurchData();
-      setChurches(data);
-      setLoading(false);
+      try {
+        const data = await fetchChurchData();
+        console.log('Fetched churches:', data);
+        setChurches(data);
+      } catch (error) {
+        console.error('Error fetching church data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
-
+  
     fetchData();
   }, []);
+
+  useEffect(() => {
+    console.log('Current churches:', churches);
+    console.log('Current position:', currentPosition);
+    console.log('Custom icon:', customIcon);
+  }, [churches, currentPosition, customIcon]);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -449,233 +438,233 @@ const VisitaIglesia = () => {
     console.log('Routes and destinations reset.');
   };
   
+  if (!isLoaded) return null;
+  
   return loading ? (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
       <img src={loadingGif} alt="Loading Google Maps..." style={{ width: '100px', justifyContent: 'center' }} />
     </div>
-  ) : !mapLoaded ? (
+  ) : !isLoaded ? (
     <div style={{ textAlign: 'center', marginTop: '20vh' }}>
       <p>Unable to load Google Maps. Please check your API key or network connection.</p>
     </div> 
   ) : (
     <>
-    <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={libraries} onLoad={() => {console.log('Google Maps API loaded'); setMapLoaded(true); setLoading(false); }} onError={(error) => {console.error('Google Maps API loading error:', error); setLoading(false);}}> 
+    <div className="google-map-container">
+      <GoogleMap
+        key={mapKey}
+        mapContainerStyle={containerStyle}
+        center={currentPosition || { lat: 0, lng: 0 }}
+        zoom={zoomLevel}
+        onLoad={handleMapInit}
+        onZoomChanged={() => {
+          if (map) {
+            onZoomChanged(map, setCustomIcon);
+          }
+        }}
+      >
+        {currentPosition && <Marker position={currentPosition} />} 
+        {churches.map((church) => {
+          const lat = parseFloat(church.latitude);
+          const lng = parseFloat(church.longitude);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            return (
+              <Marker
+                key={church.id}
+                position={{ lat, lng }}
+                icon={customIcon}
+                onClick={() => handleMarkerClick(church)}
+              />
+            );
+          }
+          return null;
+        })}
+
+        {/* Render the directions if available */}
+        {directionsResponse?.map((segment, index) => (
+          <DirectionsRenderer
+            key={index}
+            options={{
+              directions: segment.result,
+              polylineOptions: {
+                strokeColor: segment.color,
+                strokeOpacity: 0.8,
+                strokeWeight: 5,
+              },
+              suppressMarkers: true,
+              preserveViewport: true  
+            }}
+          />
+        ))}
+
+        {markers.map((marker, index) => (
+          <Marker
+            key={`marker-${index}`}
+            position={marker.position}
+            label={{
+              text: marker.label,
+              color: 'white',
+              fontWeight: 'bold',
+              fontSize: '16px',
+            }}
+            onClick={() => {
+              setShowDirectionsOffcanvas(true);
+            }}
+          />
+        ))}
+
+        {/* If not using AutoGen, render markers for destinations */}
+        {sortedChurches.length === 0 &&
+          !loading &&
+          uniqueDestinations.map((dest, index) => (
+            <Marker
+              key={`${dest.lat}-${dest.lng}`}
+              position={dest}
+              label={{
+                text: String.fromCharCode('B'.charCodeAt(0) + index),
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '16px',
+              }}
+              
+              onClick={() => {
+                setShowDirectionsOffcanvas(true); 
+              }}
+            />
+          ))}
+
       <Button variant="primary" style={{ zIndex: '999', position: 'absolute', top: '10px', left: '190px' }} onClick={() => setShowOffcanvas(true)} >
         Visita Iglesia Routes
       </Button>
       <Button variant="primary" style={{ zIndex: '999', position: 'absolute', top: '10px', right: '60px' }} onClick={() => navigate('/map')}>
         <i className="bi bi-arrow-return-left"></i>
       </Button> 
-      <Offcanvas show={showOffcanvas} style={{ zIndex: '9999' }} onHide={() => setShowOffcanvas(false)} placement="start">
-      <Offcanvas.Header closeButton>
-        <Offcanvas.Title>
-          <img src={visLogo} alt="Visita Iglesia" style={{width: '25px', height: '25px', objectFit: 'contain'}} />
-          Visita Iglesia
-        </Offcanvas.Title>
-      </Offcanvas.Header>
-      <Offcanvas.Body>
-      {showAutoGen ? (
-      <AutoGen onBack={() => setShowAutoGen(false)} resetRoutes={resetRoutes} churches={churches} currentPosition={currentPosition} handleAutoGeneratedRoute={handleAutoGeneratedRoute} />
-      ) : ( 
-      <Form>
-        <Form.Group controlId="start-church" className="mb-3">
-          <Form.Label>Select Start Location</Form.Label>
-          <ChurchAutocomplete
-            churches={churches}
-            onChurchSelected={(selectedChurch) => {
-              const lat = Number(selectedChurch.latitude);
-              const lng = Number(selectedChurch.longitude);
-              if (!isNaN(lat) && !isNaN(lng)) {
-                setStartLocation({ lat, lng });
-                // setStartChurchId(selectedChurch.id); // Optional: if you need to track the selected church ID
-              } else {
-                console.error('Invalid coordinates:', selectedChurch);
-              }
-            }}
-            placeholder="Enter Start Location"
-          />
-        </Form.Group>
-
-        {destinations.map((dest, index) => (
-          <div key={dest.id} className="destination-item d-flex align-items-center mb-3 position-relative w-100">
-            <div className="flex-grow-1">
-              <ChurchAutocomplete
-                churches={churches}
-                onChurchSelected={(selectedChurch) => {
-                  console.log('Selected Destination:', selectedChurch);
-                  const lat = Number(selectedChurch.latitude);
-                  const lng = Number(selectedChurch.longitude);
-
-                  // Validate coordinates
-                  if (!isNaN(lat) && !isNaN(lng)) {
-                    const updatedDestinations = [...destinations];
-                    updatedDestinations[index].destination = { lat, lng };
-                    setDestinations(updatedDestinations);
-                  } else {
-                    console.error('Invalid coordinates:', selectedChurch);
-                  }
-                }}
-                placeholder="Enter Destination"
-              />
-            </div>
-            <Button
-              variant="link"
-              className="delete-div-btn ms-2"
-              onClick={() => {
-                setDestinations((prevDestinations) => prevDestinations.filter((_, i) => i !== index));
-                handleCalculateRoute();
+        <Offcanvas show={showOffcanvas} style={{ zIndex: '9999' }} onHide={() => setShowOffcanvas(false)} placement="start">
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>
+            <img src={visLogo} alt="Visita Iglesia" style={{width: '25px', height: '25px', objectFit: 'contain'}} />
+            Visita Iglesia
+          </Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+        {showAutoGen ? (
+        <AutoGen onBack={() => setShowAutoGen(false)} resetRoutes={resetRoutes} churches={churches} currentPosition={currentPosition} handleAutoGeneratedRoute={handleAutoGeneratedRoute} />
+        ) : ( 
+        <Form>
+          <Form.Group controlId="start-church" className="mb-3">
+            <Form.Label>Select Start Location</Form.Label>
+            <ChurchAutocomplete
+              churches={churches}
+              onChurchSelected={(selectedChurch) => {
+                const lat = Number(selectedChurch.latitude);
+                const lng = Number(selectedChurch.longitude);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                  setStartLocation({ lat, lng });
+                  console.log(selectedChurch);
+                } else {
+                  console.error('Invalid coordinates:', selectedChurch);
+                }
               }}
-            >
-              <i className="bi bi-x-circle-fill"></i>
+              placeholder="Enter Start Location"
+              
+            />
+          </Form.Group>
+
+          {destinations.map((dest, index) => (
+            <div key={dest.id} className="destination-item d-flex align-items-center mb-3 position-relative w-100">
+              <div className="flex-grow-1">
+                <ChurchAutocomplete
+                  churches={churches}
+                  onChurchSelected={(selectedChurch) => {
+                    console.log('Selected Destination:', selectedChurch);
+                    const lat = Number(selectedChurch.latitude);
+                    const lng = Number(selectedChurch.longitude);
+
+                    // Validate coordinates
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                      const updatedDestinations = [...destinations];
+                      updatedDestinations[index].destination = { lat, lng };
+                      setDestinations(updatedDestinations);
+                    } else {
+                      console.error('Invalid coordinates:', selectedChurch);
+                    }
+                  }}
+                  placeholder="Enter Destination"
+                  required
+                />
+              </div>
+              <Button
+                variant="link"
+                className="delete-div-btn ms-2"
+                onClick={() => {
+                  setDestinations((prevDestinations) => prevDestinations.filter((_, i) => i !== index));
+                  handleCalculateRoute();
+                }}
+              >
+                <i className="bi bi-x-circle-fill"></i>
+              </Button>
+            </div>
+          ))}
+          
+          <div className="text-center">
+            <Button variant="primary" onClick={addDestination} className="d-flex justify-content-center align-items-center px-3 py-2 rounded mb-5 mt-3 mx-auto w-70" style={{ height: '35px' }}>
+              + Add another Church Destination
             </Button>
           </div>
-        ))}
-
-        
-        <div className="text-center">
-          <Button variant="primary" onClick={addDestination} className="d-flex justify-content-center align-items-center px-3 py-2 rounded mb-5 mt-3 mx-auto w-70" style={{ height: '35px' }}>
-            + Add another Church Destination
-          </Button>
-        </div>
-        <div className="d-flex align-items-center">
-          <Button onClick={handleCalculateRoute} variant="primary" className="flex-grow-1 me-2 fw-bold]" disabled={isRouteCalculated}>
-            Get Route
-          </Button>
-          <Button variant="outline-danger" className="px-4" onClick={resetRoutes}>
-            Reset
-          </Button>
-        </div>
-        <div className='text-center'>
-          <p style={{marginTop: '1rem', marginBottom: '-0.01rem'}}>or</p>
-          {!showAutoGen && (
-            <Button variant="success" onClick={() => {setShowAutoGen(true); resetRoutes(); }} className='d-flex justify-content-center align-items-center px-3 py-2 rounded mb-5 mt-1 mx-auto w-75' style={{ height: '35px', marginTop: '-4rem' }}>
-              use Auto Generate
+          <div className="d-flex align-items-center">
+            <Button onClick={handleCalculateRoute} variant="primary" className="flex-grow-1 me-2 fw-bold]" disabled={isRouteCalculated}>
+              Get Route
             </Button>
-          )}
-        </div>
-        <div className="d-flex align-items-start text-muted small ms-1" style={{marginTop: '-1rem'}}>
-          <i 
-            className="bi bi-info-circle me-1 text-danger" 
-            style={{fontSize: '20px', cursor: 'pointer', marginTop: '13rem'}}
-            onClick={() => setShowInstructions(true)}
-          ></i>
-          <span className='fst-italic' style={{fontSize: '12px', marginTop: '13.38rem'}}>
-            How to use?
-          </span>
-        </div>
-      </Form> 
-      )}
-      <Modal
-        show={showInstructions}
-        onHide={() => setShowInstructions(false)}
-        container={document.querySelector('.offcanvas-body')}
-        style={{ position: 'absolute', marginTop: '22.5rem', width: '20rem', marginLeft: '2rem'}}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title className="fs-6">How to Use Visita Iglesia?</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <ol className="small mb-0 ps-3">
-            <li>Select your starting church location</li>
-            <li>Add more church destinations as needed</li>
-            <li>Select churches from the dropdown list</li>
-            <li>Remove destinations using X button</li>
-            <li>Click "Get Route" to generate path</li>
-            <li>Use "Reset" to start over</li>
-          </ol>
-        </Modal.Body>
-      </Modal>
-      </Offcanvas.Body>
-        </Offcanvas>
-        <div className="google-map-container">
-        <GoogleMap
-          key={mapKey}
-          mapContainerStyle={containerStyle}
-          center={currentPosition || { lat: 0, lng: 0 }}
-          zoom={zoomLevel}
-          onLoad={(mapInstance) => {
-            handleMapLoad(mapInstance, setMap, setCustomIcon, setLoading);
-            setMap(mapInstance);
-          }}
-          onZoomChanged={() => {
-            if (map) {
-              onZoomChanged(map, setCustomIcon);
-            }
-          }}
+            <Button variant="outline-danger" className="px-4" onClick={resetRoutes}>
+              Reset
+            </Button>
+          </div>
+          <div className='text-center'>
+            <p style={{marginTop: '1rem', marginBottom: '-0.01rem'}}>or</p>
+            {!showAutoGen && (
+              <Button variant="success" onClick={() => {setShowAutoGen(true); resetRoutes(); }} className='d-flex justify-content-center align-items-center px-3 py-2 rounded mb-5 mt-1 mx-auto w-75' style={{ height: '35px', marginTop: '-4rem' }}>
+                use Auto Generate
+              </Button>
+            )}
+          </div>
+          <div className="d-flex align-items-start text-muted small ms-1" style={{marginTop: '-1rem'}}>
+            <i 
+              className="bi bi-info-circle me-1 text-danger" 
+              style={{fontSize: '20px', cursor: 'pointer', marginTop: '13rem'}}
+              onClick={() => setShowInstructions(true)}
+            ></i>
+            <span className='fst-italic' style={{fontSize: '12px', marginTop: '13.38rem'}}>
+              How to use?
+            </span>
+          </div>
+        </Form> 
+        )}
+        <Modal
+          show={showInstructions}
+          onHide={() => setShowInstructions(false)}
+          container={document.querySelector('.offcanvas-body')}
+          style={{ position: 'absolute', marginTop: '22.5rem', width: '20rem', marginLeft: '2rem'}}
         >
-
-
-      {currentPosition && <Marker position={currentPosition} />} 
-      {churches.map((church) => {
-        const lat = parseFloat(church.latitude);
-        const lng = parseFloat(church.longitude);
-        if (!isNaN(lat) && !isNaN(lng)) {
-          return (
-            <Marker
-              key={church.id}
-              position={{ lat, lng }}
-              icon={customIcon}
-              onClick={() => handleMarkerClick(church)}
-            />
-          );
-        }
-        return null;
-      })}
-
-      {/* Render the directions if available */}
-      {directionsResponse?.map((segment, index) => (
-        <DirectionsRenderer
-          key={index}
-          options={{
-            directions: segment.result,
-            polylineOptions: {
-              strokeColor: segment.color,
-              strokeOpacity: 0.8,
-              strokeWeight: 5,
-            },
-            suppressMarkers: true,
-            preserveViewport: true  
-          }}
-        />
-      ))}
-
-      {markers.map((marker, index) => (
-        <Marker
-          key={`marker-${index}`}
-          position={marker.position}
-          label={{
-            text: marker.label,
-            color: 'white',
-            fontWeight: 'bold',
-            fontSize: '16px',
-          }}
-          onClick={() => {
-            setShowDirectionsOffcanvas(true);
-          }}
-        />
-      ))}
-
-
-      {/* If not using AutoGen, render markers for destinations */}
-      {sortedChurches.length === 0 &&
-        !loading &&
-        uniqueDestinations.map((dest, index) => (
-          <Marker
-            key={`${dest.lat}-${dest.lng}`}
-            position={dest}
-            label={{
-              text: String.fromCharCode('B'.charCodeAt(0) + index),
-              color: 'white',
-              fontWeight: 'bold',
-              fontSize: '16px',
-            }}
-            
-            onClick={() => {
-              setShowDirectionsOffcanvas(true); 
-            }}
-          />
-        ))}
+          <Modal.Header closeButton>
+            <Modal.Title className="fs-6">How to Use Visita Iglesia?</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <ol className="small mb-0 ps-3">
+              <li>Select your starting church location</li>
+              <li>Add more church destinations as needed</li>
+              <li>Select churches from the dropdown list</li>
+              <li>Remove destinations using X button</li>
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
+              <li>Click "Get Route" to generate path</li> {/* eslint-disable-next-line react/no-unescaped-entities */}
+              <li>Use "Reset" to start over</li>
+            </ol>
+          </Modal.Body>
+        </Modal>
+        </Offcanvas.Body>
+      </Offcanvas>
      </GoogleMap>
+
+     
     {/* List View Destinations */}
      <Offcanvas 
         show={showDirectionsOffcanvas}
@@ -696,14 +685,8 @@ const VisitaIglesia = () => {
           </div>
         )}
         <Offcanvas.Body>
-           {/* Add a scrollable container */}
-          {/* <div style={{ 
-            maxHeight: '50vh', 
-            overflowY: 'auto',
-            paddingRight: '10px'
-          }}></div> */}
           {startLocation && !sortedChurches.length && (
-            <div className="py-2 border-bottom">
+            <div className="py-2 border-bottom" onClick={() => handleMarkerClick(startLocation)} style={{cursor: 'pointer'}}>
               <h6 className="mb-1 d-flex align-items-center">
               <span className="badge rounded-circle bg-white d-flex align-items-center justify-content-center me-2"
                 style={{ width: '25px', height: '25px', background: 'linear-gradient(to right, #ff0000, #ff8000)' }}>
@@ -731,8 +714,8 @@ const VisitaIglesia = () => {
             );
             
             return (
-              <div key={index} className="py-2 border-bottom">
-                <h6 className="mb-1 d-flex align-items-center">
+              <div key={index} className="py-2 border-bottom" onClick={() => handleMarkerClick(church)} style={{cursor: 'pointer'}}>
+                <h6 className="mb-1 d-flex align-items-center" >
                 <span className="badge rounded-circle bg-white d-flex align-items-center justify-content-center me-2"
                   style={{ width: '25px', height: '25px', background: 'linear-gradient(to right, #ff0000, #ff8000)' }}>
                     {String.fromCharCode('B'.charCodeAt(0) + index)}
@@ -747,7 +730,7 @@ const VisitaIglesia = () => {
           })}
 
       {sortedChurches.map((church, idx) => (
-        <div key={idx} className="py-2 border-bottom">
+        <div key={idx} className="py-2 border-bottom" onClick={() => handleMarkerClick(church)} style={{cursor: 'pointer'}}>
           <h6 className="mb-1 d-flex align-items-center">
             <span className="badge rounded-circle bg-white d-flex align-items-center justify-content-center me-2"
                   style={{ width: '25px', height: '25px', background: 'linear-gradient(to right, #ff0000, #ff8000)' }}>
@@ -763,11 +746,11 @@ const VisitaIglesia = () => {
         </Offcanvas.Body>
       </Offcanvas>
       </div>
-    </LoadScript>
+
     <SearchFilter
-      showMenu={false} // We don't need the menu functionality
-      handleCloseMenu={() => {}} // Empty function since we don't use the menu
-      handlePlaceSelected={() => {}} // Empty function since we don't use search
+      showMenu={false} 
+      handleCloseMenu={() => {}}
+      handlePlaceSelected={() => {}}
       selectedService=""
       handleServiceChange={() => {}}
       servicesList={[]}

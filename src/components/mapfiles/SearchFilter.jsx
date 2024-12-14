@@ -1,14 +1,13 @@
 // SearchFilter.jsx
 
 import PropTypes from 'prop-types';
-import { Offcanvas, Alert, Spinner, Button, OffcanvasHeader, OffcanvasBody } from 'react-bootstrap';
+import { Offcanvas, Alert, Spinner, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import AutocompleteSearch from './AutocompleteSearch';
 import logo from '/src/assets/G-Guide LOGO.png';
 import { handleMarkerClick as utilHandleMarkerClick } from './churchDataUtils';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react'; // Import useEffect for debugging
-
+import { useEffect } from 'react';
+import ChurchAutocomplete from './ChurchAutocomplete';
 
 const SearchFilter = ({
   showMenu,
@@ -29,12 +28,7 @@ const SearchFilter = ({
   showOtherDatesButton,
   handleShowAllDates,
 }) => {
-  const navigate = useNavigate(); // Initialize navigate
-
-  // Debugging: Log drawerInfo whenever it updates
-  useEffect(() => {
-    console.log('drawerInfo updated:', drawerInfo);
-  }, [drawerInfo]);
+  const navigate = useNavigate();
 
   const handleChurchClick = (church) => {
     utilHandleMarkerClick(church, setDrawerInfo, setChurchPhoto);
@@ -76,10 +70,27 @@ const SearchFilter = ({
           </div>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <div className="center-search">
-            <div className="filter-input-group input-group">
-              <AutocompleteSearch onPlaceSelected={handlePlaceSelected} />
-              <button type="button" className="btn btn-custom-filter">
+          <div className="center-search" style={{ width: '100%' }}>
+            <div className="filter-input-group input-group" style={{ width: '100%', paddingRight: '15px', paddingLeft: '15px' }}>
+              <div style={{ width: 'calc(100% - 40px)' }}>
+              <ChurchAutocomplete
+                churches={filteredChurches}
+                onChurchSelected={(selectedChurch) => {
+                  handleChurchClick(selectedChurch);
+                  const location = {
+                    lat: parseFloat(selectedChurch.latitude),
+                    lng: parseFloat(selectedChurch.longitude)
+                  };
+                  handlePlaceSelected(location);
+                }}
+                placeholder="Find your nearest church..."
+              />            
+              </div>
+              <button 
+                type="button" 
+                className="btn btn-custom-filter"
+                style={{ width: '40px' }}
+              >
                 <i className="fas fa-search"></i>
               </button>
             </div>
@@ -359,9 +370,9 @@ SearchFilter.propTypes = {
   handleLanguageChange: PropTypes.func.isRequired,
   drawerInfo: PropTypes.shape({
     show: PropTypes.bool,
-    id: PropTypes.string, // Ensure id is included
+    id: PropTypes.string,
     title: PropTypes.string,
-    churchStatus: PropTypes.string, // Add this line
+    churchStatus: PropTypes.string, 
     status: PropTypes.string,
     description: PropTypes.string,
     telephone: PropTypes.string,

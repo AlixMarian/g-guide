@@ -33,11 +33,12 @@ const ChurchAutocomplete = ({ churches, onChurchSelected, placeholder = 'Search 
         value={query}
         onChange={handleChange}
         placeholder={placeholder}
+        required
       />
       {suggestions.length > 0 && (
         <ListGroup style={{ position: 'absolute', zIndex: '1000', width: '100%', fontSize: '14px' }}>
           {suggestions.map((church) => (
-            <ListGroup.Item key={church.id} action onClick={() => handleSelect(church)}>
+            <ListGroup.Item key={church.id} action onClick={() => handleSelect(church)} required>
               <small className='fw-normal'>{church.churchName}</small> 
               <span>
                 <small className="fw-light"> - {church.churchAddress || church.churchLocation}</small>
@@ -55,19 +56,14 @@ ChurchAutocomplete.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       churchName: PropTypes.string.isRequired,
-      churchAddress: PropTypes.string,      // Made optional
-      churchLocation: PropTypes.string,     // Added optional
-      latitude: PropTypes.string.isRequired,
-      longitude: PropTypes.string.isRequired,
+      churchAddress: PropTypes.string,
+      churchLocation: PropTypes.string,
+      latitude: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      longitude: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     })
   ).isRequired,
   onChurchSelected: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
 };
-
-// ChurchAutocomplete.defaultProps = {
-//   placeholder: 'Search churches...',
-// };
-
 
 export default ChurchAutocomplete;
