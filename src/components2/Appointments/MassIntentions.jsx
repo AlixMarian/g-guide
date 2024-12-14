@@ -134,7 +134,7 @@ export const MassIntentions = () => {
         <div className="card shadow-lg" style={{ width: "80%" }}>
             <div className="card-body">
             <div className="row mb-4 align-items-center">
-            <div className="col-md-6">
+            <div className="col-md-4">
                 <div className="form-group w-100">
                     <label className="form-label"><b>Filter by Date of Request:</b></label>
                     <div className="input-group">
@@ -148,7 +148,7 @@ export const MassIntentions = () => {
                     </div>
                 </div>
             </div>
-            <div className="col-md-6">
+            <div className="col-md-4">
                 <div className="form-group w-100">
                     <label className="form-label"><b>Filter by Mass Day:</b></label>
                         <DropdownButton id="dropdown-basic-button" title={`Mass Day: ${selectedMassDay}`} variant="secondary">
