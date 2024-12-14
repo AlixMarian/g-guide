@@ -37,6 +37,8 @@ import WebsiteUserInbox from './components/WebsiteUserInbox';
 import ChurchHomepageMassSchedule from './components4/ChurchHomepageMassSchedule';
 import ChurchHomepageReqVol from './components4/ChurchHomepageReqVol';
 import ChurchHomepageAnnouncements from './components4/ChurchHomepageAnnouncements';
+import { GoogleMapsProvider } from './context/GoogleMapsContext';
+
 //Appointments
 import PendingAppointments from './components2/Appointments/PendingAppointments'
 import ForPaymentAppointments from './components2/Appointments/ForPaymentAppointments'
@@ -86,27 +88,26 @@ NavbarSelector.propTypes = {
 const App = () => {
   return (
     <AuthProvider>
+      <GoogleMapsProvider>
       <Router>
-      <Routes>
+        <Routes>
+          
+          <Route path="/" element={<Navigate to="/map" />} />
+
+          <Route path="/map" element={<MapComponent />} />
+
+          <Route path="/sidebar" element={<Sidebar />} />
+          
+          <Route path="/admin-navbar" element={<AdminNavbar />} />
+
+          <Route path="/visita-iglesia" element={<VisitaIglesia />} />
+
+          <Route path="/autogen" element={<AutoGen />} />
+
+          <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
+
+          <Route path="/renew-church" element={<><NavBar/><RenewChurch /></>} />
         
-        <Route path="/" element={<Navigate to="/map" />} />
-
-        <Route path="/map" element={<MapComponent />} />
-        
-
-        <Route path="/sidebar" element={<Sidebar />} />
-        
-        <Route path="/admin-navbar" element={<AdminNavbar />} />
-
-        <Route path="/visita-iglesia" element={<VisitaIglesia />} />
-
-        <Route path="/autogen" element={<AutoGen />} />
-
-        <Route path="/signup-coord" element={<><NavBar/><SignUpCoord /></>} />
-
-        <Route path="/renew-church" element={<><NavBar/><RenewChurch /></>} />
-        
-       
           <Route path="/church-options" element={<NavbarSelector><ChurchOptions /></NavbarSelector>} />
           <Route path="/webUser-inbox" element={<><WebUserNavBar/><WebsiteUserInbox /></>} />
           <Route path="/home" element={<><NavBar /><Home /></>} />
@@ -440,6 +441,8 @@ const App = () => {
       </Routes>
       <ToastContainer />
     </Router>
+    
+    </GoogleMapsProvider>
     </AuthProvider>
   );
 }

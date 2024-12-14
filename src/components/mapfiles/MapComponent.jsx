@@ -1,16 +1,18 @@
 // MapComponent.jsx
 
-import React, { useState, useEffect } from 'react';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { useState, useEffect, useCallback } from 'react';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 import { Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import coverLogo from '/src/assets/logo cover.png'; // Ensure the path is correct
 import logo from '/src/assets/G-Guide LOGO.png'; // Ensure the path is correct
 import visLogo from '/src/assets/visLogo.png'; // Ensure the path is correct
 import churchPartnerLogo from '/src/assets/partnerLogo.png';
-import AutocompleteSearch from './AutocompleteSearch'; // Ensure this component exists
+// import AutocompleteSearch from './AutocompleteSearch'; // Ensure this component exists
 import SearchFilter from './SearchFilter'; // Ensure this component exists
 import { useNavigate } from 'react-router-dom';
+import { useGoogleMaps } from '/src/context/GoogleMapsContext';
+
 import {
   fetchChurchData,
   handleMapLoad,
@@ -21,7 +23,7 @@ import {
   fetchChurchesByLanguageToday,
 } from './churchDataUtils'; // Ensure the path is correct
 
-const libraries = ['places', 'geometry'];
+// const libraries = ['places', 'geometry'];
 const servicesList = ['Marriages', 'Baptism', 'Burials', 'Confirmation', 'Mass Intentions'];
 
 const containerStyle = {
@@ -30,6 +32,7 @@ const containerStyle = {
 };
 
 const MapComponent = () => {
+  const { isLoaded } = useGoogleMaps();
   const [currentPosition, setCurrentPosition] = useState(null);
   const [churches, setChurches] = useState([]);
   const [filteredChurches, setFilteredChurches] = useState([]);
@@ -57,7 +60,26 @@ const MapComponent = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [error, setError] = useState(null);
   const [showOtherDatesButton, setShowOtherDatesButton] = useState(false); // Define state
-
+  
+  const handleCancel = useCallback(() => {
+    setSelectedService('');
+    setSelectedLanguage('');
+    setChurches([]);
+    setFilteredChurches([]);
+    setDrawerInfo({
+      show: false,
+      id: '',
+      title: '',
+      description: '',
+      telephone: '',
+      churchStartTime: '',
+      churchEndTime: '',
+      massDate: '',
+      massTime: '',
+      massType: '',
+      presidingPriest: '',
+    });
+  }, []);
 
   useEffect(() => {
     const success = (position) => {
@@ -80,6 +102,39 @@ const MapComponent = () => {
       setError('Geolocation is not supported by your browser.');
     }
   }, []);
+
+  const sortAndSetTopChurches = useCallback((churchesList) => {
+    if (currentPosition && window.google) {
+      const { lat, lng } = currentPosition;
+      const currentLatLng = new window.google.maps.LatLng(lat, lng);
+
+      const sortedChurches = churchesList.map((church) => {
+        const latitude = parseFloat(church.latitude);
+        const longitude = parseFloat(church.longitude);
+
+        if (!isNaN(latitude) && !isNaN(longitude)) {
+          const churchLatLng = new window.google.maps.LatLng(latitude, longitude);
+          const distance =
+            window.google.maps.geometry.spherical.computeDistanceBetween(churchLatLng, currentLatLng) / 1000;
+          return {
+            ...church,
+            distance,
+          };
+        } else {
+          console.warn(`Invalid latitude or longitude for church: ${church.churchName}`);
+          return {
+            ...church,
+            distance: Infinity,
+          };
+        }
+      });
+
+      sortedChurches.sort((a, b) => a.distance - b.distance);
+      setFilteredChurches(sortedChurches.splice(0,10));
+    } else {
+      setFilteredChurches(churchesList);
+    }
+  }, [currentPosition]);
 
 
 useEffect(() => {
@@ -112,12 +167,8 @@ useEffect(() => {
     }
   };
   fetchData();
-}, [selectedLanguage, currentPosition]);
+}, [selectedLanguage, selectedService, handleCancel, sortAndSetTopChurches]);
 
-// Add new state in the component
-// const [showOtherDatesButton, setShowOtherDatesButton] = useState(false);
-
-// Add method to handle showing all dates
 const handleShowAllDates = async () => {
   setLoading(true);
   try {
@@ -159,7 +210,7 @@ const handleShowAllDates = async () => {
       }
     };
     fetchData();
-  }, [selectedService, currentPosition]);
+  }, [selectedService, selectedLanguage, handleCancel, sortAndSetTopChurches]);
 
   const handleServiceChange = (e) => {
     setSelectedService(e.target.value);
@@ -193,41 +244,7 @@ const handleShowAllDates = async () => {
     };
 
     fetchData();
-  }, [currentPosition, selectedLanguage, selectedService]);
-
-  const sortAndSetTopChurches = (churchesList) => {
-    if (currentPosition && window.google) {
-      const { lat, lng } = currentPosition;
-      const currentLatLng = new window.google.maps.LatLng(lat, lng);
-
-      const sortedChurches = churchesList.map((church) => {
-        const latitude = parseFloat(church.latitude);
-        const longitude = parseFloat(church.longitude);
-
-        if (!isNaN(latitude) && !isNaN(longitude)) {
-          const churchLatLng = new window.google.maps.LatLng(latitude, longitude);
-          const distance =
-            window.google.maps.geometry.spherical.computeDistanceBetween(churchLatLng, currentLatLng) / 1000; // km
-          return {
-            ...church,
-            distance,
-          };
-        } else {
-          console.warn(`Invalid latitude or longitude for church: ${church.churchName}`);
-          return {
-            ...church,
-            distance: Infinity,
-          };
-        }
-      });
-
-      sortedChurches.sort((a, b) => a.distance - b.distance);
-      console.log('Sorted Churches:', sortedChurches);
-      setFilteredChurches(sortedChurches.splice(0,10)); 
-    } else {
-      setFilteredChurches(churchesList);
-    }
-  };
+  }, [currentPosition, selectedLanguage, selectedService, sortAndSetTopChurches]);
 
   const handleMenuOpen = () => {
     setShowMenu(true);
@@ -243,44 +260,24 @@ const handleShowAllDates = async () => {
     }
   };
 
-  const handleCloseDrawer = () => {
-    setDrawerInfo({
-      show: false,
-      id: '',
-      title: '',
-      description: '',
-      telephone: '',
-      churchStartTime: '',
-      churchEndTime: '',
-      massDate: '',
-      massTime: '',
-      massType: '',
-      presidingPriest: '',
-    });
-  };
+  // const handleCloseDrawer = () => {
+  //   setDrawerInfo({
+  //     show: false,
+  //     id: '',
+  //     title: '',
+  //     description: '',
+  //     telephone: '',
+  //     churchStartTime: '',
+  //     churchEndTime: '',
+  //     massDate: '',
+  //     massTime: '',
+  //     massType: '',
+  //     presidingPriest: '',
+  //   });
+  // };
 
   const handleCloseMenu = () => {
     setShowMenu(false);
-  };
-
-  const handleCancel = () => {
-    setSelectedService('');
-    setSelectedLanguage('');
-    setChurches([]);
-    setFilteredChurches([]);
-    setDrawerInfo({
-      show: false,
-      id: '',
-      title: '',
-      description: '',
-      telephone: '',
-      churchStartTime: '',
-      churchEndTime: '',
-      massDate: '',
-      massTime: '',
-      massType: '',
-      presidingPriest: '',
-    });
   };
 
   const uniqueChurches = Array.from(
@@ -291,13 +288,11 @@ const handleShowAllDates = async () => {
     utilHandleMarkerClick(church, setDrawerInfo, setChurchPhoto);
   };
 
+  if (!isLoaded) return null;
+
   return (
     <>
-
-    
-      <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={libraries}>
-
-
+      {/* <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} libraries={libraries}> */}
         <div className="map-search-container">
           <div className="logo-container">
         <img src={logo} alt="Logo" onClick={() => navigate('/home')} style={{boxShadow: '2px 6px 6px rgba(0, 0, 0, 0.3)', borderRadius: '30px', marginTop: '-0.5rem', cursor:'pointer'}}/>
@@ -356,8 +351,7 @@ const handleShowAllDates = async () => {
             return null;
           })}
         </GoogleMap>
-      </LoadScript>
-
+        
       <SearchFilter
         showMenu={showMenu}
         handleCloseMenu={handleCloseMenu}
