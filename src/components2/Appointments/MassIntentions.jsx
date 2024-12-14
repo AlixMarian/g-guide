@@ -4,6 +4,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "/backend/firebase"; 
 import { getAuth } from 'firebase/auth';
 import '../../churchCoordinator.css'
+import loadingGif from '/src/assets/Ripple@1x-1.0s-200px-200px.gif';
 
 
 export const MassIntentions = () => {
@@ -14,6 +15,8 @@ export const MassIntentions = () => {
     const auth = getAuth();
     const user = auth.currentUser;
     const intentionsPerPage = 7; 
+    const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         const fetchMassIntentions = async () => {
@@ -69,11 +72,12 @@ export const MassIntentions = () => {
                 });
                 console.log("Fetched Data: ", massIntentionsData);
                 setMassIntentions(massIntentionsData);
+                setLoading(false);
             } catch (error){
                 console.error("Error fetching appointments: ", error);
+                setLoading(false);
         }
     };
-
         fetchMassIntentions();
     }, [user]);
 
@@ -110,6 +114,14 @@ export const MassIntentions = () => {
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+    if (loading) {
+        return (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+            <img src={loadingGif} alt="Loading..." style={{ width: '100px', justifyContent: 'center' }} />
+        </div>  
+        )
+    }
+    
     return (
         <>
         <h1 className="me-3">Mass Intentions</h1>

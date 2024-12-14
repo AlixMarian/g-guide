@@ -12,8 +12,9 @@ import { handleMarkerClick as utilHandleMarkerClick, handleMapLoad, onZoomChange
 import AutoGen from './mapfiles/AutoGen';
 import coverLogo from '/src/assets/logo cover.png';
 import ChurchAutocomplete from './mapfiles/ChurchAutocomplete';
-import SearchFilter from './mapfiles/SearchFilter'; // Add this import
+import SearchFilter from './mapfiles/SearchFilter';
 import { useGoogleMaps } from '../context/GoogleMapsContext';
+import { toast } from 'react-toastify';
 
 
 const VisitaIglesia = () => {
@@ -45,6 +46,10 @@ const VisitaIglesia = () => {
     setShowDirectionsOffcanvas(false);
   };
 
+  const areDestinationsValid = () => {
+    return destinations.every(dest => dest.destination !== null);
+  };
+
   const handleMarkerClick = (church) => {
     utilHandleMarkerClick(church, setDrawerInfo, setChurchPhoto);
   };
@@ -53,7 +58,8 @@ const VisitaIglesia = () => {
     width: '100vw', 
     height: '100vh', 
   }; 
-  const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"];
+
+const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500", "#FFFF00", "#800080", "#008080", "#F5F5DC"];
 
   useEffect(() => {
     if (map && mapKey) {
@@ -319,12 +325,9 @@ const VisitaIglesia = () => {
     const newDestination = {
       id: `dest-${Date.now()}`,
       destination: null,
-      // usingCustomDestination: false,
-      // inputValue: '',
       selectedChurchId: '',
     };
     setDestinations([...destinations, newDestination]);
-    // destinationRefs.current.push(React.createRef());
   };
 
   const uniqueDestinations = destinations
@@ -449,89 +452,85 @@ const VisitaIglesia = () => {
       <p>Unable to load Google Maps. Please check your API key or network connection.</p>
     </div> 
   ) : (
-    <>
-    <div className="google-map-container">
-      <GoogleMap
-        key={mapKey}
-        mapContainerStyle={containerStyle}
-        center={currentPosition || { lat: 0, lng: 0 }}
-        zoom={zoomLevel}
-        onLoad={handleMapInit}
-        onZoomChanged={() => {
-          if (map) {
-            onZoomChanged(map, setCustomIcon);
-          }
-        }}
-      >
-        {currentPosition && <Marker position={currentPosition} />} 
-        {churches.map((church) => {
-          const lat = parseFloat(church.latitude);
-          const lng = parseFloat(church.longitude);
-          if (!isNaN(lat) && !isNaN(lng)) {
-            return (
-              <Marker
-                key={church.id}
-                position={{ lat, lng }}
-                icon={customIcon}
-                onClick={() => handleMarkerClick(church)}
-              />
-            );
-          }
-          return null;
-        })}
+  <>
+  <div className="google-map-container">
+    <GoogleMap key={mapKey} mapContainerStyle={containerStyle} center={currentPosition || { lat: 0, lng: 0 }}
+      zoom={zoomLevel} onLoad={handleMapInit}
+      onZoomChanged={() => {
+        if (map) {
+          onZoomChanged(map, setCustomIcon);
+        }
+      }}
+    >
+      {currentPosition && <Marker position={currentPosition} />} 
+      {churches.map((church) => {
+        const lat = parseFloat(church.latitude);
+        const lng = parseFloat(church.longitude);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          return (
+            <Marker
+              key={church.id}
+              position={{ lat, lng }}
+              icon={customIcon}
+              onClick={() => handleMarkerClick(church)}
+            />
+          );
+        }
+        return null;
+      })}
 
-        {/* Render the directions if available */}
-        {directionsResponse?.map((segment, index) => (
-          <DirectionsRenderer
-            key={index}
-            options={{
-              directions: segment.result,
-              polylineOptions: {
-                strokeColor: segment.color,
-                strokeOpacity: 0.8,
-                strokeWeight: 5,
-              },
-              suppressMarkers: true,
-              preserveViewport: true  
-            }}
-          />
-        ))}
+      {/* Render the directions if available */}
+      {directionsResponse?.map((segment, index) => (
+        <DirectionsRenderer
+          key={index}
+          options={{
+            directions: segment.result,
+            polylineOptions: {
+              strokeColor: segment.color,
+              strokeOpacity: 0.8,
+              strokeWeight: 5,
+            },
+            suppressMarkers: true,
+            preserveViewport: true  
+          }}
+        />
+      ))}
 
-        {markers.map((marker, index) => (
+      {markers.map((marker, index) => (
+        <Marker
+          key={`marker-${index}`}
+          position={marker.position}
+          label={{
+            text: marker.label,
+            color: 'white',
+            fontWeight: 'bold',
+            fontSize: '16px',
+          }}
+          onClick={() => {
+            setShowDirectionsOffcanvas(true);
+          }}
+        />
+      ))}
+
+      {/* If not using AutoGen, render markers for destinations */}
+      {sortedChurches.length === 0 &&
+        !loading &&
+        uniqueDestinations.map((dest, index) => (
           <Marker
-            key={`marker-${index}`}
-            position={marker.position}
+            key={`${dest.lat}-${dest.lng}`}
+            position={dest}
             label={{
-              text: marker.label,
+              text: String.fromCharCode('B'.charCodeAt(0) + index),
               color: 'white',
               fontWeight: 'bold',
               fontSize: '16px',
             }}
+            
             onClick={() => {
-              setShowDirectionsOffcanvas(true);
+              setShowDirectionsOffcanvas(true); 
             }}
           />
         ))}
-
-        {/* If not using AutoGen, render markers for destinations */}
-        {sortedChurches.length === 0 &&
-          !loading &&
-          uniqueDestinations.map((dest, index) => (
-            <Marker
-              key={`${dest.lat}-${dest.lng}`}
-              position={dest}
-              label={{
-                text: String.fromCharCode('B'.charCodeAt(0) + index),
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: '16px',
-              }}
-              
-              onClick={() => {
-                setShowDirectionsOffcanvas(true); 
-              }}
-            />
-          ))}
 
       <Button variant="primary" style={{ zIndex: '999', position: 'absolute', top: '10px', left: '190px' }} onClick={() => setShowOffcanvas(true)} >
         Visita Iglesia Routes
@@ -539,7 +538,7 @@ const VisitaIglesia = () => {
       <Button variant="primary" style={{ zIndex: '999', position: 'absolute', top: '10px', right: '60px' }} onClick={() => navigate('/map')}>
         <i className="bi bi-arrow-return-left"></i>
       </Button> 
-        <Offcanvas show={showOffcanvas} style={{ zIndex: '9999' }} onHide={() => setShowOffcanvas(false)} placement="start">
+      <Offcanvas show={showOffcanvas} style={{ zIndex: '9999' }} onHide={() => setShowOffcanvas(false)} placement="start">
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>
             <img src={visLogo} alt="Visita Iglesia" style={{width: '25px', height: '25px', objectFit: 'contain'}} />
@@ -607,8 +606,18 @@ const VisitaIglesia = () => {
           ))}
           
           <div className="text-center">
-            <Button variant="primary" onClick={addDestination} className="d-flex justify-content-center align-items-center px-3 py-2 rounded mb-5 mt-3 mx-auto w-70" style={{ height: '35px' }}>
-              + Add another Church Destination
+            <Button variant="primary" 
+              onClick={() => {
+                if (!areDestinationsValid()) {
+                  toast.error('Please fill in all current destinations before adding another.', {
+                    position: "top-right", autoClose: 3000, hideProgressBar: false, closeOnClick: true, pauseOnHover: true,
+                  });
+                  return;
+                }
+                addDestination();
+              }} 
+              className="d-flex justify-content-center align-items-center px-3 py-2 rounded mb-5 mt-3 mx-auto w-70" style={{ height: '35px' }}
+            > + Add another Church Destination
             </Button>
           </div>
           <div className="d-flex align-items-center">
@@ -627,22 +636,16 @@ const VisitaIglesia = () => {
               </Button>
             )}
           </div>
-          <div className="d-flex align-items-start text-muted small ms-1" style={{marginTop: '-1rem'}}>
-            <i 
-              className="bi bi-info-circle me-1 text-danger" 
-              style={{fontSize: '20px', cursor: 'pointer', marginTop: '13rem'}}
-              onClick={() => setShowInstructions(true)}
-            ></i>
-            <span className='fst-italic' style={{fontSize: '12px', marginTop: '13.38rem'}}>
-              How to use?
-            </span>
+          <div className="offcanvas-footer p-2 position-absolute bottom-0 start-0 w-100">
+            <div className="d-flex align-items-start text-muted small ms-1">
+              <i className="bi bi-info-circle me-1 text-danger" style={{fontSize: '20px', cursor: 'pointer'}} onClick={() => setShowInstructions(true)}></i>
+              <span className='fst-italic' style={{fontSize: '12px', marginTop: '0.38rem'}}> How to use? </span>
+            </div>
           </div>
         </Form> 
         )}
-        <Modal
-          show={showInstructions}
-          onHide={() => setShowInstructions(false)}
-          container={document.querySelector('.offcanvas-body')}
+      
+        <Modal show={showInstructions} onHide={() => setShowInstructions(false)} container={document.querySelector('.offcanvas-body')}
           style={{ position: 'absolute', marginTop: '22.5rem', width: '20rem', marginLeft: '2rem'}}
         >
           <Modal.Header closeButton>
@@ -664,15 +667,8 @@ const VisitaIglesia = () => {
       </Offcanvas>
      </GoogleMap>
 
-     
     {/* List View Destinations */}
-     <Offcanvas 
-        show={showDirectionsOffcanvas}
-        onHide={handleOffcanvasClose}
-        placement="end"
-        className="custom-offcanvas"
-        style={{ maxHeight: 'fit-content', top: '3rem' }}
-      >
+     <Offcanvas show={showDirectionsOffcanvas} onHide={handleOffcanvasClose} placement="end" className="custom-offcanvas" style={{ maxHeight: 'fit-content', top: '3rem' }}>
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Church Destinations</Offcanvas.Title>
         </Offcanvas.Header>

@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 import '../../churchCoordinator.css'
+import loadingGif from '/src/assets/Ripple@1x-1.0s-200px-200px.gif';
+
 
 export const ForPaymentAppointments = () => {
     const [forPaymentAppointments, setForPaymentAppointments] = useState([]);
@@ -20,6 +22,7 @@ export const ForPaymentAppointments = () => {
     const auth = getAuth();
     const user = auth.currentUser;
     const appointmentsPerPage = 7; 
+    const [loading, setLoading] = useState(true);
 
 
     const appointmentTypeMapping = {
@@ -94,8 +97,10 @@ export const ForPaymentAppointments = () => {
 
                 console.log("Fetched Data: ", forPaymentAppointmentsData);
                 setForPaymentAppointments(sortedAppointments);
+                setLoading(false);
             } catch (error){
                 console.error("Error fetching appointments: ", error);
+                setLoading(false);
             }
             
         };
@@ -323,6 +328,14 @@ export const ForPaymentAppointments = () => {
         setShowSendMessageModal(false);
         setMessage('');
     };
+
+    if (loading) {
+        return (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+            <img src={loadingGif} alt="Loading..." style={{ width: '100px', justifyContent: 'center' }} />
+        </div>  
+        )
+    }
 
     return (
         <>

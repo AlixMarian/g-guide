@@ -7,6 +7,7 @@ import '../websiteUser.css';
 import useChatbot from './Chatbot';
 import Pagination from 'react-bootstrap/Pagination';
 import OngoingAppointments from './OngoingAppointments';
+import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
 
 export const Homepage = () => {
   const navigate = useNavigate();
@@ -64,7 +65,11 @@ export const Homepage = () => {
   }
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+      <img src={loadingGif} alt="Loading..." style={{ width: '100px', justifyContent: 'center' }} />
+    </div>  
+    )
   }
 
   return (
