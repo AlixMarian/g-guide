@@ -88,6 +88,19 @@
     box-sizing: border-box;
   }
 
+  .churchList{
+    background-image: url('../src/assets/backgroundimg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
   .userAccStngs {
     background-image: url('../src/assets/backgroundimg.png');
     background-size: cover;
