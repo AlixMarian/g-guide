@@ -86,18 +86,20 @@ export const ReqVol = () => {
   
       if (eventsSnapshot.empty) {
         console.warn('No events found for the specified church.');
-        setEvents([]);
+        setEvents([]); 
+      } else {
         const eventsList = eventsSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
         console.log('Fetched events:', eventsList);
-        setEvents(eventsList);
+        setEvents(eventsList); 
       }
     } catch (error) {
       console.error('Error fetching events:', error);
     }
   };
+  
   
   
   useEffect(() => {
