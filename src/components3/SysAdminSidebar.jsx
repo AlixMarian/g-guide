@@ -22,30 +22,23 @@ export const SysAdminSidebar = () => {
   const handlePendingChurch = () => {
     navigate('/pending-church');
     setActiveSection('pending-church');
-    setSecondSidebarOpen(false); // Close second sidebar
-    setActiveChild(null);        // Clear any active child items
+    setSecondSidebarOpen(false); 
+    setActiveChild(null);        
   };
 
   const handleTransactions = () => {
     navigate('/transactions');
     setActiveSection('transactions');
-    setSecondSidebarOpen(false); // Close second sidebar
-    setActiveChild(null);        // Clear any active child items
-  };
-
-  const handleAddChurch = () => {
-    navigate('/addChurch');
-    setActiveSection('add-church');
     setSecondSidebarOpen(false); 
-    setActiveChild(null); 
+    setActiveChild(null);       
   };
 
   // User Directory handler
   const handleUsers = () => {
     navigate('/userDB');
     setActiveSection('user-directory');
-    setSecondSidebarOpen(false); // Close second sidebar
-    setActiveChild(null);        // Clear any active child items
+    setSecondSidebarOpen(false);
+    setActiveChild(null);  
   };
 
   // Church Directory handler with second sidebar toggle
@@ -54,8 +47,8 @@ export const SysAdminSidebar = () => {
       setSecondSidebarOpen(!secondSidebarOpen); // Toggle second sidebar
     } else {
       setActiveSection('church-directory'); // Keep Church Directory active
-      setSecondSidebarOpen(true);           // Open second sidebar
-      setActiveChild(null);                 // Reset any active child
+      setSecondSidebarOpen(true);     
+      setActiveChild(null);                
     }
   };
 
@@ -99,10 +92,6 @@ export const SysAdminSidebar = () => {
           <div className={`transactions ${activeSection === 'transactions' ? 'admin-active' : ''}`} onClick={handleTransactions}>
             <input type="image" src="../src/assets/transactions.png" className='admin-image-size' />
             <h3 className='button-name'>Transactions</h3>
-          </div>
-          <div className={`add-church ${activeSection === 'add-church' ? 'admin-active' : ''}`} onClick={handleAddChurch}>
-            <input type="image" src="../src/assets/addChurch.png" className='admin-image-size' />
-            <h3 className='button-name'>Add Church</h3>
           </div>
         </div>
 

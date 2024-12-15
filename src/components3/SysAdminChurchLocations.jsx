@@ -181,7 +181,6 @@ export const SysAdminChurchLocations = () => {
   return (
     <div className="church-location-page">
       <h1 className="me-3">Cebu Church List</h1>
-      <br />
       <div className="d-grid gap-2 d-md-flex justify-content-md-start">
         <Button
           type="button"
