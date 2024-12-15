@@ -7,6 +7,7 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 
 export const ExploreServices = () => {
     const [servicesState, setServicesState] = useState({});
+    // eslint-disable-next-line no-unused-vars
     const [userID, setUserId] = useState(null);
     const [churchID, setChurchId] = useState(null);
     const [isModified, setIsModified] = useState(false);
@@ -27,12 +28,10 @@ export const ExploreServices = () => {
 
     const fetchChurchId = async (uid) => {
         try {
-            // Step 1: Fetch the user's document
             const userDoc = await getDoc(doc(db, "users", uid));
             if (userDoc.exists()) {
                 const userData = userDoc.data();
                 if (userData.role === "churchCoor") {
-                    // Step 2: Query the coordinator collection for coordinatorID
                     const coordinatorQuery = query(
                         collection(db, "coordinator"),
                         where("userId", "==", uid)
@@ -40,9 +39,7 @@ export const ExploreServices = () => {
                     const coordinatorSnapshot = await getDocs(coordinatorQuery);
     
                     if (!coordinatorSnapshot.empty) {
-                        const coordinatorID = coordinatorSnapshot.docs[0].id; // Coordinator document ID
-                        
-                        // Step 3: Query the church collection for the matching coordinatorID
+                        const coordinatorID = coordinatorSnapshot.docs[0].id;
                         const churchQuery = query(
                             collection(db, "church"),
                             where("coordinatorID", "==", coordinatorID)
@@ -51,8 +48,8 @@ export const ExploreServices = () => {
     
                         if (!churchSnapshot.empty) {
                             const churchDoc = churchSnapshot.docs[0];
-                            setChurchId(churchDoc.id); // Set churchId in state
-                            fetchServices(churchDoc.id); // Fetch services using churchId
+                            setChurchId(churchDoc.id);
+                            fetchServices(churchDoc.id);
                         } else {
                             console.error("No church document found for the coordinator.");
                             toast.error("Unable to find a church associated with this coordinator.");
@@ -117,22 +114,19 @@ export const ExploreServices = () => {
             toast.error("Church ID is missing. Cannot update services.");
             return;
         }
-
         for (const [serviceName, serviceDetails] of Object.entries(servicesState)) {
             if (serviceDetails.active) {
                 if (!serviceDetails.fee || serviceDetails.fee <= 0) {
                     toast.error(`Service "${serviceName}" requires a valid fee.`);
-                    return; // Exit if validation fails
+                    return;
                 }
                 if (!serviceDetails.instructions || serviceDetails.instructions.trim() === "") {
                     toast.error(`Service "${serviceName}" requires instructions.`);
-                    return; // Exit if validation fails
+                    return;
                 }
             }
         }
-
         try {
-            // Use the churchId as the document ID in the services collection
             await setDoc(doc(db, "services", churchID), servicesState, { merge: true });
             toast.success("Services updated successfully!");
             setIsModified(false);

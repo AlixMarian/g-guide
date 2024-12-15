@@ -78,9 +78,6 @@ export const UserDatabase = () => {
     }
   };
   
-  
-
-  // Fetch users on component mount
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -113,8 +110,6 @@ export const UserDatabase = () => {
         const coordinatorSnapshot = await getDocs(coordinatorQuery);
         if (!coordinatorSnapshot.empty) {
           const coordinatorDocId = coordinatorSnapshot.docs[0].id;
-  
-          // Step 1: Find the connected church in the "church" collection
           const churchQuery = query(
             collection(db, 'church'),
             where('coordinatorID', '==', coordinatorDocId)
@@ -122,17 +117,12 @@ export const UserDatabase = () => {
           const churchSnapshot = await getDocs(churchQuery);
   
           if (!churchSnapshot.empty) {
-            // Step 2: Get the church document ID
             const churchDocId = churchSnapshot.docs[0].id;
-  
-            // Step 3: Update the coordinator document with the churchID
             await updateDoc(doc(db, 'coordinator', coordinatorDocId), {
               status: 'Inactive',
-              churchID: churchDocId // Add the linked church document ID
+              churchID: churchDocId
             });
             console.log(`User with ID: ${userId} status updated in coordinator with churchID.`);
-  
-            // Step 4: Update the church status to "Archived"
             await updateDoc(doc(db, 'church', churchDocId), {
               churchStatus: 'Archived',
             });
@@ -140,17 +130,13 @@ export const UserDatabase = () => {
           }
         }
       }
-
       toast.success('User Deleted Successfully');
-      // Refresh user list after deletion
-      await fetchUsers(); // Call fetchUsers to refresh the list
+      await fetchUsers();
     } catch (error) {
       console.error('Error updating user status:', error);
       toast.error('User not deleted');
     }
   };
-
-    // Pagination logic
     const filteredUsers = users
     .filter((user) => user.role !== 'sysAdmin')
     .filter((user) => selectedRole === 'All' || user.role === selectedRole);
@@ -220,79 +206,84 @@ export const UserDatabase = () => {
                 <th className='custom-th'>Contact Number</th>
                 <th className='custom-th'>Role</th>
                 <th className='custom-th'>Agreed to Data Consent</th>
-                <th className='custom-th'>Status</th> {/* New Status Column */}
+                <th className='custom-th'>Status</th>
                 <th className='custom-th'>Date of Registration</th>
                 <th className='custom-th'>Action</th>
               </tr>
             </thead>
             <tbody>
-              {paginatedUsers.map((user) => (
-                <tr key={user.id}>
-                  <td>
-                    <img
-                      src={user.profileImage || 'default-profile.jpg'}
-                      alt='Profile'
-                      style={{ width: '30px', height: '30px', borderRadius: '50%' }}
-                    />
-                  </td>
-                  <td>{`${user.firstName} ${user.lastName}`}</td>
-                  <td>{user.email}</td>
-                  <td>{user.contactNum}</td>
-                  <td>
-                  {user.role === 'churchCoor' ? (
-                    user.status === 'Inactive' ? (
-                      // If the user is a deleted church coordinator, find the previous church name using the churchID
-                      user.churchID ? (
-                        <span>
-                          {`Former Church Coordinator of ${
-                            user.previousChurchName || 'Unknown'
-                          }`}
-                        </span>
+              {paginatedUsers.length > 0 ? (
+                paginatedUsers.map((user) => (
+                  <tr key={user.id}>
+                    <td>
+                      <img
+                        src={user.profileImage || 'default-profile.jpg'}
+                        alt='Profile'
+                        style={{ width: '30px', height: '30px', borderRadius: '50%' }}
+                      />
+                    </td>
+                    <td>{`${user.firstName} ${user.lastName}`}</td>
+                    <td>{user.email}</td>
+                    <td>{user.contactNum}</td>
+                    <td>
+                    {user.role === 'churchCoor' ? (
+                      user.status === 'Inactive' ? (
+                        user.churchID ? (
+                          <span>
+                            {`Former Church Coordinator of ${
+                              user.previousChurchName || 'Unknown'
+                            }`}
+                          </span>
+                        ) : (
+                          'Former Church Coordinator'
+                        )
                       ) : (
-                        'Former Church Coordinator'
+                        `Church Coordinator of ${user.churchName || 'Unknown'}`
                       )
                     ) : (
-                      // For active church coordinators
-                      `Church Coordinator of ${user.churchName || 'Unknown'}`
-                    )
-                  ) : (
-                    roleTypeMapping[user.role]
-                  )}
-                </td>
-
-                  <td>{user.dataConsent ? 'Yes' : 'No'}</td>
-                  <td
-                    style={{
-                      color:
-                        user.status === 'Active'
-                          ? 'green'
-                          : user.status === 'Inactive'
-                          ? 'red'
-                          : user.status === 'Pending'
-                          ? '#b8860b'
-                          : 'black',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    ●{user.status || 'N/A'}
+                      roleTypeMapping[user.role]
+                    )}
                   </td>
-
-                  <td>
-                    {/* Convert Firebase Timestamp to readable date */}
-                    {user.dateOfRegistration
-                      ? new Date(user.dateOfRegistration.seconds * 1000).toLocaleString()
-                      : 'N/A'}
-                  </td>
-                  <td>
-                    <Button
-                      variant='danger'
-                      onClick={() => handleDeleteUser(user.id, user.role)}
+  
+                    <td>{user.dataConsent ? 'Yes' : 'No'}</td>
+                    <td
+                      style={{
+                        color:
+                          user.status === 'Active'
+                            ? 'green'
+                            : user.status === 'Inactive'
+                            ? 'red'
+                            : user.status === 'Pending'
+                            ? '#b8860b'
+                            : 'black',
+                        fontWeight: 'bold',
+                      }}
                     >
-                      Delete User
-                    </Button>
+                      ●{user.status || 'N/A'}
+                    </td>
+  
+                    <td>
+                      {user.dateOfRegistration
+                        ? new Date(user.dateOfRegistration.seconds * 1000).toLocaleString()
+                        : 'N/A'}
+                    </td>
+                    <td>
+                      <Button
+                        variant='danger'
+                        onClick={() => handleDeleteUser(user.id, user.role)}
+                      >
+                        Delete User
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              ):(
+                <tr>
+                  <td colSpan="9" style={{ textAlign: 'center'}}>
+                    No users found
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
           <div className="d-flex justify-content-center mt-3">

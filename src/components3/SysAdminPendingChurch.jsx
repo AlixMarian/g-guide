@@ -6,16 +6,16 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif'; // Import the GIF
+import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif'; 
 
 export const SysAdminPendingChurch = () => {
   const [churches, setChurches] = useState([]);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true); 
   const [showModal, setShowModal] = useState(false);
   const [selectedChurch, setSelectedChurch] = useState(null);
-  const [modalContent, setModalContent] = useState('history'); // To track which modal content to show
-  const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
-  const itemsPerPage = 5; // Number of entries per page
+  const [modalContent, setModalContent] = useState('history'); 
+  const [currentPage, setCurrentPage] = useState(1); 
+  const itemsPerPage = 5; 
 
   const navigate = useNavigate();
 
@@ -33,24 +33,18 @@ export const SysAdminPendingChurch = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true); // Show loading when data fetching starts
+      setLoading(true);
       try {
-        // 1. Fetch all churches with status 'pending' from the 'church' collection
         const churchCollection = collection(db, 'church');
         const churchSnapshot = await getDocs(churchCollection);
         const churchList = churchSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                              .filter(church => 
-                                  church.churchStatus === 'Pending' || 
-                                  church.churchStatus === 'For Renewal'
-                              );
-        // Array to hold the processed church data
+          .filter(church => 
+            church.churchStatus === 'Pending' || 
+            church.churchStatus === 'For Renewal'
+          );
         const processedChurches = [];
-
-        // 2. Iterate over each pending church to fetch the corresponding coordinator and user data
         for (const church of churchList) {
-          if (!church.coordinatorID) continue;  // Skip if coordinatorID is missing
-
-          // 2.1 Fetch the coordinator using coordinatorID from the 'coordinator' collection
+          if (!church.coordinatorID) continue;  
           const coordinatorDocRef = doc(db, 'coordinator', church.coordinatorID);
           const coordinatorSnapshot = await getDoc(coordinatorDocRef);
           
@@ -60,8 +54,6 @@ export const SysAdminPendingChurch = () => {
           }
 
           const coordinatorData = coordinatorSnapshot.data();
-          
-          // 2.2 Fetch the user details using userId from the 'users' collection
           const userDocRef = doc(db, 'users', coordinatorData.userId);
           const userSnapshot = await getDoc(userDocRef);
           
@@ -72,7 +64,7 @@ export const SysAdminPendingChurch = () => {
 
           const userData = userSnapshot.data();
 
-          // Combine the church data with user details
+          
           processedChurches.push({
             ...church,
             coordinatorName: `${userData.firstName || 'N/A'} ${userData.lastName || 'N/A'}`,
@@ -81,13 +73,13 @@ export const SysAdminPendingChurch = () => {
           });
         }
 
-        // Update the state with the processed church data
+        
         setChurches(processedChurches);
-        setLoading(false); // Hide loading when data is fetched
+        setLoading(false); 
 
       } catch (error) {
         console.error('Error fetching data:', error);
-        setLoading(false); // Hide loading if there is an error
+        setLoading(false); 
       }
     };
 
@@ -96,7 +88,7 @@ export const SysAdminPendingChurch = () => {
 
   const handleShowModal = (church, content) => {
     setSelectedChurch(church);
-    setModalContent(content); // 'refundPolicy' or 'proof'
+    setModalContent(content);
     setShowModal(true);
   };
 
@@ -122,29 +114,22 @@ export const SysAdminPendingChurch = () => {
 
 const handleApprove = async (church) => {
   try {
-    // Update the church's status in Firestore
     const churchRef = doc(db, "church", church.id);
     await updateDoc(churchRef, {
       churchStatus: "Approved"
     });
-
-    const coordinatorRef = doc(db, "coordinator", church.coordinatorID); // Ensure coordinatorID is available in the church object
+    const coordinatorRef = doc(db, "coordinator", church.coordinatorID);
     await updateDoc(coordinatorRef, {
       status: "Active"
     });
-
-    // Send approval email
     await sendEmail(
-      church.coordinatorEmail,  // Use the email of the church coordinator
+      church.coordinatorEmail,
       "Church Approval Notification",
       "Your church has been approved successfully. Thank you for your registration."
     );
-
-    // Update the state by removing the approved church from the list
     setChurches((prevChurches) =>
       prevChurches.filter((c) => c.id !== church.id)
     );
-
     toast.success('Church approved successfully!');
   } catch (error) {
     console.error("Error approving church: ", error);
@@ -154,29 +139,22 @@ const handleApprove = async (church) => {
 
 const handleRenew = async (church) => {
   try {
-    // Update the church's status in Firestore
     const churchRef = doc(db, "church", church.id);
     await updateDoc(churchRef, {
       churchStatus: "Approved"
     });
-
-    const coordinatorRef = doc(db, "coordinator", church.coordinatorID); // Ensure coordinatorID is available in the church object
+    const coordinatorRef = doc(db, "coordinator", church.coordinatorID);
     await updateDoc(coordinatorRef, {
       status: "Approved"
     });
-
-    // Send approval email
     await sendEmail(
-      church.coordinatorEmail,  // Use the email of the church coordinator
+      church.coordinatorEmail, 
       "Church Renewal Notification",
       "Your church has been renewed successfully. Thank you for your renewal."
     );
-
-    // Update the state by removing the approved church from the list
     setChurches((prevChurches) =>
       prevChurches.filter((c) => c.id !== church.id)
     );
-
     toast.success('Church renewed successfully!');
   } catch (error) {
     console.error("Error renweing church: ", error);
@@ -191,22 +169,18 @@ const handleDeny = async (church) => {
     await updateDoc(churchRef, {
       churchStatus: "Denied"
     });
-
-    const coordinatorRef = doc(db, "coordinator", church.coordinatorID); // Ensure coordinatorID is available in the church object
+    const coordinatorRef = doc(db, "coordinator", church.coordinatorID);
     await updateDoc(coordinatorRef, {
       status: "Denied"
     });
-
     await sendEmail(
       church.coordinatorEmail,  
       "Church Rejection Notification",
       "We regret to inform you that your church registration has been rejected. For more details, please contact our support team."
     );
-
     setChurches((prevChurches) =>
       prevChurches.filter((c) => c.id !== church.id)
     );
-
     toast.success('Church rejected successfully!');
     handleCloseModal();
   } catch (error) {
@@ -253,63 +227,71 @@ const handleDeny = async (church) => {
             </tr>
           </thead>
           <tbody>
-            {paginatedChurches.map((church) => (
-              <tr key={church.id}>
-                <td>{church.coordinatorName}</td>
-                <td>{church.coordinatorEmail}</td>
-                <td>{church.coordinatorContactNum}</td>
-                <td>{church.churchName}</td>
-                <td>{church.churchEmail}</td>
-                <td>{church.churchContactNum}</td>
-                <td>{church.churchAddress}</td>
-                <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
-                <td>{church.churchStatus}</td>
-                <td>
-                  <Button
-                    variant="primary"
-                    className="view-refund-policy"
-                    onClick={() => handleShowModal(church, 'refundPolicy')}
-                  >
-                    View Policy
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    variant="primary"
-                    className="view-proof"
-                    onClick={() => window.open(church.churchProof, '_blank')}
-                  >
-                    View Proof
-                  </Button>
-                </td>
-                <td className="pending-church-action">
-                  {church.churchStatus === 'For Renewal' ? (
+            {paginatedChurches.length > 0 ? (
+              paginatedChurches.map((church) => (
+                <tr key={church.id}>
+                  <td>{church.coordinatorName}</td>
+                  <td>{church.coordinatorEmail}</td>
+                  <td>{church.coordinatorContactNum}</td>
+                  <td>{church.churchName}</td>
+                  <td>{church.churchEmail}</td>
+                  <td>{church.churchContactNum}</td>
+                  <td>{church.churchAddress}</td>
+                  <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
+                  <td>{church.churchStatus}</td>
+                  <td>
                     <Button
-                      variant="warning"
-                      className="renew mb-2"
-                      onClick={() => handleRenew(church)}
+                      variant="primary"
+                      className="view-refund-policy"
+                      onClick={() => handleShowModal(church, 'refundPolicy')}
                     >
-                      Renew
+                      View Policy
                     </Button>
-                  ) : church.churchStatus === 'Pending' ? (
+                  </td>
+                  <td>
                     <Button
-                      variant="success"
-                      className="approve mb-2"
-                      onClick={() => handleApprove(church)}
+                      variant="primary"
+                      className="view-proof"
+                      onClick={() => window.open(church.churchProof, '_blank')}
                     >
-                      Approve
+                      View Proof
                     </Button>
-                  ) : null}
-                  <Button
-                    variant="danger"
-                    className="deny mb-2"
-                    onClick={() => handleDeny(church)}
-                  >
-                    Deny
-                  </Button>
+                  </td>
+                  <td className="pending-church-action">
+                    {church.churchStatus === 'For Renewal' ? (
+                      <Button
+                        variant="warning"
+                        className="renew mb-2"
+                        onClick={() => handleRenew(church)}
+                      >
+                        Renew
+                      </Button>
+                    ) : church.churchStatus === 'Pending' ? (
+                      <Button
+                        variant="success"
+                        className="approve mb-2"
+                        onClick={() => handleApprove(church)}
+                      >
+                        Approve
+                      </Button>
+                    ) : null}
+                    <Button
+                      variant="danger"
+                      className="deny mb-2"
+                      onClick={() => handleDeny(church)}
+                    >
+                      Deny
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            ):(
+              <tr>
+                <td  colSpan="20" style={{ textAlign: 'center'}}>
+                  No pending church registration
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
         <div className="d-flex justify-content-center mt-3">

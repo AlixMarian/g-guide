@@ -257,20 +257,16 @@ export const OngoingAppointments = () => {
         const storageRef = ref(getStorage(), `userPaymentReceipt/${user.uid}/${selectedFile.name}`);
         await uploadBytes(storageRef, selectedFile);
         const paymentImageUrl = await getDownloadURL(storageRef);
-  
         await updateDoc(doc(db, "appointments", selectedAppointmentId), {
           'appointments.paymentImage': paymentImageUrl,
           'appointments.paymentUploadDate': Timestamp.now(),
         });
-  
         toast.success("Payment receipt uploaded successfully");
         setShowPaymentModal(false);
-  
       } catch (error) {
         toast.error("Error uploading payment receipt");
         console.error("Error uploading payment receipt:", error);
       }
-  
       fileInputRef.current.value = "";
       setSelectedFile(null);
     } else {

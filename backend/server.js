@@ -6,7 +6,7 @@ const app = express();
 const port = 3006;
 
 app.use(cors({
-  origin: 'http://localhost:5173', // frontend's origin
+  origin: 'http://localhost:5173',
   methods: ['POST']
 }));
 
@@ -23,7 +23,7 @@ const transporter = createTransport({
 app.post('/send-email', async (req, res) => {
   const { email, subject, text } = req.body;
 
-  // Define the HTML content with inline CSS
+  
   const htmlContent = `
     <!DOCTYPE html>
     <html lang="en">
@@ -53,7 +53,7 @@ app.post('/send-email', async (req, res) => {
     from: 'marianehistoria88@gmail.com',
     to: email,
     subject: subject,
-    html: htmlContent  // Use the html property instead of text
+    html: htmlContent
   };
 
   try {
