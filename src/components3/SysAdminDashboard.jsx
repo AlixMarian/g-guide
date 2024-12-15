@@ -40,7 +40,11 @@ export const SysAdminDashboard = () => {
       try {
         const churchCollection = collection(db, 'church');
         const churchSnapshot = await getDocs(churchCollection);
-        setChurchCount(churchSnapshot.size);
+        const approvedChurches = churchSnapshot.docs.filter(doc => 
+          doc.data().churchStatus === "Approved" 
+        );
+        
+        setChurchCount(approvedChurches.length);
       } catch (error) {
         console.error("Error fetching church count:", error);
       }

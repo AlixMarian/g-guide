@@ -6,7 +6,7 @@ export const NavBar = () => {
     <nav className="navbar navbar-expand-lg sticky-top bg-body-tertiary">
       <div className="container-fluid">
         <a className="navbar-brand" href="/home">
-          <img src="../src/assets/gGuideLogo.svg" alt="Logo" width="40" height="34" className="d-inline-block align-text-top" />
+          <img src="../src/assets/G-Guide LOGO.png" alt="Logo" width="40" height="40" className="d-inline-block align-text-top" style={{marginTop: '-0.3rem'}}/>
           G! Guide
         </a>
         

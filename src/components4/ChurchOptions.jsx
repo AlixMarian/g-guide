@@ -4,6 +4,7 @@ import { db } from '/backend/firebase';
 import { Card, Button, Container, Row, Col, Pagination } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import '../websiteUser.css';
+import useChatbot from '/src/components/Chatbot';
 
 
  const ChurchOptions = () => {
@@ -11,6 +12,8 @@ import '../websiteUser.css';
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const navigate = useNavigate();
+  useChatbot();
+
 
   useEffect(() => {
     const fetchApprovedChurches = async () => {
