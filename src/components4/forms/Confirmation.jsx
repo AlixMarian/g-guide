@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import DatePicker from 'react-datepicker';
 import { useEffect, useState } from 'react';
 import { collection, query, where, getDocs, getDoc, doc, Timestamp, addDoc, updateDoc } from 'firebase/firestore';
@@ -109,7 +110,7 @@ export const Confirmation = () => {
 
         if (churchDocSnap.exists()) {
             const data = churchDocSnap.data();
-            setRefundPolicy(data.refundPolicy || "No refund policy available."); // Set refund policy or default message
+            setRefundPolicy(data.refundPolicy || "No refund policy available.");
         } else {
             console.log("No church data found for refund policy.");
             setRefundPolicy("No refund policy available.");
@@ -222,7 +223,7 @@ const renderTime = (slot) => {
             const appointmentData = {
               appointmentType: 'confirmation',
               appointmentStatus: 'Pending',
-              appointmentPurpose: 'none',
+              appointmentPurpose: 'personal',
               authorizationLetter: 'none',
               paymentImage: 'none',
               churchId: churchId,
