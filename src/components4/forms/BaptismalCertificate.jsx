@@ -115,15 +115,12 @@ export const BaptismalCertificate = () => {
         }
 
         try {
-            // Upload authorization image if provided
             let authorizationImageUrl = 'none';
             if (authorizationImageFile) {
                 const storageRef = ref(storage, `userAuthorizationLetter/${user.uid}/${authorizationImageFile.name}`);
                 await uploadBytes(storageRef, authorizationImageFile);
                 authorizationImageUrl = await getDownloadURL(storageRef);
             }
-
-            // Prepare appointment data
             const appointmentData = {
                 appointmentType: 'baptismalCertificate',
                 appointmentStatus: 'Pending',
@@ -148,8 +145,6 @@ export const BaptismalCertificate = () => {
                     motherLastName: formData.motherLastName,
                 }
             };
-
-            // Save appointment to Firestore
             await addDoc(collection(db, 'appointments'), appointmentData);
             toast.success("Request submitted to Church Coordinator. Please wait for approval");
             resetForm();
