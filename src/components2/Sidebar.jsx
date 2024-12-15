@@ -196,7 +196,7 @@ export const Layout = () => {
             </div>
             <div onClick={handleMessages}>
             <div className={`numbers ${activeNumber === 'messages' ? 'active' : ''}`} onClick={() => handleClick('messages')}>
-              <input type="image" src="../src/assets/number-5.png" className="image-size" />
+              <input type="image" src="../src/assets/number-6.png" className="image-size" />
               <h3 className="second-button-name">Messages</h3>
             </div>
             </div>
