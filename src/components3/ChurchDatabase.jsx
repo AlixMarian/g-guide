@@ -13,8 +13,8 @@ export const ChurchDatabase = () => {
   const [selectedChurch, setSelectedChurch] = useState(null);
   const [modalContent, setModalContent] = useState('history');
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
-  const itemsPerPage = 5; // Number of items per page
+  const [currentPage, setCurrentPage] = useState(1); 
+  const itemsPerPage = 5; 
 
   const navigate = useNavigate();
 
@@ -32,7 +32,7 @@ export const ChurchDatabase = () => {
 
   useEffect(() => {
     const fetchChurchData = async () => {
-      setLoading(true); // Set loading to true when fetching data
+      setLoading(true);
       try {
         const churchCollection = collection(db, 'church');
         const churchSnapshot = await getDocs(churchCollection);
@@ -41,25 +41,15 @@ export const ChurchDatabase = () => {
         const processedChurches = [];
 
         for (const church of churchList) {
-          if (!church.coordinatorID) continue;  // Skip if coordinatorID is missing
-
-          // Fetch the coordinator using coordinatorID from 'coordinator' collection
+          if (!church.coordinatorID) continue;  
           const coordinatorDocRef = doc(db, 'coordinator', church.coordinatorID);
           const coordinatorSnapshot = await getDoc(coordinatorDocRef);
-
           if (!coordinatorSnapshot.exists()) continue;
-
           const coordinatorData = coordinatorSnapshot.data();
-
-          // Fetch user details using userId from 'users' collection
           const userDocRef = doc(db, 'users', coordinatorData.userId);
           const userSnapshot = await getDoc(userDocRef);
-
           if (!userSnapshot.exists()) continue;
-
           const userData = userSnapshot.data();
-
-          // Combine the church data with the user data
           processedChurches.push({
             ...church,
             coordinatorName: `${userData.firstName || 'N/A'} ${userData.lastName || 'N/A'}`,
@@ -70,10 +60,10 @@ export const ChurchDatabase = () => {
         }
 
         setChurches(processedChurches);
-        setLoading(false); // Set loading to false after fetching data
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching church data:', error);
-        setLoading(false); // Set loading to false if there is an error
+        setLoading(false);
       }
     };
 
@@ -89,8 +79,8 @@ export const ChurchDatabase = () => {
 
   const handleShowModal = (church, content) => {
     setSelectedChurch(church);
-    setModalContent(content); // 'history' or 'proof'
-    setModalContent(content); // 'refundPolicy' or 'proof'
+    setModalContent(content); 
+    setModalContent(content);
     setShowModal(true);
   };
 
@@ -121,7 +111,7 @@ export const ChurchDatabase = () => {
     <div className='church-database-page'>
       <h1 className="me-3">Church Database</h1>
 
-      {loading ? ( // Show loading GIF when data is being fetched
+      {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
           <img src={loadingGif} alt="Loading..." />
         </div>
@@ -166,53 +156,61 @@ export const ChurchDatabase = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedChurches.map((church) => (
-                <tr key={church.id}>
-                  <td>
-                    <img
-                      src={church.profileImage || 'default-profile.jpg'}
-                      alt="Profile"
-                      style={{ width: '30px', height: '30px', borderRadius: '50%' }}
-                    />
-                  </td>
-                  <td>{church.coordinatorName}</td>
-                  <td>{church.coordinatorEmail}</td>
-                  <td>{church.coordinatorContactNum}</td>
-                  <td>{church.churchName}</td>
-                  <td>{church.churchEmail}</td>
-                  <td>{church.churchContactNum}</td>
-                  <td>{church.churchAddress}</td>
-                  <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
-                  <td
-                    style={{
-                      color:
-                        church.churchStatus === 'Approved'
-                          ? 'green'
-                          : church.churchStatus === 'Pending'
-                          ? '#b8860b'
-                          : church.churchStatus === 'Archived'
-                          ? 'red'
-                          : 'black',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    ●{church.churchStatus || 'N/A'}
-                  </td>
-                  <td>
-                    <Button variant="primary" className="view-history mb-1" onClick={() => handleShowModal(church, 'history')}>
-                      History
+              {paginatedChurches.length > 0 ? (
+                paginatedChurches.map((church) => (
+                  <tr key={church.id}>
+                    <td>
+                      <img
+                        src={church.profileImage || 'default-profile.jpg'}
+                        alt="Profile"
+                        style={{ width: '30px', height: '30px', borderRadius: '50%' }}
+                      />
+                    </td>
+                    <td>{church.coordinatorName}</td>
+                    <td>{church.coordinatorEmail}</td>
+                    <td>{church.coordinatorContactNum}</td>
+                    <td>{church.churchName}</td>
+                    <td>{church.churchEmail}</td>
+                    <td>{church.churchContactNum}</td>
+                    <td>{church.churchAddress}</td>
+                    <td>{new Date(church.churchRegistrationDate).toLocaleDateString()}</td>
+                    <td
+                      style={{
+                        color:
+                          church.churchStatus === 'Approved'
+                            ? 'green'
+                            : church.churchStatus === 'Pending'
+                            ? '#b8860b'
+                            : church.churchStatus === 'Archived'
+                            ? 'red'
+                            : 'black',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      ●{church.churchStatus || 'N/A'}
+                    </td>
+                    <td>
+                      <Button variant="primary" className="view-history mb-1" onClick={() => handleShowModal(church, 'history')}>
+                        History
+                      </Button>
+                      <Button variant="primary" className="view-history" onClick={() => handleShowModal(church, 'refundPolicy')}>
+                        Refund Policy
+                      </Button>
+                    </td>
+                    <td>
+                    <Button variant="primary" className="view-proof" onClick={() => window.open(church.churchProof, '_blank')}>
+                      View Proof
                     </Button>
-                    <Button variant="primary" className="view-history" onClick={() => handleShowModal(church, 'refundPolicy')}>
-                      Refund Policy
-                    </Button>
-                  </td>
-                  <td>
-                  <Button variant="primary" className="view-proof" onClick={() => window.open(church.churchProof, '_blank')}>
-                    View Proof
-                  </Button>
+                    </td>
+                  </tr>
+                ))
+              ):(
+                <tr>
+                  <td colSpan="14" style={{ textAlign: 'center'}}>
+                    No registered churches found
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
 

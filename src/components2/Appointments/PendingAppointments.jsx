@@ -213,16 +213,12 @@ export const PendingAppointments = () => {
 
     const handleForPayment = async () => {
         if (!selectedAppointment) return;
-    
         const message = "Your appointment is now pending for payment. <br>Please follow the instructions to complete the payment process.<br><br><small>Instructions:<br>1. Go to your homepage.<br> 2. In the 'Ongoing Transactions' section, locate your pending appointments.<br> 3. Click 'Pay here via QR Code'.<br> 4. Scan the displayed QR Code.<br> 5. Upload your official payment receipt.<br> 6. Check the box to confirm that you have read and understood the church's refund policy.<br> 7. Click 'Upload Receipt' to complete the process.<br></small>";
-    
         try {
             const appointmentRef = doc(db, "appointments", selectedAppointment.id);
             await updateDoc(appointmentRef, {
                 appointmentStatus: "For Payment"
             });
-    
-           
             const inboxMessageData = {
                 churchId: selectedAppointment.churchId,
                 userId: selectedAppointment.userFields?.requesterId,
@@ -231,14 +227,11 @@ export const PendingAppointments = () => {
                 dateSent: Timestamp.fromDate(new Date())
             };
             await addDoc(collection(db, "inboxMessage"), inboxMessageData);
-    
-            
             await sendEmail(
                 selectedAppointment.userFields?.requesterEmail,
                 "Appointment Pending for Payment",
                 message
             );
-    
             toast.success('Appointment pending for payment.');
             handleCloseModal();
         } catch (error) {
@@ -248,17 +241,13 @@ export const PendingAppointments = () => {
     
     const handleSubmitDenial = async () => {
         if (!selectedAppointment) return;
-    
         const message = `We regret to inform you that your appointment has been denied. <br><span style="color: red;">Reason: ${denialReason}</span><br>`;
-    
         try {
             const appointmentRef = doc(db, "appointments", selectedAppointment.id);
             await updateDoc(appointmentRef, {
                 appointmentStatus: "Denied",
                 denialReason: denialReason
             });
-    
-           
             const inboxMessageData = {
                 churchId: selectedAppointment.churchId,
                 userId: selectedAppointment.userFields?.requesterId,
@@ -267,14 +256,11 @@ export const PendingAppointments = () => {
                 dateSent: Timestamp.fromDate(new Date())
             };
             await addDoc(collection(db, "inboxMessage"), inboxMessageData);
-    
-            
             await sendEmail(
                 selectedAppointment.userFields?.requesterEmail,
                 "Appointment Denied",
                 message
             );
-    
             toast.success('Appointment denied successfully!');
             setShowDenyModal(false);
             setDenialReason('');

@@ -77,55 +77,27 @@ export const ChurchHomepageBook = () => {
           <div className="row">
             <div className="col-12 col-md-auto mb-2 mb-md-0">
               <div className="dropdown">
-                <button
-                  className="btn btn-secondary dropdown-toggle"
-                  type="button"
-                  id="servicesTypeDropdown"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
+                <button className="btn btn-secondary dropdown-toggle" type="button" id="servicesTypeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                   {selectedServiceType || "Select Service Type"}
                 </button>
                 <ul className="dropdown-menu" aria-labelledby="servicesTypeDropdown">
                   {services.appointments.length > 0 && (
                     <li>
-                      <a
-                        className="dropdown-item"
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleServiceTypeChange("Book an Appointment");
-                        }}
-                      >
+                      <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault(); handleServiceTypeChange("Book an Appointment"); }}>
                         Book an Appointment
                       </a>
                     </li>
                   )}
                   {services.documentRequests.length > 0 && (
                     <li>
-                      <a
-                        className="dropdown-item"
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleServiceTypeChange("Request Document");
-                        }}
-                      >
+                      <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault(); handleServiceTypeChange("Request Document"); }}>
                         Request Document
                       </a>
                     </li>
                   )}
                   {services.massIntentions && (
                     <li>
-                      <a
-                        className="dropdown-item"
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setSelectedServiceType("Mass Intentions");
-                          setSelectedService("Mass Intentions");
-                        }}
-                      >
+                      <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault(); setSelectedServiceType("Mass Intentions"); setSelectedService("Mass Intentions"); }}>
                         Mass Intentions
                       </a>
                     </li>
@@ -136,27 +108,14 @@ export const ChurchHomepageBook = () => {
             {selectedServiceType && selectedServiceType !== "Mass Intentions" && (
               <div className="col-12 col-md-auto">
                 <div className="dropdown">
-                  <button
-                    className="btn btn-secondary dropdown-toggle"
-                    type="button"
-                    id="servicesDropdown"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
+                  <button className="btn btn-secondary dropdown-toggle" type="button" id="servicesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     {selectedService || "Select Type"}
                   </button>
                   <ul className="dropdown-menu" aria-labelledby="servicesDropdown">
                     {selectedServiceType === "Book an Appointment" &&
                       services.appointments.map((service, index) => (
                         <li key={index}>
-                          <a
-                            className="dropdown-item"
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setSelectedService(service);
-                            }}
-                          >
+                          <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault(); setSelectedService(service); }}>
                             {service}
                           </a>
                         </li>
@@ -164,14 +123,7 @@ export const ChurchHomepageBook = () => {
                     {selectedServiceType === "Request Document" &&
                       services.documentRequests.map((service, index) => (
                         <li key={index}>
-                          <a
-                            className="dropdown-item"
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setSelectedService(service);
-                            }}
-                          >
+                          <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault(); setSelectedService(service); }}>
                             {service}
                           </a>
                         </li>

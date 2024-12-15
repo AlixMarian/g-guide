@@ -203,9 +203,7 @@ export const ForPaymentAppointments = () => {
 
     const handleApprove = async () => {
         if (!selectedAppointment) return;
-    
         const message = "<span style='color: green;'>Your appointment has been approved.</span><br>";
-    
         try {
             const appointmentRef = doc(db, "appointments", selectedAppointment.id);
             await updateDoc(appointmentRef, {
@@ -224,7 +222,6 @@ export const ForPaymentAppointments = () => {
                 "Appointment Approved",
                 message
             );
-    
             toast.success('Appointment approved successfully!');
             handleCloseModal();
         } catch (error) {

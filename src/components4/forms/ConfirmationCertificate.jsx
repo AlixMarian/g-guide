@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc, Timestamp, collection, addDoc, } from 'firebase/firestore';
@@ -8,12 +9,14 @@ import { toast } from 'react-toastify';
 
 export const ConfirmationCertificate = () => {
     const { churchId } = useParams();
+    // eslint-disable-next-line no-unused-vars
     const [churchData, setChurchData] = useState(null);
     const [userData, setUserData] = useState(null); 
     const auth = getAuth();
     const user = auth.currentUser;
     const [loading, setLoading] = useState(true);
     const [authorizationImageFile, setAuthorizationImageFile] = useState(null);
+    // eslint-disable-next-line no-unused-vars
     const [authorizationImageUrl, setAuthorizationImageUrl] = useState('');
     const [showAuthorization, setShowAuthorization] = useState(false);
     const [appointmentPurpose, setAppointmentPurpose] = useState('personal');
@@ -86,7 +89,7 @@ export const ConfirmationCertificate = () => {
 
     const handleCreateAppointment = async (e) => {
         e.preventDefault();
-    if (user){
+        if (user){
         try {
             
           let authorizationImageUrl = 'none';
@@ -95,7 +98,6 @@ export const ConfirmationCertificate = () => {
                   await uploadBytes(storageRef, authorizationImageFile);
                   authorizationImageUrl = await getDownloadURL(storageRef);
               }
-                
             const appointmentData = {
               appointmentType: 'confirmationCertificate',
               appointmentStatus: 'Pending',
@@ -116,7 +118,6 @@ export const ConfirmationCertificate = () => {
                 birthdayDate: formData.birthdayDate,
               }
             };
-      
             await addDoc(collection(db, 'appointments'), appointmentData);
             toast.success("Request submitted to Church Coordinator. Please wait for approval");
             resetForm();

@@ -12,6 +12,7 @@ export const Burial = () => {
     const [dateToday, setdateToday] = useState(new Date());
     const [matchedDates, setMatchedDates] = useState([]);
     const { churchId } = useParams();
+    // eslint-disable-next-line no-unused-vars
     const [churchData, setChurchData] = useState(null);
     const [slots, setSlots] = useState([]);
     const [userData, setUserData] = useState(null);
@@ -20,6 +21,7 @@ export const Burial = () => {
     const [activeDates, setActiveDates] = useState([]);
     const [deathCert,setDeathCert] = useState(null);
     const [refundPolicy, setRefundPolicy] = useState('');
+    // eslint-disable-next-line no-unused-vars
     const [deathCertUrl, setDeathCertUrl] = useState('');
     const [selectedSlotId, setSelectedSlotId] = useState(null);
 
@@ -170,13 +172,10 @@ export const Burial = () => {
         e.preventDefault();
         if (user && deathCert){
             try {
-                 
                 const deathCertRef = ref(storage, `userRequirementSubmissions/${user.uid}/${deathCert.name}`);
                 await uploadBytes(deathCertRef, deathCert);
                 const deathCertUrl = await getDownloadURL(deathCertRef);
                 setDeathCertUrl(deathCertUrl);
-    
-                    
                 const appointmentData = {
                   appointmentType: 'burial',
                   appointmentStatus: 'Pending',
@@ -196,17 +195,11 @@ export const Burial = () => {
                    deathCertificate: deathCertUrl,
                   }
                 };
-          
                 await addDoc(collection(db, 'appointments'), appointmentData);
-
-                
                 const slotRef = doc(db, 'slot', selectedSlotId);
                 await updateDoc(slotRef, { slotStatus: 'taken' });
-
-                
                 setSlots(prevSlots => prevSlots.filter(slot => slot.id !== selectedSlotId));
                 setMatchedDates(prevMatchedDates => prevMatchedDates.filter(slot => slot.id !== selectedSlotId));
-
                 toast.success("Request submitted to Church Coordinator. Please wait for approval");
                 resetForm();
               } catch (error) {
@@ -214,8 +207,7 @@ export const Burial = () => {
                 toast.error(`Error submitting request: ${error.message}`);
               }
             }
-            
-        };
+    };
 
         const handleClear = () => {
             resetForm();
