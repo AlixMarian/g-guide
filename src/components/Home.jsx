@@ -4,9 +4,11 @@ import { db } from '/backend/firebase';
 import { Carousel } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../websiteUser.css';
+import useChatbot from './Chatbot';
 
 const Home = () => {
   const [churches, setChurches] = useState([]);
+  useChatbot();
 
   useEffect(() => {
     const fetchChurches = async () => {
