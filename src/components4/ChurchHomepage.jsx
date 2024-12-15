@@ -12,7 +12,8 @@ import ChurchHomepageBook from './ChurchHomepageBook';
 import ChurchHomepageReqVol from './ChurchHomepageReqVol';
 import '../websiteUser.css';
 import { toast } from 'react-toastify';
-import { Modal, Button} from 'react-bootstrap';
+import { Modal} from 'react-bootstrap';
+import Logo from '../assets/G-Guide LOGO.png';
 
 const ChurchHomepage = () => {
   const { churchId } = useParams();
@@ -156,7 +157,7 @@ const ChurchHomepage = () => {
         <i 
           className={`bi ${bookmarkFilled ? 'bi-bookmark-heart-fill' : 'bi-bookmark-heart'}`} 
           style={{ fontSize: '2rem', cursor: 'pointer' }} 
-          onClick={user ? toggleBookmark : null} // Only call toggleBookmark if user is logged in
+          onClick={user ? toggleBookmark : null}
         ></i>
         <p 
           className='mb-0 ms-2'
@@ -183,8 +184,8 @@ const ChurchHomepage = () => {
             <button className="btn btn-primary" onClick={() => setActiveComponent('massSchedule')}>Mass Schedules</button>
             <button
               className="btn btn-primary"
-              onClick={() => user ? setActiveComponent('book') : setShowModal(true)} // Show modal if no user
-              disabled={!user || church.churchStatus === 'Archived'} // Disable if no user or church is Archived
+              onClick={() => user ? setActiveComponent('book') : setShowModal(true)}
+              disabled={church.churchStatus === 'Archived'}
             >
               Book a Church Service
             </button>
@@ -200,18 +201,26 @@ const ChurchHomepage = () => {
           </div>
         </div>
       </div>
-    {/* Bootstrap Modal */}
     <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Create an Account</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Want to book a church service? Create an account.</p>
+        <Modal.Body className="text-center">
+          <img 
+            src={Logo} 
+            alt="G-Guide Logo" 
+            style={{ width: '150px', marginBottom: '15px' }}
+            className="d-block mx-auto"
+          />
+          <h2>You can do more with G! Guide</h2>
+          <p>Want to book an appointment or make a request at this church?</p>
+          <div>
+            <button type="button" className="btn btn-custom-primary mb-3" onClick={() => navigate('/login')}>Sign In</button>
+          </div>
+          <p style={{ textAlign: 'center' }}>
+            <span style={{ borderBottom: '1px solid black', padding: '0 10px' }}>Or</span>
+          </p>
+          <div>
+            <button type="button" className="btn btn-custom-primary" onClick={() => navigate('/signup')}>Sign Up</button>
+          </div>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={() => navigate('/login')}>Sign In</Button>
-          <Button variant="secondary" onClick={() => navigate('/signup')}>Sign Up</Button>
-        </Modal.Footer>
       </Modal>
     </div>
   );
