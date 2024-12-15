@@ -5,7 +5,7 @@ import { getAuth } from 'firebase/auth';
 import {  collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Modal} from 'react-bootstrap'; 
+import { Modal, Pagination} from 'react-bootstrap'; 
 
 export const ViewAppointments = () => {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export const ViewAppointments = () => {
 
   const [appointments, setAppointments] = useState([]);
   const [churches, setChurches] = useState({});
-  const [massIntentions,setMassIntentions] = useState({});
+  const [massIntentions,setMassIntentions] = useState([]);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [showMassIntentionModal, setShowMassIntentionModal] = useState(false);
@@ -24,8 +24,11 @@ export const ViewAppointments = () => {
   const [selectedMassIntention, setSelectedMassIntention] = useState(null);
   const [slots, setSlots] = useState([]);
   const [events, setEvents] = useState({});
+  const [currentAppointmentPage, setCurrentAppointmentPage] = useState(1);
+  const [currentMassIntentionPage, setCurrentMassIntentionPage] = useState(1);
   const auth = getAuth();
   const user = auth.currentUser;
+  const itemsPerPage = 5; // Number of entries per page
 
   useEffect(() => {
     const fetchAppointmentsAndSlots = async () => {
@@ -219,6 +222,29 @@ export const ViewAppointments = () => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return date.toLocaleDateString(undefined, options);
   };
+  // Filter appointments first
+  const filteredAppointments = appointments.filter(
+    (appointment) => appointment.appointmentStatus === "Approved" || appointment.appointmentStatus === "Denied"
+  );
+
+  // Pagination logic for filtered appointments
+  const indexOfLastAppointment = currentAppointmentPage * itemsPerPage;
+  const indexOfFirstAppointment = indexOfLastAppointment - itemsPerPage;
+  const currentAppointments = filteredAppointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
+
+  const totalAppointmentPages = Math.ceil(filteredAppointments.length / itemsPerPage);
+
+
+  const paginateAppointments = (pageNumber) => setCurrentAppointmentPage(pageNumber);
+
+  // Pagination logic for Mass Intentions
+  const indexOfLastMassIntention = currentMassIntentionPage * itemsPerPage;
+  const indexOfFirstMassIntention = indexOfLastMassIntention - itemsPerPage;
+  const currentMassIntentions = massIntentions.slice(indexOfFirstMassIntention, indexOfLastMassIntention);
+
+  const totalMassIntentionPages = Math.ceil(massIntentions.length / itemsPerPage);
+
+  const paginateMassIntentions = (pageNumber) => setCurrentMassIntentionPage(pageNumber);
 
   return (
     <div className="viewApp">
@@ -228,12 +254,12 @@ export const ViewAppointments = () => {
             <button type="button" className="btn btn-custom-primary" onClick={handleBackToHomepage}>Back to Homepage</button>
           </div>
           <div className="col-12 mb-4">
+            <h1>Appointments and Requests History</h1>
             <div className="card">
               <div className="card-body">
-                <h5 className="card-title">Appointment History</h5>
                 <div className="row">
-                  {appointments.length > 0 ? (
-                    appointments.some(appointment => 
+                  {currentAppointments.length > 0 ? (
+                    currentAppointments.some(appointment => 
                       appointment.appointmentStatus === "Approved" || appointment.appointmentStatus === "Denied"
                     ) ? (
                       appointments
@@ -275,16 +301,29 @@ export const ViewAppointments = () => {
                   )}
                 </div>
               </div>
+              <div className="d-flex justify-content-center mt-3">
+                <Pagination>
+                  {[...Array(totalAppointmentPages).keys()].map(page => (
+                    <Pagination.Item
+                      key={page + 1}
+                      active={page + 1 === currentAppointmentPage}
+                      onClick={() => paginateAppointments(page + 1)}
+                    >
+                      {page + 1}
+                    </Pagination.Item>
+                  ))}
+                </Pagination>
+              </div>
             </div>
           </div>
 
           <div className="col-12 mb-4">
+              <h1>Mass Intentions</h1>
               <div className="card">
                   <div className="card-body">
-                      <h5 className="card-title">Mass Intentions</h5>
                       <div className="row">
-                          {massIntentions.length > 0 ? (
-                              massIntentions.map(massIntention => (
+                          {currentMassIntentions.length > 0 ? (
+                              currentMassIntentions.map(massIntention => (
                                   <div key={massIntention.id} className="col-12 mb-3">
                                       <div className="card">
                                           <div className="card-body d-flex align-items-center justify-content-between">
@@ -304,6 +343,19 @@ export const ViewAppointments = () => {
                           )}
                       </div>
                   </div>
+                  <div className="d-flex justify-content-center mt-3">
+                <Pagination>
+                  {[...Array(totalMassIntentionPages).keys()].map(page => (
+                    <Pagination.Item
+                      key={page + 1}
+                      active={page + 1 === currentMassIntentionPage}
+                      onClick={() => paginateMassIntentions(page + 1)}
+                    >
+                      {page + 1}
+                    </Pagination.Item>
+                  ))}
+                </Pagination>
+              </div>
               </div>
           </div>
 

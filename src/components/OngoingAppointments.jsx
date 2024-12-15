@@ -32,7 +32,7 @@ export const OngoingAppointments = () => {
   const [currentAppointmentPage, setCurrentAppointmentPage] = useState(1);
   const [refundPolicy, setRefundPolicy] = useState(null);
   const [servicesData, setServicesData] = useState({});
-  const appointmentsPerPage = 2;
+  const appointmentsPerPage = 5;
   
   const auth = getAuth();
   const user = auth.currentUser;
@@ -167,8 +167,6 @@ export const OngoingAppointments = () => {
                   const churchData = churchDoc.data();
                   setChurchQRDetail(churchData.churchQRDetail || null);
                   setRefundPolicy(churchData.refundPolicy || null);
-
-                  // Fetch services data
                   console.log("Fetching services data for Church ID:", churchId);
                   await fetchServicesData(churchId);
               } else {
