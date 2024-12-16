@@ -38,6 +38,7 @@ const MapComponent = () => {
   const [filteredChurches, setFilteredChurches] = useState([]);
   const [churchPhoto, setChurchPhoto] = useState(coverLogo);
   const [loading, setLoading] = useState(true);
+  const [showingAllDates, setShowingAllDates] = useState(false);
   const [drawerInfo, setDrawerInfo] = useState({
     show: false,
     id: '',
@@ -66,6 +67,7 @@ const MapComponent = () => {
     setSelectedLanguage('');
     setChurches([]);
     setFilteredChurches([]);
+    setShowingAllDates(false);
     setDrawerInfo({
       show: false,
       id: '',
@@ -171,6 +173,7 @@ useEffect(() => {
 
 const handleShowAllDates = async () => {
   setLoading(true);
+  setShowingAllDates(true);
   try {
     const churches = await fetchChurchesByLanguage(selectedLanguage);
     setChurches(churches);
@@ -370,6 +373,7 @@ const handleShowAllDates = async () => {
         setChurchPhoto={setChurchPhoto}
         showOtherDatesButton={showOtherDatesButton}
         handleShowAllDates={handleShowAllDates}
+        showingAllDates={showingAllDates}
       />
 
       {error && (
