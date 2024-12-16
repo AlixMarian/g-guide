@@ -23,7 +23,6 @@ export const MassIntention = () => {
   });
   const [massSchedules, setMassSchedules] = useState([]);
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
-  // const [filteredMassSchedules, setFilteredMassSchedules] = useState([]);
   const [weekdays, setWeekdays] = useState([]);
   const [weekends, setWeekends] = useState([]);
 
@@ -57,7 +56,7 @@ export const MassIntention = () => {
       try {
         const q = query(
           collection(db, 'massSchedules'),
-          where('churchId', '==', churchId) // Fetch schedules related to this church
+          where('churchId', '==', churchId) 
         );
 
         const querySnapshot = await getDocs(q);
@@ -66,7 +65,7 @@ export const MassIntention = () => {
           ...doc.data(),
         }));
 
-        // Separate into weekdays and weekends for easier display
+        
         const weekdayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
         const weekendOrder = ['Saturday', 'Sunday'];
 
@@ -77,7 +76,7 @@ export const MassIntention = () => {
           weekendOrder.includes(schedule.massDate)
         );
 
-        // Sort weekdays and weekends separately
+      
         weekdaySchedules.sort(
           (a, b) =>
             weekdayOrder.indexOf(a.massDate) - weekdayOrder.indexOf(b.massDate) ||

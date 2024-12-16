@@ -13,15 +13,15 @@ const AddChurch = () => {
     latitude: '',
     longitude: ''
   });
-  const [showInstructions, setShowInstructions] = useState(false); // Add this state
+  const [showInstructions, setShowInstructions] = useState(false);
 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    // For latitude and longitude, only allow numbers and decimal points
+    
     if (name === 'latitude' || name === 'longitude') {
-      // Only update if empty or a valid number (including decimals and negative signs)
+      
       if (value === '' || /^-?\d*\.?\d*$/.test(value)) {
         setFormData(prev => ({
           ...prev,
@@ -38,18 +38,14 @@ const AddChurch = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate inputs
     if (!formData.churchLocation || !formData.churchName || !formData.latitude || !formData.longitude) {
       toast.error('Please fill in all fields');
       return;
     }
-
-    // Convert latitude and longitude to numbers
     const numLatitude = parseFloat(formData.latitude);
     const numLongitude = parseFloat(formData.longitude);
 
-    // Validate latitude and longitude ranges
+
     if (numLatitude < -90 || numLatitude > 90) {
       toast.error('Latitude must be between -90 and 90 degrees');
       return;
@@ -60,7 +56,7 @@ const AddChurch = () => {
     }
 
     try {
-      // Add document to churchLocation collection
+      
       await addDoc(collection(db, 'churchLocation'), {
         churchLocation: formData.churchLocation,
         churchName: formData.churchName,
@@ -70,7 +66,7 @@ const AddChurch = () => {
 
       toast.success('Church location added successfully!');
       
-      // Reset form
+     
       setFormData({
         churchLocation: '',
         churchName: '',

@@ -20,27 +20,27 @@ export const ChurchHomepageReqVol = () => {
           return;
         }
 
-        // Query for ongoing posts
+        
         const ongoingQuery = query(
           collection(db, 'requestVolunteers'),
           where('churchId', '==', churchId),
           where('status', '==', 'ongoing')
         );
 
-        // Query for archived posts
+        
         const archivedQuery = query(
           collection(db, 'requestVolunteers'),
           where('churchId', '==', churchId),
           where('status', '==', 'archived')
         );
 
-        // Fetch both ongoing and archived posts
+        
         const [ongoingSnapshot, archivedSnapshot] = await Promise.all([
           getDocs(ongoingQuery),
           getDocs(archivedQuery),
         ]);
 
-        // Map snapshots to arrays of post data
+       
         const ongoingList = ongoingSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -51,15 +51,15 @@ export const ChurchHomepageReqVol = () => {
           ...doc.data(),
         }));
 
-        // Sort posts by uploadDate in descending order
+      
         ongoingList.sort((a, b) => b.uploadDate.toDate() - a.uploadDate.toDate());
         archivedList.sort((a, b) => b.uploadDate.toDate() - a.uploadDate.toDate());
 
-        // Update state with sorted data
+      
         setOngoingPosts(ongoingList);
         setArchivedPosts(archivedList);
 
-        // Show Bible verse if there are archived posts
+      
         setShowVerse(archivedList.length > 0);
       } catch (error) {
         console.error('Error fetching posts:', error);

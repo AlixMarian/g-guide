@@ -21,7 +21,7 @@ export const ChurchUploads = () => {
     const churchProofRef = useRef(null);
     const navigate = useNavigate();
 
-    // Step 1: Fetch the coordinator's church ID
+    
     const fetchChurchId = async (userId) => {
         try {
             const coordinatorQuery = query(
@@ -54,7 +54,7 @@ export const ChurchUploads = () => {
         }
     };
 
-    // Step 2: Fetch church data using the churchId
+    
     const fetchChurchData = async (id) => {
         try {
             const churchDoc = await getDoc(doc(db, "church", id));
@@ -69,7 +69,7 @@ export const ChurchUploads = () => {
         }
     };
 
-    // Step 3: Fetch church photos from Firestore
+   
     const fetchChurchPhotos = async (id) => {
         try {
             const photosQuery = query(
@@ -89,7 +89,7 @@ export const ChurchUploads = () => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 console.log("User signed in:", user);
-                await fetchChurchId(user.uid); // Step 1
+                await fetchChurchId(user.uid);
             } else {
                 console.log("No user signed in.");
                 navigate("/login");
@@ -101,8 +101,8 @@ export const ChurchUploads = () => {
 
     useEffect(() => {
         if (churchId) {
-            fetchChurchData(churchId); // Step 2
-            fetchChurchPhotos(churchId); // Step 3
+            fetchChurchData(churchId); 
+            fetchChurchPhotos(churchId);
         }
     }, [churchId]);
 
@@ -127,12 +127,12 @@ export const ChurchUploads = () => {
         }
     
         try {
-            const storageRef = ref(storage, `churchQRs/${churchId}`); // Use churchId
+            const storageRef = ref(storage, `churchQRs/${churchId}`); 
             await uploadBytes(storageRef, bankProofFile);
             const bankProofUrl = await getDownloadURL(storageRef);
     
             await updateDoc(doc(db, 'church', churchId), {
-                churchQRDetail: bankProofUrl, // Update church document using churchId
+                churchQRDetail: bankProofUrl, 
             });
     
             toast.success('Bank proof updated successfully');
@@ -166,12 +166,12 @@ export const ChurchUploads = () => {
         }
     
         try {
-            const storageRef = ref(storage, `churchVerification/${churchId}`); // Use churchId
+            const storageRef = ref(storage, `churchVerification/${churchId}`); 
             await uploadBytes(storageRef, churchProofFile);
             const churchProofUrl = await getDownloadURL(storageRef);
     
             await updateDoc(doc(db, 'church', churchId), {
-                churchProof: churchProofUrl, // Update church document using churchId
+                churchProof: churchProofUrl, 
             });
     
             toast.success('Church proof updated successfully');
@@ -202,7 +202,7 @@ export const ChurchUploads = () => {
         }
     
         try {
-            // Fetch current photos for this church to check count
+           
             const q = query(collection(db, "churchPhotos"), where("uploader", "==", churchId));
             const querySnapshot = await getDocs(q);
             const currentPhotoCount = querySnapshot.size;
@@ -212,20 +212,20 @@ export const ChurchUploads = () => {
                 return;
             }
     
-            // Upload each photo and save the link in Firestore
+            
             const uploadPromises = churchPhotos.map(async (photo) => {
-                const storageRef = ref(storage, `churchPhotos/${churchId}/${photo.name}`); // Save photos under churchId
+                const storageRef = ref(storage, `churchPhotos/${churchId}/${photo.name}`); 
                 await uploadBytes(storageRef, photo);
                 const photoUrl = await getDownloadURL(storageRef);
     
                 await addDoc(collection(db, 'churchPhotos'), {
                     photoLink: photoUrl,
-                    uploader: churchId, // Use churchId instead of user.uid
+                    uploader: churchId, 
                 });
             });
     
             await Promise.all(uploadPromises);
-            fetchChurchPhotos(churchId); // Fetch updated list of photos for this church
+            fetchChurchPhotos(churchId);
     
             toast.success('Church photos uploaded successfully');
             setChurchPhotos([]);

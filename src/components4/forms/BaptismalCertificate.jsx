@@ -204,7 +204,7 @@ export const BaptismalCertificate = () => {
                         </div>
                     </div>
                 </div>
-                {/* Authorization Upload Section */}
+                
                 {showAuthorization && (
                     <div className='authorization card mb-4'>
                         <div className='card-body'>
@@ -215,7 +215,7 @@ export const BaptismalCertificate = () => {
                     </div>
                 )}
 
-                {/* User Details Section */}
+             
                 <div className="userDetails card mb-4">
                     <div className="card-body">
                         <h5 className="card-title">User Details</h5>
@@ -240,7 +240,7 @@ export const BaptismalCertificate = () => {
                     </div>
                 </div>
 
-                {/* Refund Policy Section */}
+               
                 <div className="card mb-4">
                     <div className="card-body">
                         <h5 className="card-title">Refund Policy</h5>
@@ -248,7 +248,6 @@ export const BaptismalCertificate = () => {
                     </div>
                 </div>
 
-                {/* Form Fields Section */}
                 <div className="submitReq card mb-4">
                     <div className="card-body">
                         <h5 className="card-title">Submit Requirements</h5>
@@ -267,7 +266,7 @@ export const BaptismalCertificate = () => {
                             <input type="date" className="form-control" name="birthday" max={new Date().toISOString().split('T')[0]} onChange={handleChange} value={formData.birthday} required/>
                         </div>
 
-                        {/* Father's Details */}
+                        
                         <div><b>Father&apos;s Details</b></div>
                         <div className="row mb-3">
                             <div className="col">
@@ -280,7 +279,7 @@ export const BaptismalCertificate = () => {
                             </div>
                         </div>
 
-                        {/* Mother's Details */}
+                       
                         <div><b>Mother&apos;s Details</b></div>
                         <div className="row mb-3">
                             <div className="col">
@@ -293,7 +292,7 @@ export const BaptismalCertificate = () => {
                             </div>
                         </div>
 
-                        {/* Submit and Clear Buttons */}
+                       
                         <div className="d-grid gap-2 d-md-flex justify-content-md-end">
                             <button type="submit" className="btn btn-success">Submit Request</button>
                             <button type="reset" className="btn btn-danger" onClick={handleClear}>Clear</button>

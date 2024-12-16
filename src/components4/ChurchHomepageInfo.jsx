@@ -25,7 +25,7 @@ export const ChurchHomepageInfo = () => {
           const data = servicesDoc.data();
           const activeServices = Object.entries(data)
             // eslint-disable-next-line no-unused-vars
-            .filter(([key, value]) => value.active) // Only services marked as active
+            .filter(([key, value]) => value.active) 
             .map(([key, value]) => ({
               name: key,
               fee: value.fee,

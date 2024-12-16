@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '/backend/firebase'; // Adjust path based on your project structure
+import { db } from '/backend/firebase'; 
 import { Button, Modal, Pagination } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css'; // Import styles for react-datepicker
+import 'react-datepicker/dist/react-datepicker.css'; 
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif'; 
-import '../systemAdmin.css'; // Ensure this file has the necessary CSS styles
+import '../systemAdmin.css'; 
 
 export const Transactions = () => {
   const [payments, setPayments] = useState([]);
-  const [churches, setChurches] = useState([]); // Store list of churches
+  const [churches, setChurches] = useState([]); 
   const [loading, setLoading] = useState(true);
-  const [selectedPaymentImage, setSelectedPaymentImage] = useState(null); // For modal
+  const [selectedPaymentImage, setSelectedPaymentImage] = useState(null); 
   const [showModal, setShowModal] = useState(false);
   const [selectedChurch, setSelectedChurch] = useState('All');
-  const [selectedDate, setSelectedDate] = useState(null); // For react-datepicker
-  const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
-  const itemsPerPage = 10; // Number of entries per page
+  const [selectedDate, setSelectedDate] = useState(null); 
+  const [currentPage, setCurrentPage] = useState(1); 
+  const itemsPerPage = 10; 
 
-  // Fetch church list from Firestore
+ 
   useEffect(() => {
     const fetchChurches = async () => {
       try {
@@ -36,7 +36,7 @@ export const Transactions = () => {
     fetchChurches();
   }, []);
 
-    // Fetch payments from Firestore
+    
     useEffect(() => {
       const fetchPayments = async () => {
         try {
@@ -45,7 +45,7 @@ export const Transactions = () => {
             appointmentsSnapshot.docs.map(async (appointmentDoc) => {
               const appointmentData = appointmentDoc.data();
   
-              // Fetch the church name using the churchId from the 'church' collection
+              
               let churchName = 'Unknown';
               if (appointmentData.churchId) {
                 const churchDocRef = doc(db, 'church', appointmentData.churchId);
@@ -55,33 +55,33 @@ export const Transactions = () => {
                 }
               }
   
-              // Convert Firestore timestamp to a JavaScript Date object
+             
               const dateCreated = appointmentData.userFields?.dateOfRequest?.toDate?.() || new Date();
   
-              // Only return the payment if amountPaid exists (i.e., it's not null)
+              
               if (appointmentData.appointments?.paymentImage) {
                 return {
                   paymentId: appointmentDoc.id,
                   dateCreated: dateCreated,
-                  formattedDate: dateCreated.toLocaleDateString(), // For displaying
+                  formattedDate: dateCreated.toLocaleDateString(), 
                   churchName,
                   userId: appointmentData.userFields?.requesterId || 'Unknown User',
-                  amountPaid: appointmentData.appointments?.paymentImage || null, // Check if the payment image exists
+                  amountPaid: appointmentData.appointments?.paymentImage || null, 
                 };
               } else {
-                return null; // Skip payments without an amountPaid
+                return null; 
               }
             })
           );
   
-          // Filter out any null values (appointments without payment image)
+          
           const filteredAppointments = appointmentsList.filter(appointment => appointment !== null);
   
           setPayments(filteredAppointments);
         } catch (error) {
           console.error('Error fetching payments:', error);
         } finally {
-          setLoading(false); // Ensure loading is set to false in the finally block
+          setLoading(false); 
         }
       };
   
@@ -103,10 +103,10 @@ export const Transactions = () => {
   };
 
   const filteredPayments = payments.filter((payment) => {
-    // Filter by church
+    
     const churchMatch = selectedChurch === 'All' || payment.churchName === selectedChurch;
 
-    // Filter by selected date
+    
     const dateMatch = selectedDate ? payment.dateCreated.toLocaleDateString() === selectedDate.toLocaleDateString() : true;
 
     return churchMatch && dateMatch;
@@ -131,7 +131,6 @@ export const Transactions = () => {
         <>
         <div className="filtering mb-3">
           <div className="d-flex align-items-start gap-4">
-            {/* Filter by Church */}
             <div className="form-group">
               <label className="form-label"><b>Filter by Church:</b></label>
               <div className="dropdown">
@@ -158,8 +157,6 @@ export const Transactions = () => {
                 </ul>
               </div>
             </div>
-
-            {/* Filter by Date */}
             <div className="form-group">
               <label className="form-label"><b>Filter by Date:</b></label>
               <div className="input-group">
@@ -239,8 +236,6 @@ export const Transactions = () => {
           </div>
         </>
       )}
-
-      {/* Modal to display the payment image */}
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Payment Proof</Modal.Title>

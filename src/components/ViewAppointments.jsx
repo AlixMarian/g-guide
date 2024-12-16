@@ -28,7 +28,7 @@ export const ViewAppointments = () => {
   const [currentMassIntentionPage, setCurrentMassIntentionPage] = useState(1);
   const auth = getAuth();
   const user = auth.currentUser;
-  const itemsPerPage = 5; // Number of entries per page
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchAppointmentsAndSlots = async () => {
@@ -222,12 +222,12 @@ export const ViewAppointments = () => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return date.toLocaleDateString(undefined, options);
   };
-  // Filter appointments first
+  
   const filteredAppointments = appointments.filter(
     (appointment) => appointment.appointmentStatus === "Approved" || appointment.appointmentStatus === "Denied"
   );
 
-  // Pagination logic for filtered appointments
+  
   const indexOfLastAppointment = currentAppointmentPage * itemsPerPage;
   const indexOfFirstAppointment = indexOfLastAppointment - itemsPerPage;
   const currentAppointments = filteredAppointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
@@ -237,7 +237,7 @@ export const ViewAppointments = () => {
 
   const paginateAppointments = (pageNumber) => setCurrentAppointmentPage(pageNumber);
 
-  // Pagination logic for Mass Intentions
+ 
   const indexOfLastMassIntention = currentMassIntentionPage * itemsPerPage;
   const indexOfFirstMassIntention = indexOfLastMassIntention - itemsPerPage;
   const currentMassIntentions = massIntentions.slice(indexOfFirstMassIntention, indexOfLastMassIntention);

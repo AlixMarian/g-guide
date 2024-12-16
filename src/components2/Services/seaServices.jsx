@@ -11,7 +11,7 @@ export const getMassList = async (setMassList, churchId) => {
         ...doc.data(),
         id: doc.id
       }))
-      .filter(doc => doc.churchId === churchId); // Changed from creatorId to churchId
+      .filter(doc => doc.churchId === churchId);
     setMassList(filteredData);
   } catch (err) {
     console.error(err);
@@ -21,9 +21,9 @@ export const getMassList = async (setMassList, churchId) => {
 // Add a new Mass Schedule
 export const addMassSchedule = async (massData, churchId, getMassList) => {
   try {
-    await addDoc(collection(db, "massSchedules"), { ...massData }); // Removed creatorId and retained massData
+    await addDoc(collection(db, "massSchedules"), { ...massData }); 
     toast.success('Mass schedule added successfully!');
-    getMassList(churchId); // Changed argument to churchId
+    getMassList(churchId); 
   } catch (err) {
     toast.error('Error adding mass schedule!');
     console.error(err);
@@ -35,7 +35,7 @@ export const deleteMassSchedule = async (id, getMassList, churchId) => {
   try {
     await deleteDoc(doc(db, "massSchedules", id));
     toast.success('Mass schedule deleted successfully!');
-    getMassList(churchId); // Changed argument to churchId
+    getMassList(churchId); 
   } catch (err) {
     toast.error('Error deleting mass schedule!');
     console.error(err);
@@ -64,7 +64,7 @@ export const getPriestList = async (setPriestList, churchId) => {
         ...doc.data(),
         id: doc.id
       }))
-      .filter(doc => doc.churchId === churchId); // Changed from creatorId to churchId
+      .filter(doc => doc.churchId === churchId); 
     setPriestList(filteredData);
   } catch (err) {
     console.error(err);
@@ -80,7 +80,7 @@ export const getEventList = async (setEventList, churchId) => {
         ...doc.data(),
         id: doc.id
       }))
-      .filter(doc => doc.churchId === churchId); // Changed from creatorId to churchId
+      .filter(doc => doc.churchId === churchId);
     setEventList(filteredData);
   } catch (err) {
     console.error(err);
@@ -89,9 +89,9 @@ export const getEventList = async (setEventList, churchId) => {
 
 export const addEventSchedule = async (eventData, churchId, getEventList) => {
   try {
-    await addDoc(collection(db, "events"), { ...eventData }); // Removed creatorId
+    await addDoc(collection(db, "events"), { ...eventData }); 
     toast.success('Event schedule added successfully!');
-    getEventList(churchId); // Changed argument to churchId
+    getEventList(churchId); 
   } catch (err) {
     toast.error('Error adding event schedule!');
     console.error(err);
@@ -102,7 +102,7 @@ export const deleteEventSchedule = async (id, getEventList, churchId) => {
   try {
     await deleteDoc(doc(db, "events", id));
     toast.success('Event schedule deleted successfully!');
-    getEventList(churchId); // Changed argument to churchId
+    getEventList(churchId); 
   } catch (err) {
     toast.error('Error deleting event schedule!');
     console.error(err);
@@ -129,7 +129,7 @@ export const getAnnouncementList = async (setAnnouncementList, churchId) => {
         ...doc.data(),
         id: doc.id
       }))
-      .filter(doc => doc.churchId === churchId); // Changed from creatorId to churchId
+      .filter(doc => doc.churchId === churchId); 
     setAnnouncementList(filteredData);
   } catch (err) {
     console.error(err);
@@ -138,9 +138,9 @@ export const getAnnouncementList = async (setAnnouncementList, churchId) => {
 
 export const addAnnouncement = async (announcementData, churchId, getAnnouncementList) => {
   try {
-    await addDoc(collection(db, "announcements"), { ...announcementData }); // Removed creatorId
+    await addDoc(collection(db, "announcements"), { ...announcementData }); 
     toast.success('Announcement added successfully!');
-    getAnnouncementList(churchId); // Changed argument to churchId
+    getAnnouncementList(churchId); 
   } catch (err) {
     toast.error('Error adding announcement!');
     console.error(err);
@@ -151,7 +151,7 @@ export const deleteAnnouncement = async (id, getAnnouncementList, churchId) => {
   try {
     await deleteDoc(doc(db, "announcements", id));
     toast.success('Announcement deleted successfully!');
-    getAnnouncementList(churchId); // Changed argument to churchId
+    getAnnouncementList(churchId); 
   } catch (err) {
     toast.error('Error deleting Announcement!');
     console.error(err);

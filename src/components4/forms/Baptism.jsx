@@ -291,7 +291,6 @@ export const Baptism = () => {
     return (
         <div>
             <form className='baptism' onSubmit={handleCreateAppointment}>
-                {/* User Details and Selected Service */}
                 <div className="userDetails card mb-4">
                     <div className="card-body">
                         <h5 className="card-title">User Details</h5>
@@ -316,7 +315,6 @@ export const Baptism = () => {
                     </div>
                 </div>
 
-                {/* Refund Policy Section */}
                 <div className="userDetails card mb-4">
                     <div className="card-body">
                         <h5 className="card-title">Refund Policy</h5>
@@ -324,7 +322,6 @@ export const Baptism = () => {
                     </div>
                 </div>
 
-                {/* Calendar and Slots */}
                 <div className="card mb-4">
                 <div className="card-body">
                     <h5 className="card-title">Select Schedule for Baptism</h5>
@@ -374,7 +371,6 @@ export const Baptism = () => {
                 </div>
                 </div>
 
-                {/* Form for submitting baptism requirements */}
                 <div className="submitReq card mb-4">
                     <div className="card-body">
                         <h5 className="card-title">Submit Requirements</h5>

@@ -3,11 +3,11 @@ import { Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { getDoc, doc } from 'firebase/firestore';
-import { db } from '/backend/firebase'; // Adjust path based on your project structure
+import { db } from '/backend/firebase'; 
 import 'react-toastify/dist/ReactToastify.css';
 import { toast } from 'react-toastify';
 
-// Inline styles
+
 const styles = {
   navbarContainer: {
     position: 'fixed',
@@ -29,22 +29,22 @@ const styles = {
     alignItems: 'center', 
     justifyContent: 'center',
     background: '#0068A2',
-    height: '90px', // Adjusted for better height
-    width: '120px', // Adjusted for better width
+    height: '90px', 
+    width: '120px', 
     padding: '10px',
-    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.3)', // Slight shadow for depth
+    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.3)', 
   },
   buttonIcon: {
     marginBottom: '5px',
-    marginTop: '15px', // Add some space between icon and text
+    marginTop: '15px', 
   },
 };
 
 const SysAdminNavbar = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null); // State for the logged-in user
-  const [profileImage, setProfileImage] = useState('../src/assets/G-Guide LOGO.png'); // Default system admin image
-  const [userRole, setUserRole] = useState(''); // To track the user's role
+  const [user, setUser] = useState(null); 
+  const [profileImage, setProfileImage] = useState('../src/assets/G-Guide LOGO.png'); 
+  const [userRole, setUserRole] = useState(''); 
 
   useEffect(() => {
     const auth = getAuth();
@@ -55,19 +55,19 @@ const SysAdminNavbar = () => {
 
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        setUserRole(userData.role); // Set the user's role (sysAdmin, churchCoor, websiteUser)
+        setUserRole(userData.role); 
         if (userData.role !== 'sysAdmin' && userData.profileImage) {
-          setProfileImage(userData.profileImage); // Set the user's profile image if they are not sysAdmin
+          setProfileImage(userData.profileImage); 
         }
       }
     };
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUser(user); // Set the user state with logged-in user info
-        fetchUserData(user.uid); // Fetch user data from Firestore
+        setUser(user); 
+        fetchUserData(user.uid); 
       } else {
-        navigate('/login'); // Redirect to login if not authenticated
+        navigate('/login'); 
       }
     });
 

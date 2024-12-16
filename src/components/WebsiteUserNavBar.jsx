@@ -46,15 +46,15 @@ const WebsiteUserNavBar = () => {
     const auth = getAuth();
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
-        // Listen for changes in the inboxMessages collection
+        
         const inboxQuery = query(
           collection(db, 'inboxMessage'),
           where('userId', '==', user.uid),
-          where('status', '==', 'new') // Fetch only messages with status "new"
+          where('status', '==', 'new') 
         );
 
         const unsubscribeSnapshot = onSnapshot(inboxQuery, (snapshot) => {
-          setHasNewMessages(!snapshot.empty); // Set true if there are any "new" messages
+          setHasNewMessages(!snapshot.empty); 
         });
 
         return () => {

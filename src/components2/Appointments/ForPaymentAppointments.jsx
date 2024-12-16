@@ -96,7 +96,7 @@ export const ForPaymentAppointments = () => {
                  const sortedAppointments = forPaymentAppointmentsData.sort((a, b) => {
                     const dateA = a.userFields?.dateOfRequest.seconds || 0;
                     const dateB = b.userFields?.dateOfRequest.seconds || 0; 
-                    return dateB - dateA; // Most recent first
+                    return dateB - dateA;
                 });
 
                 console.log("Fetched Data: ", forPaymentAppointmentsData);
@@ -299,7 +299,7 @@ export const ForPaymentAppointments = () => {
         return `${hours12}:${minutes} ${ampm}`;
     };
 
-    // Add filtering logic
+   
     const filteredAppointments = forPaymentAppointments.filter((appointment) => {
         const matchesDate = selectedDate
             ? new Date(appointment.userFields?.dateOfRequest.seconds * 1000).toDateString() === selectedDate.toDateString()
@@ -311,7 +311,7 @@ export const ForPaymentAppointments = () => {
         return matchesDate && matchesType;
     });
 
-    // Update the data source for paginatedAppointments
+    
     const paginatedAppointments = filteredAppointments.slice(
         (currentPage - 1) * appointmentsPerPage,
         currentPage * appointmentsPerPage

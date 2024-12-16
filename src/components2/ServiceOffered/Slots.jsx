@@ -54,7 +54,7 @@ export const Slots = () => {
     }
   };
 
-  // Fetch church ID associated with the logged-in user
+  
   const fetchChurchId = async (userId) => {
     try {
       const coordinatorQuery = query(
@@ -89,13 +89,13 @@ export const Slots = () => {
     return null;
   };
 
-  // Fetch slots associated with the churchId
+ 
   const fetchSlots = async () => {
     if (!churchId) {
       console.error('Church ID is missing. Cannot fetch slots.');
       return;
     }
-    setLoading(true); // Set loading state to true
+    setLoading(true); 
     try {
       const slotsCollection = collection(db, 'slot');
       const q = query(slotsCollection, where('churchId', '==', churchId));
@@ -108,7 +108,7 @@ export const Slots = () => {
       console.error('Error fetching slots:', error);
       toast.error('Error fetching slots. Please try again.');
     } finally {
-      setLoading(false); // Set loading state to false
+      setLoading(false); 
     }
   };
 
@@ -118,7 +118,7 @@ export const Slots = () => {
         setUserID(user.uid);
         const fetchedChurchId = await fetchChurchId(user.uid);
         if (fetchedChurchId) {
-          fetchSlots(); // Fetch slots once churchId is fetched
+          fetchSlots();
         }
       } else {
         console.log('No user is signed in.');
@@ -288,7 +288,7 @@ export const Slots = () => {
         startTime,
         endTime,
         slotStatus: 'active',
-        churchId, // Use the correct churchId
+        churchId, 
       });
   
       resetForm();
@@ -324,36 +324,35 @@ export const Slots = () => {
       for (const date of dates) {
         const formattedDate = date.toISOString().split('T')[0];
   
-        // Fetch and delete active slots for the date
+       
         const activeSlotsQuery = query(
           slotsCollection,
           where('startDate', '==', formattedDate),
           where('slotStatus', '==', 'active'),
-          where('churchId', '==', churchId) // Match churchId
+          where('churchId', '==', churchId) 
         );
   
         const activeSlotsSnapshot = await getDocs(activeSlotsQuery);
         const deleteActivePromises = activeSlotsSnapshot.docs.map((doc) => deleteDoc(doc.ref));
         await Promise.all(deleteActivePromises);
   
-        // Check if disabled slot already exists
+       
         const disabledSlotsQuery = query(
           slotsCollection,
           where('startDate', '==', formattedDate),
           where('slotStatus', '==', 'disabled'),
-          where('churchId', '==', churchId) // Match churchId
+          where('churchId', '==', churchId) 
         );
   
         const disabledSlotsSnapshot = await getDocs(disabledSlotsQuery);
   
         if (disabledSlotsSnapshot.empty) {
-          // Add disabled slot if it doesn't exist
           await addDoc(slotsCollection, {
             startDate: formattedDate,
             startTime: 'none',
             endTime: 'none',
             slotStatus: 'disabled',
-            churchId, // Use the correct churchId
+            churchId,
           });
         }
       }
@@ -390,37 +389,35 @@ export const Slots = () => {
   
       for (const date of dates) {
         const formattedDate = date.toISOString().split('T')[0];
-  
-        // Fetch and delete active slots for the date
         const activeSlotsQuery = query(
           slotsCollection,
           where('startDate', '==', formattedDate),
           where('slotStatus', '==', 'active'),
-          where('churchId', '==', churchId) // Match churchId
+          where('churchId', '==', churchId) 
         );
   
         const activeSlotsSnapshot = await getDocs(activeSlotsQuery);
         const deleteActivePromises = activeSlotsSnapshot.docs.map((doc) => deleteDoc(doc.ref));
         await Promise.all(deleteActivePromises);
   
-        // Check if disabled slot already exists
+       
         const disabledSlotsQuery = query(
           slotsCollection,
           where('startDate', '==', formattedDate),
           where('slotStatus', '==', 'disabled'),
-          where('churchId', '==', churchId) // Match churchId
+          where('churchId', '==', churchId) 
         );
   
         const disabledSlotsSnapshot = await getDocs(disabledSlotsQuery);
   
         if (disabledSlotsSnapshot.empty) {
-          // Add disabled slot if it doesn't exist
+          
           await addDoc(slotsCollection, {
             startDate: formattedDate,
             startTime: 'none',
             endTime: 'none',
             slotStatus: 'disabled',
-            churchId, // Use the correct churchId
+            churchId, 
           });
         }
       }

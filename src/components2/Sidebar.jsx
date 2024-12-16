@@ -47,7 +47,7 @@ export const Layout = () => {
     navigate('/ListofPriest')
   };
 
-  //
+  
   const handlePending = () => {
     if (secondSidebarOpen) {
       navigate('/PendingAppointments');
@@ -332,7 +332,7 @@ export const Layout = () => {
         
         <div className={`second-sidebar ${secondSidebarOpen ? 'open' : 'close'}`} ref={secondSidebarRef}
            style={{
-             pointerEvents: secondSidebarOpen ? 'auto' : 'none', // Disable interactions when hidden
+             pointerEvents: secondSidebarOpen ? 'auto' : 'none',
            }}
         >
           <div className="second-sidebar-content">

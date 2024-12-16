@@ -221,7 +221,7 @@ export const Marriage = () => {
 
           if (churchDocSnap.exists()) {
               const data = churchDocSnap.data();
-              setRefundPolicy(data.refundPolicy || "No refund policy available."); // Set refund policy or default message
+              setRefundPolicy(data.refundPolicy || "No refund policy available.");
           } else {
               console.log("No church data found for refund policy.");
               setRefundPolicy("No refund policy available.");

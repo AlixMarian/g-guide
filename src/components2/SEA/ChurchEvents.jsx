@@ -23,7 +23,7 @@ export const ChurchEvents = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
 
-    // Step 1: Fetch the church ID associated with the logged-in coordinator
+  
   const fetchChurchId = async (userId) => {
     try {
       const coordinatorQuery = query(
@@ -43,7 +43,7 @@ export const ChurchEvents = () => {
         if (!churchSnapshot.empty) {
           const fetchedChurchId = churchSnapshot.docs[0].id;
           setChurchId(fetchedChurchId);
-          return fetchedChurchId; // Return the fetched churchId
+          return fetchedChurchId; 
         } else {
           toast.error('No associated church found for this coordinator.');
         }
@@ -57,7 +57,7 @@ export const ChurchEvents = () => {
     return null;
   };
 
-    // Step 2: Fetch events for the given church ID
+    
     const fetchEvents = async (churchId) => {
       if (!churchId) {
         console.error('Church ID is missing. Cannot fetch events.');
@@ -66,7 +66,7 @@ export const ChurchEvents = () => {
       }
   
       try {
-        setLoading(true); // Show loading state
+        setLoading(true); 
         const eventsQuery = query(collection(db, 'events'), where('churchId', '==', churchId));
         const eventsSnapshot = await getDocs(eventsQuery);
   
@@ -81,19 +81,19 @@ export const ChurchEvents = () => {
         console.error('Error fetching events:', error);
         toast.error('Failed to fetch events.');
       } finally {
-        setLoading(false); // Hide loading state
+        setLoading(false); 
       }
     };
 
-  // Step 3: Update useEffect to ensure proper flow
+  
   useEffect(() => {
     const auth = getAuth();
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         console.log('User signed in:', user);
-        const fetchedChurchId = await fetchChurchId(user.uid); // Fetch the churchId
+        const fetchedChurchId = await fetchChurchId(user.uid);
         if (fetchedChurchId) {
-          await fetchEvents(fetchedChurchId); // Fetch events for the church
+          await fetchEvents(fetchedChurchId); 
         }
       } else {
         console.log('No user signed in.');
@@ -116,7 +116,7 @@ export const ChurchEvents = () => {
     }
   };
 
-  // Step 3: Submit a new event
+ 
   const onSubmitEvent = async () => {
     if (!churchId) {
       toast.error('Church ID is missing.');
@@ -127,13 +127,13 @@ export const ChurchEvents = () => {
       eventDate: newEventDate,
       eventName: newEventName,
       eventTime: newEventTime,
-      churchId, // Save churchId instead of creatorId
+      churchId, 
     };
 
     try {
       await addDoc(collection(db, 'events'), eventData);
       toast.success('Event added successfully.');
-      fetchEvents(churchId); // Refresh events list
+      fetchEvents(churchId); 
       clearForm();
     } catch (error) {
       console.error('Error adding event:', error);
@@ -141,7 +141,7 @@ export const ChurchEvents = () => {
     }
   };
 
-  // Step 4: Update an existing event
+  
   const onUpdateEvent = async () => {
     if (!editingEvent) {
       toast.error('No event selected for editing.');
@@ -157,7 +157,7 @@ export const ChurchEvents = () => {
     try {
       await updateDoc(doc(db, 'events', editingEvent.id), eventData);
       toast.success('Event updated successfully.');
-      fetchEvents(churchId); // Refresh events list
+      fetchEvents(churchId); 
       setEditingEvent(null);
       clearForm();
     } catch (error) {
@@ -170,7 +170,7 @@ export const ChurchEvents = () => {
     await deleteEventSchedule(id, () => getEventList(setEventList, userId));
   };
 
-  // Step 6: Edit an event
+  
   const handleEditEventSchedule = (event) => {
     setEditingEvent(event);
     setNewEventDate(event.eventDate);

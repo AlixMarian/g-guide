@@ -16,7 +16,7 @@ export const RefundPolicy = () => {
 
     const fetchChurchId = async (userId) => {
         try {
-            // Fetch the coordinator document associated with the user
+            
             const coordinatorQuery = query(
                 collection(db, 'coordinator'),
                 where('userId', '==', userId)
@@ -32,7 +32,7 @@ export const RefundPolicy = () => {
                 const churchSnapshot = await getDocs(churchQuery);
 
                 if (!churchSnapshot.empty) {
-                    return churchSnapshot.docs[0].id; // Return the churchId
+                    return churchSnapshot.docs[0].id; 
                 } else {
                     toast.error("No church associated with this coordinator.");
                 }
@@ -88,14 +88,14 @@ export const RefundPolicy = () => {
         }
 
         try {
-            // Update the refundPolicy in Firestore
+            
             const churchDocRef = doc(db, "church", churchId);
             await updateDoc(churchDocRef, {
                 refundPolicy: refPolicyBodyInput
             });
             toast.success('Refund policy updated successfully!');
             
-            // Update local state with new refund policy
+            
             setChurchData((prevData) => ({
                 ...prevData,
                 refundPolicy: refPolicyBodyInput
