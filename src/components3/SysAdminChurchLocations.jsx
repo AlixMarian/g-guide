@@ -11,7 +11,7 @@ export const SysAdminChurchLocations = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddChurchModal, setShowAddChurchModal] = useState(false);
   const [showEditChurchModal, setShowEditChurchModal] = useState(false);
-  const [churchToEdit, setChurchToEdit] = useState(null); // Church being edited
+  const [churchToEdit, setChurchToEdit] = useState(null);
   const [formData, setFormData] = useState({
     churchLocation: '',
     churchName: '',
@@ -21,7 +21,7 @@ export const SysAdminChurchLocations = () => {
 
   const itemsPerPage = 10;
 
-  // Fetch church locations from Firestore
+ 
   useEffect(() => {
     const fetchChurchLocations = async () => {
       try {
@@ -42,7 +42,7 @@ export const SysAdminChurchLocations = () => {
     fetchChurchLocations();
   }, []);
 
-  // Handle input changes for the modal form
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === 'latitude' || name === 'longitude') {
@@ -60,7 +60,7 @@ export const SysAdminChurchLocations = () => {
     }
   };
 
-  // Handle adding a new church to Firestore
+  
   const handleAddChurch = async (e) => {
     e.preventDefault();
 
@@ -114,7 +114,7 @@ export const SysAdminChurchLocations = () => {
     }
   };
 
-  // Handle editing a church
+ 
   const handleEditChurch = async (e) => {
     e.preventDefault();
 
@@ -156,7 +156,7 @@ export const SysAdminChurchLocations = () => {
     }
   };
 
-  // Handle deleting a church
+  
   const handleDeleteChurch = async (churchId) => {
     if (window.confirm('Are you sure you want to delete this church?')) {
       try {

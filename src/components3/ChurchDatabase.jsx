@@ -71,7 +71,7 @@ export const ChurchDatabase = () => {
   }, []);
 
   const handleStatusChange = (status) => {
-    console.log('Selected Status:', status); // Log selected filter
+    console.log('Selected Status:', status);
     setSelectedStatus(status);
     setCurrentPage(1);
   };

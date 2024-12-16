@@ -89,7 +89,7 @@ export const Baptism = () => {
 
                 const priestsQuery = query(
                     collection(db, 'priest'), 
-                    where('churchId', '==', churchId) // Match current churchId
+                    where('churchId', '==', churchId) 
                 );
                 const querySnapshot = await getDocs(priestsQuery);
 
@@ -98,7 +98,7 @@ export const Baptism = () => {
                         id: doc.id,
                         ...doc.data(),
                     }));
-                    setPriests(priestsData); // Set the fetched priests
+                    setPriests(priestsData); 
                 } else {
                     setPriests([]);
                     toast.info("No priests found for this church.");
@@ -112,7 +112,7 @@ export const Baptism = () => {
         fetchChurchData();
         fetchSlots();
         fetchPriests();
-        fetchRefundPolicy(); // Fetch refund policy on component mount
+        fetchRefundPolicy();
     }, [churchId]);
 
     useEffect(() => {
@@ -129,7 +129,7 @@ export const Baptism = () => {
         fetchUserData();
     }, [user]);
 
-    // Function to fetch the refund policy
+    
     const fetchRefundPolicy = async () => {
         try {
             const churchDocRef = doc(db, 'church', churchId);
@@ -137,7 +137,7 @@ export const Baptism = () => {
 
             if (churchDocSnap.exists()) {
                 const data = churchDocSnap.data();
-                setRefundPolicy(data.refundPolicy || "No refund policy available."); // Set refund policy or default message
+                setRefundPolicy(data.refundPolicy || "No refund policy available.");
             } else {
                 console.log("No church data found for refund policy.");
                 setRefundPolicy("No refund policy available.");
@@ -205,7 +205,7 @@ export const Baptism = () => {
                 const appointmentData = {
                     appointmentType: 'baptism',
                     appointmentStatus: 'Pending',
-                    appointmentPurpose: 'none',
+                    appointmentPurpose: 'personal',
                     authorizationLetter: 'none',
                     paymentImage: 'none',
                     churchId: churchId,
@@ -291,7 +291,6 @@ export const Baptism = () => {
     return (
         <div>
             <form className='baptism' onSubmit={handleCreateAppointment}>
-                {/* User Details and Selected Service */}
                 <div className="userDetails card mb-4">
                     <div className="card-body">
                         <h5 className="card-title">User Details</h5>
@@ -316,7 +315,6 @@ export const Baptism = () => {
                     </div>
                 </div>
 
-                {/* Refund Policy Section */}
                 <div className="userDetails card mb-4">
                     <div className="card-body">
                         <h5 className="card-title">Refund Policy</h5>
@@ -324,7 +322,6 @@ export const Baptism = () => {
                     </div>
                 </div>
 
-                {/* Calendar and Slots */}
                 <div className="card mb-4">
                 <div className="card-body">
                     <h5 className="card-title">Select Schedule for Baptism</h5>
@@ -374,7 +371,6 @@ export const Baptism = () => {
                 </div>
                 </div>
 
-                {/* Form for submitting baptism requirements */}
                 <div className="submitReq card mb-4">
                     <div className="card-body">
                         <h5 className="card-title">Submit Requirements</h5>

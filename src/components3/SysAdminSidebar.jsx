@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../systemAdmin.css'; // Ensure this file has the necessary CSS styles
+import '../systemAdmin.css'; 
 
 export const SysAdminSidebar = () => {
   const sidebarRef = useRef(null);
@@ -8,17 +8,17 @@ export const SysAdminSidebar = () => {
 
   const [secondSidebarOpen, setSecondSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState(null);
-  const [activeChild, setActiveChild] = useState(null); // Track the active child
+  const [activeChild, setActiveChild] = useState(null); 
 
-  // Dashboard handler
+ 
   const handleAdminDashboard = () => {
     navigate('/systemAdminDashboard');
-    setActiveSection('dashboard');  // Set "Dashboard" as the active section
-    setSecondSidebarOpen(false);    // Close the second sidebar
-    setActiveChild(null);           // Clear any active child items
+    setActiveSection('dashboard');  
+    setSecondSidebarOpen(false);    
+    setActiveChild(null);           
   };
 
-  // Pending Church handler
+ 
   const handlePendingChurch = () => {
     navigate('/pending-church');
     setActiveSection('pending-church');
@@ -33,7 +33,7 @@ export const SysAdminSidebar = () => {
     setActiveChild(null);       
   };
 
-  // User Directory handler
+  
   const handleUsers = () => {
     navigate('/userDB');
     setActiveSection('user-directory');
@@ -41,12 +41,12 @@ export const SysAdminSidebar = () => {
     setActiveChild(null);  
   };
 
-  // Church Directory handler with second sidebar toggle
+  
   const handleChurchDB = () => {
     if (activeSection === 'church-directory') {
-      setSecondSidebarOpen(!secondSidebarOpen); // Toggle second sidebar
+      setSecondSidebarOpen(!secondSidebarOpen); 
     } else {
-      setActiveSection('church-directory'); // Keep Church Directory active
+      setActiveSection('church-directory'); 
       setSecondSidebarOpen(true);     
       setActiveChild(null);                
     }
@@ -61,8 +61,8 @@ export const SysAdminSidebar = () => {
 
   const handleCebuChurch = () => {
     setActiveSection('church-directory');
-    setSecondSidebarOpen(true); // Ensure second sidebar remains open
-    setActiveChild('cebu-church-list'); // Set child as active
+    setSecondSidebarOpen(true); 
+    setActiveChild('cebu-church-list'); 
     navigate('/churchLocations');
   };
 

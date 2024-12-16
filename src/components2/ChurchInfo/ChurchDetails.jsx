@@ -28,7 +28,7 @@ export const ChurchDetails = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         console.log("User signed in:", user);
-        await fetchChurchId(user.uid); // Fetch churchId
+        await fetchChurchId(user.uid);
       } else {
         console.log("No user signed in.");
         navigate("/login");
@@ -62,7 +62,7 @@ export const ChurchDetails = () => {
         if (!churchSnapshot.empty) {
           const fetchedChurchId = churchSnapshot.docs[0].id;
           setChurchId(fetchedChurchId);
-          console.log("Fetched churchId:", fetchedChurchId); // Debugging
+          console.log("Fetched churchId:", fetchedChurchId);
         } else {
           toast.error("No associated church found for this coordinator.");
         }

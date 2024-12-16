@@ -110,18 +110,18 @@ export const ApprovedAppointments = () => {
 
     const fetchChurchName = async (churchId) => {
             try {
-                const churchRef = doc(db, "church", churchId); // Reference the church document
-                const churchSnap = await getDoc(churchRef); // Fetch the document
+                const churchRef = doc(db, "church", churchId);
+                const churchSnap = await getDoc(churchRef); 
         
                 if (churchSnap.exists()) {
-                    return churchSnap.data().churchName || "Unknown Church"; // Return churchName or fallback
+                    return churchSnap.data().churchName || "Unknown Church"; 
                 } else {
                     console.warn(`Church with ID ${churchId} does not exist.`);
                     return "Unknown Church";
                 }
             } catch (error) {
                 console.error(`Error fetching church name for ID ${churchId}:`, error);
-                return "Unknown Church"; // Fallback on error
+                return "Unknown Church"; 
             }
     };
 

@@ -39,13 +39,10 @@ export const Login = () => {
         const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
         const user = userCredential.user;
         const userId = user.uid;
-
         console.log("Logged in user ID:", userId);
-
-        // Fetch user document
         const userDoc = await getDoc(doc(db, 'users', userId));
         if (!userDoc.exists()) {
-            console.error('User document not found for user ID:', userId); // Debug
+            console.error('User document not found for user ID:', userId);
             toast.error('User details not found.');
             return;
         }

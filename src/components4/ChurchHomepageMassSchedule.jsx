@@ -13,7 +13,7 @@ export const ChurchHomepageMassSchedule = () => {
   useEffect(() => {
     const fetchMassSchedules = async () => {
       try {
-        // Fetch mass schedules using the churchId field
+       
         const massQuery = query(
           collection(db, 'massSchedules'),
           where('churchId', '==', churchId)
@@ -24,7 +24,7 @@ export const ChurchHomepageMassSchedule = () => {
           ...doc.data(),
         }));
         setMassSchedules(schedules);
-        setFilteredMassSchedules(schedules); // Initialize the filtered list
+        setFilteredMassSchedules(schedules); 
       } catch (error) {
         console.error('Error fetching mass schedules:', error);
       }

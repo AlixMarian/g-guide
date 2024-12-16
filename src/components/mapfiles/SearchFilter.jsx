@@ -27,6 +27,7 @@ const SearchFilter = ({
   setChurchPhoto,
   showOtherDatesButton,
   handleShowAllDates,
+  showingAllDates,
 }) => {
   const navigate = useNavigate();
 
@@ -150,7 +151,7 @@ const SearchFilter = ({
                 {selectedService
                   ? `Churches offering ${selectedService}:`
                   : selectedLanguage
-                  ? `Mass languages in ${selectedLanguage} today: `
+                  ? `Mass languages in ${selectedLanguage}${!showingAllDates ? ' today' : ''}:`
                   : 'Nearby Churches:'}
               </h6>
               <div className="scrollable-section">
@@ -389,6 +390,7 @@ SearchFilter.propTypes = {
   setChurchPhoto: PropTypes.func.isRequired,
   showOtherDatesButton: PropTypes.func.isRequired,
   handleShowAllDates: PropTypes.func.isRequired,
+  showingAllDates: PropTypes.bool,
 };
 
 export default SearchFilter;

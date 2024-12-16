@@ -13,8 +13,8 @@ export const RenewChurch = () => {
     const [showDataConsentModal, setShowDataConsentModal] = useState(false);
     const [churchList, setChurchList] = useState([]);
     const [filteredChurchList, setFilteredChurchList] = useState([]);
-    const [dropdownVisible, setDropdownVisible] = useState(false); // Dropdown visibility state
-    const [selectedChurchID, setSelectedChurchID] = useState(null); // Store the selected church ID
+    const [dropdownVisible, setDropdownVisible] = useState(false);
+    const [selectedChurchID, setSelectedChurchID] = useState(null); 
     const [searchInput, setSearchInput] = useState("");
     const [formData, setFormData] = useState({
       email: "",
@@ -31,12 +31,12 @@ export const RenewChurch = () => {
       churchProof: null,
     });
     
-    // Toggle dropdown visibility
+    
     const toggleDropdown = () => {
       setDropdownVisible(!dropdownVisible);
     };
     
-    // Fetch church names and locations from the church collection where churchStatus is 'Archived'
+    
     useEffect(() => {
       const fetchChurchData = async () => {
           try {
@@ -46,24 +46,24 @@ export const RenewChurch = () => {
               );
               const churchSnapshot = await getDocs(churchQuery);
 
-              // Fetch data for each church document found
+              
               const churches = await Promise.all(
                   churchSnapshot.docs.map(async (churchDoc) => {
                       const churchData = churchDoc.data();
                       const churchLocationID = churchData.churchLocationID;
 
-                      // Fetch the corresponding church location document
+                      
                       const churchLocationDoc = await getDoc(doc(db, 'churchLocation', churchLocationID));
 
                       if (churchLocationDoc.exists()) {
                           const churchLocationData = churchLocationDoc.data();
                           
-                          // Combine church and churchLocation data
+                          
                           return {
                               id: churchDoc.id,
                               ...churchData,
-                              churchLocation: churchLocationData.churchLocation, // Location details from churchLocation collection
-                              churchName: churchLocationData.churchName // Name details from churchLocation collection
+                              churchLocation: churchLocationData.churchLocation, 
+                              churchName: churchLocationData.churchName 
                           };
                       } else {
                           console.warn(`No church location found for ID: ${churchLocationID}`);
@@ -72,10 +72,10 @@ export const RenewChurch = () => {
                   })
               );
 
-              // Filter out any null entries (in case some church locations were not found)
+              
               const filteredChurches = churches.filter(church => church !== null);
               setChurchList(filteredChurches);
-              setFilteredChurchList(filteredChurches); // Initialize filtered list
+              setFilteredChurchList(filteredChurches);
 
           } catch (error) {
               toast.error("Failed to fetch church data");
@@ -93,7 +93,7 @@ export const RenewChurch = () => {
       [id]: type === "checkbox" ? checked : type === "file" ? files[0] : value,
     }));
 
-    // If the user selects a church from the dropdown, automatically set the church address
+    
     if (id === "churchName") {
       const selectedChurch = churchList.find(church => church.churchName === value);
       if (selectedChurch) {
@@ -128,7 +128,7 @@ export const RenewChurch = () => {
         churchProofURL = await getDownloadURL(proofRef);
       }
 
-      // Save user information in the users collection
+      
       await setDoc(doc(db, 'users', user.uid), {
         lastName: formData.lastName,
         firstName: formData.firstName,
@@ -140,7 +140,7 @@ export const RenewChurch = () => {
         dateOfRegistration: Timestamp.now(),
       });
 
-      // Create a document in the 'coordinator' collection and get its ID
+      
       const churchCoorDocRef = doc(collection(db, 'coordinator')); 
       const coordinatorID = churchCoorDocRef.id;
 
@@ -149,7 +149,7 @@ export const RenewChurch = () => {
         status: 'Pending',
       });
 
-      // Update the existing church document in the 'church' collection
+     
       if (selectedChurchID) {
         const churchDocRef = doc(db, 'church', selectedChurchID);
         await setDoc(churchDocRef, {
@@ -159,7 +159,7 @@ export const RenewChurch = () => {
           churchRegistrationDate: new Date().toISOString(),
           churchStatus: 'For Renewal',
           coordinatorID: coordinatorID,
-        }, { merge: true }); // Merge to avoid overwriting other fields
+        }, { merge: true });
       }
 
     toast.success('Church renewal request submitted successfully');
@@ -169,7 +169,7 @@ export const RenewChurch = () => {
     }
   };
 
-    // Filter churches based on input
+    
     const filterFunction = (e) => {
       const searchValue = e.target.value.toLowerCase();
       setSearchInput(searchValue);
@@ -221,13 +221,13 @@ export const RenewChurch = () => {
                               onClick={() => {
                                 setFormData((prevState) => ({
                                   ...prevState,
-                                  churchName: church.churchName, // Set selected church name
-                                  churchAddress: church.churchLocation, // Set the corresponding church address
+                                  churchName: church.churchName, 
+                                  churchAddress: church.churchLocation, 
                                 }));
-                                setSearchInput(church.churchName); // Display the selected church name in the input
-                                setSelectedChurchID(church.id); // Set the selected church document ID
-                                setDropdownVisible(false); // Hide dropdown after selection
-                                console.log(`Selected Church ID: ${church.id}`); // Log the document ID
+                                setSearchInput(church.churchName); 
+                                setSelectedChurchID(church.id); 
+                                setDropdownVisible(false); 
+                                console.log(`Selected Church ID: ${church.id}`); 
                               }}
                             >
                               {church.churchName}
