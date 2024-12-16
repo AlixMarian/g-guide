@@ -4,13 +4,14 @@ import { db } from '/backend/firebase';
 import { Button, Dropdown, Pagination} from 'react-bootstrap';
 import loadingGif from '../assets/Ripple@1x-1.0s-200px-200px.gif';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 export const UserDatabase = () => {
   const [users, setUsers] = useState([]);
   const [selectedRole, setSelectedRole] = useState('All');
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1); // Current page for pagination
-  const itemsPerPage = 5; // Limit entries per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -46,13 +47,11 @@ export const UserDatabase = () => {
               churchID = coordinatorData.churchID || '';
   
               if (status === 'Deleted' && churchID) {
-                // If the coordinator is deleted, fetch the previous church name based on the churchID
                 const churchDoc = await getDoc(doc(db, 'church', churchID));
                 if (churchDoc.exists()) {
                   previousChurchName = churchDoc.data().churchName;
                 }
               } else {
-                // Fetch the current church based on the coordinator ID if the coordinator is not deleted
                 const coordinatorDocId = coordinatorSnapshot.docs[0].id;
                 const churchQuery = query(
                   collection(db, 'church'),
@@ -87,8 +86,31 @@ export const UserDatabase = () => {
     setCurrentPage(1);
   };
 
+  const sendEmail = async (email, subject, message) => {
+    try {
+      const response = await axios.post('http://localhost:3006/send-email', {
+        email: email,
+        subject: subject,
+        text: message,
+      });
+      console.log('Email sent successfully:', response.data);
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  };
+
   const handleDeleteUser = async (userId, role) => {
     try {
+      let userEmail = '';
+      let userName = '';
+      
+      
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      if (userDoc.exists()) {
+        userEmail = userDoc.data().email;
+        userName = `${userDoc.data().firstName || ''} ${userDoc.data().lastName || ''}`.trim();
+      }
+  
       if (role === 'websiteUser') {
         const websiteVisitorQuery = query(
           collection(db, 'websiteVisitor'),
@@ -102,6 +124,23 @@ export const UserDatabase = () => {
           });
           console.log(`User with ID: ${userId} status updated in websiteVisitor.`);
         }
+        const appointmentsQuery = query(
+          collection(db, 'appointments'),
+          where('userFields.requesterId', '==', userId),
+          where('appointmentStatus', 'in', ['Pending', 'For Payment'])
+        );
+  
+        const appointmentsSnapshot = await getDocs(appointmentsQuery);
+        if (!appointmentsSnapshot.empty) {
+          const updatePromises = appointmentsSnapshot.docs.map(async (appointmentDoc) => {
+            await updateDoc(doc(db, 'appointments', appointmentDoc.id), {
+              appointmentStatus: 'Denied',
+            });
+            console.log(`Appointment ID: ${appointmentDoc.id} status updated to 'Denied'`);
+          });
+          await Promise.all(updatePromises);
+        }
+        console.log(`Appointments for user ${userId} with status 'Pending' or 'For Payment' have been denied.`);
       } else if (role === 'churchCoor') {
         const coordinatorQuery = query(
           collection(db, 'coordinator'),
@@ -120,16 +159,52 @@ export const UserDatabase = () => {
             const churchDocId = churchSnapshot.docs[0].id;
             await updateDoc(doc(db, 'coordinator', coordinatorDocId), {
               status: 'Inactive',
-              churchID: churchDocId
+              churchID: churchDocId,
             });
             console.log(`User with ID: ${userId} status updated in coordinator with churchID.`);
             await updateDoc(doc(db, 'church', churchDocId), {
               churchStatus: 'Archived',
             });
             console.log(`Church with ID: ${churchDocId} status updated to Archived.`);
+
+            const churchAppointmentsQuery = query(
+              collection(db, 'appointments'),
+              where('churchId', '==', churchDocId),
+              where('appointmentStatus', 'in', ['Pending', 'For Payment'])
+            );
+
+            const churchAppointmentsSnapshot = await getDocs(churchAppointmentsQuery);
+            if (!churchAppointmentsSnapshot.empty) {
+              const updateChurchAppointments = churchAppointmentsSnapshot.docs.map(async (appointmentDoc) => {
+                await updateDoc(doc(db, 'appointments', appointmentDoc.id), {
+                  appointmentStatus: 'Denied',
+                });
+                console.log(`Appointment ID: ${appointmentDoc.id} associated with church ${churchDocId} updated to 'Denied'`);
+              });
+              await Promise.all(updateChurchAppointments);
+            }
+            console.log(`Appointments for church ${churchDocId} with status 'Pending' or 'For Payment' have been denied.`);
           }
         }
       }
+  
+      const emailSubject = "Account Deletion Notification";
+      const emailMessage = `
+        Dear ${userName || 'User'},
+  
+        Your account associated with G! Guide has been disabled.
+        As a result, any pending or incomplete appointments have been denied.
+  
+        If you believe this action was taken in error or need further assistance, please contact our support team at support@g-guide.com.
+      `;
+  
+      if (userEmail) {
+        await sendEmail(userEmail, emailSubject, emailMessage);
+        console.log('Account deletion email sent to:', userEmail);
+      } else {
+        console.warn('No email found for this user.');
+      }
+  
       toast.success('User Deleted Successfully');
       await fetchUsers();
     } catch (error) {
@@ -137,6 +212,7 @@ export const UserDatabase = () => {
       toast.error('User not deleted');
     }
   };
+
     const filteredUsers = users
     .filter((user) => user.role !== 'sysAdmin')
     .filter((user) => selectedRole === 'All' || user.role === selectedRole);
