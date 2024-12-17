@@ -61,7 +61,6 @@ export const ChurchEvents = () => {
     const fetchEvents = async (churchId) => {
       if (!churchId) {
         console.error('Church ID is missing. Cannot fetch events.');
-        toast.error('Failed to fetch events: Church ID is missing.');
         return;
       }
   
@@ -79,7 +78,6 @@ export const ChurchEvents = () => {
         }
       } catch (error) {
         console.error('Error fetching events:', error);
-        toast.error('Failed to fetch events.');
       } finally {
         setLoading(false); 
       }
@@ -97,7 +95,6 @@ export const ChurchEvents = () => {
         }
       } else {
         console.log('No user signed in.');
-        toast.error('Please log in to view events.');
       }
     });
   }, []);
