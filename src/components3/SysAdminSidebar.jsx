@@ -66,6 +66,13 @@ export const SysAdminSidebar = () => {
     navigate('/churchLocations');
   };
 
+  const handleDeniedChurches = () => {
+    setActiveSection('church-directory');
+    setSecondSidebarOpen(true);
+    setActiveChild('denied-churches');
+    navigate('/denied-churches');
+  };
+
   return (
     <>
       <div className="admin-sidebar" ref={sidebarRef}>
@@ -104,6 +111,10 @@ export const SysAdminSidebar = () => {
             <div className={`admin-numbers ${activeChild === 'cebu-church-list' ? 'admin-active' : ''}`} onClick={handleCebuChurch}>
               <input type="image" src="../src/assets/number-2.png" className='admin-image-size' />
               <h3 className='admin-second-button-name'>Cebu Church List</h3>
+            </div>
+            <div className={`admin-numbers ${activeChild === 'denied-churches' ? 'admin-active' : ''}`} onClick={handleDeniedChurches}>
+              <input type="image" src="../src/assets/number-3.png" className='admin-image-size' />
+              <h3 className='admin-second-button-name'>Denied Churches</h3>
             </div>
           </div>
         </div>
