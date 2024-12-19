@@ -38,6 +38,7 @@ import ChurchHomepageMassSchedule from './components4/ChurchHomepageMassSchedule
 import ChurchHomepageReqVol from './components4/ChurchHomepageReqVol';
 import ChurchHomepageAnnouncements from './components4/ChurchHomepageAnnouncements';
 import { GoogleMapsProvider } from './context/GoogleMapsContext';
+import DeniedChurches from './components3/SysAdminDeniedChurches';
 
 //Appointments
 import PendingAppointments from './components2/Appointments/PendingAppointments'
@@ -64,16 +65,16 @@ import RefundPolicy from './components2/ServiceOffered/RefundPolicy';
 import ChurchDetails from './components2/ChurchInfo/ChurchDetails'
 import ChurchUploads from './components2/ChurchInfo/ChurchUploads';
 
-// Import for user authentication state management
-import { AuthProvider, useAuth } from './auth/AuthContext'; // New additions for AuthContext
+
+import { AuthProvider, useAuth } from './auth/AuthContext';
 import PropTypes from 'prop-types';
 
-// Dynamic Navbar Component
+
 const NavbarSelector = ({ children }) => {
-  const { user } = useAuth(); // Determine if the user is logged in
+  const { user } = useAuth(); 
   return (
     <>
-      {user ? <WebUserNavBar /> : <NavBar />} {/* Show WebUserNavBar for logged-in users, otherwise NavBar */}
+      {user ? <WebUserNavBar /> : <NavBar />} 
       {children}
     </>
   );
@@ -81,9 +82,9 @@ const NavbarSelector = ({ children }) => {
 
 
 
-// Add propTypes for NavbarSelector
+
 NavbarSelector.propTypes = {
-  children: PropTypes.node.isRequired, // Ensure `children` is a React node and is required
+  children: PropTypes.node.isRequired,
 };
 const App = () => {
   return (
@@ -396,6 +397,16 @@ const App = () => {
             </div>
           </div>
         } />
+        <Route path="/denied-churches" element={
+          <div>
+            <SysAdminSidebar />
+            <div>
+              <AdminNavbar />
+              <div className='sys-main-content'><DeniedChurches /></div>
+            </div>
+          </div>
+        } />
+
         <Route path="/transactions" element={
           <div>
             <SysAdminSidebar />

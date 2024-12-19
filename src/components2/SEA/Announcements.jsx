@@ -8,17 +8,18 @@ import DatePicker from 'react-datepicker';
 import '../../churchCoordinator.css';
 import { Pagination } from 'react-bootstrap';
 
-
 export const Announcements = () => {
   const [announcementList, setAnnouncementList] = useState([]);
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+  const [announcementTitle, setAnnouncementTitle] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
   // eslint-disable-next-line no-unused-vars
   const [userId, setUserId] = useState('');
   const [churchId, setChurchId] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
+
 
   const getChurchId = async (userId) => {
     try {
@@ -28,6 +29,7 @@ export const Announcements = () => {
       );
       const coordinatorSnapshot = await getDocs(coordinatorQuery);
 
+
       if (!coordinatorSnapshot.empty) {
         const coordinatorDoc = coordinatorSnapshot.docs[0];
         const churchQuery = query(
@@ -35,6 +37,7 @@ export const Announcements = () => {
           where('coordinatorID', '==', coordinatorDoc.id)
         );
         const churchSnapshot = await getDocs(churchQuery);
+
 
         if (!churchSnapshot.empty) {
           const fetchedChurchId = churchSnapshot.docs[0].id;
@@ -52,6 +55,7 @@ export const Announcements = () => {
     return null;
   };
 
+
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -66,17 +70,18 @@ export const Announcements = () => {
       }
     });
 
+
     return () => unsubscribe();
   }, []);
-  
+ 
   const fetchData = (churchId) => {
     getAnnouncementList(setAnnouncementList, churchId);
   };
-  
+ 
   const handleSubmit = (e, callback) => {
     e.preventDefault();
     e.stopPropagation();
-  
+ 
     const form = e.currentTarget;
     if (form.checkValidity() === false) {
       form.classList.add('was-validated');
@@ -84,42 +89,51 @@ export const Announcements = () => {
       callback();
     }
   };
-  
+ 
   const onSubmitAnnouncement = () => {
     const announcementData = {
+      title: announcementTitle,
       announcement: newAnnouncement,
       uploadDate: Timestamp.now(),
       churchId: churchId,
     };
+
 
     if (!churchId) {
       toast.error('Failed to add announcement: Church ID is missing.');
       return;
     }
 
+
     addAnnouncement(announcementData, churchId, () => getAnnouncementList(setAnnouncementList, churchId));
     setNewAnnouncement('');
+    setAnnouncementTitle('');
   };
 
-  
+
+ 
   const handleEditAnnouncement = (announcement) => {
     setEditingAnnouncement(announcement);
     setNewAnnouncement(announcement.announcement);
+    setAnnouncementTitle(announcement.title || '');
   };
-  
+ 
   const handleDeleteAnnouncement = async (id) => {
     await deleteAnnouncement(id, () => getAnnouncementList(setAnnouncementList, userId));
   };
-  
+ 
   const onUpdateAnnouncement = () => {
     const announcementData = {
+      title: announcementTitle,
       announcement: newAnnouncement,
     };
+
 
     if (!churchId) {
       toast.error('Failed to update announcement: Church ID is missing.');
       return;
     }
+
 
     updateAnnouncement(editingAnnouncement.id, announcementData, () => {
       getAnnouncementList(setAnnouncementList, churchId);
@@ -127,10 +141,12 @@ export const Announcements = () => {
       clearForm();
     });
   };
-  
+ 
   const clearForm = () => {
     setNewAnnouncement('');
+    setAnnouncementTitle('');
   };
+
 
   const filteredAnnouncements = selectedDate
     ? announcementList.filter(
@@ -140,19 +156,23 @@ export const Announcements = () => {
       )
     : announcementList;
 
-  
+
+ 
   const totalPages = Math.ceil(filteredAnnouncements.length / itemsPerPage);
   const lastItemIndex = currentPage * itemsPerPage;
   const firstItemIndex = lastItemIndex - itemsPerPage;
 
-  
+
+ 
   const currentAnnouncements = [...filteredAnnouncements]
     .sort((a, b) => b.uploadDate.toMillis() - a.uploadDate.toMillis())
     .slice(firstItemIndex, lastItemIndex);
 
+
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+
 
   return (
     <>
@@ -164,7 +184,20 @@ export const Announcements = () => {
             <div className="card-body">
               <h3>{editingAnnouncement ? "Edit Announcement" : "Add Announcement"}</h3>
               <form className="row g-3 needs-validation" noValidate onSubmit={(e) => handleSubmit(e, editingAnnouncement ? onUpdateAnnouncement : onSubmitAnnouncement)}>
+              <div className="mb-3">
+                <label htmlFor="announcementTitle" className="form-label"><b>Title</b></label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="announcementTitle"
+                  value={announcementTitle}
+                  onChange={(e) => setAnnouncementTitle(e.target.value)}
+                  required
+                />
+                <div className="invalid-feedback">Please provide a title for the announcement</div>
+              </div>
                 <div className="mb-3">
+                  <label htmlFor="announcementTitle" className="form-label"><b>Content</b></label>
                   <textarea
                     className="form-control"
                     id="announcementTextarea"
@@ -211,11 +244,13 @@ export const Announcements = () => {
                 {currentAnnouncements.length > 0 ? (
                   currentAnnouncements.map((announcement) => (
                     <div className="card mb-3" key={announcement.id}>
+                     
                       <div className="card-body">
-                        <h6>{announcement.announcement}</h6>
+                        <h2 className='card-title'>{announcement.title}</h2>
                         <p className="card-text">
                           <small>Date Uploaded: {announcement.uploadDate.toDate().toLocaleDateString()}</small>
                         </p>
+                        <h6 className='mb-5'>{announcement.announcement}</h6>
                         <div className="d-flex justify-content-end gap-2">
                           <button type="button" className="btn btn-primary" onClick={() => handleEditAnnouncement(announcement)}>
                             Edit
@@ -254,5 +289,6 @@ export const Announcements = () => {
     </>
   );
 };
+
 
 export default Announcements;
