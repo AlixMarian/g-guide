@@ -1,18 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, ListGroup } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
-const ChurchAutocomplete = ({ churches, onChurchSelected, placeholder = 'Search churches...' }) => {
-  const [query, setQuery] = useState('');
+const ChurchAutocomplete = ({ churches, onChurchSelected, placeholder = 'Search churches...', initialValue = ''  }) => {
+  const [query, setQuery] = useState(initialValue);
   const [suggestions, setSuggestions] = useState([]);
+
+  useEffect(() => {
+    setQuery(initialValue);
+  }, [initialValue]);
 
   const handleChange = (e) => {
     const value = e.target.value;
     setQuery(value);
+
     if (value.length > 0) {
       const filtered = churches.filter((church) =>
         church.churchName.toLowerCase().startsWith(value.toLowerCase())
       );
+      const exactMatch = churches.find(
+        church => church.churchName.toLowerCase () === value.toLowerCase()
+      );
+
+      if (exactMatch) {
+        onChurchSelected(exactMatch);
+      }
       
       setSuggestions(filtered);
     } else {
@@ -21,9 +33,11 @@ const ChurchAutocomplete = ({ churches, onChurchSelected, placeholder = 'Search 
   };
 
   const handleSelect = (church) => {
+    if (query.toLowerCase() !== church.churchName.toLowerCase()) {
     setQuery(church.churchName);
     setSuggestions([]);
     onChurchSelected(church);
+    }
   };
 
   return (
@@ -64,6 +78,8 @@ ChurchAutocomplete.propTypes = {
   ).isRequired,
   onChurchSelected: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
+  initialValue: PropTypes.string,
 };
+
 
 export default ChurchAutocomplete;
