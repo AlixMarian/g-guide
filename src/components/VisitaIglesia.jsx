@@ -32,7 +32,7 @@ const VisitaIglesia = () => {
   const [showAutoGen, setShowAutoGen] = useState(false);
   // const handleToggleOffcanvas = () => setShowOffcanvas(!showOffcanvas);
   const [mapKey, setMapKey] = useState(0);
-  const [endLocation, setEndLocation] = useState(null); 
+  const [endLocation, setEndLocation] = useState(null);
   const [sortedChurches, setSortedChurches] = useState([]);
   const [churchPhoto, setChurchPhoto] = useState(coverLogo);  
   const [markers, setMarkers] = useState([]);
@@ -41,6 +41,7 @@ const VisitaIglesia = () => {
   const [isRouteCalculated, setIsRouteCalculated] = useState(false);
   const [isAutoGenRoute, setIsAutoGenRoute] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [routeSegments, setRouteSegments] = useState([]);
 
   const handleOffcanvasClose = () => {
     setShowDirectionsOffcanvas(false);
@@ -55,9 +56,9 @@ const VisitaIglesia = () => {
   };
  
   const containerStyle = {
-    width: '100vw', 
-    height: '100vh', 
-  }; 
+    width: '100vw',
+    height: '100vh',
+  };
 
 const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500", "#FFFF00", "#800080", "#008080", "#F5F5DC"];
 
@@ -66,7 +67,7 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
       // map.setZoom(14); // Remove or comment this out
     }
   }, [map, mapKey]);
-  
+ 
 
   const [drawerInfo, setDrawerInfo] = useState({
     show: false,
@@ -126,7 +127,7 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
             const remainingChurches = churches.filter(
               church => !nearbyChurches.some(nc => nc.id === church.id)
             );
-            
+           
             // Sort remaining churches by distance to route
             const sortedRemaining = remainingChurches.sort((a, b) => {
               const aDistance = getMinDistanceToRoute(a, routePolyline);
@@ -172,9 +173,9 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
                   color: colors[index % colors.length],
                 }));
 
-                setDirectionsResponse(directionsWithColors); 
+                setDirectionsResponse(directionsWithColors);
 
-                
+
                 setDirectionsResponse([]); // comment if u wanna use the lines
 
 
@@ -192,23 +193,24 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
                       lng: parseFloat(church.longitude),
                     },
                   })),
-                  
+                 
                 ];
+
 
                 if (map) {
                   const bounds = new window.google.maps.LatLngBounds();
-                  
+                 
                   // Add origin and destination to bounds
                   bounds.extend(origin);
                   bounds.extend(endLocation);
-                  
+                 
                   // Add all waypoints to bounds
                   waypoints.forEach(waypoint => {
                     bounds.extend(waypoint.location);
                   });
-                  
+                 
                   map.fitBounds(bounds);
-                  
+                 
                   // Add a slight delay before checking and adjusting zoom
                   setTimeout(() => {
                     const currentZoom = map.getZoom();
@@ -255,8 +257,8 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
       return isNearby;
     });
   };
-  
-  
+ 
+ 
   // const destinationRefs = useRef([React.createRef()]);
   const portal = useRef(document.createElement('div'));
 
@@ -297,7 +299,7 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
         setLoading(false);
       }
     };
-  
+ 
     fetchData();
   }, []);
 
@@ -345,14 +347,25 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
         alert('Please select a start location.');
         return;
       }
-    
+   
       if (uniqueDestinations.length === 0) {
         alert('Please select or enter valid destinations.');
         return;
       }
 
+      if (directionsResponse) {
+        directionsResponse.routes = [];
+        setDirectionsResponse([]);
+        setRouteSegments([]);
+        setMapKey(prev => prev + 1);
+      }
+
+
+      // Clear previous routes first
+      setDirectionsResponse([]); // Clear previous directions
+      setMarkers([]); // Clear previous markers
       setIsRouteCalculated(true);
-    
+   
       const allLocations = [startLocation, ...uniqueDestinations];
       const newDirections = [];
       const newMarkers = [
@@ -365,7 +378,7 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
           position: dest
         }))
       ];
-    
+   
       try {
         for (let i = 0; i < allLocations.length - 1; i++) {
           const directionsService = new window.google.maps.DirectionsService();
@@ -388,10 +401,11 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
               }
             );
           });
-    
+   
           newDirections.push(routeSegment);
         }
-    
+   
+        // Set new directions and markers after all calculations are complete
         setDirectionsResponse(newDirections);
         setMarkers(newMarkers);
 
@@ -400,7 +414,7 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
           const bounds = new window.google.maps.LatLngBounds();
           allLocations.forEach(location => bounds.extend(location));
           map.fitBounds(bounds);
-          
+         
           // Add a slight delay before allowing zoom changes
           setTimeout(() => {
             // Get the current zoom after bounds fit
@@ -411,7 +425,6 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
             }
           }, 100);
         }
-
       } catch (error) {
         console.error(error);
         alert('Failed to calculate route. Please check your inputs.');
@@ -421,8 +434,7 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
   const resetRoutes = () => {
     setMapKey((prevKey) => prevKey + 1);
     setDirectionsResponse([]);
-    setMarkers([]); 
-
+    setMarkers([]);
     setDestinations([
       {
         id: 'dest-0',
@@ -437,12 +449,30 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
     setSortedChurches([]);
     setIsRouteCalculated(false);
     setIsAutoGenRoute(false);
-  
+    // Clear input values
+    setInputValues({
+      start: '',
+      destinations: []
+    });
+ 
     console.log('Routes and destinations reset.');
   };
-  
+
+  useEffect(() => {
+    if (!showOffcanvas) {
+      // When offcanvas is closed, preserve the current state
+      // No need to reset anything here
+    }
+  }, [showOffcanvas]);
+
+
+  const [inputValues, setInputValues] = useState({
+    start: '',
+    destinations: []
+  });
+ 
   if (!isLoaded) return null;
-  
+ 
   return loading ? (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
       <img src={loadingGif} alt="Loading Google Maps..." style={{ width: '100px', justifyContent: 'center' }} />
@@ -450,7 +480,7 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
   ) : !isLoaded ? (
     <div style={{ textAlign: 'center', marginTop: '20vh' }}>
       <p>Unable to load Google Maps. Please check your API key or network connection.</p>
-    </div> 
+    </div>
   ) : (
   <>
   <div className="google-map-container">
@@ -462,7 +492,7 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
         }
       }}
     >
-      {currentPosition && <Marker position={currentPosition} />} 
+      {currentPosition && <Marker position={currentPosition} />}
       {churches.map((church) => {
         const lat = parseFloat(church.latitude);
         const lng = parseFloat(church.longitude);
@@ -480,21 +510,22 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
       })}
 
       {/* Render the directions if available */}
-      {directionsResponse?.map((segment, index) => (
-        <DirectionsRenderer
-          key={index}
-          options={{
-            directions: segment.result,
-            polylineOptions: {
-              strokeColor: segment.color,
-              strokeOpacity: 0.8,
-              strokeWeight: 5,
-            },
-            suppressMarkers: true,
-            preserveViewport: true  
-          }}
-        />
-      ))}
+{directionsResponse && directionsResponse.length > 0 && directionsResponse.map((segment, index) => (
+  <DirectionsRenderer
+    key={index}
+    directions={segment.result}
+    options={{
+      suppressMarkers: true,
+      polylineOptions: {
+        strokeColor: segment.color,
+        strokeOpacity: 0.8,
+        strokeWeight: 5,
+      },
+      preserveViewport: true  
+    }}
+  />
+))}
+
 
       {markers.map((marker, index) => (
         <Marker
@@ -525,9 +556,9 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
               fontWeight: 'bold',
               fontSize: '16px',
             }}
-            
+           
             onClick={() => {
-              setShowDirectionsOffcanvas(true); 
+              setShowDirectionsOffcanvas(true);
             }}
           />
         ))}
@@ -537,7 +568,7 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
       </Button>
       <Button variant="primary" style={{ zIndex: '999', position: 'absolute', top: '10px', right: '60px' }} onClick={() => navigate('/map')}>
         <i className="bi bi-arrow-return-left"></i>
-      </Button> 
+      </Button>
       <Offcanvas show={showOffcanvas} style={{ zIndex: '9999' }} onHide={() => setShowOffcanvas(false)} placement="start">
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>
@@ -548,55 +579,77 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
         <Offcanvas.Body>
         {showAutoGen ? (
         <AutoGen onBack={() => setShowAutoGen(false)} resetRoutes={resetRoutes} churches={churches} currentPosition={currentPosition} handleAutoGeneratedRoute={handleAutoGeneratedRoute} />
-        ) : ( 
+        ) : (
         <Form>
           <Form.Group controlId="start-church" className="mb-3">
             <Form.Label>Select Start Location</Form.Label>
             <ChurchAutocomplete
-              churches={churches}
-              onChurchSelected={(selectedChurch) => {
-                const lat = Number(selectedChurch.latitude);
-                const lng = Number(selectedChurch.longitude);
-                if (!isNaN(lat) && !isNaN(lng)) {
-                  setStartLocation({ lat, lng });
-                  console.log(selectedChurch);
-                } else {
-                  console.error('Invalid coordinates:', selectedChurch);
-                }
-              }}
-              placeholder="Enter Start Location"
-              
-            />
+            churches={churches}
+            onChurchSelected={(selectedChurch) => {
+              const lat = Number(selectedChurch.latitude);
+              const lng = Number(selectedChurch.longitude);
+              if (!isNaN(lat) && !isNaN(lng)) {
+                setStartLocation({ lat, lng });
+                setInputValues(prev => ({
+                  ...prev,
+                  start: selectedChurch.churchName
+                }));
+              } else {
+                console.error('Invalid coordinates:', selectedChurch);
+              }
+            }}
+            placeholder="Enter Start Location"
+            initialValue={inputValues.start} // Add this prop
+          />
           </Form.Group>
+
 
           {destinations.map((dest, index) => (
             <div key={dest.id} className="destination-item d-flex align-items-center mb-3 position-relative w-100">
               <div className="flex-grow-1">
-                <ChurchAutocomplete
-                  churches={churches}
-                  onChurchSelected={(selectedChurch) => {
-                    console.log('Selected Destination:', selectedChurch);
-                    const lat = Number(selectedChurch.latitude);
-                    const lng = Number(selectedChurch.longitude);
+              <ChurchAutocomplete
+                churches={churches}
+                onChurchSelected={(selectedChurch) => {
+                  console.log('Selected Destination:', selectedChurch);
+                  const lat = Number(selectedChurch.latitude);
+                  const lng = Number(selectedChurch.longitude);
 
-                    // Validate coordinates
-                    if (!isNaN(lat) && !isNaN(lng)) {
-                      const updatedDestinations = [...destinations];
-                      updatedDestinations[index].destination = { lat, lng };
-                      setDestinations(updatedDestinations);
-                    } else {
-                      console.error('Invalid coordinates:', selectedChurch);
-                    }
-                  }}
-                  placeholder="Enter Destination"
-                  required
-                />
+
+                  if (!isNaN(lat) && !isNaN(lng)) {
+                    const updatedDestinations = [...destinations];
+                    updatedDestinations[index].destination = { lat, lng };
+                    setDestinations(updatedDestinations);
+                   
+                    // Update input values
+                    setInputValues(prev => {
+                      const newDestinations = [...prev.destinations];
+                      newDestinations[index] = selectedChurch.churchName;
+                      return {
+                        ...prev,
+                        destinations: newDestinations
+                      };
+                    });
+                  } else {
+                    console.error('Invalid coordinates:', selectedChurch);
+                  }
+                }}
+                placeholder="Enter Destination"
+                initialValue={inputValues.destinations[index] || ''} // Add this prop
+                required
+              />
               </div>
               <Button
                 variant="link"
                 className="delete-div-btn ms-2"
                 onClick={() => {
-                  setDestinations((prevDestinations) => prevDestinations.filter((_, i) => i !== index));
+                  setDestinations((prevDestinations) =>
+                    prevDestinations.filter((_, i) => i !== index)
+                  );
+                  // Also update input values when removing a destination
+                  setInputValues(prev => ({
+                    ...prev,
+                    destinations: prev.destinations.filter((_, i) => i !== index)
+                  }));
                   handleCalculateRoute();
                 }}
               >
@@ -604,9 +657,9 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
               </Button>
             </div>
           ))}
-          
+         
           <div className="text-center">
-            <Button variant="primary" 
+            <Button variant="primary"
               onClick={() => {
                 if (!areDestinationsValid()) {
                   toast.error('Please fill in all current destinations before adding another.', {
@@ -615,13 +668,13 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
                   return;
                 }
                 addDestination();
-              }} 
+              }}
               className="d-flex justify-content-center align-items-center px-3 py-2 rounded mb-5 mt-3 mx-auto w-70" style={{ height: '35px' }}
             > + Add another Church Destination
             </Button>
           </div>
           <div className="d-flex align-items-center">
-            <Button onClick={handleCalculateRoute} variant="primary" className="flex-grow-1 me-2 fw-bold]" disabled={isRouteCalculated}>
+            <Button onClick={handleCalculateRoute} variant="primary" className="flex-grow-1 me-2 fw-bold]" >
               Get Route
             </Button>
             <Button variant="outline-danger" className="px-4" onClick={resetRoutes}>
@@ -642,9 +695,9 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
               <span className='fst-italic' style={{fontSize: '12px', marginTop: '0.38rem'}}> How to use? </span>
             </div>
           </div>
-        </Form> 
+        </Form>
         )}
-      
+     
         <Modal show={showInstructions} onHide={() => setShowInstructions(false)} container={document.querySelector('.offcanvas-body')}
           style={{ position: 'absolute', marginTop: '22.5rem', width: '20rem', marginLeft: '2rem'}}
         >
@@ -688,14 +741,14 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
                 style={{ width: '25px', height: '25px', background: 'linear-gradient(to right, #ff0000, #ff8000)' }}>
                   A
                 </span>
-                {churches.find(c => 
-                  parseFloat(c.latitude) === startLocation.lat && 
+                {churches.find(c =>
+                  parseFloat(c.latitude) === startLocation.lat &&
                   parseFloat(c.longitude) === startLocation.lng
                 )?.churchName || 'Custom Location'}
               </h6>
               <p className="ms-4 mb-0 text-muted">
-              {churches.find(c => 
-                parseFloat(c.latitude) === startLocation.lat && 
+              {churches.find(c =>
+                parseFloat(c.latitude) === startLocation.lat &&
                 parseFloat(c.longitude) === startLocation.lng
               )?.churchLocation || 'Custom Location'}
             </p>
@@ -704,11 +757,11 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
 
           {/* Destinations */}
           {uniqueDestinations.map((dest, index) => {
-            const church = churches.find(c => 
-              parseFloat(c.latitude) === dest.lat && 
+            const church = churches.find(c =>
+              parseFloat(c.latitude) === dest.lat &&
               parseFloat(c.longitude) === dest.lng
             );
-            
+           
             return (
               <div key={index} className="py-2 border-bottom" onClick={() => handleMarkerClick(church)} style={{cursor: 'pointer'}}>
                 <h6 className="mb-1 d-flex align-items-center" >
@@ -744,7 +797,7 @@ const colors = ["#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#00FFFF", "#FFA500"
       </div>
 
     <SearchFilter
-      showMenu={false} 
+      showMenu={false}
       handleCloseMenu={() => {}}
       handlePlaceSelected={() => {}}
       selectedService=""

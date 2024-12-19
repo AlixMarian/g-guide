@@ -271,7 +271,7 @@ export const ChurchUploads = () => {
 
     return (
         <>
-            <h1 className="me-3">Church Details</h1>
+            <h1 className="me-3">Church Uploads</h1>
             <div className="container mt-5">
             <div className="row">
                 <div className="col-md-6 mb-4">
