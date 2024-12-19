@@ -44,6 +44,12 @@ export const ChurchHomepageInfo = () => {
     fetchServices();
   }, [churchId]);
 
+  const appointmentTypeMapping = {
+    Marriage: 'Wedding',
+  };
+
+  const mapServiceName = (serviceName) => appointmentTypeMapping[serviceName] || serviceName;
+
   const convertTo12HourFormat = (time) => {
     if (!time || time === "none") return "none";
     const [hours, minutes] = time.split(':');
@@ -94,7 +100,7 @@ export const ChurchHomepageInfo = () => {
           {services.length > 0 ? (
             services.map((service, index) => (
               <div key={index} className="service-item">
-                <h5>{service.name}</h5>
+                <h5>{mapServiceName(service.name)}</h5>
                 <p><strong>Fee:</strong> {service.fee ? `₱${service.fee}` : 'Free'}</p>
                 <p><strong>Instructions:</strong> {service.instructions || 'No instructions provided'}</p>
               </div>

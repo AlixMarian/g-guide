@@ -135,7 +135,7 @@ export const OngoingAppointments = () => {
     confirmationCertificate: "Confirmation Certificate",
     baptism: "Baptism",
     burial: "Burial",
-    marriage: "Marriage",
+    marriage: "Wedding",
     confirmation: "Confirmation",
   };
   

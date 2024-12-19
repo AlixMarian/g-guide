@@ -106,7 +106,7 @@ const PaymentHistory = () => {
         confirmationCertificate: "Confirmation Certificate",
         baptism: "Baptism",
         burial: "Burial",
-        marriage: "Marriage",
+        marriage: "Wedding",
         confirmation: "Confirmation",
     };
 

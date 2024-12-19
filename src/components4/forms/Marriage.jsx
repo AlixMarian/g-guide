@@ -248,7 +248,7 @@ export const Marriage = () => {
                       <div className="col-md-6">
                         <div className="mb-3">
                           <label className="form-label">Selected Service</label>
-                          <input type="text" className="form-control" id="selectedService" readOnly placeholder="Marriage" />
+                          <input type="text" className="form-control" id="selectedService" readOnly placeholder="Wedding" />
                         </div>
                       </div>
                       <div className="col-md-6">

@@ -32,7 +32,7 @@ export const ApprovedAppointments = () => {
         baptismalCertificate: "Baptismal Certificate",
         burialCertificate: "Burial Certificate",
         confirmationCertificate: "Confirmation Certificate",
-        marriage:"Marriage",
+        marriage:"Wedding",
         baptism:"Baptism",
         burial:"Burial",
         confirmation:"Confirmation",

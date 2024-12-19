@@ -33,7 +33,7 @@ export const PendingAppointments = () => {
         baptismalCertificate: "Baptismal Certificate",
         burialCertificate: "Burial Certificate",
         confirmationCertificate: "Confirmation Certificate",
-        marriage:"Marriage",
+        marriage:"Wedding",
         baptism:"Baptism",
         burial:"Burial",
         confirmation:"Confirmation",
@@ -321,6 +321,7 @@ export const PendingAppointments = () => {
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
+
 
     if (loading) {
         return (

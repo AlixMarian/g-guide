@@ -13,6 +13,9 @@ import Baptism from './forms/Baptism';
 import Burial from './forms/Burial';
 import Confirmation from './forms/Confirmation';
 
+
+
+
 export const ChurchHomepageBook = () => {
   const { churchId } = useParams();
   // eslint-disable-next-line no-unused-vars
@@ -25,6 +28,9 @@ export const ChurchHomepageBook = () => {
   const [selectedServiceType, setSelectedServiceType] = useState('');
   const [selectedService, setSelectedService] = useState('');
 
+
+
+
   useEffect(() => {
     const fetchChurchData = async () => {
       const docRef = doc(db, 'church', churchId);
@@ -34,17 +40,23 @@ export const ChurchHomepageBook = () => {
       }
     };
 
+
+
+
     const fetchServices = async () => {
       const servicesDoc = await getDoc(doc(db, 'services', churchId));
       if (servicesDoc.exists()) {
         const data = servicesDoc.data();
         const appointments = Object.entries(data)
-          .filter(([key, value]) => value.active && ["Marriages", "Baptism", "Confirmation", "Burials"].includes(key))
+          .filter(([key, value]) => value.active && ["Marriage", "Baptism", "Confirmation", "Burials"].includes(key))
           .map(([key]) => key);
         const documentRequests = Object.entries(data)
           .filter(([key, value]) => value.active && ["Baptismal Certificate", "Confirmation Certificate", "Marriage Certificate", "Burial Certificate"].includes(key))
           .map(([key]) => key);
         const massIntentions = data["Mass Intentions"]?.active || false;
+
+
+
 
         setServices({
           appointments,
@@ -54,18 +66,38 @@ export const ChurchHomepageBook = () => {
       }
     };
 
+
+
+
     fetchChurchData();
     fetchServices();
   }, [churchId]);
+
+
+
 
   const handleServiceTypeChange = (serviceType) => {
     setSelectedServiceType(serviceType);
     setSelectedService('');
   };
 
+
+  const appointmentTypeMapping = {
+    Marriage: 'Wedding',
+  };
+
+
+  const mapServiceName = (serviceName) => appointmentTypeMapping[serviceName] || serviceName;
+
+
+
+
   if (!services) {
     return <div>Loading services...</div>;
   }
+
+
+
 
   return (
     <div className="container mt-5">
@@ -109,14 +141,14 @@ export const ChurchHomepageBook = () => {
               <div className="col-12 col-md-auto">
                 <div className="dropdown">
                   <button className="btn btn-secondary dropdown-toggle" type="button" id="servicesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    {selectedService || "Select Type"}
+                  {mapServiceName(selectedService) || 'Select Type'}
                   </button>
                   <ul className="dropdown-menu" aria-labelledby="servicesDropdown">
                     {selectedServiceType === "Book an Appointment" &&
                       services.appointments.map((service, index) => (
                         <li key={index}>
                           <a className="dropdown-item" href="#" onClick={(e) => {e.preventDefault(); setSelectedService(service); }}>
-                            {service}
+                          {mapServiceName(service)}
                           </a>
                         </li>
                       ))}
@@ -136,11 +168,17 @@ export const ChurchHomepageBook = () => {
         </div>
       </div>
 
+
+
+
       {selectedServiceType === "Mass Intentions" && <MassIntention />}
+
+
+
 
       {selectedServiceType === "Book an Appointment" && (
         <div>
-          {selectedService === "Marriages" && <Marriage />}
+          {selectedService === "Marriage" && <Marriage />}
           {selectedService === "Baptism" && <Baptism />}
           {selectedService === "Burials" && <Burial />}
           {selectedService === "Confirmation" && <Confirmation />}
@@ -158,4 +196,16 @@ export const ChurchHomepageBook = () => {
   );
 };
 
+
+
+
 export default ChurchHomepageBook;
+
+
+
+
+
+
+
+
+

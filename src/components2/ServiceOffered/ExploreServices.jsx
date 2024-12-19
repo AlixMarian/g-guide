@@ -5,12 +5,14 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { toast } from 'react-toastify';
 import { CheckCircle2, XCircle } from 'lucide-react';
 
+
 export const ExploreServices = () => {
     const [servicesState, setServicesState] = useState({});
     // eslint-disable-next-line no-unused-vars
     const [userID, setUserId] = useState(null);
     const [churchID, setChurchId] = useState(null);
     const [isModified, setIsModified] = useState(false);
+
 
     useEffect(() => {
         const auth = getAuth();
@@ -26,6 +28,7 @@ export const ExploreServices = () => {
         return () => unsubscribe();
     }, []);
 
+
     const fetchChurchId = async (uid) => {
         try {
             const userDoc = await getDoc(doc(db, "users", uid));
@@ -37,7 +40,7 @@ export const ExploreServices = () => {
                         where("userId", "==", uid)
                     );
                     const coordinatorSnapshot = await getDocs(coordinatorQuery);
-    
+   
                     if (!coordinatorSnapshot.empty) {
                         const coordinatorID = coordinatorSnapshot.docs[0].id;
                         const churchQuery = query(
@@ -45,7 +48,7 @@ export const ExploreServices = () => {
                             where("coordinatorID", "==", coordinatorID)
                         );
                         const churchSnapshot = await getDocs(churchQuery);
-    
+   
                         if (!churchSnapshot.empty) {
                             const churchDoc = churchSnapshot.docs[0];
                             setChurchId(churchDoc.id);
@@ -71,7 +74,7 @@ export const ExploreServices = () => {
             console.error("Error fetching churchId:", error);
         }
     };
-    
+   
     const fetchServices = async (churchId) => {
         try {
             const servicesDoc = await getDoc(doc(db, "services", churchId));
@@ -86,9 +89,11 @@ export const ExploreServices = () => {
         }
     };
 
+
     const handleToggle = (event) => {
         const serviceName = event.target.name;
         const isChecked = event.target.checked;
+
 
         const updatedService = {
             ...servicesState[serviceName],
@@ -96,9 +101,11 @@ export const ExploreServices = () => {
         };
         const updatedServicesState = { ...servicesState, [serviceName]: updatedService };
 
+
         setServicesState(updatedServicesState);
         setIsModified(true);
     };
+
 
     const handleChange = (serviceName, field, value) => {
         const updatedService = {
@@ -108,6 +115,7 @@ export const ExploreServices = () => {
         setServicesState({ ...servicesState, [serviceName]: updatedService });
         setIsModified(true);
     };
+
 
     const handleSubmit = async () => {
         if (!churchID) {
@@ -136,46 +144,60 @@ export const ExploreServices = () => {
         }
     };
 
-    const renderServiceFields = (services) =>
-        services.map((service) => (
-            <div key={service} className="service-item">
-                <div className="service-header">
-                    <input
-                        className="service-checkbox"
-                        type="checkbox"
-                        id={service.toLowerCase().replace(/ /g, '')}
-                        name={service}
-                        onChange={handleToggle}
-                        checked={!!(servicesState[service]?.active)}
-                    />
-                    <label 
-                        className="service-label" 
-                        htmlFor={service.toLowerCase().replace(/ /g, '')}
-                    >
-                        {service}
-                    </label>
+
+    const appointmentTypeMapping = {
+        Marriage: "Wedding",
+      };
+
+
+      const renderServiceFields = (services) =>
+        services.map((service) => {
+            const displayName = appointmentTypeMapping[service] || service;
+
+
+            return (
+                <div key={service} className="service-item">
+                    <div className="service-header">
+                        <input
+                            className="service-checkbox"
+                            type="checkbox"
+                            id={service.toLowerCase().replace(/ /g, '')}
+                            name={service}
+                            onChange={handleToggle}
+                            checked={!!(servicesState[service]?.active)}
+                        />
+                        <label
+                            className="service-label"
+                            htmlFor={service.toLowerCase().replace(/ /g, '')}
+                        >
+                            {displayName}
+                        </label>
+                    </div>
+                    <div className="service-details">
+                        <input
+                            className="fee-input"
+                            type="number"
+                            min="0"
+                            placeholder="Service Fee"
+                            value={servicesState[service]?.fee || ''}
+                            onChange={(e) => handleChange(service, 'fee', e.target.value)}
+                            required={servicesState[service]?.active}
+                        />
+                        <textarea
+                            className="instructions-input"
+                            placeholder="Service Instructions"
+                            value={servicesState[service]?.instructions || ''}
+                            onChange={(e) => handleChange(service, 'instructions', e.target.value)}
+                            rows="2"
+                            required={servicesState[service]?.active}
+                        />
+                    </div>
                 </div>
-                <div className="service-details">
-                    <input
-                        className="fee-input"
-                        type="number"
-                        min="0"
-                        placeholder="Service Fee"
-                        value={servicesState[service]?.fee || ''}
-                        onChange={(e) => handleChange(service, 'fee', e.target.value)}
-                        required={servicesState[service]?.active}
-                    />
-                    <textarea
-                        className="instructions-input"
-                        placeholder="Service Instructions"
-                        value={servicesState[service]?.instructions || ''}
-                        onChange={(e) => handleChange(service, 'instructions', e.target.value)}
-                        rows="2"
-                        required={servicesState[service]?.active}
-                    />
-                </div>
-            </div>
-        ));
+            );
+        });
+
+
+
 
     return (
         <div className="explore-services-container">
@@ -194,6 +216,7 @@ export const ExploreServices = () => {
                     </div>
                 </div>
 
+
                 <div className="service-section">
                     <div className="section-header">Document Requests</div>
                     <div className="service-list">
@@ -207,9 +230,10 @@ export const ExploreServices = () => {
                 </div>
             </div>
 
+
             <div className="submit-container">
-                <button 
-                    className="submit-button" 
+                <button
+                    className="submit-button"
                     onClick={handleSubmit}
                     disabled={!isModified || !churchID}
                 >
@@ -221,4 +245,8 @@ export const ExploreServices = () => {
     );
 };
 
+
 export default ExploreServices;
+
+
+

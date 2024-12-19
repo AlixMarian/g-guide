@@ -206,23 +206,24 @@ export const Layout = () => {
         return (
           <div className="second-sidebar-mass-schedule-content">
             <div onClick={handleSchedules}>
-            <div className={`numbers ${activeNumber === 'schedules' ? 'active' : ''}`} onClick={() => handleClick('schedules')}>
-              <input type="image" src="../src/assets/number-1.png" className="image-size" />
-              <h3 className="second-button-name">Mass Schedules</h3>
-            </div>
+              <div className={`numbers ${activeNumber === 'schedules' ? 'active' : ''}`} onClick={() => handleClick('schedules')}>
+                <input type="image" src="../src/assets/number-1.png" className="image-size" />
+                <h3 className="second-button-name">Church Schedules</h3>
+              </div>
             </div>
             <div onClick={handleChurchEvents}>
-            <div className={`numbers ${activeNumber === 'church-events' ? 'active' : ''}`} onClick={() => handleClick('church-events')}>
-              <input type="image" src="../src/assets/number-2.png" className="image-size" />
-              <h3 className="second-button-name">Church Events</h3>
-            </div>
+              <div className={`numbers ${activeNumber === 'church-events' ? 'active' : ''}`} onClick={() => handleClick('church-events')}>
+                <input type="image" src="../src/assets/number-2.png" className="image-size" />
+                <h3 className="second-button-name">Church Events</h3>
+              </div>
             </div>
             <div onClick={handleAnnouncements}>
-            <div className={`numbers ${activeNumber === 'announcements' ? 'active' : ''}`} onClick={() => handleClick('announcements')}>
-              <input type="image" src="../src/assets/number-3.png" className="image-size" />
-              <h3 className="second-button-name">Announcements</h3>
+              <div className={`numbers ${activeNumber === 'announcements' ? 'active' : ''}`} onClick={() => handleClick('announcements')}>
+                <input type="image" src="../src/assets/number-3.png" className="image-size" />
+                <h3 className="second-button-name">Announcements</h3>
+              </div>
             </div>
-            </div>
+            
           </div>
         );
       case 'services-offered':
