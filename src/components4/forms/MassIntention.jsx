@@ -10,6 +10,9 @@ export const MassIntention = () => {
   const { churchId } = useParams();
   const [churchData, setChurchData] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [priestList, setPriestList] = useState([]);
+  const [weekdays, setWeekdays] = useState([]); // Weekday schedules
+  const [weekends, setWeekends] = useState([]); // Weekend schedules
   const [selectedFile, setSelectedFile] = useState(null);
   const [receiptImageUrl, setReceiptImageUrl] = useState(null);
   const fileInputRef = useRef(null);
@@ -23,8 +26,6 @@ export const MassIntention = () => {
   });
   const [massSchedules, setMassSchedules] = useState([]);
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
-  const [weekdays, setWeekdays] = useState([]);
-  const [weekends, setWeekends] = useState([]);
 
   useEffect(() => {
     const fetchChurchData = async () => {
@@ -52,31 +53,38 @@ export const MassIntention = () => {
   }, [user]);
 
   useEffect(() => {
-    const fetchMassSchedules = async () => {
+    const fetchMassSchedulesAndPriests = async () => {
       try {
-        const q = query(
-          collection(db, 'massSchedules'),
-          where('churchId', '==', churchId) 
-        );
+        // Fetch priests
+        const priestSnapshot = await getDocs(collection(db, 'priest'));
+        const fetchedPriests = priestSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setPriestList(fetchedPriests);
 
-        const querySnapshot = await getDocs(q);
+        // Fetch mass schedules
+        const scheduleQuery = query(collection(db, 'massSchedules'), where('churchId', '==', churchId));
+        const querySnapshot = await getDocs(scheduleQuery);
         const schedules = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
-        
+        // Filter out schedules with Type === 'Others'
+        const filteredSchedules = schedules.filter((schedule) => schedule.Type !== 'Others');
+
+        // Sorting logic
         const weekdayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
         const weekendOrder = ['Saturday', 'Sunday'];
 
-        const weekdaySchedules = schedules.filter((schedule) =>
+        const weekdaySchedules = filteredSchedules.filter((schedule) =>
           weekdayOrder.includes(schedule.massDate)
         );
-        const weekendSchedules = schedules.filter((schedule) =>
+        const weekendSchedules = filteredSchedules.filter((schedule) =>
           weekendOrder.includes(schedule.massDate)
         );
 
-      
         weekdaySchedules.sort(
           (a, b) =>
             weekdayOrder.indexOf(a.massDate) - weekdayOrder.indexOf(b.massDate) ||
@@ -89,17 +97,24 @@ export const MassIntention = () => {
             new Date(`1970-01-01T${a.massTime}:00`) - new Date(`1970-01-01T${b.massTime}:00`)
         );
 
-        setMassSchedules(schedules);
+        setMassSchedules(filteredSchedules);
         setWeekdays(weekdaySchedules);
         setWeekends(weekendSchedules);
       } catch (error) {
-        console.error('Error fetching mass schedules:', error);
-        toast.error('Failed to load mass schedules. Please try again.');
+        console.error('Error fetching mass schedules or priests:', error);
+        toast.error('Failed to load mass schedules or priests.');
       }
     };
 
-    fetchMassSchedules();
+    fetchMassSchedulesAndPriests();
   }, [churchId]);
+  
+
+    
+  const formatPriestDetails = (priestId) => {
+    const priest = priestList.find((p) => p.id === priestId);
+    return priest ? `${priest.priestType} ${priest.firstName} ${priest.lastName}` : 'Unknown';
+  };
 
 
   const handleChange = (e) => {
@@ -263,6 +278,7 @@ export const MassIntention = () => {
               <table className="table table-striped">
                 <thead>
                   <tr>
+                    <th></th>
                     <th>Day</th>
                     <th>Time</th>
                     <th>Language</th>
@@ -285,8 +301,8 @@ export const MassIntention = () => {
                       <td>{schedule.massDate}</td>
                       <td>{convertTo12HourFormat(schedule.massTime)}</td>
                       <td>{schedule.massLanguage}</td>
-                      <td>{schedule.presidingPriest}</td>
-                      <td>{schedule.massType}</td>
+                      <td>{formatPriestDetails(schedule.presidingPriest)}</td>
+                      <td>{schedule.Type}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -303,6 +319,7 @@ export const MassIntention = () => {
                 <table className="table table-striped">
                   <thead>
                     <tr>
+                      <th></th>
                       <th>Day</th>
                       <th>Time</th>
                       <th>Language</th>
@@ -325,8 +342,8 @@ export const MassIntention = () => {
                         <td>{schedule.massDate}</td>
                         <td>{convertTo12HourFormat(schedule.massTime)}</td>
                         <td>{schedule.massLanguage}</td>
-                        <td>{schedule.presidingPriest}</td>
-                        <td>{schedule.massType}</td>
+                        <td>{formatPriestDetails(schedule.presidingPriest)}</td>
+                        <td>{schedule.Type}</td>
                       </tr>
                     ))}
                   </tbody>

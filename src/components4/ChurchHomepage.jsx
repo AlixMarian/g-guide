@@ -181,7 +181,7 @@ const ChurchHomepage = () => {
           <p className="d-inline-flex gap-1">
             <button className="btn btn-primary" onClick={() => setActiveComponent('info')}>Information</button>
             <button className="btn btn-primary" onClick={() => setActiveComponent('announcements')}>Announcements</button>
-            <button className="btn btn-primary" onClick={() => setActiveComponent('massSchedule')}>Mass Schedules</button>
+            <button className="btn btn-primary" onClick={() => setActiveComponent('massSchedule')}>Church Schedules</button>
             <button
               className="btn btn-primary"
               onClick={() => user ? setActiveComponent('book') : setShowModal(true)}

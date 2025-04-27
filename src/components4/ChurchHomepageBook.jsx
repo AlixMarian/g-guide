@@ -48,7 +48,7 @@ export const ChurchHomepageBook = () => {
       if (servicesDoc.exists()) {
         const data = servicesDoc.data();
         const appointments = Object.entries(data)
-          .filter(([key, value]) => value.active && ["Marriage", "Baptism", "Confirmation", "Burials"].includes(key))
+          .filter(([key, value]) => value.active && ["Marriage", "Baptism", "Confirmation", "Burial"].includes(key))
           .map(([key]) => key);
         const documentRequests = Object.entries(data)
           .filter(([key, value]) => value.active && ["Baptismal Certificate", "Confirmation Certificate", "Marriage Certificate", "Burial Certificate"].includes(key))
@@ -180,7 +180,7 @@ export const ChurchHomepageBook = () => {
         <div>
           {selectedService === "Marriage" && <Marriage />}
           {selectedService === "Baptism" && <Baptism />}
-          {selectedService === "Burials" && <Burial />}
+          {selectedService === "Burial" && <Burial />}
           {selectedService === "Confirmation" && <Confirmation />}
         </div>
       )}
